@@ -252,49 +252,19 @@ export default function DashboardPage() {
                   </SidebarMenuItem>
                 </Collapsible>
                 
-                <Collapsible asChild>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton 
-                        tooltip={{ children: 'Products' }}
-                        className="data-[state=open]:bg-sidebar-accent"
-                      >
-                        <Box />
-                        Products
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
-                            All Products
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
-                            Add New
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip={{ children: 'Products' }}>
+                    <Box />
+                    Products
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
 
-                <Collapsible asChild>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        tooltip={{ children: 'Specifications' }}
-                        className="data-[state=open]:bg-sidebar-accent"
-                      >
-                        <FileText />
-                        Specifications
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                  </SidebarMenuItem>
-                </Collapsible>
+                <SidebarMenuItem>
+                  <SidebarMenuButton tooltip={{ children: 'Specifications' }}>
+                    <FileText />
+                    Specifications
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
 
                 <Collapsible asChild>
                   <SidebarMenuItem>
