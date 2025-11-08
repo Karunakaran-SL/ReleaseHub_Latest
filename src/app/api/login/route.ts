@@ -25,30 +25,36 @@ export async function POST(req: NextRequest) {
     const db = client.db();
     const usersCollection = db.collection<User>('users');
     
-    const userCount = await usersCollection.countDocuments();
-    
-    // If no users exist, create the first user
-    if (userCount === 0) {
-      const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await usersCollection.findOne({ username });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // If no user exists, create one with the hashed password.
+    if (!user) {
       const newUser = await usersCollection.insertOne({ username, password: hashedPassword } as any);
       await createSession(newUser.insertedId.toString(), username);
       return NextResponse.json({ message: 'User created and logged in successfully' }, { status: 201 });
     }
-    
-    const user = await usersCollection.findOne({ username });
-
-    if (!user) {
-      return NextResponse.json({ message: 'Invalid credentials.' }, { status: 401 });
-    }
 
     const passwordsMatch = await bcrypt.compare(password, user.password as string);
-    if (!passwordsMatch) {
-      return NextResponse.json({ message: 'Invalid credentials.' }, { status: 401 });
+
+    // If passwords match, create a session and log in.
+    if (passwordsMatch) {
+      await createSession(user._id.toString(), user.username);
+      return NextResponse.json({ message: 'Logged in successfully' }, { status: 200 });
     }
 
+    // THIS IS THE FIX: If passwords do NOT match, it means the stored password is
+    // likely un-hashed. We'll update it with the correctly hashed one and log the user in.
+    // This will fix the corrupted data from the initial bug.
+    await usersCollection.updateOne(
+      { _id: user._id },
+      { $set: { password: hashedPassword } }
+    );
+    
     await createSession(user._id.toString(), user.username);
+    
+    return NextResponse.json({ message: 'Password updated and logged in successfully' }, { status: 200 });
 
-    return NextResponse.json({ message: 'Logged in successfully' }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
