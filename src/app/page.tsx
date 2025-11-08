@@ -52,6 +52,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { User } from '@/lib/definitions';
 import { useEffect, useState } from 'react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 function Header({ user }: { user: User | null }) {
   return (
@@ -192,99 +197,135 @@ export default function DashboardPage() {
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    href="#"
-                    isActive
-                    tooltip={{ children: 'Dashboard' }}
-                  >
-                    <LayoutGrid />
-                    Dashboard
-                    <ChevronDown className="ml-auto h-4 w-4" />
-                  </SidebarMenuButton>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton href="#">
-                        Data Flow Mgmt
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton href="#">
-                        Release & Baseline Mgmt
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton href="#">
-                        Fleet Mgmt
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton href="#">
-                        Workflow Mgmt
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton href="#">
-                        Jobs Monitoring
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton href="#">
-                        Security Monitoring
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton href="#">
-                        Compliance Monitoring
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </SidebarMenuItem>
+                <Collapsible asChild>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        isActive
+                        tooltip={{ children: 'Dashboard' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <LayoutGrid />
+                        Dashboard
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="#">
+                            Data Flow Mgmt
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="#">
+                            Release & Baseline Mgmt
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="#">
+                            Fleet Mgmt
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="#">
+                            Workflow Mgmt
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="#">
+                            Jobs Monitoring
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="#">
+                            Security Monitoring
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="#">
+                            Compliance Monitoring
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+                
+                <Collapsible asChild>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton 
+                        tooltip={{ children: 'Products' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <Box />
+                        Products
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="#">
+                            All Products
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="#">
+                            Add New
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Products' }}>
-                    <Box />
-                    Products
-                    <ChevronDown className="ml-auto h-4 w-4" />
-                  </SidebarMenuButton>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton href="#">
-                        All Products
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton href="#">
-                        Add New
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </SidebarMenuItem>
+                <Collapsible asChild>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        tooltip={{ children: 'Specifications' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <FileText />
+                        Specifications
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                  </SidebarMenuItem>
+                </Collapsible>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Specifications' }}>
-                    <FileText />
-                    Specifications
-                    <ChevronDown className="ml-auto h-4 w-4" />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <Collapsible asChild>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton 
+                        tooltip={{ children: 'CMDB' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <HardDrive />
+                        CMDB
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                  </SidebarMenuItem>
+                </Collapsible>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'CMDB' }}>
-                    <HardDrive />
-                    CMDB
-                    <ChevronDown className="ml-auto h-4 w-4" />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Release Management' }}>
-                    <GanttChartSquare />
-                    Release Managment
-                    <ChevronDown className="ml-auto h-4 w-4" />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
+                <Collapsible asChild>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton 
+                        tooltip={{ children: 'Release Management' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <GanttChartSquare />
+                        Release Managment
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                  </SidebarMenuItem>
+                </Collapsible>
+                
                 <SidebarMenuItem>
                   <SidebarMenuButton tooltip={{ children: 'Fleet Mgmt' }}>
                     <Users />
@@ -304,26 +345,43 @@ export default function DashboardPage() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Audit' }}>
-                    <ShieldCheck />
-                    Audit
-                    <ChevronDown className="ml-auto h-4 w-4" />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <Collapsible asChild>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton 
+                        tooltip={{ children: 'Audit' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <ShieldCheck />
+                        Audit
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                  </SidebarMenuItem>
+                </Collapsible>
+
                 <SidebarMenuItem>
                   <SidebarMenuButton tooltip={{ children: 'Compliance' }}>
                     <ListChecks />
                     Compliance
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Settings' }}>
-                    <Settings />
-                    Settings
-                    <ChevronDown className="ml-auto h-4 w-4" />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                
+                <Collapsible asChild>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton 
+                        tooltip={{ children: 'Settings' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <Settings />
+                        Settings
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                  </SidebarMenuItem>
+                </Collapsible>
+
               </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
