@@ -12,8 +12,6 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   CardFooter,
 } from '@/components/ui/card';
 import {
@@ -40,8 +38,8 @@ type Product = {
 };
 
 const ProductIcon = ({ icon }: { icon: string }) => {
-  if (icon === 'product-a') {
-    return (
+  const icons: { [key: string]: React.ReactNode } = {
+    'product-a': (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -58,10 +56,8 @@ const ProductIcon = ({ icon }: { icon: string }) => {
         <line x1="8" y1="2" x2="8" y2="22" />
         <line x1="16" y1="2" x2="16" y2="22" />
       </svg>
-    );
-  }
-  if (icon === 'product-b') {
-    return (
+    ),
+    'product-b': (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -78,10 +74,8 @@ const ProductIcon = ({ icon }: { icon: string }) => {
         <path d="M12 2a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4 4 4 0 0 0 4-4v0a4 4 0 0 0-4-4z" />
         <path d="M10.5 16a2.5 2.5 0 0 1 5 0" />
       </svg>
-    );
-  }
-  if (icon === 'product-c') {
-    return (
+    ),
+    'product-c': (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -99,9 +93,10 @@ const ProductIcon = ({ icon }: { icon: string }) => {
         <path d="M7 14c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2" />
         <path d="M9 16c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2" />
       </svg>
-    );
-  }
-  return null;
+    ),
+  };
+
+  return icons[icon] || null;
 };
 
 
@@ -153,30 +148,36 @@ export default function ProductsPage() {
                 <TableRow>
                   <TableCell colSpan={6} className="text-center">Loading products...</TableCell>
                 </TableRow>
-              ) : products.map((product) => (
-                <TableRow key={product._id}>
-                  <TableCell><ProductIcon icon={product.icon} /></TableCell>
-                  <TableCell className="font-medium">
-                    {product.productName}
-                  </TableCell>
-                  <TableCell>{product.owner}</TableCell>
-                  <TableCell>{product.deploymentType}</TableCell>
-                  <TableCell>{product.deployments}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
-                        VIEW
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        UPDATE
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+              ) : products.length > 0 ? (
+                products.map((product) => (
+                  <TableRow key={product._id}>
+                    <TableCell><ProductIcon icon={product.icon} /></TableCell>
+                    <TableCell className="font-medium">
+                      {product.productName}
+                    </TableCell>
+                    <TableCell>{product.owner}</TableCell>
+                    <TableCell>{product.deploymentType}</TableCell>
+                    <TableCell>{product.deployments}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm">
+                          VIEW
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          UPDATE
+                        </Button>
+                        <Button variant="ghost" size="icon">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                 <TableRow>
+                  <TableCell colSpan={6} className="text-center">No products found.</TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
