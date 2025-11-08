@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     // Case 2: User exists, but password is not a string (e.g. not hashed). Hash and update it.
     if (typeof user.password !== 'string' || !user.password.startsWith('$2a$')) {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10); // FIX: use 'password' from input, not 'user.password'
         await usersCollection.updateOne(
           { _id: user._id },
           { $set: { password: hashedPassword } }
