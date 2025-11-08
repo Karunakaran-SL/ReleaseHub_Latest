@@ -18,7 +18,7 @@ export default function ApiDocsPage() {
               <h3 className="text-xl font-semibold font-mono text-foreground">/api/login</h3>
             </div>
             <p className="text-muted-foreground mb-4">
-              Authenticates a user and returns a session cookie. The first login attempt will create the user.
+              Authenticates a user and returns a session cookie. The first login attempt will create the user if they do not exist. If an existing user's password is not hashed, it will be updated.
             </p>
 
             <Separator className="my-4" />
@@ -43,8 +43,16 @@ export default function ApiDocsPage() {
 }`}</code></pre>
                 </div>
               </div>
+              <div>
+                <p className="font-mono text-sm"><Badge>200 OK</Badge> - Password updated and logged in</p>
+                <div className="bg-muted p-4 rounded-md text-sm text-muted-foreground mt-2">
+                    <pre><code>{`{
+  "message": "Password updated and logged in successfully"
+}`}</code></pre>
+                </div>
+              </div>
                <div>
-                <p className="font-mono text-sm"><Badge>201 Created</Badge> - First user created and logged in</p>
+                <p className="font-mono text-sm"><Badge>201 Created</Badge> - New user created and logged in</p>
                 <div className="bg-muted p-4 rounded-md text-sm text-muted-foreground mt-2">
                     <pre><code>{`{
   "message": "User created and logged in successfully"
@@ -60,10 +68,10 @@ export default function ApiDocsPage() {
                 </div>
               </div>
               <div>
-                <p className="font-mono text-sm"><Badge variant="destructive">401 Unauthorized</Badge> - Invalid credentials</p>
+                <p className="font-mono text-sm"><Badge variant="destructive">500 Internal Server Error</Badge> - An internal error occurred</p>
                  <div className="bg-muted p-4 rounded-md text-sm text-muted-foreground mt-2">
                     <pre><code>{`{
-  "message": "Invalid credentials."
+  "message": "An internal server error occurred."
 }`}</code></pre>
                 </div>
               </div>
