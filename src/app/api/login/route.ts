@@ -35,8 +35,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'User created and logged in successfully' }, { status: 201 });
     }
 
-    // If user password is not a string (e.g. not hashed yet) or is missing, treat as password mismatch
-    // to force update, or compare passwords if it exists.
+    // If user exists, check password
+    // Case 1: Password is not a string (e.g. not hashed yet) or is missing.
+    // In this case, we'll hash the new password and update the user.
     if (typeof user.password !== 'string') {
         const hashedPassword = await bcrypt.hash(password, 10);
         await usersCollection.updateOne(
@@ -49,16 +50,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'Password updated and logged in successfully' }, { status: 200 });
     }
 
+    // Case 2: Password is a string (presumably hashed). Compare it.
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
-    // If passwords match, create a session and log in.
     if (passwordsMatch) {
       await createSession(user._id.toString(), user.username);
       return NextResponse.json({ message: 'Logged in successfully' }, { status: 200 });
     }
     
-    // If passwords do NOT match, return an error.
-    // The case of an unhashed password is now handled above.
+    // If passwords do not match, return an error.
     return NextResponse.json({ message: 'Invalid username or password.' }, { status: 401 });
 
   } catch (error) {
