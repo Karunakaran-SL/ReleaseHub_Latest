@@ -7,7 +7,7 @@ import type { User } from '@/lib/definitions';
 
 const SignInSchema = z.object({
   username: z.string().min(1, { message: 'Username is required.' }),
-  password: z.string().min(8),
+  password: z.string().min(1, { message: 'Password is required.' }),
 });
 
 export async function POST(req: NextRequest) {
