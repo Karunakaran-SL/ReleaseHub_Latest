@@ -59,7 +59,7 @@ function Header({ user }: { user: User | null }) {
       <div className="container flex h-16 items-center">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
-          <Logo className="text-xl" />
+          <Logo />
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <div className="relative hidden w-full max-w-sm items-center md:flex">
