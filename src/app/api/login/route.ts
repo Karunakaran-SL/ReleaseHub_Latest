@@ -26,34 +26,40 @@ export async function POST(req: NextRequest) {
     const usersCollection = db.collection<User>('users');
     
     const user = await usersCollection.findOne({ username });
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     // If no user exists, create one with the hashed password.
     if (!user) {
-      const newUser = await usersCollection.insertOne({ username, password: hashedPassword } as any);
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = await usersCollection.insertOne({ username, password: hashedPassword });
       await createSession(newUser.insertedId.toString(), username);
       return NextResponse.json({ message: 'User created and logged in successfully' }, { status: 201 });
     }
 
-    const passwordsMatch = await bcrypt.compare(password, user.password as string);
+    // If user password is not a string (e.g. not hashed yet) or is missing, treat as password mismatch
+    // to force update, or compare passwords if it exists.
+    if (typeof user.password !== 'string') {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await usersCollection.updateOne(
+          { _id: user._id },
+          { $set: { password: hashedPassword } }
+        );
+        
+        await createSession(user._id.toString(), user.username);
+        
+        return NextResponse.json({ message: 'Password updated and logged in successfully' }, { status: 200 });
+    }
+
+    const passwordsMatch = await bcrypt.compare(password, user.password);
 
     // If passwords match, create a session and log in.
     if (passwordsMatch) {
       await createSession(user._id.toString(), user.username);
       return NextResponse.json({ message: 'Logged in successfully' }, { status: 200 });
     }
-
-    // THIS IS THE FIX: If passwords do NOT match, it means the stored password is
-    // likely un-hashed. We'll update it with the correctly hashed one and log the user in.
-    // This will fix the corrupted data from the initial bug.
-    await usersCollection.updateOne(
-      { _id: user._id },
-      { $set: { password: hashedPassword } }
-    );
     
-    await createSession(user._id.toString(), user.username);
-    
-    return NextResponse.json({ message: 'Password updated and logged in successfully' }, { status: 200 });
+    // If passwords do NOT match, return an error.
+    // The case of an unhashed password is now handled above.
+    return NextResponse.json({ message: 'Invalid username or password.' }, { status: 401 });
 
   } catch (error) {
     console.error(error);
