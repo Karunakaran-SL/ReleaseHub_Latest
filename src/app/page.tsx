@@ -18,7 +18,7 @@ export default async function DashboardPage() {
           <div className="flex flex-1 items-center justify-end space-x-4">
             <nav className="flex items-center space-x-1">
               <span className="text-sm text-muted-foreground hidden sm:inline-block">
-                {user.email}
+                {user.username}
               </span>
               <form action={signOut}>
                 <Button variant="ghost" type="submit">

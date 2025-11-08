@@ -18,6 +18,6 @@ export async function getUser() {
 
   return {
       id: decryptedSession.userId,
-      email: decryptedSession.email
+      username: decryptedSession.username
   };
 }

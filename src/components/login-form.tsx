@@ -20,7 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
 const SignInSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email.' }),
+  username: z.string().min(1, { message: 'Please enter a valid username.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
 });
 
@@ -35,7 +35,7 @@ export default function LoginForm() {
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(SignInSchema),
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   });
@@ -91,16 +91,16 @@ export default function LoginForm() {
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="user@example.com"
+              id="username"
+              type="text"
+              placeholder="username"
               required
-              {...form.register('email')}
+              {...form.register('username')}
             />
-            {form.formState.errors.email && (
-              <p className="text-sm font-medium text-destructive">{form.formState.errors.email.message}</p>
+            {form.formState.errors.username && (
+              <p className="text-sm font-medium text-destructive">{form.formState.errors.username.message}</p>
             )}
           </div>
           <div className="space-y-2">

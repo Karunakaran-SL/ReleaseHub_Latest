@@ -26,7 +26,7 @@ export default function ApiDocsPage() {
             <h4 className="font-semibold mb-2">Request Body</h4>
             <div className="bg-muted p-4 rounded-md text-sm text-muted-foreground">
               <pre><code>{`{
-  "email": "user@example.com",
+  "username": "yourusername",
   "password": "yourpassword"
 }`}</code></pre>
             </div>
@@ -55,7 +55,7 @@ export default function ApiDocsPage() {
                 <p className="font-mono text-sm"><Badge variant="destructive">400 Bad Request</Badge> - Invalid request body</p>
                  <div className="bg-muted p-4 rounded-md text-sm text-muted-foreground mt-2">
                     <pre><code>{`{
-  "message": "Invalid email or password format."
+  "message": "Invalid username or password format."
 }`}</code></pre>
                 </div>
               </div>

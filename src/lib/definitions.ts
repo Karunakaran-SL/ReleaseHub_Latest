@@ -1,11 +1,11 @@
 export type User = {
   _id: string;
-  email: string;
+  username: string;
   password?: string;
 };
 
 export type SessionPayload = {
   userId: string;
-  email: string;
+  username: string;
   expiresAt: Date;
 };
