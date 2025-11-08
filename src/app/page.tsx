@@ -253,10 +253,12 @@ export default function DashboardPage() {
                 </Collapsible>
                 
                 <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Products' }}>
-                    <Box />
-                    Products
-                  </SidebarMenuButton>
+                  <Link href="/products">
+                    <SidebarMenuButton tooltip={{ children: 'Products' }}>
+                      <Box />
+                      Products
+                    </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
 
                 <SidebarMenuItem>
