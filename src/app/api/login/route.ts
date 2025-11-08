@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     
     const user = await usersCollection.findOne({ username });
 
-    // If no user exists, create one with the hashed password.
+    // Case 1: User does not exist. Create them.
     if (!user) {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await usersCollection.insertOne({ username, password: hashedPassword });
@@ -35,10 +35,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'User created and logged in successfully' }, { status: 201 });
     }
 
-    // If user exists, check password
-    // Case 1: Password is not a string (e.g. not hashed yet) or is missing.
-    // In this case, we'll hash the new password and update the user.
-    if (typeof user.password !== 'string') {
+    // Case 2: User exists, but password is not a string (e.g. not hashed). Hash and update it.
+    if (typeof user.password !== 'string' || !user.password.startsWith('$2a$')) {
         const hashedPassword = await bcrypt.hash(password, 10);
         await usersCollection.updateOne(
           { _id: user._id },
@@ -50,7 +48,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'Password updated and logged in successfully' }, { status: 200 });
     }
 
-    // Case 2: Password is a string (presumably hashed). Compare it.
+    // Case 3: User exists and password is a hash. Compare it.
     const passwordsMatch = await bcrypt.compare(password, user.password);
 
     if (passwordsMatch) {
