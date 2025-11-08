@@ -1,12 +1,11 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useEffect } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { signIn } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -27,20 +26,11 @@ const SignInSchema = z.object({
 
 type SignInFormValues = z.infer<typeof SignInSchema>;
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button type="submit" className="w-full" disabled={pending}>
-      {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Sign In
-    </Button>
-  );
-}
-
 export default function LoginForm() {
-  const [state, dispatch] = useFormState(signIn, undefined);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(SignInSchema),
@@ -50,15 +40,45 @@ export default function LoginForm() {
     },
   });
 
-  useEffect(() => {
-    if (state?.message) {
+  const onSubmit: SubmitHandler<SignInFormValues> = async (data) => {
+    setLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const message = errorData.message || 'An unexpected error occurred.';
+        setErrorMessage(message);
+        toast({
+          variant: 'destructive',
+          title: 'Authentication Error',
+          description: message,
+        });
+      } else {
+        // Successful login
+        router.push('/');
+        router.refresh(); // To re-trigger middleware and server components
+      }
+    } catch (error) {
+      const message = 'Failed to connect to the server. Please try again.';
+      setErrorMessage(message);
       toast({
         variant: 'destructive',
-        title: 'Authentication Error',
-        description: state.message,
+        title: 'Network Error',
+        description: message,
       });
+    } finally {
+      setLoading(false);
     }
-  }, [state, toast]);
+  };
 
   return (
     <Card>
@@ -69,18 +89,17 @@ export default function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={dispatch} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
-              name="email"
               type="email"
               placeholder="user@example.com"
               required
               {...form.register('email')}
             />
-             {form.formState.errors.email && (
+            {form.formState.errors.email && (
               <p className="text-sm font-medium text-destructive">{form.formState.errors.email.message}</p>
             )}
           </div>
@@ -88,7 +107,6 @@ export default function LoginForm() {
             <Label htmlFor="password">Password</Label>
             <Input 
               id="password" 
-              name="password" 
               type="password" 
               required 
               {...form.register('password')}
@@ -97,10 +115,13 @@ export default function LoginForm() {
                 <p className="text-sm font-medium text-destructive">{form.formState.errors.password.message}</p>
             )}
           </div>
-          <SubmitButton />
-          {state?.message && (
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Sign In
+          </Button>
+          {errorMessage && (
              <p aria-live="polite" className="text-sm font-medium text-destructive text-center">
-              {state.message}
+              {errorMessage}
             </p>
           )}
         </form>
