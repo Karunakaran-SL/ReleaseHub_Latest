@@ -10,6 +10,9 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import type { User } from '@/lib/definitions';
+import { getUser } from '@/lib/auth';
+import { useEffect, useState } from 'react';
+import DashboardLayout from './dashboard-layout';
 
 function SummaryCard({
   icon,
@@ -34,61 +37,69 @@ function SummaryCard({
 }
 
 export default function DashboardPage() {
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        getUser().then(setUser);
+    }, []);
+
   return (
-    <main className="flex-1 space-y-8 p-6 md:p-10">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Welcome to ReleaseHub
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Here's a summary of your operations.
-        </p>
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-3">
-        <SummaryCard
-          icon={<Users className="h-8 w-8" />}
-          title="Fleet Management"
-          description="Manage and monitor your fleet of devices."
-        />
-        <SummaryCard
-          icon={<Box className="h-8 w-8" />}
-          title="Product Management"
-          description="Oversee your product lifecycle and specifications."
-        />
-        <SummaryCard
-          icon={<GanttChartSquare className="h-8 w-8" />}
-          title="Release Management"
-          description="Track and manage your software releases."
-        />
-      </div>
-
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">
-          Quick Actions
-        </h2>
-        <div className="mt-4 flex flex-wrap gap-4">
-          <Button className="bg-green-600 hover:bg-green-700 text-white">
-            <LineChart className="mr-2" />
-            MONITOR JOBS
-          </Button>
-          <Button>
-            <ListChecks className="mr-2" />
-            CHECK COMPLIANCE
-          </Button>
-          <Button
-            variant="destructive"
-            className="bg-red-600 hover:bg-red-700 text-white"
-          >
-            <ShieldCheck className="mr-2" />
-            SECURITY ALERTS
-          </Button>
-          <Button>
-            <Box className="mr-2" />
-            VIEW PRODUCTS
-          </Button>
+    <DashboardLayout user={user}>
+        <main className="flex-1 space-y-8 p-6 md:p-10">
+        <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+            Welcome to ReleaseHub
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+            Here's a summary of your operations.
+            </p>
         </div>
-      </div>
-    </main>
+
+        <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-3">
+            <SummaryCard
+            icon={<Users className="h-8 w-8" />}
+            title="Fleet Management"
+            description="Manage and monitor your fleet of devices."
+            />
+            <SummaryCard
+            icon={<Box className="h-8 w-8" />}
+            title="Product Management"
+            description="Oversee your product lifecycle and specifications."
+            />
+            <SummaryCard
+            icon={<GanttChartSquare className="h-8 w-8" />}
+            title="Release Management"
+            description="Track and manage your software releases."
+            />
+        </div>
+
+        <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+            Quick Actions
+            </h2>
+            <div className="mt-4 flex flex-wrap gap-4">
+            <Button className="bg-green-600 hover:bg-green-700 text-white">
+                <LineChart className="mr-2" />
+                MONITOR JOBS
+            </Button>
+            <Button>
+                <ListChecks className="mr-2" />
+                CHECK COMPLIANCE
+            </Button>
+            <Button
+                variant="destructive"
+                className="bg-red-600 hover:bg-red-700 text-white"
+            >
+                <ShieldCheck className="mr-2" />
+                SECURITY ALERTS
+            </Button>
+            <Button>
+                <Box className="mr-2" />
+                VIEW PRODUCTS
+            </Button>
+            </div>
+        </div>
+        </main>
+    </DashboardLayout>
   );
 }

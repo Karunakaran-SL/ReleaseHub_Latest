@@ -4,25 +4,37 @@ import { decrypt } from '@/lib/session';
 import { cookies } from 'next/headers';
 
 const publicRoutes = ['/login'];
+const protectedRoutes = ['/', '/products', '/api-docs'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const sessionCookie = cookies().get('session')?.value;
 
-  // Allow public routes to be accessed without authentication
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  let session;
+  try {
+    session = await decrypt(sessionCookie);
+  } catch (error) {
+    // Invalid session cookie, treat as no session
+    session = null;
+  }
+
+  // Redirect to home if a logged-in user tries to access the login page
+  if (pathname.startsWith('/login') && session) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  // Allow access to public routes for unauthenticated users
+  if (publicRoutes.some(route => pathname.startsWith(route)) && !session) {
     return NextResponse.next();
   }
 
-  const sessionCookie = cookies().get('session')?.value;
-  const session = await decrypt(sessionCookie);
-
-  // If there's no session, redirect to the login page for protected routes
-  if (!session) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
+  // Protect routes
+  if (protectedRoutes.some(route => pathname.startsWith(route))) {
+    if (!session) {
+        return NextResponse.redirect(new URL('/login', request.url));
+    }
   }
-  
+
   return NextResponse.next();
 }
 
