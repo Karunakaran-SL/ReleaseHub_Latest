@@ -200,7 +200,45 @@ export default function DashboardPage() {
                   >
                     <LayoutGrid />
                     Dashboard
+                    <ChevronDown className="ml-auto h-4 w-4" />
                   </SidebarMenuButton>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton href="#">
+                        Data Flow Mgmt
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton href="#">
+                        Release & Baseline Mgmt
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                     <SidebarMenuSubItem>
+                      <SidebarMenuSubButton href="#">
+                        Fleet Mgmt
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                     <SidebarMenuSubItem>
+                      <SidebarMenuSubButton href="#">
+                        Workflow Mgmt
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                     <SidebarMenuSubItem>
+                      <SidebarMenuSubButton href="#">
+                        Jobs Monitoring
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                     <SidebarMenuSubItem>
+                      <SidebarMenuSubButton href="#">
+                        Security Monitoring
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                     <SidebarMenuSubItem>
+                      <SidebarMenuSubButton href="#">
+                        Compliance Monitoring
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
                 </SidebarMenuItem>
 
                 <SidebarMenuItem>
