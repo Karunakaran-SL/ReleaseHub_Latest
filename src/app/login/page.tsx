@@ -7,7 +7,7 @@ export default function LoginPage() {
         <div className="max-w-md space-y-4 text-center">
           <h1 className="text-4xl font-bold">Welcome Back!</h1>
           <p className="text-lg">
-            Sign in to access your One Stop Shop for managing all your operational needs. From fleet and product management to compliance and security, we have you covered.
+            Sign in to access your ReleaseHub for managing all your operational needs. From fleet and product management to compliance and security, we have you covered.
           </p>
         </div>
       </div>

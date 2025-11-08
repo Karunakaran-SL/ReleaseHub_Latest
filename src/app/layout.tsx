@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'One Stop Shop',
-  description: 'Manage all your operational needs.',
+  title: 'ReleaseHub',
+  description: 'Your central hub for release management.',
 };
 
 export default function RootLayout({

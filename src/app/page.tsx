@@ -338,7 +338,7 @@ export default function DashboardPage() {
             <main className="flex-1 space-y-8 p-6 md:p-10">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">
-                  Welcome to your One Stop Shop
+                  Welcome to ReleaseHub
                 </h1>
                 <p className="mt-2 text-muted-foreground">
                   Here's a summary of your operations.
