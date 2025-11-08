@@ -1,3 +1,4 @@
+'use client';
 
 import {
   Table,
@@ -27,10 +28,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useEffect, useState } from 'react';
 
-const products = [
-  {
-    icon: (
+type Product = {
+  _id: string;
+  icon: string;
+  productName: string;
+  owner: string;
+  deploymentType: string;
+  deployments: number;
+};
+
+const ProductIcon = ({ icon }: { icon: string }) => {
+  if (icon === 'product-a') {
+    return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -47,14 +58,10 @@ const products = [
         <line x1="8" y1="2" x2="8" y2="22" />
         <line x1="16" y1="2" x2="16" y2="22" />
       </svg>
-    ),
-    productName: 'Product A',
-    owner: 'John Doe',
-    deploymentType: 'Cloud',
-    deployments: 5,
-  },
-  {
-    icon: (
+    );
+  }
+  if (icon === 'product-b') {
+    return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -71,14 +78,10 @@ const products = [
         <path d="M12 2a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4 4 4 0 0 0 4-4v0a4 4 0 0 0-4-4z" />
         <path d="M10.5 16a2.5 2.5 0 0 1 5 0" />
       </svg>
-    ),
-    productName: 'Product B',
-    owner: 'Jane Smith',
-    deploymentType: 'Airgapped',
-    deployments: 3,
-  },
-  {
-    icon: (
+    );
+  }
+  if (icon === 'product-c') {
+    return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -96,15 +99,35 @@ const products = [
         <path d="M7 14c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2" />
         <path d="M9 16c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2" />
       </svg>
-    ),
-    productName: 'Product C',
-    owner: 'Peter Jones',
-    deploymentType: 'On-Prem',
-    deployments: 10,
-  },
-];
+    );
+  }
+  return null;
+};
+
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const response = await fetch('/api/products');
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data);
+        } else {
+          console.error('Failed to fetch products');
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProducts();
+  }, []);
+
   return (
     <main className="flex-1 space-y-8 p-6 md:p-10">
       <div className="flex items-center justify-between">
@@ -126,9 +149,13 @@ export default function ProductsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product, index) => (
-                <TableRow key={index}>
-                  <TableCell>{product.icon}</TableCell>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center">Loading products...</TableCell>
+                </TableRow>
+              ) : products.map((product) => (
+                <TableRow key={product._id}>
+                  <TableCell><ProductIcon icon={product.icon} /></TableCell>
                   <TableCell className="font-medium">
                     {product.productName}
                   </TableCell>
@@ -167,7 +194,7 @@ export default function ProductsPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="text-sm font-medium">1-3 of 3</div>
+          <div className="text-sm font-medium">{`1-${products.length} of ${products.length}`}</div>
           <div className="flex items-center space-x-1">
             <Button variant="outline" size="icon" className="h-8 w-8">
               <ChevronLeft className="h-4 w-4" />
