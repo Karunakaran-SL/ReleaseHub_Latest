@@ -7,7 +7,6 @@ import {
   SidebarProvider,
   Sidebar,
   SidebarTrigger,
-  SidebarInset,
   SidebarContent,
   SidebarFooter,
   SidebarMenu,
@@ -56,7 +55,7 @@ import Footer from '@/components/footer';
 
 function Header({ user }: { user: User | null }) {
   return (
-    <header className="sticky top-0 z-30 w-full border-b bg-background">
+    <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="flex h-16 items-center px-4 md:px-6">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
@@ -147,7 +146,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen flex-col overflow-hidden">
+      <div className="relative flex h-screen w-full flex-col">
         <Header user={user} />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar>
@@ -245,7 +244,6 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         </CollapsibleTrigger>
                     </SidebarMenuItem>
                 </Collapsible>
-
 
                 <Collapsible asChild>
                   <SidebarMenuItem>
@@ -406,16 +404,13 @@ export default function DashboardLayout({ children, user }: { children: React.Re
               </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
-                {/* This footer is intentionally left empty as it's replaced by the new global footer */}
             </SidebarFooter>
           </Sidebar>
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <SidebarInset>
-                {children}
-            </SidebarInset>
-            <Footer />
-          </div>
+          <main className="flex-1 overflow-auto">
+            {children}
+          </main>
         </div>
+        <Footer />
       </div>
     </SidebarProvider>
   );

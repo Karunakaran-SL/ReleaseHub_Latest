@@ -39,7 +39,7 @@ export default function Footer() {
     }
 
     return (
-        <footer className="w-full border-t bg-background text-foreground">
+        <footer className="fixed bottom-0 left-0 z-40 w-full border-t bg-background text-foreground">
             <div className="flex h-12 items-center justify-between px-4 md:px-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-4">
                      <p>&copy; {new Date().getFullYear()} ReleaseHub. All rights reserved.</p>
