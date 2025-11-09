@@ -13,13 +13,13 @@ import type { User, CmdbTenant, OnboardingConfiguration, Product } from '@/lib/d
 import { getUser } from '@/lib/auth';
 import { Loader2, ArrowRight, UploadCloud } from 'lucide-react';
 import OnboardingStepper from './_components/onboarding-stepper';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
 
 type NewTenantFormState = Partial<Omit<CmdbTenant, '_id' | 'onboarding_status'>> & {
     version?: string;
     artifact_location?: string;
-    dependent_tenants?: string[];
-    products?: string[];
+    dependent_tenants?: { id: string; name: string }[];
+    products?: { id: string; name: string }[];
     resources_cpu?: number;
     resources_memory_gb?: number;
     resources_storage_gb?: number;
@@ -55,10 +55,12 @@ export default function CreateTenantPage() {
                 
                 if (configRes.ok) {
                     const configs = await configRes.json();
-                    const latestConfig = configs.reduce((latest: OnboardingConfiguration, current: OnboardingConfiguration) => 
-                        current.version > latest.version ? current : latest
-                    , configs[0]);
-                    setOnboardingConfig(latestConfig);
+                    if (configs && configs.length > 0) {
+                        const latestConfig = configs.reduce((latest: OnboardingConfiguration, current: OnboardingConfiguration) => 
+                            current.version > latest.version ? current : latest
+                        , configs[0]);
+                        setOnboardingConfig(latestConfig);
+                    }
                 } else {
                      toast({ variant: 'destructive', title: 'Error', description: 'Failed to load onboarding configuration.' });
                 }
@@ -76,9 +78,9 @@ export default function CreateTenantPage() {
         setFormState(prev => ({ ...prev, [id]: type === 'number' ? Number(value) : value }));
     };
     
-    const handleSelectChange = (field: 'dependent_tenants' | 'products', value: string) => {
-        setFormState(prev => ({...prev, [field]: [value]}));
-    }
+    const handleMultiSelectChange = (field: 'dependent_tenants' | 'products', selectedItems: { id: string; name: string }[]) => {
+        setFormState(prev => ({ ...prev, [field]: selectedItems }));
+    };
 
     const handleFirstStepSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -106,6 +108,49 @@ export default function CreateTenantPage() {
             setLoading(false);
         }
     };
+
+    const renderMultiSelect = (
+        fieldName: 'dependent_tenants' | 'products',
+        allOptions: Option[]
+    ) => {
+        const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
+        const chosenIds = new Set(chosenItems.map(item => item.id));
+
+        const available: Option[] = allOptions
+            .filter(opt => !chosenIds.has(opt.id))
+            .map(opt => ({ id: opt.id, label: opt.label }));
+
+        const chosen: Option[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
+
+        const moveItems = (ids: string[], source: Option[], dest: Option[]) => {
+            const itemsToMove = source.filter(item => ids.includes(item.id));
+            const newDest = [...dest, ...itemsToMove];
+            handleMultiSelectChange(fieldName, newDest.map(i => ({id: i.id, name: i.label})));
+        };
+        
+        const moveAll = (source: Option[], dest: Option[]) => {
+            const newDest = [...dest, ...source];
+            handleMultiSelectChange(fieldName, newDest.map(i => ({id: i.id, name: i.label})));
+        };
+
+        return (
+            <MultiSelectListBox
+                available={available}
+                chosen={chosen}
+                onMoveToChosen={(ids) => moveItems(ids, available, chosen)}
+                onMoveToAvailable={(ids) => {
+                    const newChosen = chosen.filter(item => !ids.includes(item.id));
+                    handleMultiSelectChange(fieldName, newChosen.map(i => ({id: i.id, name: i.label})))
+                }}
+                onMoveAllToChosen={() => moveAll(available, chosen)}
+                onMoveAllToAvailable={() => handleMultiSelectChange(fieldName, [])}
+            />
+        );
+    };
+
+    if (loading && !onboardingConfig) {
+        return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
+    }
     
     if (step === 2 && onboardingConfig && newTenant) {
         return (
@@ -155,28 +200,14 @@ export default function CreateTenantPage() {
                                     <Input id="artifact_location" value={formState.artifact_location || ''} onChange={handleInputChange} />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="dependent_tenants">Dependent Tenants</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('dependent_tenants', value)}>
-                                        <SelectTrigger><SelectValue placeholder="Select dependent tenants" /></SelectTrigger>
-                                        <SelectContent>
-                                            {allTenants.map(tenant => (
-                                                <SelectItem key={tenant._id} value={tenant._id}>{tenant.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    {renderMultiSelect('dependent_tenants', allTenants.map(t => ({id: t._id, label: t.name})))}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="products">Products</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('products', value)}>
-                                        <SelectTrigger><SelectValue placeholder="Select products" /></SelectTrigger>
-                                        <SelectContent>
-                                            {allProducts.map(product => (
-                                                <SelectItem key={product._id} value={product._id}>{product.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    {renderMultiSelect('products', allProducts.map(p => ({id: p._id, label: p.name})))}
                                 </div>
                             </div>
                              <div className="space-y-2">

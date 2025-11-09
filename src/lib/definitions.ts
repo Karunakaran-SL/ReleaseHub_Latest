@@ -97,8 +97,8 @@ export type CmdbTenant = {
   onboarding_status?: Record<string, any>;
   version?: string;
   artifact_location?: string;
-  dependent_tenants?: string[];
-  products?: string[];
+  dependent_tenants?: { id: string, name: string }[];
+  products?: { id: string, name: string }[];
 };
 
 export type CmdbComponent = {
