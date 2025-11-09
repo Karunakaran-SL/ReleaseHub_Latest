@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,22 +30,25 @@ export default function CreateProductPage() {
     const [cmdbItems, setCmdbItems] = useState<SelectOption[]>([]);
     const [complianceChecks, setComplianceChecks] = useState<SelectOption[]>([]);
     const [deploymentTypes, setDeploymentTypes] = useState<SelectOption[]>([]);
+    const [airgappedDetails, setAirgappedDetails] = useState<SelectOption[]>([]);
 
     useEffect(() => {
         getUser().then(setUser);
 
         async function fetchData() {
             try {
-                const [workflowsRes, cmdbRes, complianceRes, deploymentRes] = await Promise.all([
+                const [workflowsRes, cmdbRes, complianceRes, deploymentRes, airgappedRes] = await Promise.all([
                     fetch('/api/workflows'),
                     fetch('/api/cmdb'),
                     fetch('/api/compliance-checks'),
-                    fetch('/api/deployment-types')
+                    fetch('/api/deployment-types'),
+                    fetch('/api/airgapped-details'),
                 ]);
                 
                 setWorkflows(await workflowsRes.json());
                 setCmdbItems(await cmdbRes.json());
                 setComplianceChecks(await complianceRes.json());
+                setAirgappedDetails(await airgappedRes.json());
                 
                 const deploymentData = await deploymentRes.json();
                 // Adding On-Prem for the UI as it's in the design
@@ -157,9 +160,32 @@ export default function CreateProductPage() {
                                         <Button variant="outline" type="button">TEST</Button>
                                     </div>
                                 </div>
+                                <div>
+                                    <h3 className="font-medium text-lg mb-2">Airgapped Details</h3>
+                                    <Label>Select Applicable HW Variants</Label>
+                                    <MultiSelectListBox
+                                        options={airgappedDetails.map(d => ({ id: d._id, label: d.name }))}
+                                        onChange={(selected) => console.log('Selected HW Variants:', selected)}
+                                    />
+                                </div>
+                                <div className="space-y-4 pt-6">
+                                     <div className="flex items-center gap-2">
+                                        <Input id="deployment-storage" placeholder="Product Deployment Storage" />
+                                        <Button variant="outline" type="button">TEST</Button>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Input id="deployment-report" placeholder="Product Deployment Report" />
+                                        <Button variant="outline" type="button">TEST</Button>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </CardContent>
+                     <CardFooter className="flex justify-end gap-2 pt-8">
+                        <Button variant="outline" onClick={() => router.back()}>CANCEL</Button>
+                        <Button variant="outline">VALIDATE</Button>
+                        <Button>CREATE PRODUCT</Button>
+                    </CardFooter>
                 </Card>
             </main>
         </DashboardLayout>
