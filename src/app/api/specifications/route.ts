@@ -214,16 +214,9 @@ async function seedSpecifications() {
     const db = client.db();
     const collection = db.collection('specifications');
     
-    const operations = initialSpecifications.map(spec => ({
-        updateOne: {
-            filter: { id: spec.id },
-            update: { $setOnInsert: spec },
-            upsert: true,
-        }
-    }));
-    
-    const result = await collection.bulkWrite(operations);
-    console.log(`${result.upsertedCount} new specifications inserted.`);
+    await collection.deleteMany({});
+    await collection.insertMany(initialSpecifications as any);
+    console.log('Cleared and re-seeded specifications collection.');
 
   } catch (error) {
     console.error('Error seeding specifications:', error);
@@ -237,8 +230,10 @@ export async function GET(req: NextRequest) {
     const db = client.db();
     const collection = db.collection('specifications');
     
-    // Run seeding on every GET request to ensure data is present without deleting
-    await seedSpecifications();
+    const count = await collection.countDocuments();
+    if (count === 0) {
+        await seedSpecifications();
+    }
 
     const items = await collection.find({}).toArray();
     return NextResponse.json(items, { status: 200 });
