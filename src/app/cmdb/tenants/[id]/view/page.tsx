@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 
 
 const statusColors: Record<string, string> = {
@@ -52,28 +53,54 @@ function BasicInfoBlock({ tenant }: { tenant: CmdbTenant }) {
                 <DialogHeader>
                     <DialogTitle>Basic Information: {tenant.name}</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right">Name</Label>
-                        <Input id="name" value={tenant.name} disabled className="col-span-3" />
+                        <Label className="text-right">Name</Label>
+                        <Input value={tenant.name} disabled className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="id" className="text-right">Tenant ID</Label>
-                        <Input id="id" value={tenant.id} disabled className="col-span-3" />
+                        <Label className="text-right">Tenant ID</Label>
+                        <Input value={tenant.id} disabled className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="description" className="text-right">Description</Label>
-                        <Textarea id="description" value={tenant.description || ''} disabled className="col-span-3" />
+                        <Label className="text-right">Description</Label>
+                        <Textarea value={tenant.description || 'N/A'} disabled className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="version" className="text-right">Version</Label>
-                        <Input id="version" value={tenant.version || ''} disabled className="col-span-3" />
+                        <Label className="text-right">Version</Label>
+                        <Input value={tenant.version || 'N/A'} disabled className="col-span-3" />
                     </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">Products</Label>
-                        <div className="col-span-3 border rounded-md p-2 h-20 overflow-y-auto">
-                            {tenant.products?.map(p => <div key={p.id}>{p.name}</div>) || 'N/A'}
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Artifact Location</Label>
+                        <Input value={tenant.artifact_location || 'N/A'} disabled className="col-span-3" />
+                    </div>
+                     <div className="grid grid-cols-4 items-start gap-4">
+                        <Label className="text-right pt-2">Products</Label>
+                        <div className="col-span-3 border rounded-md p-2 h-20 overflow-y-auto text-sm">
+                            {tenant.products && tenant.products.length > 0 ? tenant.products?.map(p => <div key={p.id}>{p.name}</div>) : 'N/A'}
                         </div>
+                    </div>
+                     <div className="grid grid-cols-4 items-start gap-4">
+                        <Label className="text-right pt-2">Dependent Tenants</Label>
+                        <div className="col-span-3 border rounded-md p-2 h-20 overflow-y-auto text-sm">
+                            {tenant.dependent_tenants && tenant.dependent_tenants.length > 0 ? tenant.dependent_tenants?.map(t => <div key={t.id}>{t.name}</div>) : 'N/A'}
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Resources</Label>
+                        <div className="col-span-3 grid grid-cols-3 gap-2">
+                             <Input value={`CPU: ${tenant.resources?.cpu || 'N/A'}`} disabled />
+                             <Input value={`Mem: ${tenant.resources?.memory_gb || 'N/A'} GB`} disabled />
+                             <Input value={`Sto: ${tenant.resources?.storage_gb || 'N/A'} GB`} disabled />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Created At</Label>
+                        <Input value={tenant.created_at ? format(parseISO(tenant.created_at), "yyyy-MM-dd HH:mm:ss") : 'N/A'} disabled className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Last Updated</Label>
+                        <Input value={tenant.updated_at ? format(parseISO(tenant.updated_at), "yyyy-MM-dd HH:mm:ss") : 'N/A'} disabled className="col-span-3" />
                     </div>
                 </div>
             </DialogContent>
@@ -97,7 +124,7 @@ function PhaseBlock({ phase }: { phase: CmdbPhase }) {
                 <DialogHeader>
                     <DialogTitle>{phase.name} - Details</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Status</Label>
                         <Input value={phase.status} disabled className="col-span-3" />
@@ -270,4 +297,3 @@ export default function ViewTenantPage() {
         </DashboardLayout>
     );
 }
-
