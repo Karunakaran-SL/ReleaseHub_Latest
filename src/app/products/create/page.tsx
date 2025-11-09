@@ -1,6 +1,6 @@
 
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -163,6 +163,9 @@ export default function CreateProductPage() {
         }
     };
 
+    const workflowOptions = useMemo(() => workflows.map(w => ({ id: w.id, label: w.name })), [workflows]);
+    const complianceOptions = useMemo(() => complianceChecks.map(c => ({ id: c.id, label: c.name })), [complianceChecks]);
+    const specificationOptions = useMemo(() => specifications.map(s => ({ id: s.id, label: s.name })), [specifications]);
 
     return (
         <DashboardLayout user={user}>
@@ -222,7 +225,7 @@ export default function CreateProductPage() {
                                 <div>
                                     <Label>Custom Approval Workflow</Label>
                                     <MultiSelectListBox
-                                        options={workflows.map(w => ({ id: w.id, label: w.name }))}
+                                        options={workflowOptions}
                                         onChange={(selected) => handleMultiSelectChange('custom_workflows', selected)}
                                     />
                                 </div>
@@ -246,7 +249,7 @@ export default function CreateProductPage() {
                                  <div>
                                     <Label>Select the compliance check</Label>
                                      <MultiSelectListBox
-                                        options={complianceChecks.map(c => ({ id: c.id, label: c.name }))}
+                                        options={complianceOptions}
                                         onChange={(selected) => handleMultiSelectChange('compliance_checks', selected)}
                                     />
                                 </div>
@@ -291,7 +294,7 @@ export default function CreateProductPage() {
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
                                         <MultiSelectListBox
-                                            options={specifications.map(d => ({ id: d.id, label: d.name }))}
+                                            options={specificationOptions}
                                             onChange={(selected) => handleMultiSelectChange('specifications', selected)}
                                         />
                                     </div>
