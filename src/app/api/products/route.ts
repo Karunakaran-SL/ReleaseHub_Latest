@@ -77,11 +77,14 @@ async function seedProducts() {
     const client = await clientPromise;
     const db = client.db();
     const productsCollection = db.collection('products');
-    const count = await productsCollection.countDocuments();
-    if (count === 0) {
-      await productsCollection.insertMany(initialProducts as any);
-      console.log('Seeded products collection.');
-    }
+    
+    // Delete all existing documents
+    await productsCollection.deleteMany({});
+    
+    // Insert the new data
+    await productsCollection.insertMany(initialProducts as any);
+    console.log('Cleared and re-seeded products collection.');
+
   } catch (error) {
     console.error('Error seeding products:', error);
   }
