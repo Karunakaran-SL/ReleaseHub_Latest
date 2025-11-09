@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import clientPromise from '@/lib/mongodb';
 import { createSession } from '@/lib/session';
 import type { User } from '@/lib/definitions';
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Case 2: User exists, but password is not a string (e.g. not hashed). Hash and update it.
-    if (typeof user.password !== 'string' || !user.password.startsWith('$2a$')) {
+    if (typeof user.password !== 'string' || !user.password.startsWith('$2a$') && !user.password.startsWith('$2b$')) {
         const hashedPassword = await bcrypt.hash(password, 10); // FIX: use 'password' from input, not 'user.password'
         await usersCollection.updateOne(
           { _id: user._id },
