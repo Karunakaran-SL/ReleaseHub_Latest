@@ -240,7 +240,7 @@ export default function EditComponentPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="tenants">Tenants</Label>
-                                    <Select value={formState.tenants?.[0]?.id} onValueChange={(value) => handleSelectChange('tenants', value)} required>
+                                    <Select value={formState.tenants?.[0]?.id} onValueChange={(value) => handleSelectChange('tenants', value)}>
                                         <SelectTrigger><SelectValue placeholder="Select tenant..." /></SelectTrigger>
                                         <SelectContent>
                                             {allTenants.map(tenant => (
