@@ -132,7 +132,7 @@ export default function SpecificationsPage() {
                             alt={spec.name} 
                             width={40} 
                             height={40} 
-                            className="rounded-md object-contain aspect-square"
+                            className="rounded-full"
                         />
                       </TableCell>
                       <TableCell className="font-medium">
