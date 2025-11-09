@@ -1,16 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
 import type { OnboardingPhase, OnboardingFormField } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 
 interface OnboardingPhaseProps {
   phase: OnboardingPhase;
@@ -20,6 +18,9 @@ interface OnboardingPhaseProps {
   isExpanded: boolean;
   onExpand: () => void;
   statusColor: string;
+  isDirty: boolean;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
 export default function OnboardingPhaseComponent({
@@ -30,6 +31,9 @@ export default function OnboardingPhaseComponent({
   isExpanded,
   onExpand,
   statusColor,
+  isDirty,
+  onSave,
+  onCancel,
 }: OnboardingPhaseProps) {
 
   const renderField = (field: OnboardingFormField) => {
@@ -89,7 +93,8 @@ export default function OnboardingPhaseComponent({
     <div className="relative">
       <div 
         className={cn("w-48 h-24 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all duration-300", statusColor, {
-            'ring-2 ring-primary ring-offset-2': isExpanded
+            'ring-2 ring-primary ring-offset-2': isExpanded,
+            'border-2 border-blue-500': isDirty,
         })}
         onClick={onExpand}
         >
@@ -102,7 +107,7 @@ export default function OnboardingPhaseComponent({
           <CardHeader>
             <CardTitle className="text-xl flex justify-between items-center">
                 <span>{phase.name}</span>
-                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onExpand(); }}>X</Button>
+                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onCancel(); }}>X</Button>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 max-h-96 overflow-y-auto">
@@ -120,6 +125,10 @@ export default function OnboardingPhaseComponent({
              </div>
              {phase.fields.map(renderField)}
           </CardContent>
+          <CardFooter className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onCancel}>Cancel</Button>
+            <Button onClick={onSave}>Save</Button>
+          </CardFooter>
         </Card>
       )}
     </div>

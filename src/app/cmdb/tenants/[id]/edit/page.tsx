@@ -42,6 +42,10 @@ export default function EditTenantPage() {
 
     const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
     const [phasesState, setPhasesState] = useState<Record<string, any>>({});
+    const [initialPhasesState, setInitialPhasesState] = useState<Record<string, any>>({});
+    const [dirtyPhases, setDirtyPhases] = useState<Set<string>>(new Set());
+
+    const [popupState, setPopupState] = useState<any>(null);
 
 
     const fetchAndSetData = useCallback(async () => {
@@ -61,14 +65,15 @@ export default function EditTenantPage() {
             setFormState(tenantData);
 
             // Initialize phases state for editing
-             const initialPhasesState: Record<string, any> = {};
+             const initialPhasesData: Record<string, any> = {};
             (tenantData.phases || []).forEach(phase => {
-                initialPhasesState[phase.id] = { status: phase.status };
+                initialPhasesData[phase.id] = { status: phase.status };
                 phase.fields.forEach(field => {
-                    initialPhasesState[phase.id][field.name] = { value: field.value, proofLink: field.proof?.link };
+                    initialPhasesData[phase.id][field.name] = { value: field.value, proofLink: field.proof?.link };
                 });
             });
-            setPhasesState(initialPhasesState);
+            setPhasesState(initialPhasesData);
+            setInitialPhasesState(JSON.parse(JSON.stringify(initialPhasesData)));
 
 
             if (allTenantsRes.ok) setAllTenants(await allTenantsRes.json());
@@ -92,21 +97,40 @@ export default function EditTenantPage() {
         fetchAndSetData();
     }, [fetchAndSetData]);
 
-    const handlePhaseStateChange = (phaseId: string, fieldName: string, value: any) => {
-        setPhasesState(prev => ({
-            ...prev,
-            [phaseId]: {
-                ...prev[phaseId],
-                [fieldName]: value
-            }
-        }));
+    const handleExpandPhase = (phaseId: string) => {
+        setExpandedPhase(phaseId);
+        setPopupState(JSON.parse(JSON.stringify(phasesState[phaseId])));
     };
 
-    const handleStatusChange = (phaseId: string, status: string) => {
-         setPhasesState(prev => ({
-            ...prev,
-            [phaseId]: { ...prev[phaseId], status }
-        }));
+    const handleCancelPopup = () => {
+        setExpandedPhase(null);
+        setPopupState(null);
+    };
+
+    const handleSavePopup = () => {
+        if (expandedPhase && popupState) {
+            setPhasesState(prev => ({ ...prev, [expandedPhase]: popupState }));
+            const originalPhaseState = JSON.stringify(initialPhasesState[expandedPhase]);
+            const currentPhaseState = JSON.stringify(popupState);
+            if (originalPhaseState !== currentPhaseState) {
+                setDirtyPhases(prev => new Set(prev).add(expandedPhase));
+            } else {
+                setDirtyPhases(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(expandedPhase);
+                    return newSet;
+                });
+            }
+        }
+        handleCancelPopup();
+    };
+
+    const handlePopupStateChange = (fieldName: string, value: any) => {
+        setPopupState((prev: any) => ({ ...prev, [fieldName]: value }));
+    };
+    
+    const handlePopupStatusChange = (status: string) => {
+        setPopupState((prev: any) => ({ ...prev, status }));
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -292,12 +316,15 @@ export default function EditTenantPage() {
                                         <div key={phase.id} className="flex items-center">
                                             <OnboardingPhaseComponent
                                                 phase={onboardingConfig.phases.find(p => p.id === phase.id)!}
-                                                phaseState={phasesState[phase.id] || {}}
-                                                onStateChange={(fieldName, value) => handlePhaseStateChange(phase.id, fieldName, value)}
-                                                onStatusChange={(status) => handleStatusChange(phase.id, status)}
+                                                phaseState={expandedPhase === phase.id ? popupState : phasesState[phase.id]}
+                                                onStateChange={handlePopupStateChange}
+                                                onStatusChange={handlePopupStatusChange}
                                                 isExpanded={expandedPhase === phase.id}
-                                                onExpand={() => setExpandedPhase(expandedPhase === phase.id ? null : phase.id)}
+                                                onExpand={() => handleExpandPhase(phase.id)}
                                                 statusColor={statusColors[phasesState[phase.id]?.status] || 'bg-gray-200 text-gray-800'}
+                                                isDirty={dirtyPhases.has(phase.id)}
+                                                onSave={handleSavePopup}
+                                                onCancel={handleCancelPopup}
                                             />
                                             {index < (formState.phases?.length || 0) - 1 && (
                                                 <ChevronRight className="h-8 w-8 text-muted-foreground mx-4" />
@@ -308,7 +335,7 @@ export default function EditTenantPage() {
                                 {expandedPhase && (
                                     <div 
                                         className="fixed inset-0 bg-black/30 z-10" 
-                                        onClick={() => setExpandedPhase(null)}
+                                        onClick={handleCancelPopup}
                                     />
                                 )}
                             </CardContent>
