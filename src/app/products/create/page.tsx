@@ -1,3 +1,4 @@
+
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -31,6 +32,7 @@ export default function CreateProductPage() {
     const [complianceChecks, setComplianceChecks] = useState<SelectOption[]>([]);
     const [deploymentTypes, setDeploymentTypes] = useState<SelectOption[]>([]);
     const [airgappedDetails, setAirgappedDetails] = useState<SelectOption[]>([]);
+    const [selectedDeploymentType, setSelectedDeploymentType] = useState('deployment_airgapped');
 
     useEffect(() => {
         getUser().then(setUser);
@@ -51,8 +53,7 @@ export default function CreateProductPage() {
                 setAirgappedDetails(await airgappedRes.json());
                 
                 const deploymentData = await deploymentRes.json();
-                // Adding On-Prem for the UI as it's in the design
-                setDeploymentTypes([...deploymentData, { id: "Deployment_OnPrem", name: "On-Prem" }]);
+                setDeploymentTypes([...deploymentData, { id: "Deployment_OnPrem", name: "On-Prem", _id: "temp-onprem-id" }]);
 
             } catch (error) {
                 console.error("Failed to fetch data for form", error);
@@ -137,7 +138,11 @@ export default function CreateProductPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Deployment Type</Label>
-                                    <RadioGroup defaultValue="airgapped" className="flex items-center gap-4">
+                                    <RadioGroup 
+                                        value={selectedDeploymentType}
+                                        onValueChange={setSelectedDeploymentType}
+                                        className="flex items-center gap-4"
+                                    >
                                         {deploymentTypes.map(type => (
                                             <div key={type.id} className="flex items-center space-x-2">
                                                 <RadioGroupItem value={type.id.toLowerCase()} id={type.id} />
@@ -160,14 +165,18 @@ export default function CreateProductPage() {
                                         <Button variant="outline" type="button">TEST</Button>
                                     </div>
                                 </div>
-                                <div>
-                                    <h3 className="font-medium text-lg mb-2">Airgapped Details</h3>
-                                    <Label>Select Applicable HW Variants</Label>
-                                    <MultiSelectListBox
-                                        options={airgappedDetails.map(d => ({ id: d._id, label: d.name }))}
-                                        onChange={(selected) => console.log('Selected HW Variants:', selected)}
-                                    />
-                                </div>
+
+                                {selectedDeploymentType === 'deployment_airgapped' && (
+                                    <div>
+                                        <h3 className="font-medium text-lg mb-2">Airgapped Details</h3>
+                                        <Label>Select Applicable HW Variants</Label>
+                                        <MultiSelectListBox
+                                            options={airgappedDetails.map(d => ({ id: d._id, label: d.name }))}
+                                            onChange={(selected) => console.log('Selected HW Variants:', selected)}
+                                        />
+                                    </div>
+                                )}
+                                
                                 <div className="space-y-4 pt-6">
                                      <div className="flex items-center gap-2">
                                         <Input id="deployment-storage" placeholder="Product Deployment Storage" />
