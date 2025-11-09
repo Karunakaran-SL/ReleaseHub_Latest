@@ -144,9 +144,9 @@ export default function DashboardLayout({ children, user }: { children: React.Re
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex h-screen flex-col overflow-hidden">
         <Header user={user} />
-        <div className="flex flex-1">
+        <div className="flex flex-1 overflow-hidden">
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
