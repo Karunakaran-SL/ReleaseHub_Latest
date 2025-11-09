@@ -35,7 +35,7 @@ const ProductUpdateSchema = z.object({
   git_repo: z.string().url().optional(),
   artifacts_repo: z.string().url().optional(),
   pipeline: z.string().url().optional(),
-  airgapped_details: z.optional(z.object({
+  specifications: z.array(z.object({
     id: z.string(),
     name: z.string(),
   })).optional(),

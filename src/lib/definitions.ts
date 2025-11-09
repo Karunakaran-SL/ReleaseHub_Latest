@@ -41,10 +41,10 @@ export type Product = {
   git_repo: string;
   artifacts_repo: string;
   pipeline: string;
-  airgapped_details?: {
+  specifications?: {
     id: string;
     name: string;
-  };
+  }[];
   created_at: string;
   updated_at: string;
 };

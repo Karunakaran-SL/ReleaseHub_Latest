@@ -52,7 +52,7 @@ export default function ViewProductPage() {
     const [cmdbItems, setCmdbItems] = useState<SelectOption[]>([]);
     const [complianceChecks, setComplianceChecks] = useState<SelectOption[]>([]);
     const [deploymentTypes, setDeploymentTypes] = useState<SelectOption[]>([]);
-    const [airgappedDetails, setAirgappedDetails] = useState<SelectOption[]>([]);
+    const [specifications, setSpecifications] = useState<SelectOption[]>([]);
 
     useEffect(() => {
         getUser().then(setUser);
@@ -60,13 +60,13 @@ export default function ViewProductPage() {
         async function fetchData() {
             if (!id) return;
             try {
-                const [productRes, workflowsRes, cmdbRes, complianceRes, deploymentRes, airgappedRes] = await Promise.all([
+                const [productRes, workflowsRes, cmdbRes, complianceRes, deploymentRes, specificationsRes] = await Promise.all([
                     fetch(`/api/products/${id}`),
                     fetch('/api/workflows'),
                     fetch('/api/cmdb'),
                     fetch('/api/compliance-checks'),
                     fetch('/api/deployment-types'),
-                    fetch('/api/airgapped-details'),
+                    fetch('/api/specifications'),
                 ]);
 
                 if (!productRes.ok) throw new Error("Failed to fetch product details");
@@ -76,7 +76,7 @@ export default function ViewProductPage() {
                 setCmdbItems(await cmdbRes.json());
                 setComplianceChecks(await complianceRes.json());
                 setDeploymentTypes(await deploymentRes.json());
-                setAirgappedDetails(await airgappedRes.json());
+                setSpecifications(await specificationsRes.json());
 
             } catch (error) {
                 console.error("Failed to fetch data", error);
@@ -281,11 +281,11 @@ export default function ViewProductPage() {
 
                                 {product.deployment_type?.id === 'Deployment_Airgapped' && (
                                     <div>
-                                        <h3 className="font-medium text-lg mb-2">Airgapped Details</h3>
+                                        <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
                                         <MultiSelectListBox
-                                            options={airgappedDetails.map(d => ({ id: d.id, label: d.name }))}
-                                            chosen={product.airgapped_details ? [product.airgapped_details.id] : []}
+                                            options={specifications.map(d => ({ id: d.id, label: d.name }))}
+                                            chosen={product.specifications ? product.specifications.map(s => s.id) : []}
                                             onChange={() => {}}
                                             disabled
                                         />

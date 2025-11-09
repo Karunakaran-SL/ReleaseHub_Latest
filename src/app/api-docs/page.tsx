@@ -277,16 +277,16 @@ export default function ApiDocsPage() {
                 <ApiEndpoint method="DELETE" path="/api/deployment-types/{id}" description="Deletes a deployment type." responses={genericDeleteResponses}/>
             </Section>
 
-            <Section title="Airgapped Details">
-                <ApiEndpoint method="GET" path="/api/airgapped-details" description="Retrieves a list of all airgapped details." responses={genericGetListResponses}/>
+             <Section title="Specifications">
+                <ApiEndpoint method="GET" path="/api/specifications" description="Retrieves a list of all specifications." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
-                <ApiEndpoint method="POST" path="/api/airgapped-details" description="Creates a new airgapped details entry." requestBody={`{ "id": "...", "name": "...", "description": "..." }`} responses={genericPostResponses}/>
+                <ApiEndpoint method="POST" path="/api/specifications" description="Creates a new specification entry." requestBody={`{ "id": "...", "name": "...", ... }`} responses={genericPostResponses}/>
                 <Separator className="my-8" />
-                <ApiEndpoint method="GET" path="/api/airgapped-details/{id}" description="Retrieves a single airgapped details entry by its MongoDB ObjectId." responses={genericGetOneResponses}/>
+                <ApiEndpoint method="GET" path="/api/specifications/{id}" description="Retrieves a single specification by its MongoDB ObjectId." responses={genericGetOneResponses}/>
                 <Separator className="my-8" />
-                <ApiEndpoint method="PUT" path="/api/airgapped-details/{id}" description="Updates an existing airgapped details entry." requestBody={`{ "name": "New Name" }`} responses={genericPutResponses}/>
+                <ApiEndpoint method="PUT" path="/api/specifications/{id}" description="Updates an existing specification." requestBody={`{ "name": "New Name" }`} responses={genericPutResponses}/>
                 <Separator className="my-8" />
-                <ApiEndpoint method="DELETE" path="/api/airgapped-details/{id}" description="Deletes an airgapped details entry." responses={genericDeleteResponses}/>
+                <ApiEndpoint method="DELETE" path="/api/specifications/{id}" description="Deletes a specification." responses={genericDeleteResponses}/>
             </Section>
 
         </main>

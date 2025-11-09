@@ -37,10 +37,12 @@ const initialProducts: Omit<Product, '_id'>[] = [
     "git_repo": "http://git.example.com/onestopshop-portal",
     "artifacts_repo": "http://artifacts.example.com/onestopshop-portal",
     "pipeline": "http://pipeline.example.com/onestopshop-portal",
-    "airgapped_details": {
-      "id": "Airgapped_Details_1",
-      "name": "Airgapped Details 1"
-    },
+    "specifications": [
+      {
+        "id": "HW_PowerEdge_R740",
+        "name": "PowerEdge R740"
+      }
+    ],
     "created_at": "2023-11-20T09:00:00Z",
     "updated_at": "2023-11-20T09:00:00Z"
   },
@@ -131,7 +133,7 @@ const initialProducts: Omit<Product, '_id'>[] = [
     "git_repo": "http://git.example.com/internal-crm",
     "artifacts_repo": "http://artifacts.example.com/internal-crm",
     "pipeline": "http://pipeline.example.com/internal-crm",
-    "created_at": "2023-11-23T12:00:00Z",
+    "created_at": "20_23-11-23T12:00:00Z",
     "updated_at": "2023-11-23T12:00:00Z"
   },
   {
@@ -160,10 +162,12 @@ const initialProducts: Omit<Product, '_id'>[] = [
       "id": "Deployment_Airgapped",
       "name": "Airgapped"
     },
-     "airgapped_details": {
-      "id": "Airgapped_Details_2",
-      "name": "Airgapped Details 2"
-    },
+     "specifications": [
+      {
+        "id": "HW_ProLiant_DL380",
+        "name": "ProLiant DL380 Gen10"
+      }
+    ],
     "git_repo": "http://git.example.com/hr-suite",
     "artifacts_repo": "http://artifacts.example.com/hr-suite",
     "pipeline": "http://pipeline.example.com/hr-suite",
@@ -251,10 +255,10 @@ const ProductSchema = z.object({
   git_repo: z.string().url(),
   artifacts_repo: z.string().url(),
   pipeline: z.string().url(),
-  airgapped_details: z.optional(z.object({
+  specifications: z.array(z.object({
     id: z.string(),
     name: z.string(),
-  })),
+  })).optional(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 });

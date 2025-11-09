@@ -37,7 +37,7 @@ export default function EditProductPage() {
     const [cmdbItems, setCmdbItems] = useState<SelectOption[]>([]);
     const [complianceChecks, setComplianceChecks] = useState<SelectOption[]>([]);
     const [deploymentTypes, setDeploymentTypes] = useState<SelectOption[]>([]);
-    const [airgappedDetails, setAirgappedDetails] = useState<SelectOption[]>([]);
+    const [specifications, setSpecifications] = useState<SelectOption[]>([]);
 
     useEffect(() => {
         getUser().then(setUser);
@@ -45,13 +45,13 @@ export default function EditProductPage() {
         async function fetchData() {
             if (!id) return;
             try {
-                const [productRes, workflowsRes, cmdbRes, complianceRes, deploymentRes, airgappedRes] = await Promise.all([
+                const [productRes, workflowsRes, cmdbRes, complianceRes, deploymentRes, specificationsRes] = await Promise.all([
                     fetch(`/api/products/${id}`),
                     fetch('/api/workflows'),
                     fetch('/api/cmdb'),
                     fetch('/api/compliance-checks'),
                     fetch('/api/deployment-types'),
-                    fetch('/api/airgapped-details'),
+                    fetch('/api/specifications'),
                 ]);
 
                 if (!productRes.ok) throw new Error("Failed to fetch product details");
@@ -64,7 +64,7 @@ export default function EditProductPage() {
                 setCmdbItems(await cmdbRes.json());
                 setComplianceChecks(await complianceRes.json());
                 setDeploymentTypes(await deploymentRes.json());
-                setAirgappedDetails(await airgappedRes.json());
+                setSpecifications(await specificationsRes.json());
 
             } catch (error) {
                 console.error("Failed to fetch data", error);
@@ -103,15 +103,11 @@ export default function EditProductPage() {
         let options: SelectOption[] = [];
         if (field === 'custom_workflows') options = workflows;
         else if (field === 'compliance_checks') options = complianceChecks;
+        else if (field === 'specifications') options = specifications;
         
         const selectedItems = options.filter(opt => selectedIds.includes(opt.id)).map(opt => ({ id: opt.id, name: opt.name }));
         setFormState(prev => ({ ...prev, [field]: selectedItems }));
     };
-
-    const handleAirgappedDetailsChange = (selectedIds: string[]) => {
-        const detail = airgappedDetails.find(d => d.id === selectedIds[0]);
-        setFormState(prev => ({...prev, airgapped_details: detail ? {id: detail.id, name: detail.name} : undefined}));
-    }
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -287,12 +283,12 @@ export default function EditProductPage() {
 
                                 {formState.deployment_type?.id === 'Deployment_Airgapped' && (
                                     <div>
-                                        <h3 className="font-medium text-lg mb-2">Airgapped Details</h3>
+                                        <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
                                         <MultiSelectListBox
-                                            options={airgappedDetails.map(d => ({ id: d.id, label: d.name }))}
-                                            chosen={formState.airgapped_details ? [formState.airgapped_details.id] : []}
-                                            onChange={handleAirgappedDetailsChange}
+                                            options={specifications.map(d => ({ id: d.id, label: d.name }))}
+                                            chosen={formState.specifications?.map(s => s.id) || []}
+                                            onChange={(selected) => handleMultiSelectChange('specifications', selected)}
                                         />
                                     </div>
                                 )}

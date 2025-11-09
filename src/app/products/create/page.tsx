@@ -31,7 +31,7 @@ export default function CreateProductPage() {
     const [cmdbItems, setCmdbItems] = useState<SelectOption[]>([]);
     const [complianceChecks, setComplianceChecks] = useState<SelectOption[]>([]);
     const [deploymentTypes, setDeploymentTypes] = useState<SelectOption[]>([]);
-    const [airgappedDetails, setAirgappedDetails] = useState<SelectOption[]>([]);
+    const [specifications, setSpecifications] = useState<SelectOption[]>([]);
     const [selectedDeploymentType, setSelectedDeploymentType] = useState('Deployment_Airgapped');
 
     useEffect(() => {
@@ -39,19 +39,19 @@ export default function CreateProductPage() {
 
         async function fetchData() {
             try {
-                const [workflowsRes, cmdbRes, complianceRes, deploymentRes, airgappedRes] = await Promise.all([
+                const [workflowsRes, cmdbRes, complianceRes, deploymentRes, specificationsRes] = await Promise.all([
                     fetch('/api/workflows'),
                     fetch('/api/cmdb'),
                     fetch('/api/compliance-checks'),
                     fetch('/api/deployment-types'),
-                    fetch('/api/airgapped-details'),
+                    fetch('/api/specifications'),
                 ]);
                 
                 setWorkflows(await workflowsRes.json());
                 setCmdbItems(await cmdbRes.json());
                 setComplianceChecks(await complianceRes.json());
                 setDeploymentTypes(await deploymentRes.json());
-                setAirgappedDetails(await airgappedRes.json());
+                setSpecifications(await specificationsRes.json());
 
             } catch (error) {
                 console.error("Failed to fetch data for form", error);
@@ -185,10 +185,10 @@ export default function CreateProductPage() {
 
                                 {selectedDeploymentType === 'Deployment_Airgapped' && (
                                     <div>
-                                        <h3 className="font-medium text-lg mb-2">Airgapped Details</h3>
+                                        <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
                                         <MultiSelectListBox
-                                            options={airgappedDetails.map(d => ({ id: d._id, label: d.name }))}
+                                            options={specifications.map(d => ({ id: d.id, label: d.name }))}
                                             onChange={(selected) => console.log('Selected HW Variants:', selected)}
                                         />
                                     </div>
