@@ -1,4 +1,3 @@
-
 'use client';
 import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -56,7 +55,7 @@ import { usePathname } from 'next/navigation';
 function Header({ user }: { user: User | null }) {
   return (
     <header className="sticky top-0 z-30 w-full border-b bg-background">
-      <div className="container flex h-16 items-center">
+      <div className="flex h-16 items-center px-4 md:px-6">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
           <Logo />

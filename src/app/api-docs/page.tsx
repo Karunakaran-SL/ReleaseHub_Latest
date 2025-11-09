@@ -17,7 +17,7 @@ export default function ApiDocsPage() {
 
   return (
     <DashboardLayout user={user}>
-        <main className="container mx-auto p-4 md:p-8">
+        <main className="flex-1 p-4 md:p-8">
         <h1 className="text-3xl font-bold mb-6">API Documentation</h1>
         
         <Card className="mb-8">
