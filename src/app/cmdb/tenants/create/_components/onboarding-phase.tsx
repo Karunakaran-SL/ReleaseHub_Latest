@@ -98,7 +98,7 @@ export default function OnboardingPhaseComponent({
       </div>
 
       {isExpanded && (
-        <Card className="absolute z-10 w-96 mt-2 left-1/2 -translate-x-1/2 shadow-2xl">
+        <Card className="absolute z-20 w-96 mt-2 left-1/2 -translate-x-1/2 shadow-2xl">
           <CardHeader>
             <CardTitle className="text-xl flex justify-between items-center">
                 <span>{phase.name}</span>
