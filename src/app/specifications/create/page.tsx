@@ -89,9 +89,13 @@ export default function CreateSpecificationPage() {
         e.preventDefault();
         setLoading(true);
 
+        const imageName = formState.name?.replace(/\s+/g, '') || 'newSpec';
+        const imageUrl = formState.image || `https://picsum.photos/seed/${imageName}/40/40`;
+
         const payload = {
             ...formState,
             id: `HW_${formState.name?.replace(/\s+/g, '_')}`,
+            image: imageUrl,
             network_cards: formState.network_cards ? formState.network_cards.split(',').map(name => ({ id: name.trim().replace(/\s+/g, '_'), name: name.trim() })) : [],
             plug_power_cords: formState.plug_power_cords ? formState.plug_power_cords.split(',').map(name => ({ id: name.trim().replace(/\s+/g, '_'), name: name.trim() })) : [],
             total_cpu: Number(formState.total_cpu),
