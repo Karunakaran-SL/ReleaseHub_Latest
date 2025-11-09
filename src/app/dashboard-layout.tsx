@@ -34,6 +34,7 @@ import {
   Users,
   Workflow as WorkflowIcon,
   File,
+  FileCode,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -141,6 +142,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const pathname = usePathname();
     const isProductsPage = pathname.startsWith('/products');
     const isSpecificationsPage = pathname.startsWith('/specifications');
+    const isApiDocsPage = pathname.startsWith('/api-docs');
 
   return (
     <SidebarProvider>
@@ -226,22 +228,23 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                 </Collapsible>
 
                 <Collapsible asChild defaultOpen={isSpecificationsPage}>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        isActive={isSpecificationsPage}
-                        tooltip={{ children: 'Specifications' }}
-                        className="data-[state=open]:bg-sidebar-accent"
-                      >
-                        <Link href="/specifications" className='flex items-center gap-2 w-full'>
-                          <FileText />
-                          Specifications
-                        </Link>
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                  </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                            isActive={isSpecificationsPage}
+                            tooltip={{ children: 'Specifications' }}
+                            className="data-[state=open]:bg-sidebar-accent"
+                        >
+                            <Link href="/specifications" className='flex items-center gap-2 w-full'>
+                                <FileText />
+                                Specifications
+                            </Link>
+                            <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                        </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                    </SidebarMenuItem>
                 </Collapsible>
+
 
                 <Collapsible asChild>
                   <SidebarMenuItem>
@@ -327,6 +330,33 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                   </SidebarMenuItem>
+                </Collapsible>
+
+                <Collapsible asChild defaultOpen={isApiDocsPage}>
+                    <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                            isActive={isApiDocsPage}
+                            tooltip={{ children: 'API' }}
+                            className="data-[state=open]:bg-sidebar-accent"
+                        >
+                            <FileCode />
+                            API
+                            <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                        </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <SidebarMenuSub>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname === '/api-docs'}>
+                                        <Link href="/api-docs">
+                                            API Doc
+                                        </Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                            </SidebarMenuSub>
+                        </CollapsibleContent>
+                    </SidebarMenuItem>
                 </Collapsible>
 
               </SidebarMenu>
