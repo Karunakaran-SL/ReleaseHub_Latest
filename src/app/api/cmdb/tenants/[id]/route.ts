@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
@@ -5,9 +6,37 @@ import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
+const OnboardingFieldProofSchema = z.object({
+  link: z.string().optional(),
+}).optional();
+
+const OnboardingFieldSchema = z.object({
+  name: z.string(),
+  value: z.any(),
+  proof: OnboardingFieldProofSchema,
+});
+
+const TenantPhaseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  version: z.string(),
+  status: z.string(),
+  fields: z.array(OnboardingFieldSchema),
+});
+
 const TenantUpdateSchema = z.object({
   name: z.string().optional(),
   description: z.string().optional(),
+  version: z.string().optional(),
+  artifact_location: z.string().optional(),
+  dependent_tenants: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  products: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  resources: z.object({
+      cpu: z.number().optional(),
+      memory_gb: z.number().optional(),
+      storage_gb: z.number().optional(),
+  }).optional(),
+  phases: z.array(TenantPhaseSchema).optional(),
   updateComment: z.string().min(1, 'Update comment is required.'),
 });
 
@@ -62,9 +91,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         
         const { updateComment, ...tenantData } = validatedData.data;
 
+        const updatePayload = {
+            ...tenantData,
+            updated_at: new Date().toISOString()
+        };
+
         const result = await db.collection(COLLECTION_NAME).updateOne(
             { _id: new ObjectId(id) },
-            { $set: tenantData }
+            { $set: updatePayload }
         );
 
         if (result.matchedCount === 0) {

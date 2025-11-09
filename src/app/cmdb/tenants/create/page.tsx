@@ -15,15 +15,7 @@ import { Loader2, ArrowRight, UploadCloud } from 'lucide-react';
 import OnboardingStepper from './_components/onboarding-stepper';
 import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
 
-type NewTenantFormState = Partial<Omit<CmdbTenant, '_id' | 'onboarding_status'>> & {
-    version?: string;
-    artifact_location?: string;
-    dependent_tenants?: { id: string; name: string }[];
-    products?: { id: string; name: string }[];
-    resources_cpu?: number;
-    resources_memory_gb?: number;
-    resources_storage_gb?: number;
-};
+type NewTenantFormState = Partial<Omit<CmdbTenant, '_id' | 'created_at' | 'updated_at' | 'phases'>>;
 
 export default function CreateTenantPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -75,7 +67,18 @@ export default function CreateTenantPage() {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target;
-        setFormState(prev => ({ ...prev, [id]: type === 'number' ? Number(value) : value }));
+        if (id.startsWith('resources_')) {
+            const resourceKey = id.replace('resources_', '');
+            setFormState(prev => ({
+                ...prev,
+                resources: {
+                    ...prev.resources,
+                    [resourceKey]: type === 'number' ? Number(value) : value
+                }
+            }));
+        } else {
+             setFormState(prev => ({ ...prev, [id]: type === 'number' ? Number(value) : value }));
+        }
     };
     
     const handleMultiSelectChange = (field: 'dependent_tenants' | 'products', selectedItems: { id: string; name: string }[]) => {
@@ -84,13 +87,37 @@ export default function CreateTenantPage() {
 
     const handleFirstStepSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!onboardingConfig) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Onboarding configuration not loaded. Cannot create tenant.' });
+            return;
+        }
+
         setLoading(true);
+        
+        const phases = onboardingConfig.phases.map(phase => ({
+            id: phase.id,
+            name: phase.name,
+            version: "1.0", // Or from config version
+            status: "Not Started",
+            fields: phase.fields.map(field => ({
+                name: field.name,
+                value: "",
+                proof: {}
+            }))
+        }));
+
+        const payload = {
+            ...formState,
+            phases: phases,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        }
 
         try {
             const response = await fetch('/api/cmdb/tenants', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formState),
+                body: JSON.stringify(payload),
             });
 
             if (response.ok) {
@@ -157,9 +184,8 @@ export default function CreateTenantPage() {
             <DashboardLayout user={user}>
                 <OnboardingStepper 
                     config={onboardingConfig} 
-                    entityId={newTenant._id} 
+                    tenant={newTenant} 
                     entityType="tenant"
-                    entityName={newTenant.name}
                 />
             </DashboardLayout>
         )
@@ -215,23 +241,23 @@ export default function CreateTenantPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                      <div className="space-y-2">
                                         <Label htmlFor="resources_cpu">CPU (vCores)</Label>
-                                        <Input id="resources_cpu" type="number" value={formState.resources_cpu || ''} onChange={handleInputChange} />
+                                        <Input id="resources_cpu" type="number" value={formState.resources?.cpu || ''} onChange={handleInputChange} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="resources_memory_gb">Memory (GB)</Label>
-                                        <Input id="resources_memory_gb" type="number" value={formState.resources_memory_gb || ''} onChange={handleInputChange} />
+                                        <Input id="resources_memory_gb" type="number" value={formState.resources?.memory_gb || ''} onChange={handleInputChange} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="resources_storage_gb">Storage (GB)</Label>
-                                        <Input id="resources_storage_gb" type="number" value={formState.resources_storage_gb || ''} onChange={handleInputChange} />
+                                        <Input id="resources_storage_gb" type="number" value={formState.resources?.storage_gb || ''} onChange={handleInputChange} />
                                     </div>
                                 </div>
                             </div>
                         </CardContent>
                         <CardFooter className="flex justify-start">
                             <Button type="submit" disabled={loading}>
-                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                SUBMIT
+                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+                                NEXT: ONBOARDING
                             </Button>
                         </CardFooter>
                     </Card>

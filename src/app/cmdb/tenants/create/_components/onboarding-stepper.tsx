@@ -5,15 +5,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import OnboardingPhaseComponent from './onboarding-phase';
-import type { OnboardingConfiguration } from '@/lib/definitions';
-import { ChevronRight, CheckCircle } from 'lucide-react';
+import type { OnboardingConfiguration, CmdbTenant } from '@/lib/definitions';
+import { ChevronRight, CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface OnboardingStepperProps {
     config: OnboardingConfiguration;
-    entityId: string;
+    tenant: CmdbTenant;
     entityType: 'tenant' | 'component' | 'application';
-    entityName: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -25,9 +24,10 @@ const statusColors: Record<string, string> = {
 };
 
 
-export default function OnboardingStepper({ config, entityId, entityType, entityName }: OnboardingStepperProps) {
+export default function OnboardingStepper({ config, tenant, entityType }: OnboardingStepperProps) {
     const { toast } = useToast();
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
     const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
     const [phasesState, setPhasesState] = useState<Record<string, any>>({});
@@ -63,18 +63,56 @@ export default function OnboardingStepper({ config, entityId, entityType, entity
     };
 
     const handleFinish = async () => {
-       // Here you would typically save the final onboarding state to the DB
-       // For now, we just navigate away
-       toast({ title: 'Onboarding Completed', description: `${entityName} has been onboarded.` });
-       router.push(`/cmdb/${entityType}s`);
-       router.refresh();
+        setLoading(true);
+        
+        const tenantPhases = config.phases.map(phaseConfig => {
+            const phaseData = phasesState[phaseConfig.id];
+            return {
+                id: phaseConfig.id,
+                name: phaseConfig.name,
+                version: "1.0", // This could be dynamic based on config version
+                status: phaseData.status || "Not Started",
+                fields: phaseConfig.fields.map(fieldConfig => {
+                    const fieldData = phaseData[fieldConfig.name];
+                    return {
+                        name: fieldConfig.name,
+                        value: fieldData?.value || '',
+                        proof: { link: fieldData?.proofLink || '' },
+                    };
+                }),
+            };
+        });
+
+        const updatePayload = {
+            phases: tenantPhases,
+            updateComment: "Completed initial onboarding process."
+        };
+        
+        try {
+            const response = await fetch(`/api/cmdb/tenants/${tenant._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatePayload),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to save onboarding status.');
+            }
+            toast({ title: 'Onboarding Completed', description: `${tenant.name} has been onboarded successfully.` });
+            router.push(`/cmdb/${entityType}s`);
+            router.refresh();
+        } catch (error: any) {
+             toast({ variant: 'destructive', title: 'Error', description: error.message });
+        } finally {
+            setLoading(false);
+        }
     }
 
 
     return (
         <main className="flex-1 p-6 md:p-10">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold">Onboarding: {entityName}</h1>
+                <h1 className="text-3xl font-bold">Onboarding: {tenant.name}</h1>
                 <p className="text-muted-foreground">Follow the steps below to complete the onboarding process.</p>
             </div>
             
@@ -98,7 +136,8 @@ export default function OnboardingStepper({ config, entityId, entityType, entity
             </div>
 
             <div className="mt-12 flex justify-end">
-                 <Button onClick={handleFinish} size="lg">
+                 <Button onClick={handleFinish} size="lg" disabled={loading}>
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <CheckCircle className="mr-2 h-5 w-5" />
                     FINISH ONBOARDING
                 </Button>

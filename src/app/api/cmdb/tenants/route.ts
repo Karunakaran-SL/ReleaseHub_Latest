@@ -1,13 +1,46 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
+import type { CmdbTenant } from '@/lib/definitions';
+
+const OnboardingFieldProofSchema = z.object({
+  link: z.string().optional(),
+}).optional();
+
+const OnboardingFieldSchema = z.object({
+  name: z.string(),
+  value: z.any(),
+  proof: OnboardingFieldProofSchema,
+});
+
+const TenantPhaseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  version: z.string(),
+  status: z.string(),
+  fields: z.array(OnboardingFieldSchema),
+});
+
 
 const TenantSchema = z.object({
   id: z.string().min(1, 'ID is required'),
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
+  version: z.string().optional(),
+  artifact_location: z.string().optional(),
+  dependent_tenants: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  products: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  resources: z.object({
+      cpu: z.number().optional(),
+      memory_gb: z.number().optional(),
+      storage_gb: z.number().optional(),
+  }).optional(),
+  phases: z.array(TenantPhaseSchema).optional(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
 });
 
 const COLLECTION_NAME = 'cmdb_tenants';
@@ -43,13 +76,8 @@ export async function POST(req: NextRequest) {
         const client = await clientPromise;
         const db = client.db();
         
-        const newTenantData = {
-            ...validatedData.data,
-            onboarding_status: {} // Initialize onboarding status
-        };
-        
-        const result = await db.collection(COLLECTION_NAME).insertOne(newTenantData as any);
-        const insertedItem = { ...newTenantData, _id: result.insertedId };
+        const result = await db.collection(COLLECTION_NAME).insertOne(validatedData.data as any);
+        const insertedItem = { ...validatedData.data, _id: result.insertedId };
 
         await logAuditEvent({
             action: 'CREATE',

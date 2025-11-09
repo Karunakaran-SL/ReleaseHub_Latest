@@ -89,17 +89,37 @@ export type OnboardingConfiguration = {
 };
 
 // CMDB Types
+export type TenantOnboardingPhase = {
+  id: string;
+  name: string;
+  version: string;
+  status: string;
+  fields: {
+    name: string;
+    value: any;
+    proof: Record<string, any>;
+  }[];
+};
+
 export type CmdbTenant = {
   _id: string;
   id: string;
   name: string;
   description?: string;
-  onboarding_status?: Record<string, any>;
   version?: string;
   artifact_location?: string;
-  dependent_tenants?: { id: string, name: string }[];
-  products?: { id: string, name: string }[];
+  dependent_tenants?: { id: string; name: string }[];
+  resources?: {
+    cpu?: number;
+    memory_gb?: number;
+    storage_gb?: number;
+  };
+  products?: { id: string; name: string }[];
+  phases?: TenantOnboardingPhase[];
+  created_at: string;
+  updated_at: string;
 };
+
 
 export type CmdbComponent = {
   _id: string;
