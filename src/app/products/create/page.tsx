@@ -217,7 +217,7 @@ export default function CreateProductPage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {workflows.map(item => (
-                                                <SelectItem key={item._id} value={item.id}>{item.name}</SelectItem>
+                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -241,7 +241,7 @@ export default function CreateProductPage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {cmdbItems.map(item => (
-                                                <SelectItem key={item._id} value={item.id}>{item.name}</SelectItem>
+                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -261,7 +261,7 @@ export default function CreateProductPage() {
                                         className="flex flex-wrap items-center gap-4"
                                     >
                                         {deploymentTypes.map(type => (
-                                            <div key={type._id} className="flex items-center space-x-2">
+                                            <div key={type.id} className="flex items-center space-x-2">
                                                 <RadioGroupItem value={type.id} id={`deployment-type-${type.id}`} />
                                                 <Label htmlFor={`deployment-type-${type.id}`} className="font-normal">{type.name}</Label>
                                             </div>

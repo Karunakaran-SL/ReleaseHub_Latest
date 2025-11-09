@@ -25,14 +25,13 @@ export function MultiSelectListBox({ options, chosen: initialChosen = [], onChan
   const [selectedAvailable, setSelectedAvailable] = useState<Set<string>>(new Set());
   const [selectedChosen, setSelectedChosen] = useState<Set<string>>(new Set());
 
-  const initialChosenMemo = useMemo(() => new Set(initialChosen), [initialChosen]);
-
   useEffect(() => {
-    const availableOptions = options.filter(opt => !initialChosenMemo.has(opt.id));
-    const chosenOptions = options.filter(opt => initialChosenMemo.has(opt.id));
+    const chosenSet = new Set(initialChosen);
+    const availableOptions = options.filter(opt => !chosenSet.has(opt.id));
+    const chosenOptions = options.filter(opt => chosenSet.has(opt.id));
     setAvailable(availableOptions);
     setChosen(chosenOptions);
-  }, [options, initialChosenMemo]);
+  }, [options, initialChosen]);
 
   const handleToggle = (id: string, listType: 'available' | 'chosen') => {
     if (disabled) return;
