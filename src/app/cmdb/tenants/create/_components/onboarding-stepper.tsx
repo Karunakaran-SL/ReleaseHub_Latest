@@ -78,7 +78,7 @@ export default function OnboardingStepper({ config, entityId, entityType, entity
                 <p className="text-muted-foreground">Follow the steps below to complete the onboarding process.</p>
             </div>
             
-            <div className="relative flex items-center justify-center p-8">
+            <div className="relative flex flex-wrap items-center justify-center p-8 gap-y-8">
                 {config.phases.map((phase, index) => (
                     <div key={phase.id} className="flex items-center">
                         <OnboardingPhaseComponent 
@@ -114,4 +114,3 @@ export default function OnboardingStepper({ config, entityId, entityType, entity
         </main>
     );
 }
-
