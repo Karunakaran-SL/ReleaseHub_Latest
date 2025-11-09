@@ -224,35 +224,18 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </SidebarMenuItem>
                 </Collapsible>
 
-                 <Collapsible asChild defaultOpen={isSpecificationsPage}>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton 
-                        isActive={isSpecificationsPage}
-                        tooltip={{ children: 'Specifications' }}
-                        className="data-[state=open]:bg-sidebar-accent"
-                      >
-                        <FileText />
-                        Specifications
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                     <CollapsibleContent>
-                      <SidebarMenuSub>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/specifications">
-                            View
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
-                            Create/Update
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isSpecificationsPage}
+                    tooltip={{ children: 'Specifications' }}
+                  >
+                    <Link href="/specifications" className="flex items-center gap-2">
+                      <FileText />
+                      Specifications
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
 
                 <Collapsible asChild>
                   <SidebarMenuItem>
