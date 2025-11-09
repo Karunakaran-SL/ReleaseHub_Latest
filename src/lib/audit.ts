@@ -1,13 +1,25 @@
 import type { AuditLog } from './definitions';
 
-export async function logAuditEvent(
-    event: Omit<AuditLog, '_id' | 'timestamp'>
-): Promise<void> {
+interface AuditEvent {
+    action: 'CREATE' | 'UPDATE' | 'DELETE';
+    entity: string;
+    entityId: string;
+    comment: string;
+    user: string;
+}
+
+export async function logAuditEvent(event: Omit<AuditEvent, 'user'> & { user?: string }): Promise<void> {
+  // Simulate fetching the current user if not provided
+  // In a real app, you'd get this from the session
+  const user = event.user || (await (await fetch('/api/auth/session')).json()).user?.name || 'system';
+
   try {
-    const response = await fetch('/api/audits', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/audits`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(event),
+      headers: { 
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...event, user }),
     });
 
     if (!response.ok) {

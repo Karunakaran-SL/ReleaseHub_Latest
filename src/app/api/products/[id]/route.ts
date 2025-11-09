@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
-import { logAuditEvent } from '@/lib/audit';
 import { getUser } from '@/lib/auth';
 
 const ProductUpdateSchema = z.object({
@@ -41,6 +40,23 @@ const ProductUpdateSchema = z.object({
   })).optional(),
   updateComment: z.string().min(1, 'Update comment is required.'),
 });
+
+async function logAuditEvent(event: any) {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
+    try {
+        await fetch(`${baseUrl}/api/audits`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // You might need to pass authentication cookies if your audit API is protected
+            },
+            body: JSON.stringify(event),
+        });
+    } catch (e) {
+        console.error("Failed to log audit event", e);
+    }
+}
+
 
 // Get a single product by ID
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
