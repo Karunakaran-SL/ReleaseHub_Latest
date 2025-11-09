@@ -43,8 +43,13 @@ export async function POST(req: NextRequest) {
         const client = await clientPromise;
         const db = client.db();
         
-        const result = await db.collection(COLLECTION_NAME).insertOne(validatedData.data as any);
-        const insertedItem = { ...validatedData.data, _id: result.insertedId };
+        const newTenantData = {
+            ...validatedData.data,
+            onboarding_status: {} // Initialize onboarding status
+        };
+        
+        const result = await db.collection(COLLECTION_NAME).insertOne(newTenantData as any);
+        const insertedItem = { ...newTenantData, _id: result.insertedId };
 
         await logAuditEvent({
             action: 'CREATE',

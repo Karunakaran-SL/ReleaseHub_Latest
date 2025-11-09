@@ -94,6 +94,7 @@ export type CmdbTenant = {
   id: string;
   name: string;
   description?: string;
+  onboarding_status?: Record<string, any>;
 };
 
 export type CmdbComponent = {

@@ -1,0 +1,127 @@
+'use client';
+
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import type { OnboardingPhase, OnboardingFormField } from '@/lib/definitions';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+
+interface OnboardingPhaseProps {
+  phase: OnboardingPhase;
+  phaseState: any;
+  onStateChange: (fieldName: string, value: any) => void;
+  onStatusChange: (status: string) => void;
+  isExpanded: boolean;
+  onExpand: () => void;
+  statusColor: string;
+}
+
+export default function OnboardingPhaseComponent({
+  phase,
+  phaseState,
+  onStateChange,
+  onStatusChange,
+  isExpanded,
+  onExpand,
+  statusColor,
+}: OnboardingPhaseProps) {
+
+  const renderField = (field: OnboardingFormField) => {
+    const fieldId = `${phase.id}-${field.name}`;
+    const value = phaseState[field.name]?.value || '';
+    const proofLink = phaseState[field.name]?.proofLink || '';
+
+    const handleValueChange = (newValue: any) => {
+        onStateChange(field.name, { value: newValue, proofLink: proofLink });
+    };
+
+    const handleProofLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onStateChange(field.name, { value: value, proofLink: e.target.value });
+    };
+
+    return (
+      <div key={fieldId} className="space-y-2 p-4 border rounded-md">
+        <div className="flex items-center justify-between">
+           <Label htmlFor={fieldId}>{field.label}</Label>
+           {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+        </div>
+        
+        {field.type === 'TextField' && <Input id={fieldId} value={value} onChange={e => handleValueChange(e.target.value)} />}
+        {field.type === 'Checkbox' && <Checkbox id={fieldId} checked={!!value} onCheckedChange={checked => handleValueChange(!!checked)} />}
+        {field.type === 'Link' && <Input id={fieldId} value={value} onChange={e => handleValueChange(e.target.value)} placeholder="https://..."/>}
+        {field.type === 'DropDown' && (
+             <Select onValueChange={handleValueChange} value={value}>
+                <SelectTrigger id={fieldId}><SelectValue placeholder="Select..."/></SelectTrigger>
+                <SelectContent>
+                    {field.options?.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                </SelectContent>
+            </Select>
+        )}
+        {field.type === 'RadioBox' && (
+            <div className="flex gap-4">
+            {field.options?.map(opt => (
+                <div key={opt} className="flex items-center space-x-2">
+                    <input type="radio" id={`${fieldId}-${opt}`} name={fieldId} value={opt} checked={value === opt} onChange={e => handleValueChange(e.target.value)} />
+                    <Label htmlFor={`${fieldId}-${opt}`}>{opt}</Label>
+                </div>
+            ))}
+            </div>
+        )}
+
+        {field.proof && (
+            <div className="mt-2 space-y-1">
+                <Label htmlFor={`${fieldId}-proof`} className="text-xs">Proof Link</Label>
+                <Input id={`${fieldId}-proof`} value={proofLink} onChange={handleProofLinkChange} placeholder="Link to evidence"/>
+            </div>
+        )}
+
+      </div>
+    );
+  };
+
+  return (
+    <div className="relative">
+      <div 
+        className={cn("w-48 h-24 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all duration-300", statusColor, {
+            'ring-2 ring-primary ring-offset-2': isExpanded
+        })}
+        onClick={onExpand}
+        >
+        <h4 className="font-bold text-center text-sm">{phase.name}</h4>
+        <p className="text-xs text-center">{phaseState.status || 'Not Started'}</p>
+      </div>
+
+      {isExpanded && (
+        <Card className="absolute z-10 w-96 mt-2 left-1/2 -translate-x-1/2 shadow-2xl">
+          <CardHeader>
+            <CardTitle className="text-xl flex justify-between items-center">
+                <span>{phase.name}</span>
+                <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onExpand(); }}>X</Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+             <div className="space-y-2">
+                <Label>Owner: {phase.ownerName} ({phase.ownerEmail})</Label>
+             </div>
+             <div className="space-y-2">
+                <Label htmlFor={`${phase.id}-status`}>Status</Label>
+                <Select value={phaseState.status} onValueChange={onStatusChange}>
+                    <SelectTrigger id={`${phase.id}-status`}><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        {phase.statusOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+             </div>
+             {phase.fields.map(renderField)}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
