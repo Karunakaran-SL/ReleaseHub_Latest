@@ -78,6 +78,18 @@ function BasicInfoBlock({ component }: { component: CmdbComponent }) {
                             {component.tenants && component.tenants.length > 0 ? component.tenants?.map(p => <div key={p.id}>{p.name}</div>) : 'N/A'}
                         </div>
                     </div>
+                     <div className="grid grid-cols-4 items-start gap-4">
+                        <Label className="text-right pt-2">Provided Interfaces</Label>
+                        <div className="col-span-3 border rounded-md p-2 h-20 overflow-y-auto text-sm">
+                            {component.provided_interfaces && component.provided_interfaces.length > 0 ? component.provided_interfaces?.map(p => <div key={p.id}>{p.name}</div>) : 'N/A'}
+                        </div>
+                    </div>
+                     <div className="grid grid-cols-4 items-start gap-4">
+                        <Label className="text-right pt-2">Dependent Interfaces</Label>
+                        <div className="col-span-3 border rounded-md p-2 h-20 overflow-y-auto text-sm">
+                            {component.dependent_interfaces && component.dependent_interfaces.length > 0 ? component.dependent_interfaces?.map(p => <div key={p.id}>{p.name}</div>) : 'N/A'}
+                        </div>
+                    </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Resources</Label>
                         <div className="col-span-3 grid grid-cols-3 gap-2">
