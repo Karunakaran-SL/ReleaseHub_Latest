@@ -27,81 +27,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useEffect, useState } from 'react';
-import type { User } from '@/lib/definitions';
+import type { User, Product } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import DashboardLayout from '../dashboard-layout';
-
-type Product = {
-  _id: string;
-  icon: string;
-  productName: string;
-  owner: string;
-  deploymentType: string;
-  deployments: number;
-};
-
-const ProductIcon = ({ icon }: { icon: string }) => {
-  const icons: { [key: string]: React.ReactNode } = {
-    'product-a': (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-8 w-8 text-muted-foreground"
-      >
-        <rect x="2" y="2" width="20" height="20" rx="2" ry="2" />
-        <line x1="8" y1="2" x2="8" y2="22" />
-        <line x1="16" y1="2" x2="16" y2="22" />
-      </svg>
-    ),
-    'product-b': (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-8 w-8 text-muted-foreground"
-      >
-        <path d="M20 12c0-4.42-3.58-8-8-8S4 7.58 4 12s3.58 8 8 8 8-3.58 8-8z" />
-        <path d="M12 2a4 4 0 0 0-4 4v0a4 4 0 0 0 4 4 4 4 0 0 0 4-4v0a4 4 0 0 0-4-4z" />
-        <path d="M10.5 16a2.5 2.5 0 0 1 5 0" />
-      </svg>
-    ),
-    'product-c': (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-8 w-8 text-muted-foreground"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <circle cx="12" cy="10" r="3" />
-        <path d="M7 14c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2" />
-        <path d="M9 16c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2" />
-      </svg>
-    ),
-  };
-
-  return icons[icon] || null;
-};
-
+import Image from 'next/image';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -141,11 +70,11 @@ export default function ProductsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-16">Icon</TableHead>
+                  <TableHead className="w-16">Image</TableHead>
                   <TableHead>Product Name</TableHead>
                   <TableHead>Owner</TableHead>
                   <TableHead>Deployment Type</TableHead>
-                  <TableHead>Deployments</TableHead>
+                  <TableHead>Last Updated</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -157,13 +86,21 @@ export default function ProductsPage() {
                 ) : products.length > 0 ? (
                   products.map((product) => (
                     <TableRow key={product._id}>
-                      <TableCell><ProductIcon icon={product.icon} /></TableCell>
+                      <TableCell>
+                        <Image 
+                            src={product.product_image} 
+                            alt={product.name} 
+                            width={40} 
+                            height={40} 
+                            className="rounded-full"
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">
-                        {product.productName}
+                        {product.name}
                       </TableCell>
                       <TableCell>{product.owner}</TableCell>
-                      <TableCell>{product.deploymentType}</TableCell>
-                      <TableCell>{product.deployments}</TableCell>
+                      <TableCell>{product.deployment_type.name}</TableCell>
+                      <TableCell>{new Date(product.updated_at).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm">
