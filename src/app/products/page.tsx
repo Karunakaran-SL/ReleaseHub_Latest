@@ -231,7 +231,9 @@ export default function ProductsPage() {
                         />
                       </TableCell>
                       <TableCell className="font-medium">
-                        {product.name}
+                        <Link href={`/products/${product._id}/view`} className="hover:underline">
+                          {product.name}
+                        </Link>
                       </TableCell>
                       <TableCell>{product.owner}</TableCell>
                       <TableCell>{product.deployment_type.name}</TableCell>
