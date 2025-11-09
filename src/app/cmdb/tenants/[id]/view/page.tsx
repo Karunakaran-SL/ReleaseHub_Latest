@@ -9,9 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, CmdbTenant } from '@/lib/definitions';
+import type { User, CmdbTenant, CmdbPhase, OnboardingPhase } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info, ChevronRight, CheckCircle, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { 
     AlertDialog,
@@ -24,6 +24,102 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+
+
+const statusColors: Record<string, string> = {
+    'Not Started': 'bg-gray-200 text-gray-800',
+    'In Progress': 'bg-blue-200 text-blue-800',
+    'Done': 'bg-green-200 text-green-800',
+    'Cancelled': 'bg-red-200 text-red-800',
+    'Skipped': 'bg-yellow-200 text-yellow-800',
+};
+
+
+function BasicInfoBlock({ tenant }: { tenant: CmdbTenant }) {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <div className="relative cursor-pointer">
+                    <div className={cn("w-48 h-24 rounded-lg flex flex-col items-center justify-center transition-all duration-300 bg-blue-100 text-blue-900 ring-2 ring-blue-300")}>
+                        <Info className="h-6 w-6 mb-1" />
+                        <h4 className="font-bold text-center text-sm">Basic Information</h4>
+                    </div>
+                </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[625px]">
+                <DialogHeader>
+                    <DialogTitle>Basic Information: {tenant.name}</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">Name</Label>
+                        <Input id="name" value={tenant.name} disabled className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="id" className="text-right">Tenant ID</Label>
+                        <Input id="id" value={tenant.id} disabled className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="description" className="text-right">Description</Label>
+                        <Textarea id="description" value={tenant.description || ''} disabled className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="version" className="text-right">Version</Label>
+                        <Input id="version" value={tenant.version || ''} disabled className="col-span-3" />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Products</Label>
+                        <div className="col-span-3 border rounded-md p-2 h-20 overflow-y-auto">
+                            {tenant.products?.map(p => <div key={p.id}>{p.name}</div>) || 'N/A'}
+                        </div>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function PhaseBlock({ phase }: { phase: CmdbPhase }) {
+     return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <div className="relative cursor-pointer">
+                    <div className={cn("w-48 h-24 rounded-lg flex flex-col items-center justify-center transition-all duration-300", statusColors[phase.status] || 'bg-gray-200 text-gray-800' )}>
+                        <FileText className="h-6 w-6 mb-1" />
+                        <h4 className="font-bold text-center text-sm">{phase.name}</h4>
+                        <p className="text-xs text-center">{phase.status}</p>
+                    </div>
+                </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[625px]">
+                <DialogHeader>
+                    <DialogTitle>{phase.name} - Details</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Status</Label>
+                        <Input value={phase.status} disabled className="col-span-3" />
+                    </div>
+                    {phase.fields.map(field => (
+                        <div key={field.name} className="grid grid-cols-4 items-start gap-4">
+                            <Label htmlFor={`field-${field.name}`} className="text-right pt-2">{field.name}</Label>
+                            <div className="col-span-3 space-y-1">
+                                <Input id={`field-${field.name}`} value={String(field.value) || 'Not set'} disabled />
+                                {field.proof?.link && (
+                                     <Link href={field.proof.link} target="_blank" className="text-xs text-blue-500 hover:underline">
+                                        View Proof
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 
 export default function ViewTenantPage() {
@@ -102,20 +198,22 @@ export default function ViewTenantPage() {
             <main className="flex-1 p-6 md:p-10">
                 <Card>
                     <CardHeader>
-                        <CardTitle>View Tenant: {tenant.name}</CardTitle>
+                        <CardTitle className="text-3xl">View Tenant: {tenant.name}</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <Label htmlFor="name">Tenant Name</Label>
-                            <Input id="name" value={tenant.name} disabled />
-                        </div>
-                        <div>
-                            <Label htmlFor="id">Tenant ID</Label>
-                            <Input id="id" value={tenant.id} disabled />
-                        </div>
-                        <div>
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea id="description" value={tenant.description || ''} disabled />
+                    <CardContent>
+                         <div className="relative flex flex-wrap items-center justify-center p-8 gap-y-8 gap-x-4">
+                            <BasicInfoBlock tenant={tenant} />
+
+                            {(tenant.phases && tenant.phases.length > 0) && <ChevronRight className="h-8 w-8 text-muted-foreground" />}
+                            
+                            {tenant.phases?.map((phase, index) => (
+                                <div key={phase.id} className="flex items-center gap-4">
+                                    <PhaseBlock phase={phase} />
+                                    {index < (tenant.phases?.length || 0) - 1 && (
+                                        <ChevronRight className="h-8 w-8 text-muted-foreground" />
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     </CardContent>
                      <CardFooter className="flex justify-end gap-2">
@@ -172,3 +270,4 @@ export default function ViewTenantPage() {
         </DashboardLayout>
     );
 }
+
