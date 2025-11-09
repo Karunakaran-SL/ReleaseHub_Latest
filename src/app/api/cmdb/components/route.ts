@@ -1,13 +1,42 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
+const CmdbPhaseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  version: z.string(),
+  status: z.string(),
+  fields: z.array(z.object({
+    name: z.string(),
+    value: z.any(),
+    proof: z.record(z.any()),
+  })),
+});
+
 const ComponentSchema = z.object({
   id: z.string().min(1, 'ID is required'),
   name: z.string().min(1, 'Name is required'),
-  description: z.string().optional(),
+  type: z.enum(['component', 'application']),
+  tenants: z.array(z.object({ id: z.string(), name: z.string() })),
+  version: z.string(),
+  artifact_location: z.string(),
+  artifact_name: z.string(),
+  resources: z.object({
+    default_instances: z.number(),
+    cpu: z.number(),
+    memory: z.number(),
+    storage: z.number(),
+  }),
+  custom_labels: z.array(z.object({ key: z.string(), value: z.string() })),
+  provided_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  dependent_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  phases: z.array(CmdbPhaseSchema),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
 });
 
 const COLLECTION_NAME = 'cmdb_components';
@@ -37,6 +66,7 @@ export async function POST(req: NextRequest) {
         const validatedData = ComponentSchema.safeParse(body);
 
         if (!validatedData.success) {
+            console.error(validatedData.error.flatten().fieldErrors);
             return NextResponse.json({ message: 'Invalid data.', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
         }
 

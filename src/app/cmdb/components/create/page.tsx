@@ -6,49 +6,128 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, CmdbComponent } from '@/lib/definitions';
+import type { User, CmdbComponent, OnboardingConfiguration, CmdbTenant } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight, PlusCircle, Trash2 } from 'lucide-react';
+import OnboardingStepper from '../../tenants/create/_components/onboarding-stepper';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-type NewComponentFormState = Omit<CmdbComponent, '_id'>;
+type NewComponentFormState = Partial<Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at' | 'phases'>>;
 
 export default function CreateComponentPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
-    const [formState, setFormState] = useState<Partial<NewComponentFormState>>({});
+    const [formState, setFormState] = useState<NewComponentFormState>({ custom_labels: [] });
     const router = useRouter();
     const { toast } = useToast();
 
+    const [step, setStep] = useState(1);
+    const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfiguration | null>(null);
+    const [newItem, setNewItem] = useState<CmdbComponent | null>(null);
+    
+    const [allTenants, setAllTenants] = useState<CmdbTenant[]>([]);
+    
     useEffect(() => {
         getUser().then(setUser);
-    }, []);
+        async function fetchDependencies() {
+            setLoading(true);
+            try {
+                const [tenantRes, configRes] = await Promise.all([
+                    fetch('/api/cmdb/tenants'),
+                    fetch('/api/settings/component-onboarding')
+                ]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { id, value } = e.target;
-        setFormState(prev => ({ ...prev, [id]: value }));
+                if (tenantRes.ok) setAllTenants(await tenantRes.json());
+                
+                if (configRes.ok) {
+                    const configs = await configRes.json();
+                    if (configs && configs.length > 0) {
+                        setOnboardingConfig(configs.reduce((latest: OnboardingConfiguration, current: OnboardingConfiguration) => current.version > latest.version ? current : latest, configs[0]));
+                    }
+                } else {
+                     toast({ variant: 'destructive', title: 'Error', description: 'Failed to load onboarding configuration.' });
+                }
+            } catch (error) {
+                 toast({ variant: 'destructive', title: 'Error', description: 'Could not load required data.' });
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchDependencies();
+    }, [toast]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value, type } = e.target;
+        const key = id.split('_')[1];
+         if (id.startsWith('resources_')) {
+            setFormState(prev => ({ ...prev, resources: { ...prev.resources, [key]: type === 'number' ? Number(value) : value } as any }));
+        } else {
+             setFormState(prev => ({ ...prev, [id]: value }));
+        }
+    };
+    
+    const handleSelectChange = (field: 'type' | 'tenants', value: string) => {
+        if (field === 'tenants') {
+            const selectedTenant = allTenants.find(t => t._id === value);
+            if (selectedTenant) {
+                 setFormState(prev => ({ ...prev, tenants: [{ id: selectedTenant._id, name: selectedTenant.name }] }));
+            }
+        } else {
+             setFormState(prev => ({ ...prev, [field]: value as 'component' | 'application' }));
+        }
+    };
+    
+    const handleCustomLabelChange = (index: number, key: 'key' | 'value', value: string) => {
+        const updatedLabels = [...(formState.custom_labels || [])];
+        updatedLabels[index] = { ...updatedLabels[index], [key]: value };
+        setFormState(prev => ({ ...prev, custom_labels: updatedLabels }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const addCustomLabel = () => {
+        setFormState(prev => ({ ...prev, custom_labels: [...(prev.custom_labels || []), { key: '', value: '' }] }));
+    };
+    
+    const removeCustomLabel = (index: number) => {
+        setFormState(prev => ({ ...prev, custom_labels: (prev.custom_labels || []).filter((_, i) => i !== index) }));
+    };
+
+
+    const handleFirstStepSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!onboardingConfig) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Onboarding configuration not loaded.' });
+            return;
+        }
+
         setLoading(true);
+        const payload = {
+            ...formState,
+            id: formState.name?.replace(/\s+/g, '_') || `item-${Date.now()}`,
+            phases: onboardingConfig.phases.map(phase => ({
+                id: phase.id, name: phase.name, version: "1.0", status: "Not Started",
+                fields: phase.fields.map(field => ({ name: field.name, value: "", proof: {} }))
+            })),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        };
 
         try {
             const response = await fetch('/api/cmdb/components', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formState),
+                body: JSON.stringify(payload),
             });
 
             if (response.ok) {
-                toast({ title: 'Success', description: 'Component onboarded successfully.' });
-                router.push('/cmdb/components');
-                router.refresh();
+                const createdItem = await response.json();
+                setNewItem(createdItem);
+                toast({ title: 'Success', description: 'Component created. Proceeding to onboarding.' });
+                setStep(2);
             } else {
                 const errorData = await response.json();
-                toast({ variant: 'destructive', title: 'Error', description: errorData.message || 'Failed to onboard component.' });
+                toast({ variant: 'destructive', title: 'Error', description: errorData.message || 'Failed to create component.' });
             }
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'An unexpected error occurred.' });
@@ -56,34 +135,127 @@ export default function CreateComponentPage() {
             setLoading(false);
         }
     };
+    
+    if (loading && !onboardingConfig) {
+        return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
+    }
+    
+    if (step === 2 && onboardingConfig && newItem) {
+        return (
+            <DashboardLayout user={user}>
+                <OnboardingStepper 
+                    config={onboardingConfig} 
+                    tenant={newItem as any}
+                    entityType="component"
+                />
+            </DashboardLayout>
+        )
+    }
 
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10">
-                <form onSubmit={handleSubmit}>
-                    <Card>
+                <form onSubmit={handleFirstStepSubmit}>
+                    <Card className="max-w-4xl mx-auto">
                         <CardHeader>
-                            <CardTitle>Onboard a New Component</CardTitle>
+                            <CardTitle className="text-2xl">Register New Component</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div>
-                                <Label htmlFor="name">Component Name *</Label>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="name">Name</Label>
                                 <Input id="name" value={formState.name || ''} onChange={handleInputChange} required />
                             </div>
-                            <div>
-                                <Label htmlFor="id">Component ID *</Label>
-                                <Input id="id" value={formState.id || ''} onChange={handleInputChange} required />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="type">Type</Label>
+                                     <Select value={formState.type} onValueChange={(value) => handleSelectChange('type', value)} required>
+                                        <SelectTrigger><SelectValue placeholder="Select type..." /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="component">Component</SelectItem>
+                                            <SelectItem value="application">Application</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="tenants">Tenants</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('tenants', value)} required>
+                                        <SelectTrigger><SelectValue placeholder="Select tenant..." /></SelectTrigger>
+                                        <SelectContent>
+                                            {allTenants.map(tenant => (
+                                                <SelectItem key={tenant._id} value={tenant._id}>{tenant.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
-                            <div>
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea id="description" value={formState.description || ''} onChange={handleInputChange} />
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="version">Version</Label>
+                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="artifact_location">Artifact Location</Label>
+                                    <Input id="artifact_location" value={formState.artifact_location || ''} onChange={handleInputChange} />
+                                </div>
+                             </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="artifact_name">Artifact Name</Label>
+                                <Input id="artifact_name" value={formState.artifact_name || ''} onChange={handleInputChange} />
                             </div>
+
+                            <div className="space-y-4">
+                                <Label>Resources</Label>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                                    <div className="space-y-2">
+                                         <Label htmlFor="resources_default_instances" className="text-xs">Default Instances</Label>
+                                         <Input id="resources_default_instances" type="number" value={formState.resources?.default_instances || '1'} onChange={handleInputChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                         <Label htmlFor="resources_cpu" className="text-xs">CPU</Label>
+                                         <Input id="resources_cpu" type="number" placeholder="vCores" value={formState.resources?.cpu || ''} onChange={handleInputChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                         <Label htmlFor="resources_memory" className="text-xs">Memory</Label>
+                                         <Input id="resources_memory" type="number" placeholder="GB" value={formState.resources?.memory || ''} onChange={handleInputChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                         <Label htmlFor="resources_storage" className="text-xs">Storage</Label>
+                                         <Input id="resources_storage" type="number" placeholder="GB" value={formState.resources?.storage || ''} onChange={handleInputChange} />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <Label>Custom Labels</Label>
+                                <div className="space-y-2">
+                                    {(formState.custom_labels || []).map((label, index) => (
+                                        <div key={index} className="flex items-center gap-2">
+                                            <Input placeholder="Key" value={label.key} onChange={e => handleCustomLabelChange(index, 'key', e.target.value)} />
+                                            <Input placeholder="Value" value={label.value} onChange={e => handleCustomLabelChange(index, 'value', e.target.value)} />
+                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeCustomLabel(index)}>
+                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <Button type="button" variant="outline" size="sm" onClick={addCustomLabel}><PlusCircle className="mr-2 h-4 w-4" /> Add Label</Button>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Provided Interfaces</Label>
+                                <Select disabled><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger></Select>
+                            </div>
+                             <div className="space-y-2">
+                                <Label>Dependent Interfaces</Label>
+                                <Select disabled><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger></Select>
+                            </div>
+
                         </CardContent>
-                        <CardFooter className="flex justify-end gap-2">
-                            <Button variant="outline" type="button" onClick={() => router.back()}>CANCEL</Button>
-                            <Button type="submit" disabled={loading}>
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                ONBOARD COMPONENT
+                        <CardFooter className="flex justify-between">
+                             <Button variant="outline" type="button" onClick={() => router.back()}>BACK TO LIST</Button>
+                             <Button type="submit" disabled={loading}>
+                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+                                NEXT: ONBOARDING
                             </Button>
                         </CardFooter>
                     </Card>
