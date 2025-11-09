@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
@@ -5,9 +6,35 @@ import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
+const CmdbPhaseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  version: z.string(),
+  status: z.string(),
+  fields: z.array(z.object({
+    name: z.string(),
+    value: z.any(),
+    proof: z.record(z.any()),
+  })),
+});
+
 const ApplicationUpdateSchema = z.object({
   name: z.string().optional(),
   description: z.string().optional(),
+  version: z.string().optional(),
+  artifact_location: z.string().optional(),
+  artifact_name: z.string().optional(),
+  tenants: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  resources: z.object({
+    default_instances: z.number().optional(),
+    cpu: z.number().optional(),
+    memory: z.number().optional(),
+    storage: z.number().optional(),
+  }).optional(),
+  custom_labels: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
+  provided_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  dependent_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  phases: z.array(CmdbPhaseSchema).optional(),
   updateComment: z.string().min(1, 'Update comment is required.'),
 });
 

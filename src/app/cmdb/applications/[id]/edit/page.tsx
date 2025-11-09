@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, CmdbApplication, OnboardingConfiguration, CmdbTenant } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, ArrowRight, PlusCircle, Trash2, ChevronRight } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import OnboardingPhaseComponent from '../../../tenants/create/_components/onboarding-phase';
 import { cn } from '@/lib/utils';
@@ -240,7 +240,7 @@ export default function EditApplicationPage() {
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="version">Version</Label>
-                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} />
+                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} required/>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="artifact_location">Artifact Location</Label>
@@ -298,7 +298,7 @@ export default function EditApplicationPage() {
                                 <CardTitle>Onboarding Phases</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                 <div className={cn("relative flex flex-wrap items-center p-4 gap-y-8 gap-x-4", expandedPhase && 'z-30')}>
+                                 <div className={cn("relative flex flex-wrap items-center justify-center p-4 gap-y-8 gap-x-4", expandedPhase && 'z-30')}>
                                     {formState.phases.map((phase, index) => (
                                         <div key={phase.id} className="flex items-center">
                                             <OnboardingPhaseComponent

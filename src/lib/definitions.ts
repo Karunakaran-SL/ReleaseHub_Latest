@@ -124,8 +124,7 @@ export type CmdbCommon = {
   _id: string;
   id: string;
   name: string;
-  description?: string;
-  tenants?: { id: string; name: string; }[];
+  tenants: { id: string; name: string; }[];
   version: string;
   artifact_location?: string;
   artifact_name?: string;

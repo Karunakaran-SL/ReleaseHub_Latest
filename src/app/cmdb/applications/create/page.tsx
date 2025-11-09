@@ -19,7 +19,7 @@ type NewApplicationFormState = Partial<Omit<CmdbApplication, '_id' | 'created_at
 export default function CreateApplicationPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
-    const [formState, setFormState] = useState<NewApplicationFormState>({ custom_labels: [] });
+    const [formState, setFormState] = useState<NewApplicationFormState>({ custom_labels: [], tenants: [] });
     const router = useRouter();
     const { toast } = useToast();
 
@@ -179,7 +179,7 @@ export default function CreateApplicationPage() {
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="version">Version</Label>
-                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} />
+                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} required />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="artifact_location">Artifact Location</Label>

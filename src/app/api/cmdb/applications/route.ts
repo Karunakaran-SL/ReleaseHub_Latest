@@ -21,16 +21,16 @@ const ApplicationSchema = z.object({
   id: z.string().min(1, 'ID is required'),
   name: z.string().min(1, 'Name is required'),
   tenants: z.array(z.object({ id: z.string(), name: z.string() })),
-  version: z.string(),
-  artifact_location: z.string(),
-  artifact_name: z.string(),
+  version: z.string().min(1, 'Version is required'),
+  artifact_location: z.string().optional(),
+  artifact_name: z.string().optional(),
   resources: z.object({
-    default_instances: z.number(),
-    cpu: z.number(),
-    memory: z.number(),
-    storage: z.number(),
-  }),
-  custom_labels: z.array(z.object({ key: z.string(), value: z.string() })),
+    default_instances: z.number().optional(),
+    cpu: z.number().optional(),
+    memory: z.number().optional(),
+    storage: z.number().optional(),
+  }).optional(),
+  custom_labels: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
   provided_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   dependent_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   phases: z.array(CmdbPhaseSchema),
@@ -46,13 +46,7 @@ export async function GET(req: NextRequest) {
   try {
     const client = await clientPromise;
     const db = client.db();
-    const items = await db.collection(COLLECTION_NAME).find({}, {
-        projection: {
-            _id: 1,
-            id: 1,
-            name: 1,
-        }
-    }).toArray();
+    const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
     console.error(error);
