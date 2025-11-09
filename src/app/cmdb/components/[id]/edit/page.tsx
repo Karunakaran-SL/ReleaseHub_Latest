@@ -13,7 +13,7 @@ import type { User, CmdbComponent, OnboardingConfiguration, CmdbTenant } from '@
 import { getUser } from '@/lib/auth';
 import { Loader2, ArrowRight, PlusCircle, Trash2, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import OnboardingPhaseComponent from '../../create/_components/onboarding-phase';
+import OnboardingPhaseComponent from '../../../tenants/create/_components/onboarding-phase';
 
 type EditComponentFormState = Partial<Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'>> & { updateComment?: string };
 
