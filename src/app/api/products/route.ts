@@ -70,6 +70,103 @@ const initialProducts: Omit<Product, '_id'>[] = [
     "pipeline": "http://pipeline.example.com/data-analytics",
     "created_at": "2023-10-15T14:30:00Z",
     "updated_at": "2023-11-21T11:00:00Z"
+  },
+  {
+    "id": "Product_C",
+    "name": "Mobile Banking App",
+    "owner": "Finance Team",
+    "owner_email": "finance@onestopshop.com",
+    "product_image": "https://picsum.photos/seed/productC/40/40",
+    "approval_needed": true,
+    "default_workflow": {
+      "id": "Workflow_Flow_2",
+      "name": "Flow 2"
+    },
+    "custom_workflows": [
+        { "id": "Workflow_Security_Review", "name": "Security Review" }
+    ],
+    "cmdb": {
+      "id": "CMDB_1",
+      "name": "CMDB 1"
+    },
+    "compliance_checks": [
+      { "id": "Compliance_Security", "name": "Security" },
+      { "id": "Compliance_IT_Policy", "name": "IT Policy" }
+    ],
+    "deployment_type": {
+      "id": "Deployment_Cloud",
+      "name": "Cloud"
+    },
+    "git_repo": "http://git.example.com/mobile-banking",
+    "artifacts_repo": "http://artifacts.example.com/mobile-banking",
+    "pipeline": "http://pipeline.example.com/mobile-banking",
+    "created_at": "2023-11-22T10:00:00Z",
+    "updated_at": "2023-11-22T10:00:00Z"
+  },
+    {
+    "id": "Product_D",
+    "name": "Internal CRM",
+    "owner": "Sales Team",
+    "owner_email": "sales@onestopshop.com",
+    "product_image": "https://picsum.photos/seed/productD/40/40",
+    "approval_needed": false,
+    "default_workflow": {
+      "id": "Workflow_Flow_1",
+      "name": "Flow 1"
+    },
+    "custom_workflows": [],
+    "cmdb": {
+      "id": "CMDB_2",
+      "name": "CMDB 2"
+    },
+    "compliance_checks": [
+        { "id": "Compliance_IT_Policy", "name": "IT Policy" }
+    ],
+    "deployment_type": {
+      "id": "Deployment_Cloud",
+      "name": "Cloud"
+    },
+    "git_repo": "http://git.example.com/internal-crm",
+    "artifacts_repo": "http://artifacts.example.com/internal-crm",
+    "pipeline": "http://pipeline.example.com/internal-crm",
+    "created_at": "2023-11-23T12:00:00Z",
+    "updated_at": "2023-11-23T12:00:00Z"
+  },
+  {
+    "id": "Product_E",
+    "name": "HR Management Suite",
+    "owner": "HR Department",
+    "owner_email": "hr@onestopshop.com",
+    "product_image": "https://picsum.photos/seed/productE/40/40",
+    "approval_needed": true,
+    "default_workflow": {
+      "id": "Workflow_Flow_2",
+      "name": "Flow 2"
+    },
+    "custom_workflows": [
+        { "id": "Workflow_Flow_1", "name": "Flow 1" },
+        { "id": "Workflow_Security_Review", "name": "Security Review" }
+    ],
+    "cmdb": {
+      "id": "CMDB_3",
+      "name": "CMDB 3"
+    },
+    "compliance_checks": [
+      { "id": "Compliance_Security", "name": "Security" }
+    ],
+    "deployment_type": {
+      "id": "Deployment_Airgapped",
+      "name": "Airgapped"
+    },
+     "airgapped_details": {
+      "id": "Airgapped_Details_2",
+      "name": "Airgapped Details 2"
+    },
+    "git_repo": "http://git.example.com/hr-suite",
+    "artifacts_repo": "http://artifacts.example.com/hr-suite",
+    "pipeline": "http://pipeline.example.com/hr-suite",
+    "created_at": "2023-11-24T15:00:00Z",
+    "updated_at": "2023-11-24T15:00:00Z"
   }
 ];
 
