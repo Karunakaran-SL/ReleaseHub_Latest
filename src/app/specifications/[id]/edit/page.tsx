@@ -12,6 +12,7 @@ import DashboardLayout from '@/app/dashboard-layout';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Specification {
     _id: string;
@@ -32,11 +33,18 @@ interface Specification {
     custom_fields?: { key: string; value: string; }[];
 }
 
+interface FormState extends Partial<Specification> {
+    updateComment?: string;
+    network_cards: any;
+    plug_power_cords: any;
+}
+
+
 export default function EditSpecificationPage() {
     const [user, setUser] = useState<User | null>(null);
-    const [specification, setSpecification] = useState<Partial<Specification>>({});
+    const [specification, setSpecification] = useState<Specification | null>(null);
     const [loading, setLoading] = useState(true);
-    const [formState, setFormState] = useState<Partial<Specification>>({});
+    const [formState, setFormState] = useState<FormState>({network_cards: '', plug_power_cords: ''});
     const router = useRouter();
     const params = useParams();
     const { id } = params;
@@ -53,11 +61,9 @@ export default function EditSpecificationPage() {
             })
             .then(data => {
                 setSpecification(data);
-                setFormState(data);
-                // Convert comma-separated string from input back to array for custom fields
-                const networkCards = data.network_cards?.map((c: any) => c.name).join(', ');
-                const plugPowerCords = data.plug_power_cords?.map((p: any) => p.name).join(', ');
-                setFormState(prev => ({...prev, network_cards: networkCards, plug_power_cords: plugPowerCords, custom_fields: data.custom_fields || []}));
+                const networkCards = data.network_cards?.map((c: any) => c.name).join(', ') || '';
+                const plugPowerCords = data.plug_power_cords?.map((p: any) => p.name).join(', ') || '';
+                setFormState({...data, network_cards: networkCards, plug_power_cords: plugPowerCords, custom_fields: data.custom_fields || []});
             })
             .catch(err => {
                 toast({ variant: 'destructive', title: 'Error', description: err.message });
@@ -66,7 +72,7 @@ export default function EditSpecificationPage() {
             .finally(() => setLoading(false));
     }, [id, router, toast]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
         setFormState(prev => ({ ...prev, [id]: value }));
     };
@@ -96,6 +102,11 @@ export default function EditSpecificationPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formState.updateComment) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Update Reason is required.' });
+            return;
+        }
+
         setLoading(true);
         // Transform comma-separated strings back to arrays of objects
         const payload = {
@@ -130,7 +141,7 @@ export default function EditSpecificationPage() {
     const contractTypes = [{ id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus' }, { id: 'ServiceContract_Foundation_Care', name: 'Foundation Care' }];
     const hypervisors = [{ id: 'Hypervisor_VMWare_ESXi', name: 'VMWare ESXi' }, { id: 'Hypervisor_Microsoft_HyperV', name: 'Microsoft Hyper-V' }];
 
-    if (loading) {
+    if (loading && !specification) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
     
@@ -140,7 +151,7 @@ export default function EditSpecificationPage() {
                 <form onSubmit={handleSubmit}>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Update Specification</CardTitle>
+                            <CardTitle>Update Specification: {specification?.name}</CardTitle>
                         </CardHeader>
                         <CardContent>
                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -246,10 +257,19 @@ export default function EditSpecificationPage() {
                                     </div>
                                 </div>
                             </div>
+                            <div className="space-y-2 mt-8 md:col-span-2">
+                                <Label htmlFor="updateComment">Update Reason *</Label>
+                                <Textarea 
+                                    id="updateComment" 
+                                    placeholder="Please provide a reason for this update."
+                                    value={formState.updateComment || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
                         </CardContent>
                         <CardFooter className="flex justify-end gap-2">
                             <Button variant="outline" type="button" onClick={() => router.back()}>CANCEL</Button>
-                            <Button type="submit" disabled={loading}>
+                            <Button type="submit" disabled={loading || !formState.updateComment}>
                                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 UPDATE
                             </Button>

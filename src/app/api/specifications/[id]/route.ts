@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
@@ -19,6 +20,7 @@ const SpecificationUpdateSchema = z.object({
   network_cards: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   plug_power_cords: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   custom_fields: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
+  updateComment: z.string().min(1, 'Update comment is required.'),
 });
 
 
@@ -64,15 +66,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const client = await clientPromise;
         const db = client.db();
         const collection = db.collection('specifications');
+        
+        const { updateComment, ...specData } = validatedData.data;
 
         const result = await collection.updateOne(
             { _id: new ObjectId(id) },
-            { $set: validatedData.data }
+            { $set: specData }
         );
 
         if (result.matchedCount === 0) {
             return NextResponse.json({ message: 'Item not found.' }, { status: 404 });
         }
+
+        // TODO: Add audit log event here if needed
 
         const updatedItem = await collection.findOne({ _id: new ObjectId(id) });
 
@@ -93,6 +99,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
             return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
         }
 
+        const { comment } = await req.json();
+        if (!comment) {
+            return NextResponse.json({ message: 'Delete comment is required.' }, { status: 400 });
+        }
+
         const client = await clientPromise;
         const db = client.db();
         const result = await db.collection('specifications').deleteOne({ _id: new ObjectId(id) });
@@ -100,6 +111,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Item not found.' }, { status: 404 });
         }
+        
+        // TODO: Add audit log event here if needed
 
         return NextResponse.json({ message: 'Item deleted successfully.' }, { status: 200 });
 

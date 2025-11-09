@@ -7,12 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, Trash2, PlusCircle } from 'lucide-react';
+import { Loader2, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { 
     AlertDialog,
@@ -25,6 +24,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Specification {
     _id: string;
@@ -54,6 +54,9 @@ export default function ViewSpecificationPage() {
     const params = useParams();
     const { id } = params;
     
+    const [deleteComment, setDeleteComment] = useState('');
+    const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+
     useEffect(() => {
         getUser().then(setUser);
 
@@ -79,10 +82,21 @@ export default function ViewSpecificationPage() {
     }, [id, toast]);
 
     const handleDelete = async () => {
+        if (deleteConfirmationText !== 'delete' || !deleteComment) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Please type "delete" and provide a comment to confirm deletion.'
+            });
+            return;
+        }
+
         setIsDeleting(true);
         try {
             const response = await fetch(`/api/specifications/${id}`, {
                 method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment: deleteComment }),
             });
 
             if (response.ok) {
@@ -122,6 +136,8 @@ export default function ViewSpecificationPage() {
     
     const networkCardsDisplay = specification.network_cards?.map(c => c.name).join(', ') || 'N/A';
     const plugPowerCordsDisplay = specification.plug_power_cords?.map(p => p.name).join(', ') || 'N/A';
+    const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
+
 
     return (
         <DashboardLayout user={user}>
@@ -217,13 +233,33 @@ export default function ViewSpecificationPage() {
                                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                     <AlertDialogDescription>
                                         This action cannot be undone. This will permanently delete the specification.
+                                        Please type <strong>delete</strong> to confirm.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="delete-comment">Reason for Deletion *</Label>
+                                        <Textarea 
+                                            id="delete-comment"
+                                            placeholder="Provide a comment for auditing purposes."
+                                            value={deleteComment}
+                                            onChange={(e) => setDeleteComment(e.target.value)}
+                                        />
+                                    </div>
+                                     <div className="space-y-2">
+                                        <Label htmlFor="delete-confirmation">Type "delete" to confirm *</Label>
+                                        <Input 
+                                            id="delete-confirmation"
+                                            value={deleteConfirmationText}
+                                            onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction 
                                         onClick={handleDelete}
-                                        disabled={isDeleting}
+                                        disabled={isDeleteButtonDisabled}
                                         className="bg-destructive hover:bg-destructive/90"
                                     >
                                         {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
