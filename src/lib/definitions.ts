@@ -124,20 +124,21 @@ export type CmdbCommon = {
   _id: string;
   id: string;
   name: string;
+  description?: string;
   type: 'component' | 'application';
   tenants?: { id: string; name: string; }[];
   version: string;
-  artifact_location: string;
-  artifact_name: string;
-  resources: {
-    default_instances: number;
-    cpu: number;
-    memory: number;
-    storage: number;
+  artifact_location?: string;
+  artifact_name?: string;
+  resources?: {
+    default_instances?: number;
+    cpu?: number;
+    memory?: number;
+    storage?: number;
   };
-  custom_labels: { key: string; value: string; }[];
-  provided_interfaces: { id: string; name: string; }[];
-  dependent_interfaces: { id: string; name: string; }[];
+  custom_labels?: { key: string; value: string; }[];
+  provided_interfaces?: { id: string; name: string; }[];
+  dependent_interfaces?: { id: string; name: string; }[];
   phases: CmdbPhase[];
   created_at: string;
   updated_at: string;

@@ -109,7 +109,7 @@ function PhaseBlock({ phase }: { phase: CmdbPhase }) {
                     <div className={cn("w-48 h-24 rounded-lg flex flex-col items-center justify-center transition-all duration-300", statusColors[phase.status] || 'bg-gray-200 text-gray-800' )}>
                         <FileText className="h-6 w-6 mb-1" />
                         <h4 className="font-bold text-center text-sm">{phase.name}</h4>
-                        <p className="text-xs text-center">{phase.status}</p>
+                        <p className="text-xs text-center">{phase.status || "Not Started"}</p>
                     </div>
                 </div>
             </DialogTrigger>
