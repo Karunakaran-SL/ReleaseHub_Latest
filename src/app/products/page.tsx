@@ -29,6 +29,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
+  Loader2
 } from 'lucide-react';
 import {
   Select,
@@ -44,6 +45,112 @@ import DashboardLayout from '../dashboard-layout';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+
+
+function DeleteProductDialog({ product, onProductDeleted }: { product: Product, onProductDeleted: () => void}) {
+  const [deleteComment, setDeleteComment] = useState('');
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
+
+  const handleDelete = async () => {
+    if (deleteConfirmationText !== 'delete' || !deleteComment) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Please type "delete" and provide a comment to confirm deletion.'
+        });
+        return;
+    }
+    
+    setIsDeleting(true);
+    try {
+        const response = await fetch(`/api/products/${product._id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ comment: deleteComment }),
+        });
+
+        if (response.ok) {
+            toast({
+                title: "Success",
+                description: "Product deleted successfully.",
+            });
+            onProductDeleted();
+        } else {
+            const errorData = await response.json();
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: errorData.message || "Failed to delete product.",
+            });
+        }
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "An unexpected error occurred.",
+        });
+    } finally {
+        setIsDeleting(false);
+    }
+  };
+
+  const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
+
+  return (
+    <AlertDialog>
+        <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon">
+                <Trash2 className="h-4 w-4" />
+            </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the product.
+                Please type <strong>delete</strong> to confirm.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor={`delete-comment-${product._id}`}>Reason for Deletion *</Label>
+                    <Textarea 
+                        id={`delete-comment-${product._id}`}
+                        placeholder="Provide a comment for auditing purposes."
+                        value={deleteComment}
+                        onChange={(e) => setDeleteComment(e.target.value)}
+                    />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor={`delete-confirmation-${product._id}`}>Type "delete" to confirm *</Label>
+                    <Input 
+                        id={`delete-confirmation-${product._id}`}
+                        value={deleteConfirmationText}
+                        onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                    />
+                </div>
+            </div>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+                onClick={handleDelete}
+                disabled={isDeleteButtonDisabled}
+                className="bg-destructive hover:bg-destructive/90"
+            >
+                 {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Continue
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,6 +159,7 @@ export default function ProductsPage() {
   const { toast } = useToast();
 
   async function fetchProducts() {
+    setLoading(true);
     try {
       const response = await fetch('/api/products');
       if (response.ok) {
@@ -81,37 +189,6 @@ export default function ProductsPage() {
     getUser().then(setUser);
     fetchProducts();
   }, []);
-
-  const handleDelete = async (productId: string) => {
-    try {
-        const response = await fetch(`/api/products/${productId}`, {
-            method: 'DELETE',
-        });
-
-        if (response.ok) {
-            toast({
-                title: "Success",
-                description: "Product deleted successfully.",
-            });
-            // Refresh the products list
-            fetchProducts();
-        } else {
-            const errorData = await response.json();
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: errorData.message || "Failed to delete product.",
-            });
-        }
-    } catch (error) {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "An unexpected error occurred.",
-        });
-    }
-  };
-
 
   return (
     <DashboardLayout user={user}>
@@ -167,28 +244,7 @@ export default function ProductsPage() {
                           <Button variant="outline" size="sm" asChild>
                              <Link href={`/products/${product._id}/edit`}>UPDATE</Link>
                           </Button>
-                           <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This action cannot be undone. This will permanently delete the product
-                                        and remove its data from our servers.
-                                    </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDelete(product._id)}>
-                                        Continue
-                                    </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                          <DeleteProductDialog product={product} onProductDeleted={fetchProducts} />
                         </div>
                       </TableCell>
                     </TableRow>
