@@ -32,7 +32,7 @@ export default function CreateProductPage() {
     const [complianceChecks, setComplianceChecks] = useState<SelectOption[]>([]);
     const [deploymentTypes, setDeploymentTypes] = useState<SelectOption[]>([]);
     const [airgappedDetails, setAirgappedDetails] = useState<SelectOption[]>([]);
-    const [selectedDeploymentType, setSelectedDeploymentType] = useState('deployment_airgapped');
+    const [selectedDeploymentType, setSelectedDeploymentType] = useState('Deployment_Airgapped');
 
     useEffect(() => {
         getUser().then(setUser);
@@ -50,10 +50,8 @@ export default function CreateProductPage() {
                 setWorkflows(await workflowsRes.json());
                 setCmdbItems(await cmdbRes.json());
                 setComplianceChecks(await complianceRes.json());
+                setDeploymentTypes(await deploymentRes.json());
                 setAirgappedDetails(await airgappedRes.json());
-                
-                const deploymentData = await deploymentRes.json();
-                setDeploymentTypes([...deploymentData, { id: "Deployment_OnPrem", name: "On-Prem", _id: "temp-onprem-id" }]);
 
             } catch (error) {
                 console.error("Failed to fetch data for form", error);
@@ -105,6 +103,19 @@ export default function CreateProductPage() {
                                         Product Level Deployment Approval is Needed
                                     </Label>
                                 </div>
+                                 <div className="space-y-2">
+                                    <Label htmlFor="default-workflow">Default Approval Workflow</Label>
+                                    <Select>
+                                        <SelectTrigger id="default-workflow">
+                                            <SelectValue placeholder="Select a default workflow" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {workflows.map(item => (
+                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <div>
                                     <Label>Custom Approval Workflow</Label>
                                     <MultiSelectListBox
@@ -141,12 +152,12 @@ export default function CreateProductPage() {
                                     <RadioGroup 
                                         value={selectedDeploymentType}
                                         onValueChange={setSelectedDeploymentType}
-                                        className="flex items-center gap-4"
+                                        className="flex flex-wrap items-center gap-4"
                                     >
                                         {deploymentTypes.map(type => (
                                             <div key={type.id} className="flex items-center space-x-2">
-                                                <RadioGroupItem value={type.id.toLowerCase()} id={type.id} />
-                                                <Label htmlFor={type.id} className="font-normal">{type.name}</Label>
+                                                <RadioGroupItem value={type.id} id={`deployment-type-${type.id}`} />
+                                                <Label htmlFor={`deployment-type-${type.id}`} className="font-normal">{type.name}</Label>
                                             </div>
                                         ))}
                                     </RadioGroup>
@@ -166,7 +177,7 @@ export default function CreateProductPage() {
                                     </div>
                                 </div>
 
-                                {selectedDeploymentType === 'deployment_airgapped' && (
+                                {selectedDeploymentType === 'Deployment_Airgapped' && (
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Airgapped Details</h3>
                                         <Label>Select Applicable HW Variants</Label>
