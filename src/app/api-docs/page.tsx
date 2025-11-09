@@ -83,9 +83,9 @@ function ApiEndpoint({
     )
 }
 
-function Section({ title, children }: { title: string, children: React.ReactNode }) {
+function Section({ title, id, children }: { title: string, id: string, children: React.ReactNode }) {
     return (
-        <Card className="mb-8">
+        <Card id={id} className="mb-8 scroll-mt-20">
             <CardHeader>
                 <CardTitle className="text-2xl">{title}</CardTitle>
             </CardHeader>
@@ -136,7 +136,7 @@ export default function ApiDocsPage() {
         <main className="flex-1 p-4 md:p-8">
             <h1 className="text-3xl font-bold mb-6">API Documentation</h1>
             
-            <Section title="Authentication">
+            <Section title="Authentication" id="authentication">
                 <ApiEndpoint 
                     method="POST"
                     path="/api/login"
@@ -154,7 +154,7 @@ export default function ApiDocsPage() {
                 />
             </Section>
             
-            <Section title="Products">
+            <Section title="Products" id="products">
                 <ApiEndpoint 
                     method="GET"
                     path="/api/products"
@@ -207,7 +207,7 @@ export default function ApiDocsPage() {
                 />
             </Section>
 
-            <Section title="Audits">
+            <Section title="Audits" id="audits">
                  <ApiEndpoint 
                     method="GET"
                     path="/api/audits"
@@ -229,7 +229,7 @@ export default function ApiDocsPage() {
                 />
             </Section>
 
-            <Section title="Workflows">
+            <Section title="Workflows" id="workflows">
                 <ApiEndpoint method="GET" path="/api/workflows" description="Retrieves a list of all workflows." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
                 <ApiEndpoint method="POST" path="/api/workflows" description="Creates a new workflow." requestBody={`{ "id": "...", "name": "...", "description": "..." }`} responses={genericPostResponses}/>
@@ -241,7 +241,7 @@ export default function ApiDocsPage() {
                 <ApiEndpoint method="DELETE" path="/api/workflows/{id}" description="Deletes a workflow." responses={genericDeleteResponses}/>
             </Section>
 
-            <Section title="CMDB">
+            <Section title="CMDB" id="cmdb">
                 <ApiEndpoint method="GET" path="/api/cmdb" description="Retrieves a list of all CMDB entries." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
                 <ApiEndpoint method="POST" path="/api/cmdb" description="Creates a new CMDB entry." requestBody={`{ "id": "...", "name": "...", "description": "..." }`} responses={genericPostResponses}/>
@@ -253,7 +253,7 @@ export default function ApiDocsPage() {
                 <ApiEndpoint method="DELETE" path="/api/cmdb/{id}" description="Deletes a CMDB entry." responses={genericDeleteResponses}/>
             </Section>
 
-            <Section title="Compliance Checks">
+            <Section title="Compliance Checks" id="compliance-checks">
                 <ApiEndpoint method="GET" path="/api/compliance-checks" description="Retrieves a list of all compliance checks." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
                 <ApiEndpoint method="POST" path="/api/compliance-checks" description="Creates a new compliance check." requestBody={`{ "id": "...", "name": "...", "description": "..." }`} responses={genericPostResponses}/>
@@ -265,7 +265,7 @@ export default function ApiDocsPage() {
                 <ApiEndpoint method="DELETE" path="/api/compliance-checks/{id}" description="Deletes a compliance check." responses={genericDeleteResponses}/>
             </Section>
 
-            <Section title="Deployment Types">
+            <Section title="Deployment Types" id="deployment-types">
                 <ApiEndpoint method="GET" path="/api/deployment-types" description="Retrieves a list of all deployment types." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
                 <ApiEndpoint method="POST" path="/api/deployment-types" description="Creates a new deployment type." requestBody={`{ "id": "...", "name": "...", "description": "..." }`} responses={genericPostResponses}/>
@@ -277,7 +277,7 @@ export default function ApiDocsPage() {
                 <ApiEndpoint method="DELETE" path="/api/deployment-types/{id}" description="Deletes a deployment type." responses={genericDeleteResponses}/>
             </Section>
 
-             <Section title="Specifications">
+             <Section title="Specifications" id="specifications">
                 <ApiEndpoint method="GET" path="/api/specifications" description="Retrieves a list of all specifications." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
                 <ApiEndpoint method="POST" path="/api/specifications" description="Creates a new specification entry." requestBody={`{ "id": "...", "name": "...", ... }`} responses={genericPostResponses}/>

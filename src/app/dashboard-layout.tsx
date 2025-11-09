@@ -340,18 +340,58 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             tooltip={{ children: 'API' }}
                             className="data-[state=open]:bg-sidebar-accent"
                         >
-                            <FileCode />
-                            API
+                            <Link href="/api-docs" className='flex items-center gap-2 w-full'>
+                                <FileCode />
+                                API
+                            </Link>
                             <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                         </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                            <SidebarMenuSub>
+                             <SidebarMenuSub>
                                 <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname === '/api-docs'}>
-                                        <Link href="/api-docs">
-                                            API Doc
-                                        </Link>
+                                    <SidebarMenuSubButton asChild isActive={pathname === '/api-docs' && !pathname.includes('#')}>
+                                        <Link href="/api-docs">API Doc</Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#authentication')}>
+                                        <Link href="/api-docs#authentication">Authentication</Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#products')}>
+                                        <Link href="/api-docs#products">Products</Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#audits')}>
+                                        <Link href="/api-docs#audits">Audits</Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#workflows')}>
+                                        <Link href="/api-docs#workflows">Workflows</Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#cmdb')}>
+                                        <Link href="/api-docs#cmdb">CMDB</Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#compliance-checks')}>
+                                        <Link href="/api-docs#compliance-checks">Compliance</Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#deployment-types')}>
+                                        <Link href="/api-docs#deployment-types">Deployment</Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#specifications')}>
+                                        <Link href="/api-docs#specifications">Specifications</Link>
                                     </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
                             </SidebarMenuSub>
