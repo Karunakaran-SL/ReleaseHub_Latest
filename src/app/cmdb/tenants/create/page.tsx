@@ -20,6 +20,9 @@ type NewTenantFormState = Partial<Omit<CmdbTenant, '_id' | 'onboarding_status'>>
     artifact_location?: string;
     dependent_tenants?: string[];
     products?: string[];
+    resources_cpu?: number;
+    resources_memory_gb?: number;
+    resources_storage_gb?: number;
 };
 
 export default function CreateTenantPage() {
@@ -69,8 +72,8 @@ export default function CreateTenantPage() {
     }, [toast]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { id, value } = e.target;
-        setFormState(prev => ({ ...prev, [id]: value }));
+        const { id, value, type } = e.target;
+        setFormState(prev => ({ ...prev, [id]: type === 'number' ? Number(value) : value }));
     };
     
     const handleSelectChange = (field: 'dependent_tenants' | 'products', value: string) => {
@@ -178,10 +181,19 @@ export default function CreateTenantPage() {
                             </div>
                              <div className="space-y-2">
                                 <Label>Resources</Label>
-                                <div className="flex gap-2">
-                                    <Button type="button" variant="outline">CPU</Button>
-                                    <Button type="button" variant="outline">Memory</Button>
-                                    <Button type="button" variant="outline">Storage</Button>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                     <div className="space-y-2">
+                                        <Label htmlFor="resources_cpu">CPU (vCores)</Label>
+                                        <Input id="resources_cpu" type="number" value={formState.resources_cpu || ''} onChange={handleInputChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="resources_memory_gb">Memory (GB)</Label>
+                                        <Input id="resources_memory_gb" type="number" value={formState.resources_memory_gb || ''} onChange={handleInputChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="resources_storage_gb">Storage (GB)</Label>
+                                        <Input id="resources_storage_gb" type="number" value={formState.resources_storage_gb || ''} onChange={handleInputChange} />
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>
