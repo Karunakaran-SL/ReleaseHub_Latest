@@ -1,4 +1,5 @@
 
+
 export type User = {
   _id: string;
   username: string;
@@ -85,4 +86,33 @@ export type OnboardingConfiguration = {
     name: string;
     version: number;
     phases: OnboardingPhase[];
+};
+
+// CMDB Types
+export type CmdbTenant = {
+  _id: string;
+  id: string;
+  name: string;
+  description?: string;
+};
+
+export type CmdbComponent = {
+  _id: string;
+  id: string;
+  name: string;
+  description?: string;
+};
+
+export type CmdbApplication = {
+  _id: string;
+  id: string;
+  name: string;
+  description?: string;
+};
+
+export type CmdbInterface = {
+  _id: string;
+  id: string;
+  name: string;
+  description?: string;
 };

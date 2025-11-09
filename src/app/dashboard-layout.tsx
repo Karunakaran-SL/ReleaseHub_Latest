@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import {
+  AppWindow,
   Bell,
   Box,
   ChevronDown,
@@ -28,10 +29,13 @@ import {
   HardDrive,
   LayoutGrid,
   ListChecks,
+  Network,
+  Puzzle,
   Search,
   Settings,
   ShieldCheck,
   Users,
+  Warehouse,
   Workflow as WorkflowIcon,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -144,6 +148,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isApiDocsPage = pathname.startsWith('/api-docs');
     const isAuditPage = pathname.startsWith('/audits');
     const isSettingsPage = pathname.startsWith('/settings');
+    const isCmdbPage = pathname.startsWith('/cmdb');
 
   return (
     <SidebarProvider>
@@ -246,10 +251,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </SidebarMenuItem>
                 </Collapsible>
 
-                <Collapsible asChild>
+                <Collapsible asChild defaultOpen={isCmdbPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton 
+                        isActive={isCmdbPage}
                         tooltip={{ children: 'CMDB' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -258,6 +264,30 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/tenants" isActive={pathname.startsWith('/cmdb/tenants')}>
+                                <Warehouse className="mr-2"/> Tenants
+                            </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/components" isActive={pathname.startsWith('/cmdb/components')}>
+                                <Puzzle className="mr-2"/> Components
+                            </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/applications" isActive={pathname.startsWith('/cmdb/applications')}>
+                                <AppWindow className="mr-2"/> Applications
+                            </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/interfaces" isActive={pathname.startsWith('/cmdb/interfaces')}>
+                                <Network className="mr-2"/> Interfaces
+                            </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
 
