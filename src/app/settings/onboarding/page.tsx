@@ -169,7 +169,7 @@ export default function OnboardingSettingsPage() {
         ) : (
           <Accordion type="single" collapsible className="w-full space-y-4">
             <AccordionItem value="tenant-onboarding">
-              <AccordionTrigger className="bg-primary/10 hover:bg-primary/20 text-primary-foreground font-bold text-lg p-4 rounded-md">
+              <AccordionTrigger className="bg-muted hover:bg-muted/90 text-foreground font-bold text-lg p-4 rounded-md">
                 Tenant Onboarding
               </AccordionTrigger>
               <AccordionContent className="p-4 border border-t-0 rounded-b-md">
@@ -185,7 +185,7 @@ export default function OnboardingSettingsPage() {
             </AccordionItem>
 
             <AccordionItem value="component-onboarding">
-              <AccordionTrigger className="bg-primary/10 hover:bg-primary/20 text-primary-foreground font-bold text-lg p-4 rounded-md">
+              <AccordionTrigger className="bg-muted hover:bg-muted/90 text-foreground font-bold text-lg p-4 rounded-md">
                 Component Onboarding
               </AccordionTrigger>
               <AccordionContent className="p-4 border border-t-0 rounded-b-md">
@@ -201,7 +201,7 @@ export default function OnboardingSettingsPage() {
             </AccordionItem>
 
             <AccordionItem value="application-onboarding">
-              <AccordionTrigger className="bg-primary/10 hover:bg-primary/20 text-primary-foreground font-bold text-lg p-4 rounded-md">
+              <AccordionTrigger className="bg-muted hover:bg-muted/90 text-foreground font-bold text-lg p-4 rounded-md">
                 Application Onboarding
               </AccordionTrigger>
               <AccordionContent className="p-4 border border-t-0 rounded-b-md">
