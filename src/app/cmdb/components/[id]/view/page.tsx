@@ -72,13 +72,13 @@ function BasicInfoBlock({ component }: { component: CmdbComponent }) {
                         <Label className="text-right">Artifact Location</Label>
                         <Input value={component.artifact_location || 'N/A'} disabled className="col-span-3" />
                     </div>
-                     <div className="grid grid-cols-4 items-start gap-4">
+                    <div className="grid grid-cols-4 items-start gap-4">
                         <Label className="text-right pt-2">Tenants</Label>
                         <div className="col-span-3 border rounded-md p-2 h-20 overflow-y-auto text-sm">
                             {component.tenants && component.tenants.length > 0 ? component.tenants?.map(p => <div key={p.id}>{p.name}</div>) : 'N/A'}
                         </div>
                     </div>
-                     <div className="grid grid-cols-4 items-start gap-4">
+                    <div className="grid grid-cols-4 items-start gap-4">
                         <Label className="text-right pt-2">Provided Interfaces</Label>
                         <div className="col-span-3 border rounded-md p-2 h-20 overflow-y-auto text-sm">
                             {component.provided_interfaces && component.provided_interfaces.length > 0 ? component.provided_interfaces?.map(p => <div key={p.id}>{p.name}</div>) : 'N/A'}
@@ -300,3 +300,5 @@ export default function ViewComponentPage() {
         </DashboardLayout>
     );
 }
+
+    
