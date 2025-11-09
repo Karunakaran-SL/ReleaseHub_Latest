@@ -1,6 +1,6 @@
 
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -12,55 +12,120 @@ import DashboardLayout from '@/app/dashboard-layout';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
-import { useEffect } from 'react';
 
-const initialField = { key: '', value: '' };
+interface CustomField {
+    key: string;
+    value: string;
+}
+
+interface SpecificationFormData {
+    id: string;
+    name: string;
+    hw_type?: { id: string; name: string; };
+    vendor?: string;
+    total_cpu?: number;
+    memory_gb?: number;
+    storage_gb?: number;
+    hypervisor?: { id: string; name: string; };
+    image?: string;
+    service_contract_type?: { id: string; name: string; };
+    contact_point_email?: string;
+    contact_point_phone?: string;
+    network_cards?: string; // Storing as comma-separated string
+    plug_power_cords?: string; // Storing as comma-separated string
+    custom_fields?: CustomField[];
+}
 
 export default function CreateSpecificationPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
-    const [customFields, setCustomFields] = useState([{ ...initialField }]);
+    
+    const [formState, setFormState] = useState<Partial<SpecificationFormData>>({
+        custom_fields: [{ key: '', value: '' }]
+    });
 
     useEffect(() => {
         getUser().then(setUser);
     }, []);
 
-    const addCustomField = () => {
-        setCustomFields([...customFields, { ...initialField }]);
+     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setFormState(prev => ({ ...prev, [id]: value }));
     };
 
+    const handleSelectChange = (field: keyof SpecificationFormData, value: string) => {
+        const selectedOption = (
+            field === 'hw_type' ? hwTypes :
+            field === 'hypervisor' ? hypervisors :
+            field === 'service_contract_type' ? contractTypes :
+            []
+        ).find(opt => opt.id === value);
+
+        if (selectedOption) {
+             setFormState(prev => ({ ...prev, [field]: { id: value, name: selectedOption.name } }));
+        } else if (field === 'vendor') {
+             setFormState(prev => ({ ...prev, vendor: value }));
+        }
+    };
+    
     const handleCustomFieldChange = (index: number, field: 'key' | 'value', value: string) => {
-        const newFields = [...customFields];
-        newFields[index][field] = value;
-        setCustomFields(newFields);
+        const newFields = [...(formState.custom_fields || [])];
+        newFields[index] = { ...newFields[index], [field]: value };
+        setFormState(prev => ({ ...prev, custom_fields: newFields }));
+    };
+
+    const addCustomField = () => {
+        setFormState(prev => ({ ...prev, custom_fields: [...(prev.custom_fields || []), { key: '', value: '' }]}));
     };
 
     const removeCustomField = (index: number) => {
-        const newFields = customFields.filter((_, i) => i !== index);
-        setCustomFields(newFields);
+        const newFields = (formState.custom_fields || []).filter((_, i) => i !== index);
+        setFormState(prev => ({ ...prev, custom_fields: newFields }));
     };
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        const payload = {
+            ...formState,
+            id: `HW_${formState.name?.replace(/\s+/g, '_')}`,
+            network_cards: formState.network_cards ? formState.network_cards.split(',').map(name => ({ id: name.trim().replace(/\s+/g, '_'), name: name.trim() })) : [],
+            plug_power_cords: formState.plug_power_cords ? formState.plug_power_cords.split(',').map(name => ({ id: name.trim().replace(/\s+/g, '_'), name: name.trim() })) : [],
+            total_cpu: Number(formState.total_cpu),
+            memory_gb: Number(formState.memory_gb),
+            storage_gb: Number(formState.storage_gb),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+
+        try {
+            const response = await fetch('/api/specifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create specification');
+            }
+            toast({ title: 'Success', description: 'Specification created successfully.' });
+            router.push('/specifications');
+            router.refresh();
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+    
     // Dummy data for dropdowns
     const hwTypes = [{ id: 'HWType_Rack', name: 'Rack' }, { id: 'HWType_Blade', name: 'Blade' }];
     const vendors = ['Dell EMC', 'HPE', 'Cisco', 'Lenovo'];
     const contractTypes = [{ id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus' }, { id: 'ServiceContract_Foundation_Care', name: 'Foundation Care' }];
     const hypervisors = [{ id: 'Hypervisor_VMWare_ESXi', name: 'VMWare ESXi' }, { id: 'Hypervisor_Microsoft_HyperV', name: 'Microsoft Hyper-V' }];
-    const networkCardTypes = [{ id: 'NetworkCard_10GbE_SFP_Plus', name: '10GbE SFP+' }, { id: 'NetworkCard_1GbE_BaseT', name: '1GbE BaseT' }];
-    const plugPowerCordTypes = [{ id: 'PowerCord_NEMA_5_15P', name: 'NEMA 5-15P' }, { id: 'PowerCord_C13_C14', name: 'C13 to C14' }];
-
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        // Form submission logic will go here
-        console.log('Submitting form...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setLoading(false);
-        toast({ title: 'Success', description: 'Specification created successfully (simulation).' });
-        router.push('/specifications');
-    };
 
     return (
         <DashboardLayout user={user}>
@@ -72,15 +137,14 @@ export default function CreateSpecificationPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* Left Column */}
                                 <div className="space-y-4">
                                     <div>
-                                        <Label htmlFor="hw-name">HW Name *</Label>
-                                        <Input id="hw-name" required />
+                                        <Label htmlFor="name">HW Name *</Label>
+                                        <Input id="name" onChange={handleInputChange} required />
                                     </div>
                                     <div>
-                                        <Label htmlFor="hw-type">HW Type (Optional)</Label>
-                                        <Select>
+                                        <Label htmlFor="hw_type">HW Type (Optional)</Label>
+                                        <Select onValueChange={(value) => handleSelectChange('hw_type', value)}>
                                             <SelectTrigger><SelectValue placeholder="Select HW Type" /></SelectTrigger>
                                             <SelectContent>
                                                 {hwTypes.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
@@ -89,7 +153,7 @@ export default function CreateSpecificationPage() {
                                     </div>
                                     <div>
                                         <Label htmlFor="vendor">Vendor *</Label>
-                                        <Select required>
+                                        <Select onValueChange={(value) => handleSelectChange('vendor', value)} required>
                                             <SelectTrigger><SelectValue placeholder="Select Vendor" /></SelectTrigger>
                                             <SelectContent>
                                                 {vendors.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
@@ -97,57 +161,56 @@ export default function CreateSpecificationPage() {
                                         </Select>
                                     </div>
                                     <div>
-                                        <Label htmlFor="image">Image</Label>
-                                        <Input id="image" type="file" />
+                                        <Label htmlFor="image">Image URL</Label>
+                                        <Input id="image" onChange={handleInputChange} placeholder="https://picsum.photos/seed/..." />
                                     </div>
                                     <div>
-                                        <Label htmlFor="service-contract-type">Service Contract Type</Label>
-                                        <Select>
+                                        <Label htmlFor="service_contract_type">Service Contract Type</Label>
+                                        <Select onValueChange={(value) => handleSelectChange('service_contract_type', value)}>
                                             <SelectTrigger><SelectValue placeholder="Select Contract Type" /></SelectTrigger>
                                             <SelectContent>
                                                 {contractTypes.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <div>
+                                     <div>
                                         <Label htmlFor="service-doc">Service Doc</Label>
                                         <Input id="service-doc" type="file" />
                                     </div>
                                     <div>
-                                        <Label htmlFor="contact-email">Contact Point Email</Label>
-                                        <Input id="contact-email" type="email" />
+                                        <Label htmlFor="contact_point_email">Contact Point Email</Label>
+                                        <Input id="contact_point_email" type="email" onChange={handleInputChange} />
                                     </div>
                                     <div>
-                                        <Label htmlFor="contact-phone">Contact Point Phone</Label>
-                                        <Input id="contact-phone" type="tel" />
+                                        <Label htmlFor="contact_point_phone">Contact Point Phone</Label>
+                                        <Input id="contact_point_phone" type="tel" onChange={handleInputChange} />
                                     </div>
                                 </div>
-                                {/* Right Column */}
                                 <div className="space-y-4">
                                     <h3 className="font-semibold text-lg">HW Resources</h3>
                                     <div>
-                                        <Label htmlFor="total-cpu">Total CPU *</Label>
-                                        <Input id="total-cpu" type="number" required />
+                                        <Label htmlFor="total_cpu">Total CPU *</Label>
+                                        <Input id="total_cpu" type="number" onChange={handleInputChange} required />
                                     </div>
                                     <div>
-                                        <Label htmlFor="memory">Memory (GB) *</Label>
-                                        <Input id="memory" type="number" required />
+                                        <Label htmlFor="memory_gb">Memory (GB) *</Label>
+                                        <Input id="memory_gb" type="number" onChange={handleInputChange} required />
                                     </div>
                                     <div>
-                                        <Label htmlFor="storage">Storage (GB) *</Label>
-                                        <Input id="storage" type="number" required />
+                                        <Label htmlFor="storage_gb">Storage (GB) *</Label>
+                                        <Input id="storage_gb" type="number" onChange={handleInputChange} required />
                                     </div>
                                     <div>
-                                        <Label htmlFor="network-cards">Network Cards type (comma-separated)</Label>
-                                        <Input id="network-cards" />
+                                        <Label htmlFor="network_cards">Network Cards type (comma-separated)</Label>
+                                        <Input id="network_cards" onChange={handleInputChange} />
                                     </div>
                                     <div>
-                                        <Label htmlFor="plug-power-cord">Plug/Power Cord Type</Label>
-                                        <Input id="plug-power-cord" />
+                                        <Label htmlFor="plug_power_cords">Plug/Power Cord Type</Label>
+                                        <Input id="plug_power_cords" onChange={handleInputChange} />
                                     </div>
                                     <div>
                                         <Label htmlFor="hypervisor">Hypervisor</Label>
-                                        <Select>
+                                        <Select onValueChange={(value) => handleSelectChange('hypervisor', value)}>
                                             <SelectTrigger><SelectValue placeholder="N/A" /></SelectTrigger>
                                             <SelectContent>
                                                 {hypervisors.map(h => <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>)}
@@ -157,18 +220,10 @@ export default function CreateSpecificationPage() {
                                     <div>
                                         <h3 className="font-semibold text-lg mt-6">Custom Fields</h3>
                                         <div className="space-y-2">
-                                            {customFields.map((field, index) => (
+                                            {formState.custom_fields?.map((field, index) => (
                                                 <div key={index} className="flex items-center gap-2">
-                                                    <Input
-                                                        placeholder="Key"
-                                                        value={field.key}
-                                                        onChange={(e) => handleCustomFieldChange(index, 'key', e.target.value)}
-                                                    />
-                                                    <Input
-                                                        placeholder="Value"
-                                                        value={field.value}
-                                                        onChange={(e) => handleCustomFieldChange(index, 'value', e.target.value)}
-                                                    />
+                                                    <Input placeholder="Key" value={field.key} onChange={(e) => handleCustomFieldChange(index, 'key', e.target.value)} />
+                                                    <Input placeholder="Value" value={field.value} onChange={(e) => handleCustomFieldChange(index, 'value', e.target.value)} />
                                                     <Button variant="ghost" size="icon" onClick={() => removeCustomField(index)} type="button">
                                                         <Trash2 className="h-4 w-4 text-destructive" />
                                                     </Button>
