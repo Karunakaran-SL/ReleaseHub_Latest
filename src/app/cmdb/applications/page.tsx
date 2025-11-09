@@ -71,14 +71,13 @@ export default function ApplicationsPage() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>ID</TableHead>
-                  <TableHead>Description</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={3} className="h-24 text-center">
                         <Loader2 className="mx-auto h-8 w-8 animate-spin" />
                     </TableCell>
                   </TableRow>
@@ -91,7 +90,6 @@ export default function ApplicationsPage() {
                         </Link>
                       </TableCell>
                        <TableCell>{item.id}</TableCell>
-                      <TableCell>{item.description}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" asChild>
@@ -109,7 +107,7 @@ export default function ApplicationsPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center">No applications found.</TableCell>
+                    <TableCell colSpan={3} className="text-center">No applications found.</TableCell>
                   </TableRow>
                 )}
               </TableBody>

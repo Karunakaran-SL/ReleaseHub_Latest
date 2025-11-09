@@ -145,7 +145,7 @@ export type CmdbCommon = {
 };
 
 export type CmdbComponent = CmdbCommon;
-export type CmdbApplication = CmdbCommon;
+export type CmdbApplication = CmdbCommon & { description?: string };
 
 export type CmdbInterface = {
   _id: string;

@@ -174,14 +174,13 @@ export default function ComponentsPage() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>ID</TableHead>
-                  <TableHead>Description</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={3} className="h-24 text-center">
                         <Loader2 className="mx-auto h-8 w-8 animate-spin" />
                     </TableCell>
                   </TableRow>
@@ -194,7 +193,6 @@ export default function ComponentsPage() {
                         </Link>
                       </TableCell>
                        <TableCell>{item.id}</TableCell>
-                      <TableCell>{item.description}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" asChild>
@@ -210,7 +208,7 @@ export default function ComponentsPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center">No components found.</TableCell>
+                    <TableCell colSpan={3} className="text-center">No components found.</TableCell>
                   </TableRow>
                 )}
               </TableBody>
