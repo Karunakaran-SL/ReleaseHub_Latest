@@ -143,6 +143,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isSpecificationsPage = pathname.startsWith('/specifications');
     const isApiDocsPage = pathname.startsWith('/api-docs');
     const isAuditPage = pathname.startsWith('/audits');
+    const isSettingsPage = pathname.startsWith('/settings');
 
   return (
     <SidebarProvider>
@@ -152,11 +153,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={!isProductsPage && !isSpecificationsPage}
+                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage}
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -319,10 +320,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 
-                <Collapsible asChild>
+                <Collapsible asChild defaultOpen={isSettingsPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton 
+                        isActive={isSettingsPage}
                         tooltip={{ children: 'Settings' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -331,6 +333,15 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
+                     <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/settings/onboarding" isActive={pathname === '/settings/onboarding'}>
+                            Onboarding
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
 

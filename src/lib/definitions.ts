@@ -1,3 +1,4 @@
+
 export type User = {
   _id: string;
   username: string;
@@ -57,4 +58,31 @@ export type AuditLog = {
     user: string;
     comment: string;
     timestamp: string;
+};
+
+export type OnboardingFormField = {
+    type: 'Checkbox' | 'RadioBox' | 'TextField' | 'DropDown' | 'Link';
+    name: string;
+    label: string;
+    options?: string[];
+    helpText?: string;
+    proof?: boolean;
+    proofLink?: string;
+};
+
+export type OnboardingPhase = {
+    id: string,
+    name: string;
+    ownerName: string;
+    ownerEmail: string;
+    sendEmailOnComplete: boolean;
+    statusOptions: string[];
+    fields: OnboardingFormField[];
+};
+
+export type OnboardingConfiguration = {
+    _id: string;
+    name: string;
+    version: number;
+    phases: OnboardingPhase[];
 };
