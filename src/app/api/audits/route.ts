@@ -28,16 +28,16 @@ export async function GET(req: NextRequest) {
 // Create a new audit log
 export async function POST(req: NextRequest) {
     try {
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ message: 'Unauthorized.' }, { status: 401 });
+        }
+
         const body = await req.json();
         const validatedData = AuditLogSchema.safeParse(body);
 
         if (!validatedData.success) {
             return NextResponse.json({ message: 'Invalid audit data.', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
-        }
-
-        const user = await getUser();
-        if (!user) {
-            return NextResponse.json({ message: 'Unauthorized.' }, { status: 401 });
         }
 
         const client = await clientPromise;

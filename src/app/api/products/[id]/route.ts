@@ -3,6 +3,7 @@ import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
+import { logAuditEvent } from '@/lib/audit';
 
 const ProductUpdateSchema = z.object({
   id: z.string().optional(),
@@ -40,23 +41,6 @@ const ProductUpdateSchema = z.object({
   })).optional(),
   updateComment: z.string().min(1, 'Update comment is required.'),
 });
-
-async function logAuditEvent(event: any) {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
-    try {
-        await fetch(`${baseUrl}/api/audits`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // You might need to pass authentication cookies if your audit API is protected
-            },
-            body: JSON.stringify(event),
-        });
-    } catch (e) {
-        console.error("Failed to log audit event", e);
-    }
-}
-
 
 // Get a single product by ID
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -127,7 +111,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             entity: 'product',
             entityId: id,
             comment: updateComment,
-            user: user.username,
         });
 
         const updatedProduct = await productsCollection.findOne({ _id: new ObjectId(id) });
@@ -172,7 +155,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
             entity: 'product',
             entityId: id,
             comment,
-            user: user.username
         });
 
         return NextResponse.json({ message: 'Product deleted successfully.' }, { status: 200 });
