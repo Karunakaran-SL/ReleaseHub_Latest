@@ -16,6 +16,7 @@ import { Camera } from 'lucide-react';
 import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 
 interface SelectOption {
+    _id: string;
     id: string;
     name: string;
 }
@@ -103,7 +104,7 @@ export default function CreateProductPage() {
                                 <div>
                                     <Label>Custom Approval Workflow</Label>
                                     <MultiSelectListBox
-                                        options={workflows.map(w => ({ id: w.id, label: w.name }))}
+                                        options={workflows.map(w => ({ id: w._id, label: w.name }))}
                                         onChange={(selected) => console.log('Selected Workflows:', selected)}
                                     />
                                 </div>
@@ -119,7 +120,7 @@ export default function CreateProductPage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {cmdbItems.map(item => (
-                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -127,7 +128,7 @@ export default function CreateProductPage() {
                                  <div>
                                     <Label>Select the compliance check</Label>
                                      <MultiSelectListBox
-                                        options={complianceChecks.map(c => ({ id: c.id, label: c.name }))}
+                                        options={complianceChecks.map(c => ({ id: c._id, label: c.name }))}
                                         onChange={(selected) => console.log('Selected Checks:', selected)}
                                     />
                                 </div>

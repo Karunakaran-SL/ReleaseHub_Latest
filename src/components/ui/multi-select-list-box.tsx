@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, ChevronsRight, ChevronsLeft } from 'lucide-react';
@@ -21,6 +21,10 @@ export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProp
   const [chosen, setChosen] = useState<Option[]>([]);
   const [selectedAvailable, setSelectedAvailable] = useState<Set<string>>(new Set());
   const [selectedChosen, setSelectedChosen] = useState<Set<string>>(new Set());
+
+  React.useEffect(() => {
+    setAvailable(options);
+  }, [options]);
 
   const handleToggle = (id: string, listType: 'available' | 'chosen') => {
     if (listType === 'available') {
@@ -66,11 +70,13 @@ export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProp
 
   const moveAll = (direction: 'toChosen' | 'toAvailable') => {
      if (direction === 'toChosen') {
-        setChosen([...chosen, ...available]);
+        const newChosen = [...chosen, ...available];
+        setChosen(newChosen);
         setAvailable([]);
-        onChange([...chosen, ...available].map(opt => opt.id));
+        onChange(newChosen.map(opt => opt.id));
      } else {
-        setAvailable([...available, ...chosen]);
+        const newAvailable = [...available, ...chosen];
+        setAvailable(newAvailable);
         setChosen([]);
         onChange([]);
      }
@@ -87,7 +93,7 @@ export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProp
         <CardContent className="p-0">
           <ScrollArea className="h-40">
             <div className="p-2 space-y-1">
-              {options.filter(opt => available.some(a => a.id === opt.id)).map(option => (
+              {available.map(option => (
                 <div key={option.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={`available-${option.id}`}
@@ -126,7 +132,7 @@ export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProp
         <CardContent className="p-0">
           <ScrollArea className="h-40">
             <div className="p-2 space-y-1">
-             {options.filter(opt => chosen.some(c => c.id === opt.id)).map(option => (
+             {chosen.map(option => (
                 <div key={option.id} className="flex items-center space-x-2">
                    <Checkbox
                     id={`chosen-${option.id}`}
