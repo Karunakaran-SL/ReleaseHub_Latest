@@ -10,7 +10,8 @@ const DeploymentTypeSchema = z.object({
 
 const initialDeploymentTypes = [
     { "id": "Deployment_Airgapped", "name": "Airgapped", "description": "Deployment in an isolated, offline environment." },
-    { "id": "Deployment_Cloud", "name": "Cloud", "description": "Deployment to a public or private cloud." }
+    { "id": "Deployment_Cloud", "name": "Cloud", "description": "Deployment to a public or private cloud." },
+    { "id": "Deployment_OnPrem", "name": "On-Prem", "description": "Deployment to on-premises servers." }
 ];
 
 async function seedDeploymentTypes() {
