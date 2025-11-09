@@ -11,9 +11,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '../../dashboard-layout';
-import type { User } from '@/lib/definitions';
+import type { User, Product } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Camera, Settings } from 'lucide-react';
+import { Camera, Settings, Loader2 } from 'lucide-react';
 import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 
 interface SelectOption {
@@ -22,17 +22,39 @@ interface SelectOption {
     name: string;
 }
 
+type NewProductFormState = Omit<Product, '_id' | 'created_at' | 'updated_at'>;
+
+const initialFormState: NewProductFormState = {
+    id: '',
+    name: '',
+    owner: '',
+    owner_email: '',
+    product_image: '',
+    approval_needed: false,
+    default_workflow: { id: '', name: '' },
+    custom_workflows: [],
+    cmdb: { id: '', name: '' },
+    compliance_checks: [],
+    deployment_type: { id: 'Deployment_Airgapped', name: 'Airgapped' },
+    git_repo: '',
+    artifacts_repo: '',
+    pipeline: '',
+    specifications: [],
+};
+
 export default function CreateProductPage() {
     const [user, setUser] = useState<User | null>(null);
     const { toast } = useToast();
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
+
+    const [formState, setFormState] = useState<Partial<NewProductFormState>>(initialFormState);
 
     const [workflows, setWorkflows] = useState<SelectOption[]>([]);
     const [cmdbItems, setCmdbItems] = useState<SelectOption[]>([]);
     const [complianceChecks, setComplianceChecks] = useState<SelectOption[]>([]);
     const [deploymentTypes, setDeploymentTypes] = useState<SelectOption[]>([]);
     const [specifications, setSpecifications] = useState<SelectOption[]>([]);
-    const [selectedDeploymentType, setSelectedDeploymentType] = useState('Deployment_Airgapped');
 
     useEffect(() => {
         getUser().then(setUser);
@@ -64,54 +86,135 @@ export default function CreateProductPage() {
         }
         fetchData();
     }, [toast]);
+    
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setFormState(prev => ({ ...prev, [id]: value }));
+    };
+
+    const handleCheckboxChange = (id: string, checked: boolean) => {
+        setFormState(prev => ({ ...prev, [id]: checked }));
+    };
+
+    const handleSelectChange = (field: 'default_workflow' | 'cmdb', value: string) => {
+        const options = field === 'default_workflow' ? workflows : cmdbItems;
+        const selected = options.find(opt => opt.id === value);
+        if (selected) {
+            setFormState(prev => ({ ...prev, [field]: { id: selected.id, name: selected.name } }));
+        }
+    };
+    
+    const handleRadioChange = (value: string) => {
+        const selectedType = deploymentTypes.find(item => item.id === value);
+        if (selectedType) {
+            setFormState(prev => ({ ...prev, deployment_type: {id: selectedType.id, name: selectedType.name} }));
+        }
+    };
+
+    const handleMultiSelectChange = (field: 'custom_workflows' | 'compliance_checks' | 'specifications', selectedIds: string[]) => {
+        let options: SelectOption[] = [];
+        if (field === 'custom_workflows') options = workflows;
+        else if (field === 'compliance_checks') options = complianceChecks;
+        else if (field === 'specifications') options = specifications;
+
+        const selectedItems = options.filter(opt => selectedIds.includes(opt.id)).map(opt => ({ id: opt.id, name: opt.name }));
+        setFormState(prev => ({ ...prev, [field]: selectedItems }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        const productName = formState.name || 'NewProduct';
+        const productId = `Product_${productName.replace(/\s+/g, '_')}`;
+        const imageUrl = formState.product_image || `https://picsum.photos/seed/${productId}/40/40`;
+
+        const payload = {
+            ...initialFormState,
+            ...formState,
+            id: productId,
+            product_image: imageUrl,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        };
+
+        try {
+            const response = await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                toast({ title: 'Success', description: 'Product created successfully.' });
+                router.push('/products');
+                router.refresh();
+            } else {
+                const errorData = await response.json();
+                console.error('Failed to create product:', errorData);
+                toast({ variant: 'destructive', title: 'Error', description: errorData.message || 'Failed to create product.' });
+            }
+
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Error', description: 'An unexpected error occurred.' });
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10">
+                 <form onSubmit={handleSubmit}>
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-2xl">Create a New Product</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                             {/* Part 1 */}
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="product-name">Product Name *</Label>
-                                    <Input id="product-name" placeholder="" />
+                                    <Label htmlFor="name">Product Name *</Label>
+                                    <Input id="name" value={formState.name || ''} onChange={handleInputChange} required />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="owner-name">Owner Name *</Label>
-                                    <Input id="owner-name" placeholder="" />
+                                    <Label htmlFor="owner">Owner Name *</Label>
+                                    <Input id="owner" value={formState.owner || ''} onChange={handleInputChange} required />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="owner-email">Owner Email *</Label>
-                                    <Input id="owner-email" type="email" placeholder="" />
+                                    <Label htmlFor="owner_email">Owner Email *</Label>
+                                    <Input id="owner_email" type="email" value={formState.owner_email || ''} onChange={handleInputChange} required/>
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Product Image</Label>
                                     <div className="flex items-center gap-4">
-                                        <Button variant="outline" size="icon">
+                                        <Button variant="outline" size="icon" type="button">
                                             <Camera className="h-5 w-5" />
                                         </Button>
                                     </div>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox id="approval-needed" />
-                                    <Label htmlFor="approval-needed" className="font-normal">
+                                    <Checkbox 
+                                        id="approval_needed"
+                                        checked={formState.approval_needed}
+                                        onCheckedChange={(checked) => handleCheckboxChange('approval_needed', !!checked)}
+                                     />
+                                    <Label htmlFor="approval_needed" className="font-normal">
                                         Product Level Deployment Approval is Needed
                                     </Label>
                                 </div>
                                  <div className="space-y-2">
-                                    <Label htmlFor="default-workflow">Default Approval Workflow</Label>
-                                    <Select>
-                                        <SelectTrigger id="default-workflow">
+                                    <Label htmlFor="default_workflow">Default Approval Workflow</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('default_workflow', value)}>
+                                        <SelectTrigger id="default_workflow">
                                             <SelectValue placeholder="Select a default workflow" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {workflows.map(item => (
-                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -119,8 +222,8 @@ export default function CreateProductPage() {
                                 <div>
                                     <Label>Custom Approval Workflow</Label>
                                     <MultiSelectListBox
-                                        options={workflows.map(w => ({ id: w._id, label: w.name }))}
-                                        onChange={(selected) => console.log('Selected Workflows:', selected)}
+                                        options={workflows.map(w => ({ id: w.id, label: w.name }))}
+                                        onChange={(selected) => handleMultiSelectChange('custom_workflows', selected)}
                                     />
                                 </div>
                             </div>
@@ -129,13 +232,13 @@ export default function CreateProductPage() {
                             <div className="space-y-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="cmdb">Select the CMDB</Label>
-                                    <Select>
+                                    <Select onValueChange={(value) => handleSelectChange('cmdb', value)}>
                                         <SelectTrigger id="cmdb">
                                             <SelectValue placeholder="Select the CMDB" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {cmdbItems.map(item => (
-                                                <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>
+                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -143,15 +246,15 @@ export default function CreateProductPage() {
                                  <div>
                                     <Label>Select the compliance check</Label>
                                      <MultiSelectListBox
-                                        options={complianceChecks.map(c => ({ id: c._id, label: c.name }))}
-                                        onChange={(selected) => console.log('Selected Checks:', selected)}
+                                        options={complianceChecks.map(c => ({ id: c.id, label: c.name }))}
+                                        onChange={(selected) => handleMultiSelectChange('compliance_checks', selected)}
                                     />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Deployment Type</Label>
                                     <RadioGroup 
-                                        value={selectedDeploymentType}
-                                        onValueChange={setSelectedDeploymentType}
+                                        value={formState.deployment_type?.id}
+                                        onValueChange={handleRadioChange}
                                         className="flex flex-wrap items-center gap-4"
                                     >
                                         {deploymentTypes.map(type => (
@@ -164,32 +267,32 @@ export default function CreateProductPage() {
                                 </div>
                                 <div className="space-y-4">
                                      <div className="flex items-center gap-2">
-                                        <Input id="git-repo" placeholder="Product Git Repo" />
+                                        <Input id="git_repo" placeholder="Product Git Repo" value={formState.git_repo} onChange={handleInputChange} />
                                         <Button variant="outline" size="icon" type="button">
                                             <Settings className="h-5 w-5" />
                                         </Button>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Input id="artifacts-repo" placeholder="Product Artifacts Repo" />
+                                        <Input id="artifacts_repo" placeholder="Product Artifacts Repo" value={formState.artifacts_repo} onChange={handleInputChange} />
                                         <Button variant="outline" size="icon" type="button">
                                             <Settings className="h-5 w-5" />
                                         </Button>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Input id="pipeline" placeholder="Product Pipeline" />
+                                        <Input id="pipeline" placeholder="Product Pipeline" value={formState.pipeline} onChange={handleInputChange} />
                                         <Button variant="outline" size="icon" type="button">
                                             <Settings className="h-5 w-5" />
                                         </Button>
                                     </div>
                                 </div>
 
-                                {selectedDeploymentType === 'Deployment_Airgapped' && (
+                                {formState.deployment_type?.id === 'Deployment_Airgapped' && (
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
                                         <MultiSelectListBox
                                             options={specifications.map(d => ({ id: d.id, label: d.name }))}
-                                            onChange={(selected) => console.log('Selected HW Variants:', selected)}
+                                            onChange={(selected) => handleMultiSelectChange('specifications', selected)}
                                         />
                                     </div>
                                 )}
@@ -209,14 +312,18 @@ export default function CreateProductPage() {
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </CardContent>
                      <CardFooter className="flex justify-end gap-2 pt-8">
-                        <Button variant="outline" onClick={() => router.back()}>CANCEL</Button>
-                        <Button variant="outline">VALIDATE</Button>
-                        <Button>CREATE PRODUCT</Button>
+                        <Button variant="outline" onClick={() => router.back()} type="button">CANCEL</Button>
+                        <Button variant="outline" type="button">VALIDATE</Button>
+                        <Button type="submit" disabled={loading}>
+                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            CREATE PRODUCT
+                        </Button>
                     </CardFooter>
                 </Card>
+                </form>
             </main>
         </DashboardLayout>
     );
