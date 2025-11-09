@@ -1,6 +1,6 @@
 
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -14,7 +14,7 @@ import DashboardLayout from '../../dashboard-layout';
 import type { User, Product } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Camera, Settings, Loader2 } from 'lucide-react';
-import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
+import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
 
 interface SelectOption {
     _id: string;
@@ -47,18 +47,17 @@ export default function CreateProductPage() {
     const { toast } = useToast();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-
     const [formState, setFormState] = useState<Partial<NewProductFormState>>(initialFormState);
 
-    const [workflows, setWorkflows] = useState<SelectOption[]>([]);
-    const [cmdbItems, setCmdbItems] = useState<SelectOption[]>([]);
-    const [complianceChecks, setComplianceChecks] = useState<SelectOption[]>([]);
-    const [deploymentTypes, setDeploymentTypes] = useState<SelectOption[]>([]);
-    const [specifications, setSpecifications] = useState<SelectOption[]>([]);
+    // Options fetched from API
+    const [allWorkflows, setAllWorkflows] = useState<Option[]>([]);
+    const [allCmdbItems, setAllCmdbItems] = useState<Option[]>([]);
+    const [allComplianceChecks, setAllComplianceChecks] = useState<Option[]>([]);
+    const [allDeploymentTypes, setAllDeploymentTypes] = useState<Option[]>([]);
+    const [allSpecifications, setAllSpecifications] = useState<Option[]>([]);
 
     useEffect(() => {
         getUser().then(setUser);
-
         async function fetchData() {
             try {
                 const [workflowsRes, cmdbRes, complianceRes, deploymentRes, specificationsRes] = await Promise.all([
@@ -69,11 +68,13 @@ export default function CreateProductPage() {
                     fetch('/api/specifications'),
                 ]);
                 
-                setWorkflows(await workflowsRes.json());
-                setCmdbItems(await cmdbRes.json());
-                setComplianceChecks(await complianceRes.json());
-                setDeploymentTypes(await deploymentRes.json());
-                setSpecifications(await specificationsRes.json());
+                const mapToOptions = (items: any[]): Option[] => items.map(item => ({ id: item.id, label: item.name }));
+
+                setAllWorkflows(mapToOptions(await workflowsRes.json()));
+                setAllCmdbItems(mapToOptions(await cmdbRes.json()));
+                setAllComplianceChecks(mapToOptions(await complianceRes.json()));
+                setAllDeploymentTypes(mapToOptions(await deploymentRes.json()));
+                setAllSpecifications(mapToOptions(await specificationsRes.json()));
 
             } catch (error) {
                 console.error("Failed to fetch data for form", error);
@@ -97,29 +98,26 @@ export default function CreateProductPage() {
     };
 
     const handleSelectChange = (field: 'default_workflow' | 'cmdb', value: string) => {
-        const options = field === 'default_workflow' ? workflows : cmdbItems;
+        const options = field === 'default_workflow' ? allWorkflows : allCmdbItems;
         const selected = options.find(opt => opt.id === value);
         if (selected) {
-            setFormState(prev => ({ ...prev, [field]: { id: selected.id, name: selected.name } }));
+            setFormState(prev => ({ ...prev, [field]: { id: selected.id, name: selected.label } }));
         }
     };
     
     const handleRadioChange = (value: string) => {
-        const selectedType = deploymentTypes.find(item => item.id === value);
+        const selectedType = allDeploymentTypes.find(item => item.id === value);
         if (selectedType) {
-            setFormState(prev => ({ ...prev, deployment_type: {id: selectedType.id, name: selectedType.name} }));
+            setFormState(prev => ({ ...prev, deployment_type: {id: selectedType.id, name: selectedType.label} }));
         }
     };
-
-    const handleMultiSelectChange = (field: 'custom_workflows' | 'compliance_checks' | 'specifications', selectedIds: string[]) => {
-        let options: SelectOption[] = [];
-        if (field === 'custom_workflows') options = workflows;
-        else if (field === 'compliance_checks') options = complianceChecks;
-        else if (field === 'specifications') options = specifications;
-
-        const selectedItems = options.filter(opt => selectedIds.includes(opt.id)).map(opt => ({ id: opt.id, name: opt.name }));
-        setFormState(prev => ({ ...prev, [field]: selectedItems }));
-    };
+    
+    const handleMultiSelectUpdate = useCallback((fieldName: keyof Pick<NewProductFormState, 'custom_workflows' | 'compliance_checks' | 'specifications'>, newChosenItems: {id: string, name: string}[]) => {
+        setFormState(prev => ({
+            ...prev,
+            [fieldName]: newChosenItems,
+        }));
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -163,10 +161,32 @@ export default function CreateProductPage() {
         }
     };
 
-    const workflowOptions = useMemo(() => workflows.map(w => ({ id: w.id, label: w.name })), [workflows]);
-    const complianceOptions = useMemo(() => complianceChecks.map(c => ({ id: c.id, label: c.name })), [complianceChecks]);
-    const specificationOptions = useMemo(() => specifications.map(s => ({ id: s.id, label: s.name })), [specifications]);
+    const renderMultiSelect = (
+        fieldName: keyof Pick<NewProductFormState, 'custom_workflows' | 'compliance_checks' | 'specifications'>,
+        allOptions: Option[]
+    ) => {
+        const chosenIds = new Set((formState[fieldName] || []).map(item => item.id));
+        const available = allOptions.filter(opt => !chosenIds.has(opt.id));
+        const chosen = allOptions.filter(opt => chosenIds.has(opt.id));
 
+        const onMove = (ids: string[], source: Option[], dest: Option[], destFieldName: keyof NewProductFormState) => {
+            const itemsToMove = source.filter(item => ids.includes(item.id));
+            const newDest = [...dest, ...itemsToMove];
+            handleMultiSelectUpdate(fieldName, newDest.map(i => ({id: i.id, name: i.label})));
+        }
+
+        return (
+            <MultiSelectListBox
+                available={available}
+                chosen={chosen}
+                onMoveToChosen={(ids) => onMove(ids, available, chosen, fieldName)}
+                onMoveToAvailable={(ids) => onMove(ids, chosen, available, fieldName)}
+                onMoveAllToChosen={() => handleMultiSelectUpdate(fieldName, allOptions.map(i => ({id: i.id, name: i.label})))}
+                onMoveAllToAvailable={() => handleMultiSelectUpdate(fieldName, [])}
+            />
+        );
+    }
+    
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10">
@@ -216,18 +236,15 @@ export default function CreateProductPage() {
                                             <SelectValue placeholder="Select a default workflow" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {workflows.map(item => (
-                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                                            {allWorkflows.map(item => (
+                                                <SelectItem key={item.id} value={item.id}>{item.label}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div>
                                     <Label>Custom Approval Workflow</Label>
-                                    <MultiSelectListBox
-                                        options={workflowOptions}
-                                        onChange={(selected) => handleMultiSelectChange('custom_workflows', selected)}
-                                    />
+                                    {renderMultiSelect('custom_workflows', allWorkflows)}
                                 </div>
                             </div>
 
@@ -240,18 +257,15 @@ export default function CreateProductPage() {
                                             <SelectValue placeholder="Select the CMDB" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {cmdbItems.map(item => (
-                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                                            {allCmdbItems.map(item => (
+                                                <SelectItem key={item.id} value={item.id}>{item.label}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                  <div>
                                     <Label>Select the compliance check</Label>
-                                     <MultiSelectListBox
-                                        options={complianceOptions}
-                                        onChange={(selected) => handleMultiSelectChange('compliance_checks', selected)}
-                                    />
+                                     {renderMultiSelect('compliance_checks', allComplianceChecks)}
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Deployment Type</Label>
@@ -260,10 +274,10 @@ export default function CreateProductPage() {
                                         onValueChange={handleRadioChange}
                                         className="flex flex-wrap items-center gap-4"
                                     >
-                                        {deploymentTypes.map(type => (
+                                        {allDeploymentTypes.map(type => (
                                             <div key={type.id} className="flex items-center space-x-2">
                                                 <RadioGroupItem value={type.id} id={`deployment-type-${type.id}`} />
-                                                <Label htmlFor={`deployment-type-${type.id}`} className="font-normal">{type.name}</Label>
+                                                <Label htmlFor={`deployment-type-${type.id}`} className="font-normal">{type.label}</Label>
                                             </div>
                                         ))}
                                     </RadioGroup>
@@ -293,10 +307,7 @@ export default function CreateProductPage() {
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
-                                        <MultiSelectListBox
-                                            options={specificationOptions}
-                                            onChange={(selected) => handleMultiSelectChange('specifications', selected)}
-                                        />
+                                        {renderMultiSelect('specifications', allSpecifications)}
                                     </div>
                                 )}
                                 
