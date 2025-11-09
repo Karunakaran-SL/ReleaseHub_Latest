@@ -48,3 +48,13 @@ export type Product = {
   created_at: string;
   updated_at: string;
 };
+
+export type AuditLog = {
+    _id: string;
+    action: 'CREATE' | 'UPDATE' | 'DELETE';
+    entity: string;
+    entityId: string;
+    user: string;
+    comment: string;
+    timestamp: string;
+};

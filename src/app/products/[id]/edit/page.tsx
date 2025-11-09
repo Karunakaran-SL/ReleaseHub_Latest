@@ -14,6 +14,7 @@ import type { User, Product } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Camera, Settings, Loader2 } from 'lucide-react';
 import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
+import { Textarea } from '@/components/ui/textarea';
 
 interface SelectOption {
     _id: string;
@@ -25,7 +26,7 @@ export default function EditProductPage() {
     const [user, setUser] = useState<User | null>(null);
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
-    const [formState, setFormState] = useState<Partial<Product>>({});
+    const [formState, setFormState] = useState<Partial<Product> & { updateComment?: string }>({});
     
     const { toast } = useToast();
     const router = useRouter();
@@ -79,9 +80,13 @@ export default function EditProductPage() {
         fetchData();
     }, [id, toast]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id, value, type, checked } = e.target;
-        setFormState(prev => ({ ...prev, [id]: type === 'checkbox' ? checked : value }));
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { id, value } = e.target;
+        setFormState(prev => ({ ...prev, [id]: value }));
+    };
+    
+    const handleCheckboxChange = (id: string, checked: boolean) => {
+        setFormState(prev => ({ ...prev, [id]: checked }));
     };
 
     const handleSelectChange = (id: string, value: string) => {
@@ -95,13 +100,26 @@ export default function EditProductPage() {
     };
 
     const handleMultiSelectChange = (field: keyof Product, selectedIds: string[]) => {
-        const options = field === 'custom_workflows' ? workflows : field === 'compliance_checks' ? complianceChecks : airgappedDetails;
+        let options: SelectOption[] = [];
+        if (field === 'custom_workflows') options = workflows;
+        else if (field === 'compliance_checks') options = complianceChecks;
+        
         const selectedItems = options.filter(opt => selectedIds.includes(opt.id)).map(opt => ({ id: opt.id, name: opt.name }));
         setFormState(prev => ({ ...prev, [field]: selectedItems }));
     };
+
+    const handleAirgappedDetailsChange = (selectedIds: string[]) => {
+        const detail = airgappedDetails.find(d => d.id === selectedIds[0]);
+        setFormState(prev => ({...prev, airgapped_details: detail ? {id: detail.id, name: detail.name} : undefined}));
+    }
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formState.updateComment) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Update Reason is required for auditing.' });
+            return;
+        }
+
         setLoading(true);
         try {
             const response = await fetch(`/api/products/${id}`, {
@@ -126,7 +144,7 @@ export default function EditProductPage() {
         }
     }
 
-    if (loading) {
+    if (loading && !product) {
         return (
              <DashboardLayout user={user}>
                 <div className="flex justify-center items-center h-full">
@@ -180,7 +198,7 @@ export default function EditProductPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox id="approval_needed" checked={formState.approval_needed || false} onCheckedChange={(checked) => setFormState(prev => ({...prev, approval_needed: !!checked}))} />
+                                    <Checkbox id="approval_needed" checked={formState.approval_needed || false} onCheckedChange={(checked) => handleCheckboxChange('approval_needed', !!checked)} />
                                     <Label htmlFor="approval_needed" className="font-normal">
                                         Product Level Deployment Approval is Needed
                                     </Label>
@@ -274,20 +292,26 @@ export default function EditProductPage() {
                                         <MultiSelectListBox
                                             options={airgappedDetails.map(d => ({ id: d.id, label: d.name }))}
                                             chosen={formState.airgapped_details ? [formState.airgapped_details.id] : []}
-                                            onChange={(selected) => {
-                                                const detail = airgappedDetails.find(d => d.id === selected[0]);
-                                                setFormState(prev => ({...prev, airgapped_details: detail ? {id: detail.id, name: detail.name} : undefined}));
-                                            }}
+                                            onChange={handleAirgappedDetailsChange}
                                         />
                                     </div>
                                 )}
                                 
                             </div>
                         </div>
+                        <div className="space-y-2 mt-8">
+                            <Label htmlFor="updateComment">Update Reason *</Label>
+                            <Textarea 
+                                id="updateComment" 
+                                placeholder="Please provide a reason for this update for auditing purposes."
+                                value={formState.updateComment || ''}
+                                onChange={handleInputChange}
+                            />
+                        </div>
                     </CardContent>
                      <CardFooter className="flex justify-end gap-2 pt-8">
                         <Button variant="outline" type="button" onClick={() => router.back()}>CANCEL</Button>
-                        <Button disabled={loading}>
+                        <Button disabled={loading || !formState.updateComment}>
                              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             UPDATE PRODUCT
                         </Button>

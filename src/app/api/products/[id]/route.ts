@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { z } from 'zod';
+import { logAuditEvent } from '@/lib/audit';
+import { getUser } from '@/lib/auth';
 
 const ProductUpdateSchema = z.object({
   id: z.string().optional(),
@@ -37,6 +39,7 @@ const ProductUpdateSchema = z.object({
     id: z.string(),
     name: z.string(),
   })).optional(),
+  updateComment: z.string().min(1, 'Update comment is required.'),
 });
 
 // Get a single product by ID
@@ -66,6 +69,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 // Update a product
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
     try {
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
         const { id } = params;
         if (!ObjectId.isValid(id)) {
             return NextResponse.json({ message: 'Invalid product ID.' }, { status: 400 });
@@ -82,8 +90,10 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const db = client.db();
         const productsCollection = db.collection('products');
 
+        const { updateComment, ...productData } = validatedData.data;
+
         const updateData = { 
-            ...validatedData.data,
+            ...productData,
             updated_at: new Date().toISOString()
         };
 
@@ -95,6 +105,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         if (result.matchedCount === 0) {
             return NextResponse.json({ message: 'Product not found.' }, { status: 404 });
         }
+
+        await logAuditEvent({
+            action: 'UPDATE',
+            entity: 'product',
+            entityId: id,
+            comment: updateComment,
+            user: user.username,
+        });
 
         const updatedProduct = await productsCollection.findOne({ _id: new ObjectId(id) });
 
@@ -110,9 +128,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 // Delete a product
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     try {
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
         const { id } = params;
          if (!ObjectId.isValid(id)) {
             return NextResponse.json({ message: 'Invalid product ID.' }, { status: 400 });
+        }
+        
+        const { comment } = await req.json();
+        if (!comment) {
+            return NextResponse.json({ message: 'Delete comment is required.' }, { status: 400 });
         }
 
         const client = await clientPromise;
@@ -122,6 +150,14 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Product not found.' }, { status: 404 });
         }
+
+        await logAuditEvent({
+            action: 'DELETE',
+            entity: 'product',
+            entityId: id,
+            comment,
+            user: user.username
+        });
 
         return NextResponse.json({ message: 'Product deleted successfully.' }, { status: 200 });
 

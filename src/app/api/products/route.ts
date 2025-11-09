@@ -3,6 +3,8 @@ import clientPromise from '@/lib/mongodb';
 import type { Product } from '@/lib/definitions';
 import { z } from 'zod';
 import { ObjectId } from 'mongodb';
+import { logAuditEvent } from '@/lib/audit';
+import { getUser } from '@/lib/auth';
 
 const initialProducts: Omit<Product, '_id'>[] = [
   {
@@ -261,6 +263,11 @@ const ProductSchema = z.object({
 // Create a new product
 export async function POST(req: NextRequest) {
     try {
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await req.json();
         const validatedData = ProductSchema.safeParse(body);
 
@@ -281,6 +288,13 @@ export async function POST(req: NextRequest) {
         const result = await productsCollection.insertOne(newProduct as any);
         const insertedProduct = { ...newProduct, _id: result.insertedId };
 
+        await logAuditEvent({
+            action: 'CREATE',
+            entity: 'product',
+            entityId: result.insertedId.toString(),
+            comment: `Product "${newProduct.name}" created.`,
+            user: user.username,
+        });
 
         return NextResponse.json(insertedProduct, { status: 201 });
 
