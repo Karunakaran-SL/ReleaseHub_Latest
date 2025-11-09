@@ -58,6 +58,73 @@ interface Specification {
     image: string;
 }
 
+function DeleteSpecificationDialog({ specification, onSpecificationDeleted }: { specification: Specification, onSpecificationDeleted: () => void}) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
+
+  const handleDelete = async () => {    
+    setIsDeleting(true);
+    try {
+        const response = await fetch(`/api/specifications/${specification._id}`, {
+            method: 'DELETE',
+        });
+
+        if (response.ok) {
+            toast({
+                title: "Success",
+                description: "Specification deleted successfully.",
+            });
+            onSpecificationDeleted();
+        } else {
+            const errorData = await response.json();
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: errorData.message || "Failed to delete specification.",
+            });
+        }
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "An unexpected error occurred.",
+        });
+    } finally {
+        setIsDeleting(false);
+    }
+  };
+
+  return (
+    <AlertDialog>
+        <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon">
+                <Trash2 className="h-4 w-4" />
+            </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the specification.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="bg-destructive hover:bg-destructive/90"
+            >
+                 {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Continue
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+
 export default function SpecificationsPage() {
   const [specifications, setSpecifications] = useState<Specification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,7 +169,7 @@ export default function SpecificationsPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Specifications</h1>
           <Button asChild>
-            <Link href="#">CREATE SPECIFICATION</Link>
+            <Link href="/specifications/create">CREATE SPECIFICATION</Link>
           </Button>
         </div>
 
@@ -136,21 +203,21 @@ export default function SpecificationsPage() {
                         />
                       </TableCell>
                       <TableCell className="font-medium">
-                        {spec.name}
+                        <Link href={`/specifications/${spec._id}/view`} className="hover:underline">
+                            {spec.name}
+                        </Link>
                       </TableCell>
                       <TableCell>{spec.hw_type.name}</TableCell>
                       <TableCell>{spec.vendor}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" asChild>
-                             <Link href="#">VIEW</Link>
+                             <Link href={`/specifications/${spec._id}/view`}>VIEW</Link>
                           </Button>
                           <Button variant="outline" size="sm" asChild>
-                             <Link href="#">UPDATE</Link>
+                             <Link href={`/specifications/${spec._id}/edit`}>UPDATE</Link>
                           </Button>
-                          <Button variant="ghost" size="icon">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <DeleteSpecificationDialog specification={spec} onSpecificationDeleted={fetchSpecifications} />
                         </div>
                       </TableCell>
                     </TableRow>
