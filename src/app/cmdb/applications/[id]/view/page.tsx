@@ -60,6 +60,10 @@ function BasicInfoBlock({ application }: { application: CmdbApplication }) {
                         <Label className="text-right">Application ID</Label>
                         <Input value={application.id} disabled className="col-span-3" />
                     </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Description</Label>
+                        <Textarea value={application.description || 'N/A'} disabled className="col-span-3" />
+                    </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Version</Label>
                         <Input value={application.version || 'N/A'} disabled className="col-span-3" />
