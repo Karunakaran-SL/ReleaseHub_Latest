@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
@@ -25,12 +25,14 @@ export function MultiSelectListBox({ options, chosen: initialChosen = [], onChan
   const [selectedAvailable, setSelectedAvailable] = useState<Set<string>>(new Set());
   const [selectedChosen, setSelectedChosen] = useState<Set<string>>(new Set());
 
+  const initialChosenMemo = useMemo(() => new Set(initialChosen), [initialChosen]);
+
   useEffect(() => {
-    const chosenOptions = options.filter(opt => initialChosen.includes(opt.id));
-    const availableOptions = options.filter(opt => !initialChosen.includes(opt.id));
-    setChosen(chosenOptions);
+    const availableOptions = options.filter(opt => !initialChosenMemo.has(opt.id));
+    const chosenOptions = options.filter(opt => initialChosenMemo.has(opt.id));
     setAvailable(availableOptions);
-  }, [options, initialChosen]);
+    setChosen(chosenOptions);
+  }, [options, initialChosenMemo]);
 
   const handleToggle = (id: string, listType: 'available' | 'chosen') => {
     if (disabled) return;
@@ -127,16 +129,16 @@ export function MultiSelectListBox({ options, chosen: initialChosen = [], onChan
       </Card>
 
       <div className="flex flex-col gap-2 self-center">
-        <Button variant="outline" size="icon" onClick={() => moveAll('toChosen')} disabled={disabled}>
+        <Button variant="outline" size="icon" onClick={() => moveAll('toChosen')} disabled={disabled || available.length === 0}>
           <ChevronsRight className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={() => moveSelected('toChosen')} disabled={disabled}>
+        <Button variant="outline" size="icon" onClick={() => moveSelected('toChosen')} disabled={disabled || selectedAvailable.size === 0}>
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={() => moveSelected('toAvailable')} disabled={disabled}>
+        <Button variant="outline" size="icon" onClick={() => moveSelected('toAvailable')} disabled={disabled || selectedChosen.size === 0}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-         <Button variant="outline" size="icon" onClick={() => moveAll('toAvailable')} disabled={disabled}>
+         <Button variant="outline" size="icon" onClick={() => moveAll('toAvailable')} disabled={disabled || chosen.length === 0}>
           <ChevronsLeft className="h-4 w-4" />
         </Button>
       </div>
