@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
+import { ObjectId } from 'mongodb';
 
 const SpecificationSchema = z.object({
   id: z.string(),
@@ -213,9 +214,16 @@ async function seedSpecifications() {
     const db = client.db();
     const collection = db.collection('specifications');
     
-    await collection.deleteMany({});
-    await collection.insertMany(initialSpecifications as any);
-    console.log('Cleared and re-seeded specifications collection.');
+    const operations = initialSpecifications.map(spec => ({
+        updateOne: {
+            filter: { id: spec.id },
+            update: { $setOnInsert: spec },
+            upsert: true,
+        }
+    }));
+    
+    const result = await collection.bulkWrite(operations);
+    console.log(`${result.upsertedCount} new specifications inserted.`);
 
   } catch (error) {
     console.error('Error seeding specifications:', error);
@@ -229,10 +237,8 @@ export async function GET(req: NextRequest) {
     const db = client.db();
     const collection = db.collection('specifications');
     
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedSpecifications();
-    }
+    // Run seeding on every GET request to ensure data is present without deleting
+    await seedSpecifications();
 
     const items = await collection.find({}).toArray();
     return NextResponse.json(items, { status: 200 });
@@ -256,7 +262,14 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         const collection = db.collection('specifications');
         
+        // Ensure the ID is unique before inserting
+        const existing = await collection.findOne({ id: validatedData.data.id });
+        if (existing) {
+             return NextResponse.json({ message: `Specification with ID "${validatedData.data.id}" already exists.` }, { status: 409 });
+        }
+        
         const result = await collection.insertOne(validatedData.data as any);
+
         const insertedItem = { ...validatedData.data, _id: result.insertedId };
 
 
@@ -267,3 +280,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
+
+    
