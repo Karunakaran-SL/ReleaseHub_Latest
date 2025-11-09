@@ -22,7 +22,7 @@ const ComponentSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   type: z.enum(['component', 'application']),
   tenants: z.array(z.object({ id: z.string(), name: z.string() })),
-  version: z.string(),
+  version: z.string().min(1, 'Version is required'),
   artifact_location: z.string(),
   artifact_name: z.string(),
   resources: z.object({
