@@ -1,3 +1,4 @@
+
 'use client';
 import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -230,7 +231,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     isActive={isSpecificationsPage}
                     tooltip={{ children: 'Specifications' }}
                   >
-                    <Link href="/specifications" className="flex items-center gap-2">
+                    <Link href="/specifications" className="flex items-center gap-2 w-full">
                       <FileText />
                       Specifications
                     </Link>
