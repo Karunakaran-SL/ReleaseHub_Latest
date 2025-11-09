@@ -20,7 +20,6 @@ const CmdbPhaseSchema = z.object({
 const ApplicationSchema = z.object({
   id: z.string().min(1, 'ID is required'),
   name: z.string().min(1, 'Name is required'),
-  type: z.enum(['component', 'application']),
   tenants: z.array(z.object({ id: z.string(), name: z.string() })),
   version: z.string(),
   artifact_location: z.string(),

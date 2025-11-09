@@ -125,7 +125,6 @@ export type CmdbCommon = {
   id: string;
   name: string;
   description?: string;
-  type: 'component' | 'application';
   tenants?: { id: string; name: string; }[];
   version: string;
   artifact_location?: string;

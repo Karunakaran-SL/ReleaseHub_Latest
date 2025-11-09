@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -137,14 +136,12 @@ export default function EditApplicationPage() {
         }
     };
     
-    const handleSelectChange = (field: 'type' | 'tenants', value: string) => {
+    const handleSelectChange = (field: 'tenants', value: string) => {
         if (field === 'tenants') {
             const selectedTenant = allTenants.find(t => t._id === value);
             if (selectedTenant) {
                  setFormState(prev => ({ ...prev, tenants: [{ id: selectedTenant._id, name: selectedTenant.name }] }));
             }
-        } else {
-             setFormState(prev => ({ ...prev, [field]: value as 'component' | 'application' }));
         }
     };
     
@@ -223,20 +220,10 @@ export default function EditApplicationPage() {
                             <CardTitle>Update Application: {formState.name}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                             <div className="space-y-2">
-                                <Label htmlFor="name">Name</Label>
-                                <Input id="name" value={formState.name || ''} onChange={handleInputChange} required />
-                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="type">Type</Label>
-                                     <Select value={formState.type} onValueChange={(value) => handleSelectChange('type', value)} required disabled>
-                                        <SelectTrigger><SelectValue placeholder="Select type..." /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="component">Component</SelectItem>
-                                            <SelectItem value="application">Application</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <Label htmlFor="name">Name</Label>
+                                    <Input id="name" value={formState.name || ''} onChange={handleInputChange} required />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="tenants">Tenants</Label>

@@ -61,10 +61,6 @@ function BasicInfoBlock({ component }: { component: CmdbComponent }) {
                         <Input value={component.id} disabled className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">Type</Label>
-                        <Input value={component.type} disabled className="col-span-3" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Version</Label>
                         <Input value={component.version || 'N/A'} disabled className="col-span-3" />
                     </div>
