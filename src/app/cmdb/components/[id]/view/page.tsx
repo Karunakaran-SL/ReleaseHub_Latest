@@ -9,9 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, CmdbComponent } from '@/lib/definitions';
+import type { User, CmdbComponent, CmdbPhase } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info, ChevronRight, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { 
     AlertDialog,
@@ -24,7 +24,122 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import { format, parseISO } from 'date-fns';
 
+const statusColors: Record<string, string> = {
+    'Not Started': 'bg-gray-200 text-gray-800',
+    'In Progress': 'bg-blue-200 text-blue-800',
+    'Done': 'bg-green-200 text-green-800',
+    'Cancelled': 'bg-red-200 text-red-800',
+    'Skipped': 'bg-yellow-200 text-yellow-800',
+};
+
+
+function BasicInfoBlock({ component }: { component: CmdbComponent }) {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <div className="relative cursor-pointer">
+                    <div className={cn("w-48 h-24 rounded-lg flex flex-col items-center justify-center transition-all duration-300 bg-blue-100 text-blue-900 ring-2 ring-blue-300")}>
+                        <Info className="h-6 w-6 mb-1" />
+                        <h4 className="font-bold text-center text-sm">Basic Information</h4>
+                    </div>
+                </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[625px]">
+                <DialogHeader>
+                    <DialogTitle>Basic Information: {component.name}</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Name</Label>
+                        <Input value={component.name} disabled className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Component ID</Label>
+                        <Input value={component.id} disabled className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Type</Label>
+                        <Input value={component.type} disabled className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Version</Label>
+                        <Input value={component.version || 'N/A'} disabled className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Artifact Location</Label>
+                        <Input value={component.artifact_location || 'N/A'} disabled className="col-span-3" />
+                    </div>
+                     <div className="grid grid-cols-4 items-start gap-4">
+                        <Label className="text-right pt-2">Tenants</Label>
+                        <div className="col-span-3 border rounded-md p-2 h-20 overflow-y-auto text-sm">
+                            {component.tenants && component.tenants.length > 0 ? component.tenants?.map(p => <div key={p.id}>{p.name}</div>) : 'N/A'}
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Resources</Label>
+                        <div className="col-span-3 grid grid-cols-3 gap-2">
+                             <Input value={`CPU: ${component.resources?.cpu || 'N/A'}`} disabled />
+                             <Input value={`Mem: ${component.resources?.memory || 'N/A'} GB`} disabled />
+                             <Input value={`Sto: ${component.resources?.storage || 'N/A'} GB`} disabled />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Created At</Label>
+                        <Input value={component.created_at ? format(parseISO(component.created_at), "yyyy-MM-dd HH:mm:ss") : 'N/A'} disabled className="col-span-3" />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Last Updated</Label>
+                        <Input value={component.updated_at ? format(parseISO(component.updated_at), "yyyy-MM-dd HH:mm:ss") : 'N/A'} disabled className="col-span-3" />
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function PhaseBlock({ phase }: { phase: CmdbPhase }) {
+     return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <div className="relative cursor-pointer">
+                    <div className={cn("w-48 h-24 rounded-lg flex flex-col items-center justify-center transition-all duration-300", statusColors[phase.status] || 'bg-gray-200 text-gray-800' )}>
+                        <FileText className="h-6 w-6 mb-1" />
+                        <h4 className="font-bold text-center text-sm">{phase.name}</h4>
+                        <p className="text-xs text-center">{phase.status}</p>
+                    </div>
+                </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[625px]">
+                <DialogHeader>
+                    <DialogTitle>{phase.name} - Details</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Status</Label>
+                        <Input value={phase.status} disabled className="col-span-3" />
+                    </div>
+                    {phase.fields.map(field => (
+                        <div key={field.name} className="grid grid-cols-4 items-start gap-4">
+                            <Label htmlFor={`field-${field.name}`} className="text-right pt-2">{field.name}</Label>
+                            <div className="col-span-3 space-y-1">
+                                <Input id={`field-${field.name}`} value={String(field.value) || 'Not set'} disabled />
+                                {field.proof?.link && (
+                                     <Link href={field.proof.link} target="_blank" className="text-xs text-blue-500 hover:underline">
+                                        View Proof
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 export default function ViewComponentPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -102,20 +217,22 @@ export default function ViewComponentPage() {
             <main className="flex-1 p-6 md:p-10">
                 <Card>
                     <CardHeader>
-                        <CardTitle>View Component: {component.name}</CardTitle>
+                        <CardTitle className="text-3xl">View Component: {component.name}</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <Label htmlFor="name">Component Name</Label>
-                            <Input id="name" value={component.name} disabled />
-                        </div>
-                        <div>
-                            <Label htmlFor="id">Component ID</Label>
-                            <Input id="id" value={component.id} disabled />
-                        </div>
-                        <div>
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea id="description" value={component.description || ''} disabled />
+                    <CardContent>
+                         <div className="relative flex flex-wrap items-center justify-center p-8 gap-y-8 gap-x-4">
+                            <BasicInfoBlock component={component} />
+
+                            {(component.phases && component.phases.length > 0) && <ChevronRight className="h-8 w-8 text-muted-foreground" />}
+                            
+                            {component.phases?.map((phase, index) => (
+                                <div key={phase.id} className="flex items-center gap-4">
+                                    <PhaseBlock phase={phase} />
+                                    {index < (component.phases?.length || 0) - 1 && (
+                                        <ChevronRight className="h-8 w-8 text-muted-foreground" />
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     </CardContent>
                      <CardFooter className="flex justify-end gap-2">
