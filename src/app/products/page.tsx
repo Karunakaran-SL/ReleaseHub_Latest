@@ -15,6 +15,17 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
   ChevronLeft,
   ChevronRight,
   Trash2,
@@ -32,31 +43,75 @@ import { getUser } from '@/lib/auth';
 import DashboardLayout from '../dashboard-layout';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const { toast } = useToast();
+
+  async function fetchProducts() {
+    try {
+      const response = await fetch('/api/products');
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data);
+      } else {
+        console.error('Failed to fetch products');
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to fetch products.",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+       toast({
+            variant: "destructive",
+            title: "Error",
+            description: "An error occurred while fetching products.",
+        });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     getUser().then(setUser);
-    async function fetchProducts() {
-      try {
-        const response = await fetch('/api/products');
-        if (response.ok) {
-          const data = await response.json();
-          setProducts(data);
-        } else {
-          console.error('Failed to fetch products');
-        }
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchProducts();
   }, []);
+
+  const handleDelete = async (productId: string) => {
+    try {
+        const response = await fetch(`/api/products/${productId}`, {
+            method: 'DELETE',
+        });
+
+        if (response.ok) {
+            toast({
+                title: "Success",
+                description: "Product deleted successfully.",
+            });
+            // Refresh the products list
+            fetchProducts();
+        } else {
+            const errorData = await response.json();
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: errorData.message || "Failed to delete product.",
+            });
+        }
+    } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "An unexpected error occurred.",
+        });
+    }
+  };
+
 
   return (
     <DashboardLayout user={user}>
@@ -106,15 +161,34 @@ export default function ProductsPage() {
                       <TableCell>{new Date(product.updated_at).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
-                            VIEW
+                          <Button variant="outline" size="sm" asChild>
+                             <Link href={`/products/${product._id}/view`}>VIEW</Link>
                           </Button>
-                          <Button variant="outline" size="sm">
-                            UPDATE
+                          <Button variant="outline" size="sm" asChild>
+                             <Link href={`/products/${product._id}/edit`}>UPDATE</Link>
                           </Button>
-                          <Button variant="ghost" size="icon">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                           <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the product
+                                        and remove its data from our servers.
+                                    </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDelete(product._id)}>
+                                        Continue
+                                    </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </div>
                       </TableCell>
                     </TableRow>

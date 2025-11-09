@@ -1,10 +1,11 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, ChevronsRight, ChevronsLeft } from 'lucide-react';
 import { ScrollArea } from './scroll-area';
+import { cn } from '@/lib/utils';
 
 interface Option {
   id: string;
@@ -13,20 +14,26 @@ interface Option {
 
 interface MultiSelectListBoxProps {
   options: Option[];
+  chosen?: string[];
   onChange: (selected: string[]) => void;
+  disabled?: boolean;
 }
 
-export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProps) {
-  const [available, setAvailable] = useState<Option[]>(options);
+export function MultiSelectListBox({ options, chosen: initialChosen = [], onChange, disabled = false }: MultiSelectListBoxProps) {
+  const [available, setAvailable] = useState<Option[]>([]);
   const [chosen, setChosen] = useState<Option[]>([]);
   const [selectedAvailable, setSelectedAvailable] = useState<Set<string>>(new Set());
   const [selectedChosen, setSelectedChosen] = useState<Set<string>>(new Set());
 
-  React.useEffect(() => {
-    setAvailable(options);
-  }, [options]);
+  useEffect(() => {
+    const chosenOptions = options.filter(opt => initialChosen.includes(opt.id));
+    const availableOptions = options.filter(opt => !initialChosen.includes(opt.id));
+    setChosen(chosenOptions);
+    setAvailable(availableOptions);
+  }, [options, initialChosen]);
 
   const handleToggle = (id: string, listType: 'available' | 'chosen') => {
+    if (disabled) return;
     if (listType === 'available') {
       const newSelection = new Set(selectedAvailable);
       if (newSelection.has(id)) {
@@ -47,6 +54,7 @@ export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProp
   };
   
   const moveSelected = (direction: 'toChosen' | 'toAvailable') => {
+    if (disabled) return;
     if (direction === 'toChosen') {
       const toMove = available.filter(opt => selectedAvailable.has(opt.id));
       const newAvailable = available.filter(opt => !selectedAvailable.has(opt.id));
@@ -69,6 +77,7 @@ export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProp
   };
 
   const moveAll = (direction: 'toChosen' | 'toAvailable') => {
+    if (disabled) return;
      if (direction === 'toChosen') {
         const newChosen = [...chosen, ...available];
         setChosen(newChosen);
@@ -84,9 +93,15 @@ export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProp
      setSelectedChosen(new Set());
   };
 
+  const containerClasses = cn("grid grid-cols-[1fr_auto_1fr] items-start gap-4 mt-2", {
+      'opacity-70 cursor-not-allowed': disabled
+  });
+  
+  const cardClasses = cn({ 'bg-muted/50': disabled });
+
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 mt-2">
-      <Card>
+    <div className={containerClasses}>
+      <Card className={cardClasses}>
         <CardHeader className="p-2 border-b">
           <h4 className="font-semibold text-sm">Choices</h4>
         </CardHeader>
@@ -99,8 +114,9 @@ export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProp
                     id={`available-${option.id}`}
                     checked={selectedAvailable.has(option.id)}
                     onCheckedChange={() => handleToggle(option.id, 'available')}
+                    disabled={disabled}
                   />
-                  <label htmlFor={`available-${option.id}`} className="text-sm font-normal">
+                  <label htmlFor={`available-${option.id}`} className={cn("text-sm font-normal", {'text-muted-foreground': disabled})}>
                     {option.label}
                   </label>
                 </div>
@@ -111,21 +127,21 @@ export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProp
       </Card>
 
       <div className="flex flex-col gap-2 self-center">
-        <Button variant="outline" size="icon" onClick={() => moveAll('toChosen')}>
+        <Button variant="outline" size="icon" onClick={() => moveAll('toChosen')} disabled={disabled}>
           <ChevronsRight className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={() => moveSelected('toChosen')}>
+        <Button variant="outline" size="icon" onClick={() => moveSelected('toChosen')} disabled={disabled}>
           <ChevronRight className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={() => moveSelected('toAvailable')}>
+        <Button variant="outline" size="icon" onClick={() => moveSelected('toAvailable')} disabled={disabled}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-         <Button variant="outline" size="icon" onClick={() => moveAll('toAvailable')}>
+         <Button variant="outline" size="icon" onClick={() => moveAll('toAvailable')} disabled={disabled}>
           <ChevronsLeft className="h-4 w-4" />
         </Button>
       </div>
 
-      <Card>
+      <Card className={cardClasses}>
         <CardHeader className="p-2 border-b">
           <h4 className="font-semibold text-sm">Chosen</h4>
         </CardHeader>
@@ -138,8 +154,9 @@ export function MultiSelectListBox({ options, onChange }: MultiSelectListBoxProp
                     id={`chosen-${option.id}`}
                     checked={selectedChosen.has(option.id)}
                     onCheckedChange={() => handleToggle(option.id, 'chosen')}
+                    disabled={disabled}
                   />
-                  <label htmlFor={`chosen-${option.id}`} className="text-sm font-normal">
+                  <label htmlFor={`chosen-${option.id}`} className={cn("text-sm font-normal", {'text-muted-foreground': disabled})}>
                     {option.label}
                   </label>
                 </div>
