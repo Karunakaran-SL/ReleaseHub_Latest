@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -14,6 +15,7 @@ import { getUser } from '@/lib/auth';
 import { Loader2, ArrowRight, PlusCircle, Trash2, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import OnboardingPhaseComponent from '../../../tenants/create/_components/onboarding-phase';
+import { cn } from '@/lib/utils';
 
 type EditApplicationFormState = Partial<Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at'>> & { updateComment?: string };
 
@@ -309,7 +311,7 @@ export default function EditApplicationPage() {
                                 <CardTitle>Onboarding Phases</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                 <div className="relative flex flex-wrap items-center p-4 gap-y-8 gap-x-4">
+                                 <div className={cn("relative flex flex-wrap items-center p-4 gap-y-8 gap-x-4", expandedPhase && 'z-30')}>
                                     {formState.phases.map((phase, index) => (
                                         <div key={phase.id} className="flex items-center">
                                             <OnboardingPhaseComponent
@@ -362,5 +364,3 @@ export default function EditApplicationPage() {
         </DashboardLayout>
     );
 }
-
-    

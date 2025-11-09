@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -48,42 +49,44 @@ export default function EditTenantPage() {
     const [popupState, setPopupState] = useState<any>(null);
 
 
-    const fetchAndSetData = useCallback(async () => {
+    useEffect(() => {
+        getUser().then(setUser);
         if (!id) return;
         setLoading(true);
         try {
-            const [tenantRes, allTenantsRes, allProductsRes, configRes] = await Promise.all([
+            Promise.all([
                 fetch(`/api/cmdb/tenants/${id}`),
                 fetch('/api/cmdb/tenants'),
                 fetch('/api/products'),
                 fetch('/api/settings/tenant-onboarding')
-            ]);
+            ]).then(async ([tenantRes, allTenantsRes, allProductsRes, configRes]) => {
 
-            if (!tenantRes.ok) throw new Error('Failed to fetch tenant data');
-            
-            const tenantData: CmdbTenant = await tenantRes.json();
-            setFormState(tenantData);
+                if (!tenantRes.ok) throw new Error('Failed to fetch tenant data');
+                
+                const tenantData: CmdbTenant = await tenantRes.json();
+                setFormState(tenantData);
 
-            // Initialize phases state for editing
-             const initialPhasesData: Record<string, any> = {};
-            (tenantData.phases || []).forEach(phase => {
-                initialPhasesData[phase.id] = { status: phase.status };
-                phase.fields.forEach(field => {
-                    initialPhasesData[phase.id][field.name] = { value: field.value, proofLink: field.proof?.link };
+                // Initialize phases state for editing
+                 const initialPhasesData: Record<string, any> = {};
+                (tenantData.phases || []).forEach(phase => {
+                    initialPhasesData[phase.id] = { status: phase.status };
+                    phase.fields.forEach(field => {
+                        initialPhasesData[phase.id][field.name] = { value: field.value, proofLink: field.proof?.link };
+                    });
                 });
-            });
-            setPhasesState(initialPhasesData);
-            setInitialPhasesState(JSON.parse(JSON.stringify(initialPhasesData)));
+                setPhasesState(initialPhasesData);
+                setInitialPhasesState(JSON.parse(JSON.stringify(initialPhasesData)));
 
 
-            if (allTenantsRes.ok) setAllTenants(await allTenantsRes.json());
-            if (allProductsRes.ok) setAllProducts(await allProductsRes.json());
-            if (configRes.ok) {
-                const configs = await configRes.json();
-                if (configs && configs.length > 0) {
-                    setOnboardingConfig(configs.reduce((latest: any, current: any) => current.version > latest.version ? current : latest, configs[0]));
+                if (allTenantsRes.ok) setAllTenants(await allTenantsRes.json());
+                if (allProductsRes.ok) setAllProducts(await allProductsRes.json());
+                if (configRes.ok) {
+                    const configs = await configRes.json();
+                    if (configs && configs.length > 0) {
+                        setOnboardingConfig(configs.reduce((latest: any, current: any) => current.version > latest.version ? current : latest, configs[0]));
+                    }
                 }
-            }
+            });
 
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error', description: `Failed to load data: ${error.message}` });
@@ -91,11 +94,6 @@ export default function EditTenantPage() {
             setLoading(false);
         }
     }, [id, toast]);
-
-    useEffect(() => {
-        getUser().then(setUser);
-        fetchAndSetData();
-    }, [fetchAndSetData]);
 
     const handleExpandPhase = (phaseId: string) => {
         setExpandedPhase(phaseId);
@@ -205,6 +203,7 @@ export default function EditTenantPage() {
         fieldName: 'dependent_tenants' | 'products',
         allOptions: Option[]
     ) => {
+        if (!formState._id) return null; // Don't render if formState is not ready
         const currentItemAndSelfFilteredOptions = allOptions.filter(opt => opt.id !== formState._id);
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
@@ -311,7 +310,7 @@ export default function EditTenantPage() {
                                 <CardTitle>Onboarding Phases</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                 <div className="relative flex flex-wrap items-center p-4 gap-y-8 gap-x-4">
+                                 <div className={cn("relative flex flex-wrap items-center p-4 gap-y-8 gap-x-4", expandedPhase && 'z-30')}>
                                     {formState.phases.map((phase, index) => (
                                         <div key={phase.id} className="flex items-center">
                                             <OnboardingPhaseComponent
@@ -364,5 +363,3 @@ export default function EditTenantPage() {
         </DashboardLayout>
     );
 }
-
-    
