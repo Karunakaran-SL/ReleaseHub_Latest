@@ -191,7 +191,7 @@ export default function CreateComponentPage() {
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="version">Version</Label>
-                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} />
+                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} required/>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="artifact_location">Artifact Location</Label>
@@ -264,3 +264,5 @@ export default function CreateComponentPage() {
         </DashboardLayout>
     );
 }
+
+    
