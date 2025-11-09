@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '../../dashboard-layout';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Camera } from 'lucide-react';
+import { Camera, Settings } from 'lucide-react';
 import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 
 interface SelectOption {
@@ -165,15 +165,21 @@ export default function CreateProductPage() {
                                 <div className="space-y-4">
                                      <div className="flex items-center gap-2">
                                         <Input id="git-repo" placeholder="Product Git Repo" />
-                                        <Button variant="outline" type="button">TEST</Button>
+                                        <Button variant="outline" size="icon" type="button">
+                                            <Settings className="h-5 w-5" />
+                                        </Button>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Input id="artifacts-repo" placeholder="Product Artifacts Repo" />
-                                        <Button variant="outline" type="button">TEST</Button>
+                                        <Button variant="outline" size="icon" type="button">
+                                            <Settings className="h-5 w-5" />
+                                        </Button>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Input id="pipeline" placeholder="Product Pipeline" />
-                                        <Button variant="outline" type="button">TEST</Button>
+                                        <Button variant="outline" size="icon" type="button">
+                                            <Settings className="h-5 w-5" />
+                                        </Button>
                                     </div>
                                 </div>
 
@@ -191,11 +197,15 @@ export default function CreateProductPage() {
                                 <div className="space-y-4 pt-6">
                                      <div className="flex items-center gap-2">
                                         <Input id="deployment-storage" placeholder="Product Deployment Storage" />
-                                        <Button variant="outline" type="button">TEST</Button>
+                                        <Button variant="outline" size="icon" type="button">
+                                            <Settings className="h-5 w-5" />
+                                        </Button>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Input id="deployment-report" placeholder="Product Deployment Report" />
-                                        <Button variant="outline" type="button">TEST</Button>
+                                        <Button variant="outline" size="icon" type="button">
+                                            <Settings className="h-5 w-5" />
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
