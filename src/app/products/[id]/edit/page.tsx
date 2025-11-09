@@ -1,3 +1,4 @@
+
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -13,7 +14,7 @@ import DashboardLayout from '../../../dashboard-layout';
 import type { User, Product } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Camera, Settings, Loader2 } from 'lucide-react';
-import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
+import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
 import { Textarea } from '@/components/ui/textarea';
 
 interface SelectOption {
@@ -99,13 +100,7 @@ export default function EditProductPage() {
          setFormState(prev => ({ ...prev, deployment_type: selectedType ? { id: selectedType.id, name: selectedType.name } : undefined }));
     };
 
-    const handleMultiSelectChange = (field: keyof Product, selectedIds: string[]) => {
-        let options: SelectOption[] = [];
-        if (field === 'custom_workflows') options = workflows;
-        else if (field === 'compliance_checks') options = complianceChecks;
-        else if (field === 'specifications') options = specifications;
-        
-        const selectedItems = options.filter(opt => selectedIds.includes(opt.id)).map(opt => ({ id: opt.id, name: opt.name }));
+    const handleMultiSelectChange = (field: keyof Product, selectedItems: { id: string; name: string; }[]) => {
         setFormState(prev => ({ ...prev, [field]: selectedItems }));
     };
     
@@ -160,6 +155,43 @@ export default function EditProductPage() {
         )
     }
 
+    const renderMultiSelect = (
+        fieldName: 'custom_workflows' | 'compliance_checks' | 'specifications',
+        allOptions: SelectOption[]
+    ) => {
+        const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
+        const chosenIds = new Set(chosenItems.map(item => item.id));
+
+        const available: Option[] = allOptions
+            .filter(opt => !chosenIds.has(opt.id))
+            .map(opt => ({ id: opt.id, label: opt.name }));
+
+        const chosen: Option[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
+
+        const moveItems = (ids: string[], source: Option[], dest: Option[]) => {
+            const itemsToMove = source.filter(item => ids.includes(item.id));
+            const newDest = [...dest, ...itemsToMove];
+            const newDestAsProductField = newDest.map(i => ({ id: i.id, name: i.label }));
+            handleMultiSelectChange(fieldName, newDestAsProductField);
+        };
+        
+        const moveAll = (source: Option[], dest: Option[]) => {
+            const newDest = [...dest, ...source];
+            const newDestAsProductField = newDest.map(i => ({ id: i.id, name: i.label }));
+            handleMultiSelectChange(fieldName, newDestAsProductField);
+        };
+
+        return (
+            <MultiSelectListBox
+                available={available}
+                chosen={chosen}
+                onMoveToChosen={(ids) => moveItems(ids, available, chosen)}
+                onMoveToAvailable={(ids) => moveItems(ids, chosen, [])}
+                onMoveAllToChosen={() => moveAll(available, chosen)}
+                onMoveAllToAvailable={() => handleMultiSelectChange(fieldName, [])}
+            />
+        );
+    };
 
     return (
         <DashboardLayout user={user}>
@@ -214,11 +246,7 @@ export default function EditProductPage() {
                                 </div>
                                 <div>
                                     <Label>Custom Approval Workflow</Label>
-                                    <MultiSelectListBox
-                                        options={workflows.map(w => ({ id: w.id, label: w.name }))}
-                                        chosen={formState.custom_workflows?.map(w => w.id) || []}
-                                        onChange={(selected) => handleMultiSelectChange('custom_workflows', selected)}
-                                    />
+                                    {renderMultiSelect('custom_workflows', workflows)}
                                 </div>
                             </div>
 
@@ -239,11 +267,7 @@ export default function EditProductPage() {
                                 </div>
                                  <div>
                                     <Label>Select the compliance check</Label>
-                                     <MultiSelectListBox
-                                        options={complianceChecks.map(c => ({ id: c.id, label: c.name }))}
-                                        chosen={formState.compliance_checks?.map(c => c.id) || []}
-                                        onChange={(selected) => handleMultiSelectChange('compliance_checks', selected)}
-                                    />
+                                     {renderMultiSelect('compliance_checks', complianceChecks)}
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Deployment Type</Label>
@@ -285,11 +309,7 @@ export default function EditProductPage() {
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
-                                        <MultiSelectListBox
-                                            options={specifications.map(d => ({ id: d.id, label: d.name }))}
-                                            chosen={formState.specifications?.map(s => s.id) || []}
-                                            onChange={(selected) => handleMultiSelectChange('specifications', selected)}
-                                        />
+                                         {renderMultiSelect('specifications', specifications)}
                                     </div>
                                 )}
                                 
@@ -318,3 +338,5 @@ export default function EditProductPage() {
         </DashboardLayout>
     );
 }
+
+    
