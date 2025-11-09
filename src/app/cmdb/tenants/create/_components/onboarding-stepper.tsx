@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -89,7 +90,7 @@ export default function OnboardingStepper({ config, tenant, entityType }: Onboar
         };
         
         try {
-            const response = await fetch(`/api/cmdb/tenants/${tenant._id}`, {
+            const response = await fetch(`/api/cmdb/${entityType}s/${tenant._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatePayload),
