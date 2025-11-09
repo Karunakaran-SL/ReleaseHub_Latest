@@ -225,21 +225,18 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </SidebarMenuItem>
                 </Collapsible>
 
-                <Collapsible asChild defaultOpen={isSpecificationsPage}>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        isActive={isSpecificationsPage}
-                        tooltip={{ children: 'Specifications' }}
-                      >
-                        <Link href="/specifications" className="flex items-center gap-2 w-full">
-                          <FileText />
-                          Specifications
-                        </Link>
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                  </SidebarMenuItem>
-                </Collapsible>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={isSpecificationsPage}
+                    tooltip={{ children: 'Specifications' }}
+                    asChild
+                  >
+                    <Link href="/specifications">
+                      <FileText />
+                      Specifications
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
 
                 <Collapsible asChild>
                   <SidebarMenuItem>
