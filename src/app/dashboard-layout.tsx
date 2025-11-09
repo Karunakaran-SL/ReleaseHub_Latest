@@ -23,6 +23,7 @@ import {
   Box,
   ChevronDown,
   ClipboardList,
+  FileCode,
   FileText,
   GanttChartSquare,
   HardDrive,
@@ -33,8 +34,6 @@ import {
   ShieldCheck,
   Users,
   Workflow as WorkflowIcon,
-  File,
-  FileCode,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -53,6 +52,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { usePathname } from 'next/navigation';
+import Footer from '@/components/footer';
 
 function Header({ user }: { user: User | null }) {
   return (
@@ -143,6 +143,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isProductsPage = pathname.startsWith('/products');
     const isSpecificationsPage = pathname.startsWith('/specifications');
     const isApiDocsPage = pathname.startsWith('/api-docs');
+    const isAuditPage = pathname.startsWith('/audits');
 
   return (
     <SidebarProvider>
@@ -152,7 +153,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
@@ -295,15 +296,18 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <Collapsible asChild>
+                <Collapsible asChild defaultOpen={isAuditPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton 
+                        isActive={isAuditPage}
                         tooltip={{ children: 'Audit' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
-                        <ShieldCheck />
-                        Audit
+                         <Link href="/audits" className='flex items-center gap-2 w-full'>
+                            <ShieldCheck />
+                            Audit
+                         </Link>
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
@@ -402,15 +406,15 @@ export default function DashboardLayout({ children, user }: { children: React.Re
               </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground p-2 border-t">
-                <File className="h-4 w-4" />
-                <span>Updated a policy by Admin</span>
-              </div>
+                {/* This footer is intentionally left empty as it's replaced by the new global footer */}
             </SidebarFooter>
           </Sidebar>
-          <SidebarInset>
-            {children}
-          </SidebarInset>
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <SidebarInset>
+                {children}
+            </SidebarInset>
+            <Footer />
+          </div>
         </div>
       </div>
     </SidebarProvider>
