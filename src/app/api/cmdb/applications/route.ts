@@ -73,7 +73,7 @@ const generatePhases = () => {
 
 const initialApplications = [
     {
-        "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront", "description": "Customer-facing web application for browsing and purchasing products.", "version": "2.1.0",
+        "_id": "App_Ecom_Storefront", "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront", "description": "Customer-facing web application for browsing and purchasing products.", "version": "2.1.0",
         "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
         "dependent_components": [{ "id": "Comp_Auth_Service", "name": "Authentication Service" }, { "id": "Comp_Search_Service", "name": "Search Service" }],
         "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
@@ -82,7 +82,7 @@ const initialApplications = [
         "created_at": "2024-01-15T10:00:00Z", "updated_at": "2024-01-15T10:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_Order_Processing", "name": "Order Processing Backend", "description": "Handles order creation, payment processing, and fulfillment.", "version": "1.5.0",
+        "_id": "App_Order_Processing", "id": "App_Order_Processing", "name": "Order Processing Backend", "description": "Handles order creation, payment processing, and fulfillment.", "version": "1.5.0",
         "tenants": [ { "id": "Tenant_Medium_Level", "name": "Medium Level Services" } ],
         "dependent_components": [{ "id": "Comp_Payment_Gateway", "name": "Payment Gateway" }, { "id": "Comp_Inventory_Service", "name": "Inventory Service" }],
         "provided_interfaces": [{ "id": "Interface_Order_API", "name": "Order Management API" }],
@@ -90,7 +90,7 @@ const initialApplications = [
         "created_at": "2024-01-16T11:00:00Z", "updated_at": "2024-01-16T11:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_Analytics_Dashboard", "name": "Analytics Dashboard", "description": "Provides business intelligence and sales analytics.", "version": "3.0.0",
+        "_id": "App_Analytics_Dashboard", "id": "App_Analytics_Dashboard", "name": "Analytics Dashboard", "description": "Provides business intelligence and sales analytics.", "version": "3.0.0",
         "tenants": [{ "id": "Tenant_Analytics", "name": "Analytics" }],
         "dependent_components": [{ "id": "Comp_Data_Warehouse_Connector", "name": "Data Warehouse Connector" }],
         "provided_interfaces": [{ "id": "Interface_Analytics_UI", "name": "Analytics Web UI" }],
@@ -107,8 +107,8 @@ async function seedApplications() {
     
     for (const app of initialApplications) {
         await collection.updateOne(
-            { id: app.id },
-            { $set: { ...app, _id: app.id, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
+            { _id: app._id },
+            { $set: app },
             { upsert: true }
         );
     }
@@ -125,7 +125,10 @@ export async function GET(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
     
-    await seedApplications();
+    const count = await db.collection(COLLECTION_NAME).countDocuments();
+    if (count === 0) {
+      await seedApplications();
+    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });

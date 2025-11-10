@@ -32,7 +32,7 @@ const ComponentSchema = z.object({
   }).optional(),
   custom_labels: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
   provided_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
-  dependent_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  dependent_interfaces: z.array(z.object({ id: z.string(), name: zstring() })).optional(),
   dependent_components: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   dependent_applications: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   phases: z.array(CmdbPhaseSchema),
@@ -71,32 +71,32 @@ const generatePhases = () => {
 
 const initialComponents = [
     {
-        "id": "Comp_Auth_Service", "name": "Authentication Service", "version": "1.2.0",
+        "_id": "Comp_Auth_Service", "id": "Comp_Auth_Service", "name": "Authentication Service", "version": "1.2.0",
         "tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }],
         "provided_interfaces": [{ "id": "Interface_User_Auth_API", "name": "User Authentication API" }],
         "created_at": "2024-01-10T09:00:00Z", "updated_at": "2024-01-10T09:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Payment_Gateway", "name": "Payment Gateway", "version": "3.0.0",
+        "_id": "Comp_Payment_Gateway", "id": "Comp_Payment_Gateway", "name": "Payment Gateway", "version": "3.0.0",
         "tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }],
         "provided_interfaces": [{ "id": "Interface_Payment_API", "name": "Payment Processing API" }],
         "dependent_interfaces": [{ "id": "Interface_Compliance_Check_API", "name": "Compliance Check API" }],
         "created_at": "2024-01-11T14:00:00Z", "updated_at": "2024-01-11T14:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Inventory_Service", "name": "Inventory Service", "version": "2.5.0",
+        "_id": "Comp_Inventory_Service", "id": "Comp_Inventory_Service", "name": "Inventory Service", "version": "2.5.0",
         "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
         "provided_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
         "created_at": "2024-01-12T11:00:00Z", "updated_at": "2024-01-12T11:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Search_Service", "name": "Search Service", "version": "1.8.0",
+        "_id": "Comp_Search_Service", "id": "Comp_Search_Service", "name": "Search Service", "version": "1.8.0",
         "tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }],
         "dependent_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
         "created_at": "2024-01-13T16:00:00Z", "updated_at": "2024-01-13T16:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Email_Service", "name": "Email Service", "version": "2.0.0",
+        "_id": "Comp_Email_Service", "id": "Comp_Email_Service", "name": "Email Service", "version": "2.0.0",
         "tenants": [ { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" } ],
         "created_at": "2024-01-14T10:00:00Z", "updated_at": "2024-01-14T10:00:00Z", "phases": generatePhases()
     }
@@ -111,8 +111,8 @@ async function seedComponents() {
     
     for (const component of initialComponents) {
         await collection.updateOne(
-            { id: component.id },
-            { $set: { ...component, _id: component.id, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
+            { _id: component._id },
+            { $set: component },
             { upsert: true }
         );
     }
@@ -129,7 +129,10 @@ export async function GET(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
     
-    await seedComponents();
+    const count = await db.collection(COLLECTION_NAME).countDocuments();
+    if (count === 0) {
+        await seedComponents();
+    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });

@@ -51,7 +51,7 @@ const COLLECTION_NAME = 'cmdb_interfaces';
 
 const initialInterfaces = [
     {
-        "id": "Interface_Product_Catalog_API", "name": "Product Catalog API",
+        "_id": "Interface_Product_Catalog_API", "id": "Interface_Product_Catalog_API", "name": "Product Catalog API",
         "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.0",
         "owner_name": "E-com Team", "owner_email": "ecom@example.com",
         "source": { "id": "Comp_Inventory_Service", "name": "Inventory Service" },
@@ -59,7 +59,7 @@ const initialInterfaces = [
         "created_at": "2024-01-20T10:00:00Z", "updated_at": "2024-01-20T10:00:00Z"
     },
     {
-        "id": "Interface_User_Auth_API", "name": "User Authentication API",
+        "_id": "Interface_User_Auth_API", "id": "Interface_User_Auth_API", "name": "User Authentication API",
         "type": { "id": "Interface_Type_API", "name": "API" }, "version": "2.1",
         "owner_name": "Security Team", "owner_email": "security@example.com",
         "source": { "id": "Comp_Auth_Service", "name": "Authentication Service" },
@@ -67,7 +67,7 @@ const initialInterfaces = [
         "created_at": "2024-01-21T11:00:00Z", "updated_at": "2024-01-21T11:00:00Z"
     },
     {
-        "id": "Interface_Payment_API", "name": "Payment Processing API",
+        "_id": "Interface_Payment_API", "id": "Interface_Payment_API", "name": "Payment Processing API",
         "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.5",
         "owner_name": "Finance Team", "owner_email": "finance@example.com",
         "source": { "id": "Comp_Payment_Gateway", "name": "Payment Gateway" },
@@ -75,7 +75,7 @@ const initialInterfaces = [
         "created_at": "2024-01-22T12:00:00Z", "updated_at": "2024-01-22T12:00:00Z"
     },
     {
-        "id": "Interface_Order_API", "name": "Order Management API",
+        "_id": "Interface_Order_API", "id": "Interface_Order_API", "name": "Order Management API",
         "type": { "id": "Interface_Type_API", "name": "API" }, "version": "3.0",
         "owner_name": "E-com Team", "owner_email": "ecom@example.com",
         "source": { "id": "App_Order_Processing", "name": "Order Processing Backend" },
@@ -83,7 +83,7 @@ const initialInterfaces = [
         "created_at": "2024-01-23T13:00:00Z", "updated_at": "2024-01-23T13:00:00Z"
     },
     {
-        "id": "Interface_Web_UI", "name": "Main Web UI",
+        "_id": "Interface_Web_UI", "id": "Interface_Web_UI", "name": "Main Web UI",
         "type": { "id": "Interface_Type_UI", "name": "UI" }, "version": "1.0",
         "owner_name": "Frontend Team", "owner_email": "frontend@example.com",
         "source": { "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront" },
@@ -91,7 +91,7 @@ const initialInterfaces = [
         "created_at": "2024-01-27T17:00:00Z", "updated_at": "2024-01-27T17:00:00Z"
     },
     {
-        "id": "Interface_Analytics_UI", "name": "Analytics Web UI",
+        "_id": "Interface_Analytics_UI", "id": "Interface_Analytics_UI", "name": "Analytics Web UI",
         "type": { "id": "Interface_Type_UI", "name": "UI" }, "version": "1.0",
         "owner_name": "Analytics Team", "owner_email": "analytics@example.com",
         "source": { "id": "App_Analytics_Dashboard", "name": "Analytics Dashboard" },
@@ -109,8 +109,8 @@ async function seedInterfaces() {
     
     for (const iface of initialInterfaces) {
         await collection.updateOne(
-            { id: iface.id },
-            { $set: { ...iface, _id: iface.id, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
+            { _id: iface._id },
+            { $set: iface },
             { upsert: true }
         );
     }
@@ -126,7 +126,10 @@ export async function GET(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
     
-    await seedInterfaces();
+    const count = await db.collection(COLLECTION_NAME).countDocuments();
+    if (count === 0) {
+      await seedInterfaces();
+    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).sort({updated_at: -1}).toArray();
     return NextResponse.json(items, { status: 200 });
