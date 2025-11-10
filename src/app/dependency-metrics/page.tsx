@@ -95,7 +95,7 @@ export default function DependencyMetricsPage() {
         } finally {
             setLoading(false);
         }
-    }, [selectedEntityId, router, toast]);
+    }, [router, toast, selectedEntityId]);
 
     useEffect(() => {
         getUser().then(setUser);
@@ -146,7 +146,7 @@ export default function DependencyMetricsPage() {
              fetchTree();
         }
 
-    }, [selectedEntityType, selectedEntityId, toast, allEntities]);
+    }, [selectedEntityType, selectedEntityId, toast, allEntities, loading]);
     
     const handleEntityTypeChange = (type: EntityType) => {
         const firstEntityId = allEntities[type]?.[0]?.id;
@@ -174,7 +174,7 @@ export default function DependencyMetricsPage() {
         const usedBySet = new Set<AnyCmdbEntity & { entityType: EntityType }>();
         const dependsOnSet = new Set<AnyCmdbEntity & { entityType: EntityType }>();
         
-        allEntities.forEach(entity => {
+        allTreeEntities.forEach(entity => {
             if (entity.id === currentItem.id) return;
             const dependencies = [
                 ...((entity as CmdbTenant).dependent_tenants || []),
@@ -246,7 +246,7 @@ export default function DependencyMetricsPage() {
                             <SelectTrigger><SelectValue placeholder="Select an entity..." /></SelectTrigger>
                             <SelectContent>
                                 {allEntities[selectedEntityType]?.map(entity => (
-                                    <SelectItem key={entity.id} value={entity.id}>
+                                    <SelectItem key={entity._id} value={entity.id}>
                                         {entity.name}
                                     </SelectItem>
                                 ))}

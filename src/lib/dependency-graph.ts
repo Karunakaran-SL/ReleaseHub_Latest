@@ -55,19 +55,14 @@ export async function generateDependencyTree(entityType: EntityType, entityId: s
         return null;
     }
 
-    const relatedTenants = new Set<string>();
-    const relatedComponents = new Set<string>();
-    const relatedApplications = new Set<string>();
-    const relatedInterfaces = new Set<string>();
-    const relatedSpecifications = new Set<string>();
-    const relatedProducts = new Set<string>();
-    
+    const relatedEntities = new Map<string, EntityWithRelations>();
     const queue: EntityWithRelations[] = [rootEntity];
     const visited = new Set<string>([`${rootEntity.entityType}:${rootEntity.id}`]);
 
     const addEntityToQueue = (entity: EntityWithRelations | undefined) => {
         if (!entity) return;
         const key = `${entity.entityType}:${entity.id}`;
+        relatedEntities.set(key, entity);
         if (!visited.has(key)) {
             visited.add(key);
             queue.push(entity);
@@ -76,15 +71,8 @@ export async function generateDependencyTree(entityType: EntityType, entityId: s
     
     while (queue.length > 0) {
         const current = queue.shift()!;
-
-        // Add current entity to its respective set
-        switch (current.entityType) {
-            case 'product': relatedProducts.add(current.id); break;
-            case 'tenant': relatedTenants.add(current.id); break;
-            case 'component': relatedComponents.add(current.id); break;
-            case 'application': relatedApplications.add(current.id); break;
-            case 'interface': relatedInterfaces.add(current.id); break;
-        }
+        const currentKey = `${current.entityType}:${current.id}`;
+        relatedEntities.set(currentKey, current);
         
         // Find what depends on the current item (Upstream)
         allEntities.forEach(upstreamEntity => {
@@ -120,16 +108,18 @@ export async function generateDependencyTree(entityType: EntityType, entityId: s
         });
     }
 
+    const finalEntities = Array.from(relatedEntities.values());
+
     const tree: DependencyTree = {
-        _id: rootEntity.id,
+        _id: rootEntity._id,
         rootEntityType: rootEntity.entityType,
         rootEntityId: rootEntity.id,
-        product: allData.products.find(p => relatedProducts.has(p.id)) || null,
-        specifications: Array.from(relatedSpecifications).map(id => allData.specifications.find(s => s.id === id)).filter(Boolean) as any,
-        tenants: Array.from(relatedTenants).map(id => allData.tenants.find(t => t.id === id)).filter(Boolean) as CmdbTenant[],
-        components: Array.from(relatedComponents).map(id => allData.components.find(c => c.id === id)).filter(Boolean) as CmdbComponent[],
-        applications: Array.from(relatedApplications).map(id => allData.applications.find(a => a.id === id)).filter(Boolean) as CmdbApplication[],
-        interfaces: Array.from(relatedInterfaces).map(id => allData.interfaces.find(i => i.id === id)).filter(Boolean) as CmdbInterface[],
+        product: finalEntities.find(e => e.entityType === 'product') as Product || null,
+        specifications: allData.specifications.filter(s => finalEntities.some(e => e.entityType === 'product' && (e as Product).specifications?.some(sp => sp.id === s.id))),
+        tenants: finalEntities.filter(e => e.entityType === 'tenant') as CmdbTenant[],
+        components: finalEntities.filter(e => e.entityType === 'component') as CmdbComponent[],
+        applications: finalEntities.filter(e => e.entityType === 'application') as CmdbApplication[],
+        interfaces: finalEntities.filter(e => e.entityType === 'interface') as CmdbInterface[],
         metadata: {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
