@@ -85,7 +85,10 @@ const initialComponents = [
         "id": "Comp_Email_Service",
         "name": "Email Service",
         "version": "2.0.0",
-        "tenants": [{ "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }],
+        "tenants": [
+            { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" },
+            { "id": "Tenant_Low_Level", "name": "Low Level Services" }
+        ],
         "provided_interfaces": [],
         "created_at": "2024-01-14T10:00:00Z", "updated_at": "2024-01-14T10:00:00Z",
         "phases": []
@@ -97,6 +100,112 @@ const initialComponents = [
         "tenants": [{ "id": "Tenant_Analytics", "name": "Analytics" }],
         "provided_interfaces": [{ "id": "Interface_Reporting_API", "name": "Reporting API" }],
         "created_at": "2024-02-01T12:00:00Z", "updated_at": "2024-02-01T12:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Config_Service",
+        "name": "Configuration Service",
+        "version": "1.5.0",
+        "tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }],
+        "created_at": "2024-02-05T09:00:00Z", "updated_at": "2024-02-05T09:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Logging_Service",
+        "name": "Logging Service",
+        "version": "2.1.0",
+        "tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }],
+        "created_at": "2024-02-06T10:00:00Z", "updated_at": "2024-02-06T10:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Message_Broker",
+        "name": "Message Broker",
+        "version": "3.0.0",
+        "tenants": [{ "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }],
+        "created_at": "2024-02-07T11:00:00Z", "updated_at": "2024-02-07T11:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_ETL_Service",
+        "name": "ETL Service",
+        "version": "1.3.0",
+        "tenants": [{ "id": "Tenant_Analytics", "name": "Analytics" }],
+        "created_at": "2024-02-08T12:00:00Z", "updated_at": "2024-02-08T12:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Notification_Service",
+        "name": "Notification Service",
+        "version": "1.7.0",
+        "tenants": [
+            { "id": "Tenant_Low_Level", "name": "Low Level Services" },
+            { "id": "Tenant_Medium_Level", "name": "Medium Level Services" }
+        ],
+        "created_at": "2024-02-09T14:00:00Z", "updated_at": "2024-02-09T14:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Content_Delivery_Network",
+        "name": "Content Delivery Network (CDN)",
+        "version": "2.0.0",
+        "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
+        "created_at": "2024-02-11T16:00:00Z", "updated_at": "2024-02-11T16:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Secret_Management",
+        "name": "Secret Management",
+        "version": "1.1.0",
+        "tenants": [
+            { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" },
+            { "id": "Tenant_Platform_Infra", "name": "Platform Infra" }
+        ],
+        "created_at": "2024-03-10T10:00:00Z", "updated_at": "2024-03-10T10:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_API_Gateway",
+        "name": "API Gateway",
+        "version": "2.4.0",
+        "tenants": [
+            { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" },
+            { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }
+        ],
+        "created_at": "2024-03-12T11:00:00Z", "updated_at": "2024-03-12T11:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Metrics_Service",
+        "name": "Metrics Service",
+        "version": "1.9.0",
+        "tenants": [
+            { "id": "Tenant_Platform_Infra", "name": "Platform Infra" },
+            { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }
+        ],
+        "created_at": "2024-03-14T12:00:00Z", "updated_at": "2024-03-14T12:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Data_Streaming_Service",
+        "name": "Data Streaming Service",
+        "version": "2.0.0",
+        "tenants": [
+            { "id": "Tenant_Analytics", "name": "Analytics" },
+            { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }
+        ],
+        "created_at": "2024-03-16T14:00:00Z", "updated_at": "2024-03-16T14:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Cache_Service",
+        "name": "Cache Service",
+        "version": "3.1.0",
+        "tenants": [
+            { "id": "Tenant_Medium_Level", "name": "Medium Level Services" },
+            { "id": "Tenant_High_Level", "name": "High Level Services" }
+        ],
+        "created_at": "2024-03-18T15:00:00Z", "updated_at": "2024-03-18T15:00:00Z",
         "phases": []
     }
 ];
@@ -173,3 +282,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
+
+    

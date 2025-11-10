@@ -70,7 +70,10 @@ const initialApplications = [
         "name": "Order Processing Backend",
         "description": "Handles order creation, payment processing, and fulfillment.",
         "version": "1.5.0",
-        "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
+        "tenants": [
+            { "id": "Tenant_Medium_Level", "name": "Medium Level Services" },
+            { "id": "Tenant_High_Level", "name": "High Level Services" }
+        ],
         "dependent_components": [
             { "id": "Comp_Payment_Gateway", "name": "Payment Gateway" },
             { "id": "Comp_Inventory_Service", "name": "Inventory Service" }
@@ -116,6 +119,47 @@ const initialApplications = [
         "dependent_components": [{ "id": "Comp_Email_Service", "name": "Email Service" }],
         "provided_interfaces": [{ "id": "Interface_Customer_Data_API", "name": "Customer Data API" }],
         "created_at": "2024-02-20T16:00:00Z", "updated_at": "2024-02-20T16:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_Marketing_Automation",
+        "name": "Marketing Automation",
+        "description": "Automates marketing campaigns and lead nurturing.",
+        "version": "1.8.0",
+        "tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }],
+        "dependent_applications": [{ "id": "App_CRM_Platform", "name": "CRM Platform" }],
+        "dependent_components": [{ "id": "Comp_Email_Service", "name": "Email Service" }],
+        "created_at": "2024-04-01T10:00:00Z", "updated_at": "2024-04-01T10:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_Product_Recommendations",
+        "name": "Product Recommendations AI",
+        "description": "AI-powered service for personalized product recommendations.",
+        "version": "1.0.0",
+        "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
+        "dependent_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
+        "created_at": "2024-04-05T12:00:00Z", "updated_at": "2024-04-05T12:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_Fraud_Detection",
+        "name": "Fraud Detection Service",
+        "description": "Real-time fraud detection for transactions.",
+        "version": "2.2.0",
+        "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
+        "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
+        "created_at": "2024-04-10T15:00:00Z", "updated_at": "2024-04-10T15:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_A_B_Testing",
+        "name": "A/B Testing Platform",
+        "description": "Platform for running A/B tests on the storefront.",
+        "version": "1.1.0",
+        "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
+        "dependent_applications": [{ "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront" }],
+        "created_at": "2024-04-12T11:00:00Z", "updated_at": "2024-04-12T11:00:00Z",
         "phases": []
     }
 ];
@@ -191,3 +235,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
+
+    
