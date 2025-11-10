@@ -286,11 +286,6 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                                 <Network className="mr-2"/> Interfaces
                             </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/cmdb/interface-types" isActive={pathname.startsWith('/cmdb/interface-types')}>
-                                <Network className="mr-2"/> Interface Types
-                            </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -371,8 +366,13 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                      <CollapsibleContent>
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/settings/onboarding" isActive={pathname === '/settings/onboarding'}>
+                          <SidebarMenuSubButton href="/settings/onboarding" isActive={pathname.startsWith('/settings/onboarding')}>
                             Onboarding
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/settings/cmdb" isActive={pathname.startsWith('/settings/cmdb')}>
+                            CMDB
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
