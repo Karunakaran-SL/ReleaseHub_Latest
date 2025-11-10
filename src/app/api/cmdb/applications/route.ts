@@ -96,64 +96,6 @@ const initialApplications = [
         "provided_interfaces": [{ "id": "Interface_Analytics_UI", "name": "Analytics Web UI" }],
         "dependent_interfaces": [{ "id": "Interface_Reporting_API", "name": "Reporting API" }],
         "created_at": "2024-02-10T09:00:00Z", "updated_at": "2024-02-10T09:00:00Z", "phases": generatePhases()
-    },
-    {
-        "id": "App_Mobile_Companion", "name": "Mobile Companion App", "description": "iOS and Android app for on-the-go shopping.", "version": "1.2.0",
-        "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
-        "dependent_applications": [{ "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront" }],
-        "dependent_interfaces": [{ "id": "Interface_Order_API", "name": "Order Management API" }],
-        "created_at": "2024-03-05T14:00:00Z", "updated_at": "2024-03-05T14:00:00Z", "phases": generatePhases()
-    },
-    {
-        "id": "App_CRM_Platform", "name": "CRM Platform", "description": "Manages customer relationships, support tickets, and marketing campaigns.", "version": "4.0.1",
-        "tenants": [ { "id": "Tenant_Low_Level", "name": "Low Level Services" } ],
-        "dependent_components": [{ "id": "Comp_Email_Service", "name": "Email Service" }],
-        "provided_interfaces": [{ "id": "Interface_Customer_Data_API", "name": "Customer Data API" }],
-        "created_at": "2024-02-20T16:00:00Z", "updated_at": "2024-02-20T16:00:00Z", "phases": generatePhases()
-    },
-    {
-        "id": "App_Marketing_Automation", "name": "Marketing Automation", "description": "Automates marketing campaigns and lead nurturing.", "version": "1.8.0",
-        "tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }],
-        "dependent_applications": [{ "id": "App_CRM_Platform", "name": "CRM Platform" }],
-        "dependent_components": [{ "id": "Comp_Email_Service", "name": "Email Service" }],
-        "created_at": "2024-04-01T10:00:00Z", "updated_at": "2024-04-01T10:00:00Z", "phases": generatePhases()
-    },
-    {
-        "id": "App_Product_Recommendations", "name": "Product Recommendations AI", "description": "AI-powered service for personalized product recommendations.", "version": "1.0.0",
-        "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
-        "dependent_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
-        "created_at": "2024-04-05T12:00:00Z", "updated_at": "2024-04-05T12:00:00Z", "phases": generatePhases()
-    },
-    {
-        "id": "App_Fraud_Detection", "name": "Fraud Detection Service", "description": "Real-time fraud detection for transactions.", "version": "2.2.0",
-        "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
-        "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
-        "created_at": "2024-04-10T15:00:00Z", "updated_at": "2024-04-10T15:00:00Z", "phases": generatePhases()
-    },
-    {
-        "id": "App_A_B_Testing", "name": "A/B Testing Platform", "description": "Platform for running A/B tests on the storefront.", "version": "1.1.0",
-        "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
-        "dependent_applications": [{ "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront" }],
-        "created_at": "2024-04-12T11:00:00Z", "updated_at": "2024-04-12T11:00:00Z", "phases": generatePhases()
-    },
-    {
-        "id": "App_PIM_Platform", "name": "Product Information Management", "description": "Centralizes and harmonizes all marketing and technical information for product listings.", "version": "1.3.0",
-        "tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }],
-        "dependent_components": [{ "id": "Comp_Inventory_Service", "name": "Inventory Service" }],
-        "created_at": "2024-05-01T09:00:00Z", "updated_at": "2024-05-01T09:00:00Z", "phases": generatePhases()
-    },
-    {
-        "id": "App_Support_Chatbot", "name": "Customer Support Chatbot", "description": "AI-powered chatbot for handling customer support queries.", "version": "1.0.0",
-        "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
-        "dependent_applications": [{ "id": "App_CRM_Platform", "name": "CRM Platform" }],
-        "created_at": "2024-05-05T11:00:00Z", "updated_at": "2024-05-05T11:00:00Z", "phases": generatePhases()
-    },
-    {
-        "id": "App_Returns_Management", "name": "Returns Management System", "description": "Manages the product returns and refund process.", "version": "1.6.0",
-        "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
-        "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
-        "dependent_components": [{ "id": "Comp_Inventory_Service", "name": "Inventory Service" }],
-        "created_at": "2024-05-10T14:00:00Z", "updated_at": "2024-05-10T14:00:00Z", "phases": generatePhases()
     }
 ];
 
@@ -163,9 +105,13 @@ async function seedApplications() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    // This will only delete the initial seed items, preserving user-added data
-    await collection.deleteMany({ id: { $in: initialApplications.map(i => i.id) } });
-    await collection.insertMany(initialApplications as any);
+    for (const app of initialApplications) {
+        await collection.updateOne(
+            { id: app.id },
+            { $set: { ...app, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
+            { upsert: true }
+        );
+    }
     console.log('Seeded applications collection.');
 
   } catch (error) {
@@ -176,13 +122,9 @@ async function seedApplications() {
 // List all applications
 export async function GET(req: NextRequest) {
   try {
+    await seedApplications();
     const client = await clientPromise;
     const db = client.db();
-    
-    const count = await db.collection(COLLECTION_NAME).countDocuments();
-    if (count === 0) {
-        await seedApplications();
-    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });

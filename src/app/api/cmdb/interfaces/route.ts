@@ -84,30 +84,6 @@ const initialInterfaces = [
         "created_at": "2024-01-23T13:00:00Z", "updated_at": "2024-01-23T13:00:00Z"
     },
     {
-        "id": "Interface_Customer_Data_API", "name": "Customer Data API",
-        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.1",
-        "owner_name": "CRM Team", "owner_email": "crm@example.com",
-        "source": { "id": "App_CRM_Platform", "name": "CRM Platform" },
-        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": false, "authentication": false } },
-        "created_at": "2024-01-24T14:00:00Z", "updated_at": "2024-01-24T14:00:00Z"
-    },
-    {
-        "id": "Interface_Reporting_API", "name": "Reporting API",
-        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.0",
-        "owner_name": "Analytics Team", "owner_email": "analytics@example.com",
-        "source": { "id": "Comp_Data_Warehouse_Connector", "name": "Data Warehouse Connector" },
-        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": false, "authentication": false } },
-        "created_at": "2024-01-25T15:00:00Z", "updated_at": "2024-01-25T15:00:00Z"
-    },
-    {
-        "id": "Interface_Compliance_Check_API", "name": "Compliance Check API",
-        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.0",
-        "owner_name": "Compliance Team", "owner_email": "compliance@example.com",
-        "source": { "id": "Comp_Payment_Gateway", "name": "Payment Gateway" },
-        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": true, "authentication": true } },
-        "created_at": "2024-01-26T16:00:00Z", "updated_at": "2024-01-26T16:00:00Z"
-    },
-    {
         "id": "Interface_Web_UI", "name": "Main Web UI",
         "type": { "id": "Interface_Type_UI", "name": "UI" }, "version": "1.0",
         "owner_name": "Frontend Team", "owner_email": "frontend@example.com",
@@ -132,12 +108,14 @@ async function seedInterfaces() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    const count = await collection.countDocuments({ id: { $in: initialInterfaces.map(i => i.id) } });
-    if (count < initialInterfaces.length) {
-      await collection.deleteMany({ id: { $in: initialInterfaces.map(i => i.id) } });
-      await collection.insertMany(initialInterfaces as any);
-      console.log('Seeded interfaces collection.');
+    for (const iface of initialInterfaces) {
+        await collection.updateOne(
+            { id: iface.id },
+            { $set: { ...iface, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
+            { upsert: true }
+        );
     }
+    console.log('Seeded interfaces collection.');
   } catch (error) {
     console.error('Error seeding interfaces:', error);
   }

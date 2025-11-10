@@ -1,5 +1,4 @@
 
-
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -73,13 +72,13 @@ const generatePhases = () => {
 };
 
 const initialTenants = [
-    { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation", "description": "Core platform services and infrastructure foundation.", "products": [], "dependent_tenants": [], "version": "1.0.0", "created_at": "2023-12-01T10:00:00Z", "updated_at": "2023-12-01T10:00:00Z", "phases": generatePhases() },
+    { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation", "description": "Core platform services and infrastructure foundation.", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }], "dependent_tenants": [], "version": "1.0.0", "created_at": "2023-12-01T10:00:00Z", "updated_at": "2023-12-01T10:00:00Z", "phases": generatePhases() },
     { "id": "Tenant_Platform_Infra", "name": "Platform Infra", "description": "Infrastructure services for compute, storage, and networking.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }], "version": "1.1.0", "created_at": "2023-12-01T11:00:00Z", "updated_at": "2023-12-01T11:00:00Z", "phases": generatePhases() },
     { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations", "description": "Integration and mediation services for connecting systems.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "version": "1.2.0", "created_at": "2023-12-01T12:00:00Z", "updated_at": "2023-12-01T12:00:00Z", "phases": generatePhases() },
-    { "id": "Tenant_Analytics", "name": "Analytics", "description": "Data analytics and business intelligence services.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "version": "2.0.0", "created_at": "2023-12-02T09:00:00Z", "updated_at": "2023-12-02T09:00:00Z", "phases": generatePhases() },
+    { "id": "Tenant_Analytics", "name": "Analytics", "description": "Data analytics and business intelligence services.", "products": [{ "id": "Product_Data_Platform", "name": "Data Analytics Platform" }], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "version": "2.0.0", "created_at": "2023-12-02T09:00:00Z", "updated_at": "2023-12-02T09:00:00Z", "phases": generatePhases() },
     { "id": "Tenant_Low_Level", "name": "Low Level Services", "description": "Fundamental services for e-commerce operations.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }], "version": "1.0.0", "created_at": "2023-12-02T10:00:00Z", "updated_at": "2023-12-02T10:00:00Z", "phases": generatePhases() },
     { "id": "Tenant_Medium_Level", "name": "Medium Level Services", "description": "Business logic and orchestration for e-commerce.", "products": [], "dependent_tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }], "version": "1.0.0", "created_at": "2023-12-02T11:00:00Z", "updated_at": "2023-12-02T11:00:00Z", "phases": generatePhases() },
-    { "id": "Tenant_High_Level", "name": "High Level Services", "description": "Customer-facing e-commerce applications and APIs.", "products": [], "dependent_tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }], "version": "1.0.0", "created_at": "2023-12-02T12:00:00Z", "updated_at": "2023-12-02T12:00:00Z", "phases": generatePhases() }
+    { "id": "Tenant_High_Level", "name": "High Level Services", "description": "Customer-facing e-commerce applications and APIs.", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }], "dependent_tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }], "version": "1.0.0", "created_at": "2023-12-02T12:00:00Z", "updated_at": "2023-12-02T12:00:00Z", "phases": generatePhases() }
 ];
 
 
@@ -89,12 +88,14 @@ async function seedTenants() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    const count = await collection.countDocuments({ id: { $in: initialTenants.map(i => i.id) } });
-    if (count < initialTenants.length) {
-      await collection.deleteMany({ id: { $in: initialTenants.map(i => i.id) } });
-      await collection.insertMany(initialTenants as any);
-      console.log('Seeded tenants collection.');
+    for (const tenant of initialTenants) {
+        await collection.updateOne(
+            { id: tenant.id },
+            { $set: { ...tenant, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
+            { upsert: true }
+        );
     }
+    console.log('Seeded tenants collection.');
   } catch (error) {
     console.error('Error seeding tenants:', error);
   }

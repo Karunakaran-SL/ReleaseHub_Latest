@@ -17,17 +17,18 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 
-const entityTypeDetails: Record<EntityType, { label: string; icon: React.ElementType; linkPrefix: string; apiPath: string }> = {
-    product: { label: 'Product', icon: Box, linkPrefix: '/products', apiPath: '/api/products' },
-    tenant: { label: 'Tenant', icon: Building, linkPrefix: '/cmdb/tenants', apiPath: '/api/cmdb/tenants' },
-    component: { label: 'Component', icon: Puzzle, linkPrefix: '/cmdb/components', apiPath: '/api/cmdb/components' },
-    application: { label: 'Application', icon: AppWindow, linkPrefix: '/cmdb/applications', apiPath: '/api/cmdb/applications' },
-    interface: { label: 'Interface', icon: Network, linkPrefix: '/cmdb/interfaces', apiPath: '/api/cmdb/interfaces' },
+const entityTypeDetails: Record<EntityType, { label: string; icon: React.ElementType; linkPrefix: string; apiPath: string, idField: '_id' | 'id'}> = {
+    product: { label: 'Product', icon: Box, linkPrefix: '/products', apiPath: '/api/products', idField: '_id' },
+    tenant: { label: 'Tenant', icon: Building, linkPrefix: '/cmdb/tenants', apiPath: '/api/cmdb/tenants', idField: '_id' },
+    component: { label: 'Component', icon: Puzzle, linkPrefix: '/cmdb/components', apiPath: '/api/cmdb/components', idField: '_id' },
+    application: { label: 'Application', icon: AppWindow, linkPrefix: '/cmdb/applications', apiPath: '/api/cmdb/applications', idField: '_id' },
+    interface: { label: 'Interface', icon: Network, linkPrefix: '/cmdb/interfaces', apiPath: '/api/cmdb/interfaces', idField: '_id' },
 };
 
 function DependencyCard({ item, entityType, onSelect, isSelected }: { item: any, entityType: EntityType, onSelect: () => void, isSelected?: boolean }) {
     const Icon = entityTypeDetails[entityType]?.icon || Box;
     const linkPrefix = entityTypeDetails[entityType]?.linkPrefix || '/';
+    const idToUse = item._id || item.id;
 
     return (
         <div 
@@ -46,7 +47,7 @@ function DependencyCard({ item, entityType, onSelect, isSelected }: { item: any,
             </div>
             <Badge variant={isSelected ? 'secondary' : 'outline'} className="capitalize text-xs">{entityType}</Badge>
             <Button asChild variant="ghost" size="icon" className={cn("absolute top-1 right-1 h-6 w-6", isSelected ? 'text-primary-foreground hover:bg-primary/80' : 'text-muted-foreground')} onClick={(e) => e.stopPropagation()}>
-                <Link href={`${linkPrefix}/${item.id}/view`} target="_blank">
+                <Link href={`${linkPrefix}/${idToUse}/view`} target="_blank">
                     <ExternalLink className="h-4 w-4" />
                 </Link>
             </Button>
@@ -108,11 +109,16 @@ export default function DependencyMetricsPage() {
             setLoading(true);
             setDependencyTree(null);
             try {
-                const res = await fetch(`/api/dependency-tree/${selectedEntityType}/${selectedEntityId}`);
+                // For products, we use the string `id`. For others, we use `_id`.
+                const idToFetch = selectedEntityType === 'product' 
+                    ? selectedEntityId 
+                    : allEntities[selectedEntityType]?.find(e => e.id === selectedEntityId)?._id || selectedEntityId;
+                
+                const res = await fetch(`/api/dependency-tree/${selectedEntityType}/${idToFetch}`);
                 if (res.ok) {
                     setDependencyTree(await res.json());
                 } else {
-                    console.error(`Failed to fetch dependency tree for ${selectedEntityType}:${selectedEntityId}`);
+                    console.error(`Failed to fetch dependency tree for ${selectedEntityType}:${idToFetch}`);
                     toast({ variant: 'destructive', title: 'Error', description: 'Failed to load dependency tree.'})
                 }
             } catch (error) {
@@ -123,15 +129,11 @@ export default function DependencyMetricsPage() {
             }
         }
         fetchTree();
-    }, [selectedEntityType, selectedEntityId, toast]);
+    }, [selectedEntityType, selectedEntityId, toast, allEntities]);
     
     const handleEntityTypeChange = (type: EntityType) => {
         const firstEntityId = allEntities[type]?.[0]?.id;
-        if (firstEntityId) {
-            router.push(`/dependency-metrics?type=${type}&id=${firstEntityId}`);
-        } else {
-            router.push(`/dependency-metrics?type=${type}`);
-        }
+        router.push(`/dependency-metrics?type=${type}${firstEntityId ? `&id=${firstEntityId}` : ''}`);
     };
     
     const handleEntityChange = (id: string) => {
@@ -202,7 +204,7 @@ export default function DependencyMetricsPage() {
         ...dependsOn.map(item => ({ relationship: 'Depends On', item })),
     ];
     
-     if (loading && !dependencyTree && !selectedEntityId) {
+     if (loading && !allEntities.product.length) {
          return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 

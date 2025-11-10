@@ -8,7 +8,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { getUser } from '@/lib/auth';
 import { revalidateDependencyTree } from '@/lib/dependency-graph';
 
-const initialProducts: Omit<Product, '_id'>[] = [
+const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
     "id": "Product_OSS_Portal",
     "name": "OneStopShop Portal",
@@ -29,8 +29,7 @@ const initialProducts: Omit<Product, '_id'>[] = [
     "git_repo": "http://git.example.com/onestopshop-portal",
     "artifacts_repo": "http://artifacts.example.com/onestopshop-portal",
     "pipeline": "http://pipeline.example.com/onestopshop-portal",
-    "specifications": [{ "id": "HW_PowerEdge_R740", "name": "PowerEdge R740" }],
-    "created_at": "2023-11-20T09:00:00Z", "updated_at": "2023-11-20T09:00:00Z"
+    "specifications": [{ "id": "HW_PowerEdge_R740", "name": "PowerEdge R740" }]
   },
   {
     "id": "Product_Data_Platform",
@@ -46,45 +45,7 @@ const initialProducts: Omit<Product, '_id'>[] = [
     "git_repo": "http://git.example.com/data-analytics",
     "artifacts_repo": "http://artifacts.example.com/data-analytics",
     "pipeline": "http://pipeline.example.com/data-analytics",
-    "specifications": [],
-    "created_at": "2023-10-15T14:30:00Z", "updated_at": "2023-11-21T11:00:00Z"
-  },
-  {
-    "id": "Product_Orchestration_Engine",
-    "name": "Orchestration Engine",
-    "owner": "Platform Team", "owner_email": "platform@onestopshop.com",
-    "product_image": "https://picsum.photos/seed/productOrch/40/40",
-    "approval_needed": true,
-    "default_workflow": { "id": "Workflow_Security_Review", "name": "Security Review" },
-    "custom_workflows": [],
-    "cmdb": { "id": "CMDB_1", "name": "CMDB 1" },
-    "compliance_checks": [{ "id": "Compliance_Security", "name": "Security" }],
-    "deployment_type": { "id": "Deployment_OnPrem", "name": "On-Prem" },
-    "git_repo": "http://git.example.com/orchestration-engine",
-    "artifacts_repo": "http://artifacts.example.com/orchestration-engine",
-    "pipeline": "http://pipeline.example.com/orchestration-engine",
-    "specifications": [
-      { "id": "HW_ProLiant_DL380", "name": "ProLiant DL380 Gen10" },
-      { "id": "HW_Cisco_UCS_B200_M5", "name": "Cisco UCS B200 M5 Blade" }
-    ],
-    "created_at": "2024-01-05T10:00:00Z", "updated_at": "2024-01-10T12:00:00Z"
-  },
-  {
-    "id": "Product_Discovery_Service",
-    "name": "Discovery Service",
-    "owner": "Infra Team", "owner_email": "infra@onestopshop.com",
-    "product_image": "https://picsum.photos/seed/productDiscovery/40/40",
-    "approval_needed": false,
-    "default_workflow": { "id": "Workflow_Flow_1", "name": "Flow 1" },
-    "custom_workflows": [],
-    "cmdb": { "id": "CMDB_2", "name": "CMDB 2" },
-    "compliance_checks": [],
-    "deployment_type": { "id": "Deployment_Cloud", "name": "Cloud" },
-    "git_repo": "http://git.example.com/discovery-service",
-    "artifacts_repo": "http://artifacts.example.com/discovery-service",
-    "pipeline": "http://pipeline.example.com/discovery-service",
-    "specifications": [],
-    "created_at": "2024-02-01T09:00:00Z", "updated_at": "2024-02-05T15:00:00Z"
+    "specifications": []
   }
 ];
 
@@ -95,12 +56,14 @@ async function seedProducts() {
     const db = client.db();
     const productsCollection = db.collection('products');
     
-    const count = await productsCollection.countDocuments({ id: { $in: initialProducts.map(p => p.id) } });
-    if (count < initialProducts.length) {
-      await productsCollection.deleteMany({ id: { $in: initialProducts.map(i => i.id) } });
-      await productsCollection.insertMany(initialProducts as any);
-      console.log('Seeded products collection.');
+    for (const product of initialProducts) {
+        await productsCollection.updateOne(
+            { id: product.id },
+            { $set: { ...product, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
+            { upsert: true }
+        );
     }
+    console.log('Seeded products collection.');
 
   } catch (error) {
     console.error('Error seeding products:', error);
@@ -169,8 +132,6 @@ const ProductSchema = z.object({
     id: z.string(),
     name: z.string(),
   })).optional(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
 });
 
 
