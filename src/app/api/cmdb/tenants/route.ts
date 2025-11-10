@@ -45,14 +45,41 @@ const TenantSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_tenants';
 
+const initialTenantOnboardingPhases = [
+    { id: "phase-1", name: "Initiate Onboarding", fields: ["requestFormSubmitted", "csApproved", "pmApproved", "productTeamAgreement"] },
+    { id: "phase-2", name: "Product Definitions", fields: ["architectAgreed", "specChanged", "hlDesignApproved"] },
+    { id: "phase-3", name: "Detail Design", fields: ["detailDesignDone", "dependencyIdentified", "pertReady", "testPlanReady"] },
+    { id: "phase-4", name: "Delivery", fields: ["implementationDone", "unitTestDone", "staticCodeDone", "systemIntegrationDone", "systemIntegrationTestingDone", "allTestCasesAutomated"] },
+    { id: "phase-5", name: "Alpha Qualification", fields: ["uatTestDone", "riskReported", "serviceMetricsDone"] },
+    { id: "phase-6", name: "Prepare customer", fields: ["communicatedChanges", "plannedMCWindow"] },
+    { id: "phase-7", name: "Beta Qualification", fields: ["deploymentRunbookForBeta", "deploymentDone", "betaTestsExecuted"] },
+    { id: "phase-8", name: "Completed", fields: ["onboardingCompleteClosure"] }
+];
+const statuses = ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"];
+const getRandomStatus = () => statuses[Math.floor(Math.random() * statuses.length)];
+
+const generatePhases = () => {
+    return initialTenantOnboardingPhases.map(p => ({
+        id: p.id,
+        name: p.name,
+        version: "1.0",
+        status: getRandomStatus(),
+        fields: p.fields.map(f => ({
+            name: f,
+            value: Math.random() > 0.5,
+            proof: { link: '' }
+        }))
+    }));
+};
+
 const initialTenants = [
-    { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation", "description": "Core platform services and infrastructure foundation.", "products": [], "dependent_tenants": [], "version": "1.0.0", "created_at": "2023-12-01T10:00:00Z", "updated_at": "2023-12-01T10:00:00Z" },
-    { "id": "Tenant_Platform_Infra", "name": "Platform Infra", "description": "Infrastructure services for compute, storage, and networking.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }], "version": "1.1.0", "created_at": "2023-12-01T11:00:00Z", "updated_at": "2023-12-01T11:00:00Z" },
-    { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations", "description": "Integration and mediation services for connecting systems.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "version": "1.2.0", "created_at": "2023-12-01T12:00:00Z", "updated_at": "2023-12-01T12:00:00Z" },
-    { "id": "Tenant_Analytics", "name": "Analytics", "description": "Data analytics and business intelligence services.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "version": "2.0.0", "created_at": "2023-12-02T09:00:00Z", "updated_at": "2023-12-02T09:00:00Z" },
-    { "id": "Tenant_Low_Level", "name": "Low Level Services", "description": "Fundamental services for e-commerce operations.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }], "version": "1.0.0", "created_at": "2023-12-02T10:00:00Z", "updated_at": "2023-12-02T10:00:00Z" },
-    { "id": "Tenant_Medium_Level", "name": "Medium Level Services", "description": "Business logic and orchestration for e-commerce.", "products": [], "dependent_tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }], "version": "1.0.0", "created_at": "2023-12-02T11:00:00Z", "updated_at": "2023-12-02T11:00:00Z" },
-    { "id": "Tenant_High_Level", "name": "High Level Services", "description": "Customer-facing e-commerce applications and APIs.", "products": [], "dependent_tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }], "version": "1.0.0", "created_at": "2023-12-02T12:00:00Z", "updated_at": "2023-12-02T12:00:00Z" }
+    { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation", "description": "Core platform services and infrastructure foundation.", "products": [], "dependent_tenants": [], "version": "1.0.0", "created_at": "2023-12-01T10:00:00Z", "updated_at": "2023-12-01T10:00:00Z", "phases": generatePhases() },
+    { "id": "Tenant_Platform_Infra", "name": "Platform Infra", "description": "Infrastructure services for compute, storage, and networking.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }], "version": "1.1.0", "created_at": "2023-12-01T11:00:00Z", "updated_at": "2023-12-01T11:00:00Z", "phases": generatePhases() },
+    { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations", "description": "Integration and mediation services for connecting systems.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "version": "1.2.0", "created_at": "2023-12-01T12:00:00Z", "updated_at": "2023-12-01T12:00:00Z", "phases": generatePhases() },
+    { "id": "Tenant_Analytics", "name": "Analytics", "description": "Data analytics and business intelligence services.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "version": "2.0.0", "created_at": "2023-12-02T09:00:00Z", "updated_at": "2023-12-02T09:00:00Z", "phases": generatePhases() },
+    { "id": "Tenant_Low_Level", "name": "Low Level Services", "description": "Fundamental services for e-commerce operations.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }], "version": "1.0.0", "created_at": "2023-12-02T10:00:00Z", "updated_at": "2023-12-02T10:00:00Z", "phases": generatePhases() },
+    { "id": "Tenant_Medium_Level", "name": "Medium Level Services", "description": "Business logic and orchestration for e-commerce.", "products": [], "dependent_tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }], "version": "1.0.0", "created_at": "2023-12-02T11:00:00Z", "updated_at": "2023-12-02T11:00:00Z", "phases": generatePhases() },
+    { "id": "Tenant_High_Level", "name": "High Level Services", "description": "Customer-facing e-commerce applications and APIs.", "products": [], "dependent_tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }], "version": "1.0.0", "created_at": "2023-12-02T12:00:00Z", "updated_at": "2023-12-02T12:00:00Z", "phases": generatePhases() }
 ];
 
 

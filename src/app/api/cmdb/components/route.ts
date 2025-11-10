@@ -43,189 +43,149 @@ const ComponentSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_components';
 
+const initialComponentOnboardingPhases = [
+    { id: "phase-1", name: "Initiate Onboarding", fields: ["requestFormSubmitted", "csApproved", "pmApproved", "productTeamAgreement"] },
+    { id: "phase-2", name: "Product Definitions", fields: ["architectAgreed", "specChanged", "hlDesignApproved"] },
+    { id: "phase-3", name: "Detail Design", fields: ["detailDesignDone", "dependencyIdentified", "pertReady", "testPlanReady"] },
+    { id: "phase-4", name: "Delivery", fields: ["implementationDone", "unitTestDone", "staticCodeDone", "systemIntegrationDone", "systemIntegrationTestingDone", "allTestCasesAutomated"] },
+    { id: "phase-5", name: "Alpha Qualification", fields: ["uatTestDone", "riskReported", "serviceMetricsDone"] },
+    { id: "phase-6", name: "Prepare customer", fields: ["communicatedChanges", "plannedMCWindow"] },
+    { id: "phase-7", name: "Beta Qualification", fields: ["deploymentRunbookForBeta", "deploymentDone", "betaTestsExecuted"] },
+    { id: "phase-8", name: "Completed", fields: ["onboardingCompleteClosure"] }
+];
+const statuses = ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"];
+const getRandomStatus = () => statuses[Math.floor(Math.random() * statuses.length)];
+
+const generatePhases = () => {
+    return initialComponentOnboardingPhases.map(p => ({
+        id: p.id,
+        name: p.name,
+        version: "1.0",
+        status: getRandomStatus(),
+        fields: p.fields.map(f => ({
+            name: f,
+            value: Math.random() > 0.5,
+            proof: { link: '' }
+        }))
+    }));
+};
+
 const initialComponents = [
     {
-        "id": "Comp_Auth_Service",
-        "name": "Authentication Service",
-        "version": "1.2.0",
+        "id": "Comp_Auth_Service", "name": "Authentication Service", "version": "1.2.0",
         "tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }],
         "provided_interfaces": [{ "id": "Interface_User_Auth_API", "name": "User Authentication API" }],
-        "created_at": "2024-01-10T09:00:00Z", "updated_at": "2024-01-10T09:00:00Z",
-        "phases": []
+        "created_at": "2024-01-10T09:00:00Z", "updated_at": "2024-01-10T09:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Payment_Gateway",
-        "name": "Payment Gateway",
-        "version": "3.0.0",
+        "id": "Comp_Payment_Gateway", "name": "Payment Gateway", "version": "3.0.0",
         "tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }],
         "provided_interfaces": [{ "id": "Interface_Payment_API", "name": "Payment Processing API" }],
         "dependent_interfaces": [{ "id": "Interface_Compliance_Check_API", "name": "Compliance Check API" }],
-        "created_at": "2024-01-11T14:00:00Z", "updated_at": "2024-01-11T14:00:00Z",
-        "phases": []
+        "created_at": "2024-01-11T14:00:00Z", "updated_at": "2024-01-11T14:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Inventory_Service",
-        "name": "Inventory Service",
-        "version": "2.5.0",
+        "id": "Comp_Inventory_Service", "name": "Inventory Service", "version": "2.5.0",
         "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
         "provided_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
-        "created_at": "2024-01-12T11:00:00Z", "updated_at": "2024-01-12T11:00:00Z",
-        "phases": []
+        "created_at": "2024-01-12T11:00:00Z", "updated_at": "2024-01-12T11:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Search_Service",
-        "name": "Search Service",
-        "version": "1.8.0",
+        "id": "Comp_Search_Service", "name": "Search Service", "version": "1.8.0",
         "tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }],
         "dependent_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
-        "created_at": "2024-01-13T16:00:00Z", "updated_at": "2024-01-13T16:00:00Z",
-        "phases": []
+        "created_at": "2024-01-13T16:00:00Z", "updated_at": "2024-01-13T16:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Email_Service",
-        "name": "Email Service",
-        "version": "2.0.0",
+        "id": "Comp_Email_Service", "name": "Email Service", "version": "2.0.0",
         "tenants": [ { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" } ],
-        "provided_interfaces": [],
-        "created_at": "2024-01-14T10:00:00Z", "updated_at": "2024-01-14T10:00:00Z",
-        "phases": []
+        "created_at": "2024-01-14T10:00:00Z", "updated_at": "2024-01-14T10:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Data_Warehouse_Connector",
-        "name": "Data Warehouse Connector",
-        "version": "1.0.0",
+        "id": "Comp_Data_Warehouse_Connector", "name": "Data Warehouse Connector", "version": "1.0.0",
         "tenants": [{ "id": "Tenant_Analytics", "name": "Analytics" }],
         "provided_interfaces": [{ "id": "Interface_Reporting_API", "name": "Reporting API" }],
-        "created_at": "2024-02-01T12:00:00Z", "updated_at": "2024-02-01T12:00:00Z",
-        "phases": []
+        "created_at": "2024-02-01T12:00:00Z", "updated_at": "2024-02-01T12:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Config_Service",
-        "name": "Configuration Service",
-        "version": "1.5.0",
+        "id": "Comp_Config_Service", "name": "Configuration Service", "version": "1.5.0",
         "tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }],
-        "created_at": "2024-02-05T09:00:00Z", "updated_at": "2024-02-05T09:00:00Z",
-        "phases": []
+        "created_at": "2024-02-05T09:00:00Z", "updated_at": "2024-02-05T09:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Logging_Service",
-        "name": "Logging Service",
-        "version": "2.1.0",
+        "id": "Comp_Logging_Service", "name": "Logging Service", "version": "2.1.0",
         "tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }],
-        "created_at": "2024-02-06T10:00:00Z", "updated_at": "2024-02-06T10:00:00Z",
-        "phases": []
+        "created_at": "2024-02-06T10:00:00Z", "updated_at": "2024-02-06T10:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Message_Broker",
-        "name": "Message Broker",
-        "version": "3.0.0",
+        "id": "Comp_Message_Broker", "name": "Message Broker", "version": "3.0.0",
         "tenants": [{ "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }],
-        "created_at": "2024-02-07T11:00:00Z", "updated_at": "2024-02-07T11:00:00Z",
-        "phases": []
+        "created_at": "2024-02-07T11:00:00Z", "updated_at": "2024-02-07T11:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_ETL_Service",
-        "name": "ETL Service",
-        "version": "1.3.0",
+        "id": "Comp_ETL_Service", "name": "ETL Service", "version": "1.3.0",
         "tenants": [{ "id": "Tenant_Analytics", "name": "Analytics" }],
-        "created_at": "2024-02-08T12:00:00Z", "updated_at": "2024-02-08T12:00:00Z",
-        "phases": []
+        "created_at": "2024-02-08T12:00:00Z", "updated_at": "2024-02-08T12:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Notification_Service",
-        "name": "Notification Service",
-        "version": "1.7.0",
+        "id": "Comp_Notification_Service", "name": "Notification Service", "version": "1.7.0",
         "tenants": [ { "id": "Tenant_Low_Level", "name": "Low Level Services" } ],
-        "created_at": "2024-02-09T14:00:00Z", "updated_at": "2024-02-09T14:00:00Z",
-        "phases": []
+        "created_at": "2024-02-09T14:00:00Z", "updated_at": "2024-02-09T14:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Content_Delivery_Network",
-        "name": "Content Delivery Network (CDN)",
-        "version": "2.0.0",
+        "id": "Comp_Content_Delivery_Network", "name": "Content Delivery Network (CDN)", "version": "2.0.0",
         "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
-        "created_at": "2024-02-11T16:00:00Z", "updated_at": "2024-02-11T16:00:00Z",
-        "phases": []
+        "created_at": "2024-02-11T16:00:00Z", "updated_at": "2024-02-11T16:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Secret_Management",
-        "name": "Secret Management",
-        "version": "1.1.0",
+        "id": "Comp_Secret_Management", "name": "Secret Management", "version": "1.1.0",
         "tenants": [ { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" } ],
-        "created_at": "2024-03-10T10:00:00Z", "updated_at": "2024-03-10T10:00:00Z",
-        "phases": []
+        "created_at": "2024-03-10T10:00:00Z", "updated_at": "2024-03-10T10:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_API_Gateway",
-        "name": "API Gateway",
-        "version": "2.4.0",
+        "id": "Comp_API_Gateway", "name": "API Gateway", "version": "2.4.0",
         "tenants": [ { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" } ],
-        "created_at": "2024-03-12T11:00:00Z", "updated_at": "2024-03-12T11:00:00Z",
-        "phases": []
+        "created_at": "2024-03-12T11:00:00Z", "updated_at": "2024-03-12T11:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Metrics_Service",
-        "name": "Metrics Service",
-        "version": "1.9.0",
+        "id": "Comp_Metrics_Service", "name": "Metrics Service", "version": "1.9.0",
         "tenants": [ { "id": "Tenant_Platform_Infra", "name": "Platform Infra" } ],
-        "created_at": "2024-03-14T12:00:00Z", "updated_at": "2024-03-14T12:00:00Z",
-        "phases": []
+        "created_at": "2024-03-14T12:00:00Z", "updated_at": "2024-03-14T12:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Data_Streaming_Service",
-        "name": "Data Streaming Service",
-        "version": "2.0.0",
+        "id": "Comp_Data_Streaming_Service", "name": "Data Streaming Service", "version": "2.0.0",
         "tenants": [ { "id": "Tenant_Analytics", "name": "Analytics" } ],
-        "created_at": "2024-03-16T14:00:00Z", "updated_at": "2024-03-16T14:00:00Z",
-        "phases": []
+        "created_at": "2024-03-16T14:00:00Z", "updated_at": "2024-03-16T14:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Cache_Service",
-        "name": "Cache Service",
-        "version": "3.1.0",
+        "id": "Comp_Cache_Service", "name": "Cache Service", "version": "3.1.0",
         "tenants": [ { "id": "Tenant_Medium_Level", "name": "Medium Level Services" } ],
-        "created_at": "2024-03-18T15:00:00Z", "updated_at": "2024-03-18T15:00:00Z",
-        "phases": []
+        "created_at": "2024-03-18T15:00:00Z", "updated_at": "2024-03-18T15:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Service_Discovery",
-        "name": "Service Discovery",
-        "version": "1.0.0",
+        "id": "Comp_Service_Discovery", "name": "Service Discovery", "version": "1.0.0",
         "tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }],
-        "created_at": "2024-05-20T10:00:00Z", "updated_at": "2024-05-20T10:00:00Z",
-        "phases": []
+        "created_at": "2024-05-20T10:00:00Z", "updated_at": "2024-05-20T10:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Circuit_Breaker",
-        "name": "Circuit Breaker",
-        "version": "1.2.0",
+        "id": "Comp_Circuit_Breaker", "name": "Circuit Breaker", "version": "1.2.0",
         "tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }],
-        "created_at": "2024-05-21T11:00:00Z", "updated_at": "2024-05-21T11:00:00Z",
-        "phases": []
+        "created_at": "2024-05-21T11:00:00Z", "updated_at": "2024-05-21T11:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Distributed_Tracing",
-        "name": "Distributed Tracing",
-        "version": "1.5.0",
+        "id": "Comp_Distributed_Tracing", "name": "Distributed Tracing", "version": "1.5.0",
         "tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }],
-        "created_at": "2024-05-22T12:00:00Z", "updated_at": "2024-05-22T12:00:00Z",
-        "phases": []
+        "created_at": "2024-05-22T12:00:00Z", "updated_at": "2024-05-22T12:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Event_Bus",
-        "name": "Event Bus",
-        "version": "2.0.0",
+        "id": "Comp_Event_Bus", "name": "Event Bus", "version": "2.0.0",
         "tenants": [{ "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }],
-        "created_at": "2024-05-23T13:00:00Z", "updated_at": "2024-05-23T13:00:00Z",
-        "phases": []
+        "created_at": "2024-05-23T13:00:00Z", "updated_at": "2024-05-23T13:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "Comp_Data_Lake",
-        "name": "Data Lake",
-        "version": "1.8.0",
+        "id": "Comp_Data_Lake", "name": "Data Lake", "version": "1.8.0",
         "tenants": [{ "id": "Tenant_Analytics", "name": "Analytics" }],
-        "created_at": "2024-05-24T14:00:00Z", "updated_at": "2024-05-24T14:00:00Z",
-        "phases": []
+        "created_at": "2024-05-24T14:00:00Z", "updated_at": "2024-05-24T14:00:00Z", "phases": generatePhases()
     }
 ];
 

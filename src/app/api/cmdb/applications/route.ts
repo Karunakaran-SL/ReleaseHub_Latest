@@ -44,150 +44,116 @@ const ApplicationSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_applications';
 
+const initialApplicationOnboardingPhases = [
+    { id: "phase-1", name: "Initiate Onboarding", fields: ["requestFormSubmitted", "csApproved", "pmApproved", "productTeamAgreement"] },
+    { id: "phase-2", name: "Product Definitions", fields: ["architectAgreed", "specChanged", "hlDesignApproved"] },
+    { id: "phase-3", name: "Detail Design", fields: ["detailDesignDone", "dependencyIdentified", "pertReady", "testPlanReady"] },
+    { id: "phase-4", name: "Delivery", fields: ["implementationDone", "unitTestDone", "staticCodeDone", "systemIntegrationDone", "systemIntegrationTestingDone", "allTestCasesAutomated"] },
+    { id: "phase-5", name: "Alpha Qualification", fields: ["uatTestDone", "riskReported", "serviceMetricsDone"] },
+    { id: "phase-6", name: "Prepare customer", fields: ["communicatedChanges", "plannedMCWindow"] },
+    { id: "phase-7", name: "Beta Qualification", fields: ["deploymentRunbookForBeta", "deploymentDone", "betaTestsExecuted"] },
+    { id: "phase-8", name: "Completed", fields: ["onboardingCompleteClosure"] }
+];
+const statuses = ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"];
+const getRandomStatus = () => statuses[Math.floor(Math.random() * statuses.length)];
+
+const generatePhases = () => {
+    return initialApplicationOnboardingPhases.map(p => ({
+        id: p.id,
+        name: p.name,
+        version: "1.0",
+        status: getRandomStatus(),
+        fields: p.fields.map(f => ({
+            name: f,
+            value: Math.random() > 0.5,
+            proof: { link: '' }
+        }))
+    }));
+};
 
 const initialApplications = [
     {
-        "id": "App_Ecom_Storefront",
-        "name": "E-Commerce Storefront",
-        "description": "Customer-facing web application for browsing and purchasing products.",
-        "version": "2.1.0",
+        "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront", "description": "Customer-facing web application for browsing and purchasing products.", "version": "2.1.0",
         "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
-        "dependent_components": [
-            { "id": "Comp_Auth_Service", "name": "Authentication Service" },
-            { "id": "Comp_Search_Service", "name": "Search Service" }
-        ],
+        "dependent_components": [{ "id": "Comp_Auth_Service", "name": "Authentication Service" }, { "id": "Comp_Search_Service", "name": "Search Service" }],
         "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
         "provided_interfaces": [{ "id": "Interface_Web_UI", "name": "Main Web UI" }],
-        "dependent_interfaces": [
-            { "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" },
-            { "id": "Interface_User_Auth_API", "name": "User Authentication API" }
-        ],
-        "created_at": "2024-01-15T10:00:00Z", "updated_at": "2024-01-15T10:00:00Z",
-        "phases": []
+        "dependent_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }, { "id": "Interface_User_Auth_API", "name": "User Authentication API" }],
+        "created_at": "2024-01-15T10:00:00Z", "updated_at": "2024-01-15T10:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_Order_Processing",
-        "name": "Order Processing Backend",
-        "description": "Handles order creation, payment processing, and fulfillment.",
-        "version": "1.5.0",
+        "id": "App_Order_Processing", "name": "Order Processing Backend", "description": "Handles order creation, payment processing, and fulfillment.", "version": "1.5.0",
         "tenants": [ { "id": "Tenant_Medium_Level", "name": "Medium Level Services" } ],
-        "dependent_components": [
-            { "id": "Comp_Payment_Gateway", "name": "Payment Gateway" },
-            { "id": "Comp_Inventory_Service", "name": "Inventory Service" }
-        ],
+        "dependent_components": [{ "id": "Comp_Payment_Gateway", "name": "Payment Gateway" }, { "id": "Comp_Inventory_Service", "name": "Inventory Service" }],
         "provided_interfaces": [{ "id": "Interface_Order_API", "name": "Order Management API" }],
         "dependent_interfaces": [{ "id": "Interface_Payment_API", "name": "Payment Processing API" }],
-        "created_at": "2024-01-16T11:00:00Z", "updated_at": "2024-01-16T11:00:00Z",
-        "phases": []
+        "created_at": "2024-01-16T11:00:00Z", "updated_at": "2024-01-16T11:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_Analytics_Dashboard",
-        "name": "Analytics Dashboard",
-        "description": "Provides business intelligence and sales analytics.",
-        "version": "3.0.0",
+        "id": "App_Analytics_Dashboard", "name": "Analytics Dashboard", "description": "Provides business intelligence and sales analytics.", "version": "3.0.0",
         "tenants": [{ "id": "Tenant_Analytics", "name": "Analytics" }],
         "dependent_components": [{ "id": "Comp_Data_Warehouse_Connector", "name": "Data Warehouse Connector" }],
         "provided_interfaces": [{ "id": "Interface_Analytics_UI", "name": "Analytics Web UI" }],
         "dependent_interfaces": [{ "id": "Interface_Reporting_API", "name": "Reporting API" }],
-        "created_at": "2024-02-10T09:00:00Z", "updated_at": "2024-02-10T09:00:00Z",
-        "phases": []
+        "created_at": "2024-02-10T09:00:00Z", "updated_at": "2024-02-10T09:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_Mobile_Companion",
-        "name": "Mobile Companion App",
-        "description": "iOS and Android app for on-the-go shopping.",
-        "version": "1.2.0",
+        "id": "App_Mobile_Companion", "name": "Mobile Companion App", "description": "iOS and Android app for on-the-go shopping.", "version": "1.2.0",
         "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
         "dependent_applications": [{ "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront" }],
-        "provided_interfaces": [],
         "dependent_interfaces": [{ "id": "Interface_Order_API", "name": "Order Management API" }],
-        "created_at": "2024-03-05T14:00:00Z", "updated_at": "2024-03-05T14:00:00Z",
-        "phases": []
+        "created_at": "2024-03-05T14:00:00Z", "updated_at": "2024-03-05T14:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_CRM_Platform",
-        "name": "CRM Platform",
-        "description": "Manages customer relationships, support tickets, and marketing campaigns.",
-        "version": "4.0.1",
+        "id": "App_CRM_Platform", "name": "CRM Platform", "description": "Manages customer relationships, support tickets, and marketing campaigns.", "version": "4.0.1",
         "tenants": [ { "id": "Tenant_Low_Level", "name": "Low Level Services" } ],
         "dependent_components": [{ "id": "Comp_Email_Service", "name": "Email Service" }],
         "provided_interfaces": [{ "id": "Interface_Customer_Data_API", "name": "Customer Data API" }],
-        "created_at": "2024-02-20T16:00:00Z", "updated_at": "2024-02-20T16:00:00Z",
-        "phases": []
+        "created_at": "2024-02-20T16:00:00Z", "updated_at": "2024-02-20T16:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_Marketing_Automation",
-        "name": "Marketing Automation",
-        "description": "Automates marketing campaigns and lead nurturing.",
-        "version": "1.8.0",
+        "id": "App_Marketing_Automation", "name": "Marketing Automation", "description": "Automates marketing campaigns and lead nurturing.", "version": "1.8.0",
         "tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }],
         "dependent_applications": [{ "id": "App_CRM_Platform", "name": "CRM Platform" }],
         "dependent_components": [{ "id": "Comp_Email_Service", "name": "Email Service" }],
-        "created_at": "2024-04-01T10:00:00Z", "updated_at": "2024-04-01T10:00:00Z",
-        "phases": []
+        "created_at": "2024-04-01T10:00:00Z", "updated_at": "2024-04-01T10:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_Product_Recommendations",
-        "name": "Product Recommendations AI",
-        "description": "AI-powered service for personalized product recommendations.",
-        "version": "1.0.0",
+        "id": "App_Product_Recommendations", "name": "Product Recommendations AI", "description": "AI-powered service for personalized product recommendations.", "version": "1.0.0",
         "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
         "dependent_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
-        "created_at": "2024-04-05T12:00:00Z", "updated_at": "2024-04-05T12:00:00Z",
-        "phases": []
+        "created_at": "2024-04-05T12:00:00Z", "updated_at": "2024-04-05T12:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_Fraud_Detection",
-        "name": "Fraud Detection Service",
-        "description": "Real-time fraud detection for transactions.",
-        "version": "2.2.0",
+        "id": "App_Fraud_Detection", "name": "Fraud Detection Service", "description": "Real-time fraud detection for transactions.", "version": "2.2.0",
         "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
         "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
-        "created_at": "2024-04-10T15:00:00Z", "updated_at": "2024-04-10T15:00:00Z",
-        "phases": []
+        "created_at": "2024-04-10T15:00:00Z", "updated_at": "2024-04-10T15:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_A_B_Testing",
-        "name": "A/B Testing Platform",
-        "description": "Platform for running A/B tests on the storefront.",
-        "version": "1.1.0",
+        "id": "App_A_B_Testing", "name": "A/B Testing Platform", "description": "Platform for running A/B tests on the storefront.", "version": "1.1.0",
         "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
         "dependent_applications": [{ "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront" }],
-        "created_at": "2024-04-12T11:00:00Z", "updated_at": "2024-04-12T11:00:00Z",
-        "phases": []
+        "created_at": "2024-04-12T11:00:00Z", "updated_at": "2024-04-12T11:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_PIM_Platform",
-        "name": "Product Information Management",
-        "description": "Centralizes and harmonizes all marketing and technical information for product listings.",
-        "version": "1.3.0",
+        "id": "App_PIM_Platform", "name": "Product Information Management", "description": "Centralizes and harmonizes all marketing and technical information for product listings.", "version": "1.3.0",
         "tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }],
-        "dependent_components": [
-            { "id": "Comp_Inventory_Service", "name": "Inventory Service" }
-        ],
-        "created_at": "2024-05-01T09:00:00Z", "updated_at": "2024-05-01T09:00:00Z",
-        "phases": []
+        "dependent_components": [{ "id": "Comp_Inventory_Service", "name": "Inventory Service" }],
+        "created_at": "2024-05-01T09:00:00Z", "updated_at": "2024-05-01T09:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_Support_Chatbot",
-        "name": "Customer Support Chatbot",
-        "description": "AI-powered chatbot for handling customer support queries.",
-        "version": "1.0.0",
+        "id": "App_Support_Chatbot", "name": "Customer Support Chatbot", "description": "AI-powered chatbot for handling customer support queries.", "version": "1.0.0",
         "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
         "dependent_applications": [{ "id": "App_CRM_Platform", "name": "CRM Platform" }],
-        "created_at": "2024-05-05T11:00:00Z", "updated_at": "2024-05-05T11:00:00Z",
-        "phases": []
+        "created_at": "2024-05-05T11:00:00Z", "updated_at": "2024-05-05T11:00:00Z", "phases": generatePhases()
     },
     {
-        "id": "App_Returns_Management",
-        "name": "Returns Management System",
-        "description": "Manages the product returns and refund process.",
-        "version": "1.6.0",
+        "id": "App_Returns_Management", "name": "Returns Management System", "description": "Manages the product returns and refund process.", "version": "1.6.0",
         "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
         "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
         "dependent_components": [{ "id": "Comp_Inventory_Service", "name": "Inventory Service" }],
-        "created_at": "2024-05-10T14:00:00Z", "updated_at": "2024-05-10T14:00:00Z",
-        "phases": []
+        "created_at": "2024-05-10T14:00:00Z", "updated_at": "2024-05-10T14:00:00Z", "phases": generatePhases()
     }
 ];
 
