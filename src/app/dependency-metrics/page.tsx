@@ -15,6 +15,7 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
 
 const entityTypeDetails: Record<EntityType, { label: string; icon: React.ElementType; linkPrefix: string; apiPath: string }> = {
     product: { label: 'Product', icon: Box, linkPrefix: '/products', apiPath: '/api/products' },
