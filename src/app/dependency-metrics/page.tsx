@@ -111,7 +111,6 @@ export default function DependencyMetricsPage() {
             
             const entityList = allEntities[selectedEntityType];
             if (!entityList || entityList.length === 0) {
-                 // Data might still be fetching, wait for it.
                  if (loading) return;
                  console.error(`Entity list for type ${selectedEntityType} is empty.`);
                  setLoading(false);
@@ -121,7 +120,6 @@ export default function DependencyMetricsPage() {
             const entity = entityList.find(e => e.id === selectedEntityId);
             if (!entity) {
                 console.error(`Entity not found for type ${selectedEntityType} and id: ${selectedEntityId}`);
-                // Don't toast here, as it can happen during normal navigation
                 setLoading(false);
                 return;
             }
@@ -144,12 +142,11 @@ export default function DependencyMetricsPage() {
             }
         }
         
-        // Only run fetchTree if we have the entity data available
         if (allEntities[selectedEntityType] && allEntities[selectedEntityType].length > 0) {
              fetchTree();
         }
 
-    }, [selectedEntityType, selectedEntityId, toast, allEntities, loading]);
+    }, [selectedEntityType, selectedEntityId, toast, allEntities]);
     
     const handleEntityTypeChange = (type: EntityType) => {
         const firstEntityId = allEntities[type]?.[0]?.id;
@@ -177,8 +174,7 @@ export default function DependencyMetricsPage() {
         const usedBySet = new Set<AnyCmdbEntity & { entityType: EntityType }>();
         const dependsOnSet = new Set<AnyCmdbEntity & { entityType: EntityType }>();
         
-        // Find what depends on the current item
-        allTreeEntities.forEach(entity => {
+        allEntities.forEach(entity => {
             if (entity.id === currentItem.id) return;
             const dependencies = [
                 ...((entity as CmdbTenant).dependent_tenants || []),
@@ -190,12 +186,11 @@ export default function DependencyMetricsPage() {
                 ...((entity as CmdbTenant).products || [])
             ].filter(Boolean);
             
-            if (dependencies.some(dep => dep.id === currentItem.id)) {
+            if (dependencies.some(dep => dep && dep.id === currentItem.id)) {
                 usedBySet.add(entity);
             }
         });
 
-        // Find what the current item depends on
         const currentAsAny = currentItem as any;
          const dependencies = [
             ...(currentAsAny.dependent_tenants || []),
@@ -217,7 +212,7 @@ export default function DependencyMetricsPage() {
             usedBy: Array.from(usedBySet),
             dependsOn: Array.from(dependsOnSet),
         };
-    }, [dependencyTree, selectedEntityId]);
+    }, [dependencyTree, selectedEntityId, allEntities]);
     
     const summaryData = [
         ...usedBy.map(item => ({ relationship: 'Used By', item })),
