@@ -17,7 +17,7 @@ import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-li
 import OnboardingPhaseComponent from '../../../tenants/create/_components/onboarding-phase';
 import { cn } from '@/lib/utils';
 
-type EditComponentFormState = Partial<Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'>> & { updateComment?: string };
+type EditComponentFormState = Partial<Omit<CmdbComponent, 'created_at' | 'updated_at'>> & { updateComment?: string };
 
 const statusColors: Record<string, string> = {
     'Not Started': 'bg-gray-200 text-gray-800',
@@ -219,7 +219,7 @@ export default function EditComponentPage() {
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
 
-        const available: Option[] = allOptions.filter(opt => !chosenIds.has(opt.id));
+        const available: Option[] = allOptions.filter(opt => !chosenIds.has(opt.id) && opt.id !== formState.id);
         const chosen: Option[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
 
         const moveItems = (ids: string[], source: Option[], dest: Option[]) => {

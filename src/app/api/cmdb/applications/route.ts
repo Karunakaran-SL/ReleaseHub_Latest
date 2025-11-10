@@ -107,8 +107,8 @@ async function seedApplications() {
     
     for (const app of initialApplications) {
         await collection.updateOne(
-            { id: app.id },
-            { $set: { ...app, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
+            { _id: app.id },
+            { $set: { ...app, _id: app.id, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
             { upsert: true }
         );
     }
@@ -122,9 +122,13 @@ async function seedApplications() {
 // List all applications
 export async function GET(req: NextRequest) {
   try {
-    await seedApplications();
     const client = await clientPromise;
     const db = client.db();
+    
+    const count = await db.collection(COLLECTION_NAME).countDocuments();
+    if (count === 0) {
+        await seedApplications();
+    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });
@@ -153,22 +157,26 @@ export async function POST(req: NextRequest) {
         const client = await clientPromise;
         const db = client.db();
         
-        const result = await db.collection(COLLECTION_NAME).insertOne(validatedData.data as any);
-        const insertedItem = { ...validatedData.data, _id: result.insertedId };
+        const newItem = {
+            ...validatedData.data,
+            _id: validatedData.data.id,
+        };
+        
+        await db.collection(COLLECTION_NAME).insertOne(newItem as any);
 
         await logAuditEvent({
             action: 'CREATE',
             entity: 'application',
-            entityId: result.insertedId.toString(),
-            comment: `Application "${insertedItem.name}" onboarded.`,
+            entityId: newItem.id,
+            comment: `Application "${newItem.name}" onboarded.`,
         });
         
         const products = await db.collection('products').find({}).toArray();
         for (const product of products) {
-            revalidateDependencyTree(product._id.toString());
+            revalidateDependencyTree(product._id);
         }
 
-        return NextResponse.json(insertedItem, { status: 201 });
+        return NextResponse.json(newItem, { status: 201 });
 
     } catch (error) {
         console.error(error);

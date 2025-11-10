@@ -9,14 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, CmdbInterface, CmdbInterfaceType, CmdbComponent } from '@/lib/definitions';
+import type { User, CmdbInterface, CmdbInterfaceType, CmdbComponent, CmdbApplication } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
-type EditInterfaceFormState = Partial<Omit<CmdbInterface, '_id'>> & { updateComment?: string };
+type EditInterfaceFormState = Partial<Omit<CmdbInterface, 'created_at' | 'updated_at'>> & { updateComment?: string };
 
 export default function EditInterfacePage() {
     const [user, setUser] = useState<User | null>(null);
@@ -28,7 +28,7 @@ export default function EditInterfacePage() {
     const { toast } = useToast();
 
     const [interfaceTypes, setInterfaceTypes] = useState<CmdbInterfaceType[]>([]);
-    const [sourceComponents, setSourceComponents] = useState<CmdbComponent[]>([]);
+    const [sourceComponents, setSourceComponents] = useState<(CmdbComponent | CmdbApplication)[]>([]);
 
     useEffect(() => {
         getUser().then(setUser);
@@ -37,17 +37,20 @@ export default function EditInterfacePage() {
         async function fetchData() {
             setLoading(true);
             try {
-                const [itemRes, typesRes, componentsRes] = await Promise.all([
+                const [itemRes, typesRes, componentsRes, applicationsRes] = await Promise.all([
                     fetch(`/api/cmdb/interfaces/${id}`),
                     fetch('/api/cmdb/interface-types'),
-                    fetch('/api/cmdb/components')
+                    fetch('/api/cmdb/components'),
+                    fetch('/api/cmdb/applications')
                 ]);
                 
                 if(!itemRes.ok) throw new Error('Failed to fetch interface');
                 setFormState(await itemRes.json());
                 
                 if(typesRes.ok) setInterfaceTypes(await typesRes.json());
-                if(componentsRes.ok) setSourceComponents(await componentsRes.json());
+                const components = componentsRes.ok ? await componentsRes.json() : [];
+                const applications = applicationsRes.ok ? await applicationsRes.json() : [];
+                setSourceComponents([...components, ...applications]);
             } catch (error) {
                 toast({ variant: 'destructive', title: 'Error', description: 'Failed to load data.'});
                 router.push('/cmdb/interfaces');

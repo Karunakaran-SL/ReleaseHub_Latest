@@ -1,5 +1,4 @@
 
-
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -110,8 +109,8 @@ async function seedInterfaces() {
     
     for (const iface of initialInterfaces) {
         await collection.updateOne(
-            { id: iface.id },
-            { $set: { ...iface, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
+            { _id: iface.id },
+            { $set: { ...iface, _id: iface.id, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
             { upsert: true }
         );
     }
@@ -124,9 +123,13 @@ async function seedInterfaces() {
 // List all interfaces
 export async function GET(req: NextRequest) {
   try {
-    await seedInterfaces();
     const client = await clientPromise;
     const db = client.db();
+    
+    const count = await db.collection(COLLECTION_NAME).countDocuments();
+    if (count === 0) {
+        await seedInterfaces();
+    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).sort({updated_at: -1}).toArray();
     return NextResponse.json(items, { status: 200 });
@@ -155,17 +158,21 @@ export async function POST(req: NextRequest) {
         const client = await clientPromise;
         const db = client.db();
         
-        const result = await db.collection(COLLECTION_NAME).insertOne(validatedData.data as any);
-        const insertedItem = { ...validatedData.data, _id: result.insertedId };
+        const newItem = {
+            ...validatedData.data,
+            _id: validatedData.data.id,
+        };
+        
+        await db.collection(COLLECTION_NAME).insertOne(newItem as any);
 
         await logAuditEvent({
             action: 'CREATE',
             entity: 'interface',
-            entityId: result.insertedId.toString(),
-            comment: `Interface "${insertedItem.name}" created.`,
+            entityId: newItem.id,
+            comment: `Interface "${newItem.name}" created.`,
         });
 
-        return NextResponse.json(insertedItem, { status: 201 });
+        return NextResponse.json(newItem, { status: 201 });
 
     } catch (error) {
         console.error(error);
