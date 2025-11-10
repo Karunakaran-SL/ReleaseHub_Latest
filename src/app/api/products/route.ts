@@ -107,6 +107,7 @@ async function seedProducts() {
 // Search and list products
 export async function GET(req: NextRequest) {
   try {
+    await seedProducts();
     const client = await clientPromise;
     const db = client.db();
     const productsCollection = db.collection('products');
@@ -119,10 +120,6 @@ export async function GET(req: NextRequest) {
             name: { $regex: query, $options: 'i' } 
         }).toArray();
     } else {
-        const count = await productsCollection.countDocuments();
-        if (count === 0) {
-            await seedProducts();
-        }
         products = await productsCollection.find({}).toArray();
     }
 

@@ -108,16 +108,11 @@ async function seedSpecifications() {
 // List all or search
 export async function GET(req: NextRequest) {
   try {
+    await seedSpecifications();
     const client = await clientPromise;
     const db = client.db();
-    const collection = db.collection('specifications');
     
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedSpecifications();
-    }
-
-    const items = await collection.find({}).toArray();
+    const items = await db.collection('specifications').find({}).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
     console.error(error);

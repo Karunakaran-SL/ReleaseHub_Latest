@@ -249,14 +249,9 @@ async function seedComponents() {
 // List all components
 export async function GET(req: NextRequest) {
   try {
+    await seedComponents();
     const client = await clientPromise;
     const db = client.db();
-    const collection = db.collection(COLLECTION_NAME);
-
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedComponents();
-    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });

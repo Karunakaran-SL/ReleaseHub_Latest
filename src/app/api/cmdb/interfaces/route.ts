@@ -145,14 +145,9 @@ async function seedInterfaces() {
 // List all interfaces
 export async function GET(req: NextRequest) {
   try {
+    await seedInterfaces();
     const client = await clientPromise;
     const db = client.db();
-    const collection = db.collection(COLLECTION_NAME);
-
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedInterfaces();
-    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).sort({updated_at: -1}).toArray();
     return NextResponse.json(items, { status: 200 });

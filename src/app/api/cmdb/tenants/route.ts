@@ -75,14 +75,9 @@ async function seedTenants() {
 // List all tenants
 export async function GET(req: NextRequest) {
   try {
+    await seedTenants();
     const client = await clientPromise;
     const db = client.db();
-    const collection = db.collection(COLLECTION_NAME);
-
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedTenants();
-    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });

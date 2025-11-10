@@ -186,7 +186,7 @@ const initialApplications = [
         "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
         "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
         "dependent_components": [{ "id": "Comp_Inventory_Service", "name": "Inventory Service" }],
-        "created_at": "2024_05_10T14:00:00Z", "updated_at": "2024-05-10T14:00:00Z",
+        "created_at": "2024-05-10T14:00:00Z", "updated_at": "2024-05-10T14:00:00Z",
         "phases": []
     }
 ];
@@ -210,14 +210,9 @@ async function seedApplications() {
 // List all applications
 export async function GET(req: NextRequest) {
   try {
+    await seedApplications();
     const client = await clientPromise;
     const db = client.db();
-    const collection = db.collection(COLLECTION_NAME);
-    
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedApplications();
-    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });
