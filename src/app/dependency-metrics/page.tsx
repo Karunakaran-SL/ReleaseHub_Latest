@@ -105,6 +105,7 @@ export default function DependencyMetricsPage() {
             }
         }
         fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     
     const handleEntityTypeChange = (type: EntityType) => {
@@ -116,47 +117,73 @@ export default function DependencyMetricsPage() {
         router.push(`/dependency-metrics?type=${selectedEntityType}&id=${id}`);
     };
 
-    const { selectedItem, usedBy, dependsOn, inherits, inheritedBy } = useMemo(() => {
-        if (!selectedItemId) return { selectedItem: null, usedBy: [], dependsOn: [], inherits: [], inheritedBy: [] };
+    const { selectedItem, usedBy, dependsOn, inherits } = useMemo(() => {
+        if (!selectedItemId || !selectedEntityType) return { selectedItem: null, usedBy: [], dependsOn: [], inherits: [] };
 
         const allEntities = Object.values(allData).flat();
         const item = allEntities.find(e => e._id === selectedItemId && e.entityType === selectedEntityType);
 
-        if (!item) return { selectedItem: null, usedBy: [], dependsOn: [], inherits: [], inheritedBy: [] };
+        if (!item) return { selectedItem: null, usedBy: [], dependsOn: [], inherits: [] };
+        
+        const usedBySet = new Set<AnyCmdbEntity>();
+        const dependsOnSet = new Set<AnyCmdbEntity>();
+        const inheritsSet = new Set<AnyCmdbEntity>();
 
-        let usedBy: AnyCmdbEntity[] = [];
-        let dependsOn: AnyCmdbEntity[] = [];
-        let inherits: AnyCmdbEntity[] = [];
-        let inheritedBy: AnyCmdbEntity[] = [];
+        // Find what the selected item depends on
+        const checkDependencies = (depArray?: {id: string}[]) => {
+             if (!depArray) return;
+             depArray.forEach(dep => {
+                const found = allEntities.find(e => e._id === dep.id);
+                if (found) dependsOnSet.add(found);
+             });
+        };
+        
+        checkDependencies((item as CmdbTenant).dependent_tenants);
+        checkDependencies((item as CmdbComponent).dependent_components);
+        checkDependencies((item as CmdbApplication).dependent_applications);
+        checkDependencies((item as CmdbComponent).dependent_interfaces);
+        checkDependencies((item as CmdbComponent).tenants);
+        checkDependencies((item as Product).specifications);
+        checkDependencies((item as CmdbTenant).products);
 
-        // Calculate "Depends On" and "Inherits"
-        if ('dependent_tenants' in item && item.dependent_tenants) dependsOn.push(...allEntities.filter(e => item.dependent_tenants?.some(d => d.id === e._id)));
-        if ('dependent_components' in item && item.dependent_components) dependsOn.push(...allEntities.filter(e => item.dependent_components?.some(d => d.id === e._id)));
-        if ('dependent_applications' in item && item.dependent_applications) dependsOn.push(...allEntities.filter(e => item.dependent_applications?.some(d => d.id === e._id)));
-        if ('dependent_interfaces' in item && item.dependent_interfaces) dependsOn.push(...allEntities.filter(e => item.dependent_interfaces?.some(d => d.id === e._id)));
-        if ('tenants' in item && item.tenants) dependsOn.push(...allEntities.filter(e => item.tenants?.some(d => d.id === e._id)));
-        if ('specifications' in item && item.specifications) dependsOn.push(...allEntities.filter(e => item.specifications?.some(d => d.id === e._id)));
-        if ('source' in item && item.source) dependsOn.push(...allEntities.filter(e => e._id === item.source.id));
+        if ('source' in item && (item as CmdbInterface).source) {
+            const found = allEntities.find(e => e._id === (item as CmdbInterface).source.id);
+            if (found) dependsOnSet.add(found);
+        }
 
-
-        // Calculate "Used By" and "Inherited By"
+        // Find what uses the selected item
         allEntities.forEach(entity => {
             if (entity._id === item._id) return;
-            if ('dependent_tenants' in entity && entity.dependent_tenants?.some(d => d.id === item._id)) usedBy.push(entity);
-            if ('dependent_components' in entity && entity.dependent_components?.some(d => d.id === item._id)) usedBy.push(entity);
-            if ('dependent_applications' in entity && entity.dependent_applications?.some(d => d.id === item._id)) usedBy.push(entity);
-            if ('dependent_interfaces' in entity && entity.dependent_interfaces?.some(d => d.id === item._id)) usedBy.push(entity);
-            if ('tenants'in entity && entity.tenants?.some(d => d.id === item._id)) usedBy.push(entity);
-            if ('specifications' in entity && entity.specifications?.some(d => d.id === item._id)) usedBy.push(entity);
-            if ('source' in entity && entity.source.id === item._id) usedBy.push(entity);
+            const hasDependency = (deps?: {id: string}[]) => deps?.some(d => d.id === item._id) || false;
+
+            if (hasDependency((entity as CmdbTenant).dependent_tenants) ||
+                hasDependency((entity as CmdbComponent).dependent_components) ||
+                hasDependency((entity as CmdbApplication).dependent_applications) ||
+                hasDependency((entity as CmdbComponent).dependent_interfaces) ||
+                hasDependency((entity as CmdbComponent).tenants) ||
+                hasDependency((entity as Product).specifications) ||
+                hasDependency((entity as CmdbTenant).products)) {
+                usedBySet.add(entity);
+            }
+             if ('source' in entity && (entity as CmdbInterface).source?.id === item._id) {
+                usedBySet.add(entity);
+            }
         });
 
         // Inheritance specific
-        if (item.entityType === 'tenant' && 'products' in item && item.products) inherits.push(...allEntities.filter(e => item.products?.some(p => p.id === e._id)));
-        if ((item.entityType === 'component' || item.entityType === 'application') && 'provided_interfaces' in item && item.provided_interfaces) inherits.push(...allEntities.filter(e => item.provided_interfaces?.some(p => p.id === e._id)));
+        if ((item.entityType === 'component' || item.entityType === 'application') && 'provided_interfaces' in item && item.provided_interfaces) {
+            item.provided_interfaces.forEach(pi => {
+                const found = allEntities.find(e => e._id === pi.id);
+                if (found) inheritsSet.add(found);
+            })
+        }
 
-        return { selectedItem: item, usedBy, dependsOn, inherits, inheritedBy };
-
+        return {
+            selectedItem: item,
+            usedBy: Array.from(usedBySet),
+            dependsOn: Array.from(dependsOnSet),
+            inherits: Array.from(inheritsSet)
+        };
     }, [allData, selectedEntityType, selectedItemId]);
     
      const summaryData = [
