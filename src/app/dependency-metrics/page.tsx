@@ -142,72 +142,69 @@ export default function DependencyMetricsPage() {
         router.push(`/dependency-metrics?type=${selectedEntityType}&id=${id}`);
     };
 
-     const { selectedItem, usedBy, dependsOn, inherits } = useMemo(() => {
+    const { selectedItem, usedBy, dependsOn, inherits } = useMemo(() => {
         if (!selectedItemId || !selectedEntityType) return { selectedItem: null, usedBy: [], dependsOn: [], inherits: [] };
 
         const allEntities = Object.values(allData).flat();
-        const item = allEntities.find(e => e._id === selectedItemId && e.entityType === selectedEntityType);
+        const item = allEntities.find(e => e._id === selectedItemId);
 
         if (!item) return { selectedItem: null, usedBy: [], dependsOn: [], inherits: [] };
 
         const usedBySet = new Set<AnyCmdbEntity>();
         const dependsOnSet = new Set<AnyCmdbEntity>();
         
-        // Calculate "Depends On" (what the selected item needs)
-        const findAndAddDependency = (depId: string) => {
-            const found = allEntities.find(e => e._id === depId);
-            if (found) dependsOnSet.add(found);
+        const findAndAddEntity = (id: string, set: Set<AnyCmdbEntity>) => {
+            const found = allEntities.find(e => e._id === id);
+            if (found) set.add(found);
         };
-
-        const itemAsTenant = item as CmdbTenant;
-        itemAsTenant.dependent_tenants?.forEach(dep => findAndAddDependency(dep.id));
-        itemAsTenant.products?.forEach(dep => findAndAddDependency(dep.id));
         
-        const itemAsCommon = item as CmdbApplication | CmdbComponent;
-        itemAsCommon.dependent_components?.forEach(dep => findAndAddDependency(dep.id));
-        itemAsCommon.dependent_applications?.forEach(dep => findAndAddDependency(dep.id));
-        itemAsCommon.dependent_interfaces?.forEach(dep => findAndAddDependency(dep.id));
-        itemAsCommon.tenants?.forEach(dep => findAndAddDependency(dep.id));
+        // "Depends On": What the selected item needs
+        const itemAsTenant = item as CmdbTenant;
+        itemAsTenant.dependent_tenants?.forEach(d => findAndAddEntity(d.id, dependsOnSet));
+        itemAsTenant.products?.forEach(p => findAndAddEntity(p.id, dependsOnSet));
+        
+        const itemAsCommon = item as (CmdbComponent | CmdbApplication);
+        itemAsCommon.tenants?.forEach(t => findAndAddEntity(t.id, dependsOnSet));
+        itemAsCommon.dependent_components?.forEach(d => findAndAddEntity(d.id, dependsOnSet));
+        itemAsCommon.dependent_applications?.forEach(d => findAndAddEntity(d.id, dependsOnSet));
+        itemAsCommon.dependent_interfaces?.forEach(d => findAndAddEntity(d.id, dependsOnSet));
 
         const itemAsInterface = item as CmdbInterface;
-        if (itemAsInterface.source?.id) {
-            findAndAddDependency(itemAsInterface.source.id);
-        }
+        if (itemAsInterface.source?.id) findAndAddEntity(itemAsInterface.source.id, dependsOnSet);
 
-        const itemAsProduct = item as Product;
-        itemAsProduct.specifications?.forEach(dep => findAndAddDependency(dep.id));
-
-        // Calculate "Used By" (which other items need the selected item)
+        // "Used By": Which other items need the selected item
         allEntities.forEach(entity => {
             if (entity._id === item._id) return;
+            
+            const entityAsTenant = entity as CmdbTenant;
+            if (entityAsTenant.dependent_tenants?.some(d => d.id === item._id)) usedBySet.add(entity);
+            if (entityAsTenant.products?.some(p => p.id === item._id)) usedBySet.add(entity);
 
-            const checkAndAdd = (depArray: { id: string }[] | undefined) => {
-                if (depArray?.some(d => d.id === item._id)) {
-                    usedBySet.add(entity);
-                }
-            };
-            
-            checkAndAdd((entity as CmdbTenant).dependent_tenants);
-            checkAndAdd((entity as CmdbTenant).products);
-            checkAndAdd((entity as CmdbComponent).dependent_components);
-            checkAndAdd((entity as CmdbComponent).dependent_applications);
-            checkAndAdd((entity as CmdbComponent).dependent_interfaces);
-            checkAndAdd((entity as CmdbComponent).tenants);
-            checkAndAdd((entity as Product).specifications);
-            
-            if ((entity as CmdbInterface).source?.id === item._id) {
-                usedBySet.add(entity);
-            }
+            const entityAsCommon = entity as (CmdbComponent | CmdbApplication);
+            if(entityAsCommon.tenants?.some(t => t.id === item._id)) usedBySet.add(entity);
+            if(entityAsCommon.dependent_components?.some(d => d.id === item._id)) usedBySet.add(entity);
+            if(entityAsCommon.dependent_applications?.some(d => d.id === item._id)) usedBySet.add(entity);
+            if(entityAsCommon.dependent_interfaces?.some(d => d.id === item._id)) usedBySet.add(entity);
+            if(entityAsCommon.provided_interfaces?.some(d => d.id === item._id)) usedBySet.add(entity);
+
+            const entityAsInterface = entity as CmdbInterface;
+            if (entityAsInterface.source?.id === item._id) usedBySet.add(entity);
         });
 
         // Simplified inheritance/composition view
         const inheritsSet = new Set<AnyCmdbEntity>();
         if ((item as CmdbComponent).provided_interfaces) {
              (item as CmdbComponent).provided_interfaces?.forEach(pi => {
-                 const found = allEntities.find(e => e._id === pi.id);
+                 const found = allEntities.find(e => e.id === pi.id);
                  if (found) inheritsSet.add(found)
              })
         }
+        if ((item as CmdbApplication).provided_interfaces) {
+            (item as CmdbApplication).provided_interfaces?.forEach(pi => {
+                const found = allEntities.find(e => e.id === pi.id);
+                if (found) inheritsSet.add(found)
+            })
+       }
 
 
         return {
@@ -359,5 +356,7 @@ export default function DependencyMetricsPage() {
         </DashboardLayout>
     );
 }
+
+    
 
     
