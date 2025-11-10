@@ -54,4 +54,6 @@ export async function PUT(req: NextRequest, { params }: { params: { productId: s
 
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500
+        return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
+    }
+}

@@ -13,7 +13,7 @@ type AllData = {
 };
 
 // Helper function to find an entity by its string ID
-const findById = (collection: AnyCmdbEntity[], id: string) => collection.find(item => item.id === id || item._id === id);
+const findById = (collection: AnyCmdbEntity[], id: string) => collection.find(item => item.id === id || item._id.toString() === id);
 
 async function fetchAllData(): Promise<AllData> {
     const client = await clientPromise;
@@ -54,36 +54,46 @@ export async function generateDependencyTree(productId: string): Promise<Depende
     // Add product's direct specifications
     rootProduct.specifications?.forEach(spec => relatedSpecifications.add(spec.id));
 
-    const queue: AnyCmdbEntity[] = [rootProduct as any];
-    const visited = new Set<string>([rootProduct.id]);
+    const queue: AnyCmdbEntity[] = [{...rootProduct, entityType: 'product'} as any];
+    const visited = new Set<string>([rootProduct._id.toString()]);
+    
+    const allEntities = [
+        ...allData.tenants.map(t => ({ ...t, entityType: 'tenant' })),
+        ...allData.components.map(c => ({ ...c, entityType: 'component' })),
+        ...allData.applications.map(a => ({ ...a, entityType: 'application' })),
+        ...allData.interfaces.map(i => ({ ...i, entityType: 'interface' })),
+        ...allData.products.map(p => ({ ...p, entityType: 'product' })),
+    ] as AnyCmdbEntity[];
 
     while (queue.length > 0) {
         const current = queue.shift();
         if (!current) continue;
 
         // Find tenants using this product
-        allData.tenants.forEach(tenant => {
-            if (tenant.products?.some(p => p.id === current.id) && !visited.has(tenant.id)) {
-                relatedTenants.add(tenant.id);
-                visited.add(tenant.id);
-                queue.push(tenant as any);
-            }
-        });
+        if (current.entityType === 'product') {
+            allData.tenants.forEach(tenant => {
+                if (tenant.products?.some(p => p.id === current._id.toString()) && !visited.has(tenant._id.toString())) {
+                    relatedTenants.add(tenant._id.toString());
+                    visited.add(tenant._id.toString());
+                    queue.push(allEntities.find(e => e._id.toString() === tenant._id.toString())!);
+                }
+            });
+        }
         
         // Find components/apps using this tenant
         if (current.entityType === 'tenant') {
              allData.components.forEach(comp => {
-                if (comp.tenants?.some(t => t.id === current.id) && !visited.has(comp.id)) {
-                    relatedComponents.add(comp.id);
-                    visited.add(comp.id);
-                    queue.push(comp as any);
+                if (comp.tenants?.some(t => t.id === current._id.toString()) && !visited.has(comp._id.toString())) {
+                    relatedComponents.add(comp._id.toString());
+                    visited.add(comp._id.toString());
+                    queue.push(allEntities.find(e => e._id.toString() === comp._id.toString())!);
                 }
             });
             allData.applications.forEach(app => {
-                if (app.tenants?.some(t => t.id === current.id) && !visited.has(app.id)) {
-                    relatedApplications.add(app.id);
-                    visited.add(app.id);
-                    queue.push(app as any);
+                if (app.tenants?.some(t => t.id === current._id.toString()) && !visited.has(app._id.toString())) {
+                    relatedApplications.add(app._id.toString());
+                    visited.add(app._id.toString());
+                    queue.push(allEntities.find(e => e._id.toString() === app._id.toString())!);
                 }
             });
         }
@@ -91,25 +101,31 @@ export async function generateDependencyTree(productId: string): Promise<Depende
         // Follow component/app dependencies
         if (current.entityType === 'component' || current.entityType === 'application') {
             const entity = current as (CmdbComponent | CmdbApplication);
-            entity.dependent_components?.forEach(dep => {
-                 if (!visited.has(dep.id)) {
-                    relatedComponents.add(dep.id);
-                    visited.add(dep.id);
-                    queue.push(findById(allData.components as any, dep.id) as any);
+            const dependencies = [
+                ...(entity.dependent_components || []),
+                ...(entity.dependent_applications || []),
+            ];
+
+            dependencies.forEach(dep => {
+                 if (dep.id && !visited.has(dep.id)) {
+                    const found = findById(allEntities, dep.id);
+                    if (found) {
+                        if(found.entityType === 'component') relatedComponents.add(found._id.toString());
+                        if(found.entityType === 'application') relatedApplications.add(found._id.toString());
+                        visited.add(found._id.toString());
+                        queue.push(found);
+                    }
                  }
             });
-             entity.dependent_applications?.forEach(dep => {
-                 if (!visited.has(dep.id)) {
-                    relatedApplications.add(dep.id);
-                    visited.add(dep.id);
-                    queue.push(findById(allData.applications as any, dep.id) as any);
-                 }
-            });
+
              entity.dependent_interfaces?.forEach(dep => {
-                 if (!visited.has(dep.id)) {
-                    relatedInterfaces.add(dep.id);
-                    visited.add(dep.id);
-                    queue.push(findById(allData.interfaces as any, dep.id) as any);
+                 if (dep.id && !visited.has(dep.id)) {
+                    const found = findById(allEntities, dep.id);
+                    if (found) {
+                        relatedInterfaces.add(found._id.toString());
+                        visited.add(found._id.toString());
+                        queue.push(found);
+                    }
                  }
             });
         }
@@ -117,13 +133,13 @@ export async function generateDependencyTree(productId: string): Promise<Depende
         // Follow interface sources
         if (current.entityType === 'interface') {
             const intf = current as CmdbInterface;
-            if (intf.source && !visited.has(intf.source.id)) {
-                const source = findById(allData.components as any, intf.source.id) || findById(allData.applications as any, intf.source.id);
+            if (intf.source && intf.source.id && !visited.has(intf.source.id)) {
+                const source = findById(allEntities, intf.source.id);
                  if (source) {
-                    if(source.entityType === 'component') relatedComponents.add(source.id);
-                    if(source.entityType === 'application') relatedApplications.add(source.id);
-                    visited.add(source.id);
-                    queue.push(source as any);
+                    if(source.entityType === 'component') relatedComponents.add(source._id.toString());
+                    if(source.entityType === 'application') relatedApplications.add(source._id.toString());
+                    visited.add(source._id.toString());
+                    queue.push(source);
                 }
             }
         }
@@ -140,11 +156,11 @@ export async function generateDependencyTree(productId: string): Promise<Depende
         specifications: Array.from(relatedSpecifications).map(id => {
             const spec = allData.specifications.find(s => s.id === id);
             return { id: spec?.id, name: spec?.name, version: spec?.version || '1.0' };
-        }).filter(Boolean),
-        tenants: Array.from(relatedTenants).map(id => allData.tenants.find(t => t.id === id)).filter(Boolean) as CmdbTenant[],
-        components: Array.from(relatedComponents).map(id => allData.components.find(c => c.id === id)).filter(Boolean) as CmdbComponent[],
-        applications: Array.from(relatedApplications).map(id => allData.applications.find(a => a.id === id)).filter(Boolean) as CmdbApplication[],
-        interfaces: Array.from(relatedInterfaces).map(id => allData.interfaces.find(i => i.id === id)).filter(Boolean) as CmdbInterface[],
+        }).filter(Boolean) as any,
+        tenants: Array.from(relatedTenants).map(id => allData.tenants.find(t => t._id.toString() === id)).filter(Boolean) as CmdbTenant[],
+        components: Array.from(relatedComponents).map(id => allData.components.find(c => c._id.toString() === id)).filter(Boolean) as CmdbComponent[],
+        applications: Array.from(relatedApplications).map(id => allData.applications.find(a => a._id.toString() === id)).filter(Boolean) as CmdbApplication[],
+        interfaces: Array.from(relatedInterfaces).map(id => allData.interfaces.find(i => i._id.toString() === id)).filter(Boolean) as CmdbInterface[],
         metadata: {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -155,7 +171,7 @@ export async function generateDependencyTree(productId: string): Promise<Depende
     const client = await clientPromise;
     const db = client.db();
     const collection = db.collection('dependency_trees');
-    const result = await collection.updateOne(
+    await collection.updateOne(
         { productId: rootProduct._id.toString() },
         { $set: tree },
         { upsert: true }
@@ -175,3 +191,8 @@ export async function revalidateDependencyTree(productId: string): Promise<void>
     });
   } catch (error) {
       console.error(
+        `Failed to trigger dependency tree revalidation for product ${productId}:`,
+        error
+      );
+  }
+}
