@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -20,9 +21,10 @@ async function seedCmdb() {
     const db = client.db();
     const collection = db.collection('cmdb');
     
-    await collection.deleteMany({});
+    // This will only delete the initial seed items, preserving user-added data
+    await collection.deleteMany({ id: { $in: initialCmdb.map(i => i.id) } });
     await collection.insertMany(initialCmdb as any);
-    console.log('Cleared and re-seeded cmdb collection.');
+    console.log('Seeded cmdb collection.');
 
   } catch (error) {
     console.error('Error seeding cmdb:', error);

@@ -217,7 +217,8 @@ async function seedComponents() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    await collection.deleteMany({});
+    // This will only delete the initial seed items, preserving user-added data
+    await collection.deleteMany({ id: { $in: initialComponents.map(i => i.id) } });
     await collection.insertMany(initialComponents as any);
     console.log('Seeded components collection.');
 

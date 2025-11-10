@@ -170,7 +170,8 @@ async function seedApplications() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    await collection.deleteMany({});
+    // This will only delete the initial seed items, preserving user-added data
+    await collection.deleteMany({ id: { $in: initialApplications.map(i => i.id) } });
     await collection.insertMany(initialApplications as any);
     console.log('Seeded applications collection.');
 

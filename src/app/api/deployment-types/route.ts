@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -20,9 +21,10 @@ async function seedDeploymentTypes() {
     const db = client.db();
     const collection = db.collection('deployment_types');
     
-    await collection.deleteMany({});
+    // This will only delete the initial seed items, preserving user-added data
+    await collection.deleteMany({ id: { $in: initialDeploymentTypes.map(i => i.id) } });
     await collection.insertMany(initialDeploymentTypes as any);
-    console.log('Cleared and re-seeded deployment_types collection.');
+    console.log('Seeded deployment_types collection.');
 
   } catch (error) {
     console.error('Error seeding deployment_types:', error);

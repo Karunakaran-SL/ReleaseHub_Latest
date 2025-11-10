@@ -132,7 +132,8 @@ async function seedInterfaces() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    await collection.deleteMany({});
+    // This will only delete the initial seed items, preserving user-added data
+    await collection.deleteMany({ id: { $in: initialInterfaces.map(i => i.id) } });
     await collection.insertMany(initialInterfaces as any);
     console.log('Seeded interfaces collection.');
 
@@ -188,7 +189,6 @@ export async function POST(req: NextRequest) {
             entity: 'interface',
             entityId: result.insertedId.toString(),
             comment: `Interface "${insertedItem.name}" created.`,
-            user: user.username,
         });
 
         return NextResponse.json(insertedItem, { status: 201 });

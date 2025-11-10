@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { ObjectId } from 'mongodb';
+import { logAuditEvent } from '@/lib/audit';
+import { getUser } from '@/lib/auth';
 
 const SpecificationSchema = z.object({
   id: z.string(),
@@ -93,9 +95,10 @@ async function seedSpecifications() {
     const db = client.db();
     const collection = db.collection('specifications');
     
-    await collection.deleteMany({});
+    // This will only delete the initial seed items, preserving user-added data
+    await collection.deleteMany({ id: { $in: initialSpecifications.map(i => i.id) } });
     await collection.insertMany(initialSpecifications as any);
-    console.log('Cleared and re-seeded specifications collection.');
+    console.log('Seeded specifications collection.');
 
   } catch (error) {
     console.error('Error seeding specifications:', error);
@@ -125,6 +128,11 @@ export async function GET(req: NextRequest) {
 // Create a new item
 export async function POST(req: NextRequest) {
     try {
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+        
         const body = await req.json();
         const validatedData = SpecificationSchema.safeParse(body);
 
@@ -136,16 +144,20 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         const collection = db.collection('specifications');
         
-        // Ensure the ID is unique before inserting
         const existing = await collection.findOne({ id: validatedData.data.id });
         if (existing) {
              return NextResponse.json({ message: `Specification with ID "${validatedData.data.id}" already exists.` }, { status: 409 });
         }
         
         const result = await collection.insertOne(validatedData.data as any);
-
         const insertedItem = { ...validatedData.data, _id: result.insertedId };
-
+        
+        await logAuditEvent({
+            action: 'CREATE',
+            entity: 'specification',
+            entityId: result.insertedId.toString(),
+            comment: `Specification "${insertedItem.name}" created.`,
+        });
 
         return NextResponse.json(insertedItem, { status: 201 });
 
@@ -154,5 +166,3 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
-
-    

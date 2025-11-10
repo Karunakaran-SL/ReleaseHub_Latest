@@ -13,18 +13,20 @@ const InterfaceTypeSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_interface_types';
 
+const initialTypes = [
+    { id: "Interface_Type_API", name: "API", description: "A standard API endpoint." },
+    { id: "Interface_Type_Topic", name: "Topic", description: "A message queue topic." },
+    { id: "Interface_Type_UI", name: "UI", description: "A user interface component." },
+];
+
 async function seedInterfaceTypes() {
   try {
     const client = await clientPromise;
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    await collection.deleteMany({});
-    const initialTypes = [
-        { id: "Interface_Type_API", name: "API", description: "A standard API endpoint." },
-        { id: "Interface_Type_Topic", name: "Topic", description: "A message queue topic." },
-        { id: "Interface_Type_UI", name: "UI", description: "A user interface component." },
-    ];
+    // This will only delete the initial seed items, preserving user-added data
+    await collection.deleteMany({ id: { $in: initialTypes.map(i => i.id) } });
     await collection.insertMany(initialTypes as any);
     console.log('Seeded interface types collection.');
 
@@ -79,7 +81,6 @@ export async function POST(req: NextRequest) {
             entity: 'interface_type',
             entityId: result.insertedId.toString(),
             comment: `Interface Type "${insertedItem.name}" created.`,
-            user: user.username,
         });
 
         return NextResponse.json(insertedItem, { status: 201 });

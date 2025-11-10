@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -19,9 +20,10 @@ async function seedComplianceChecks() {
     const db = client.db();
     const collection = db.collection('compliance_checks');
     
-    await collection.deleteMany({});
+    // This will only delete the initial seed items, preserving user-added data
+    await collection.deleteMany({ id: { $in: initialComplianceChecks.map(i => i.id) } });
     await collection.insertMany(initialComplianceChecks as any);
-    console.log('Cleared and re-seeded compliance_checks collection.');
+    console.log('Seeded compliance_checks collection.');
 
   } catch (error) {
     console.error('Error seeding compliance_checks:', error);

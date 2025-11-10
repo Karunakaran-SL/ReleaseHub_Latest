@@ -5,7 +5,6 @@ import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
-import type { CmdbTenant } from '@/lib/definitions';
 
 const OnboardingFieldProofSchema = z.object({
   link: z.string().optional(),
@@ -63,9 +62,10 @@ async function seedTenants() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    await collection.deleteMany({});
+    // This will only delete the initial seed items, preserving user-added data
+    await collection.deleteMany({ id: { $in: initialTenants.map(i => i.id) } });
     await collection.insertMany(initialTenants as any);
-    console.log('Cleared and re-seeded tenants collection.');
+    console.log('Seeded tenants collection.');
 
   } catch (error) {
     console.error('Error seeding tenants:', error);

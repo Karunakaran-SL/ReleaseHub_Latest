@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -21,9 +22,10 @@ async function seedWorkflows() {
     const db = client.db();
     const collection = db.collection('workflows');
     
-    await collection.deleteMany({});
+    // This will only delete the initial seed items, preserving user-added data
+    await collection.deleteMany({ id: { $in: initialWorkflows.map(i => i.id) } });
     await collection.insertMany(initialWorkflows as any);
-    console.log('Cleared and re-seeded workflows collection.');
+    console.log('Seeded workflows collection.');
 
   } catch (error) {
     console.error('Error seeding workflows:', error);

@@ -94,12 +94,10 @@ async function seedProducts() {
     const db = client.db();
     const productsCollection = db.collection('products');
     
-    // Delete all existing documents
-    await productsCollection.deleteMany({});
-    
-    // Insert the new data
+    // This will only delete the initial seed items, preserving user-added data
+    await productsCollection.deleteMany({ id: { $in: initialProducts.map(i => i.id) } });
     await productsCollection.insertMany(initialProducts as any);
-    console.log('Cleared and re-seeded products collection.');
+    console.log('Seeded products collection.');
 
   } catch (error) {
     console.error('Error seeding products:', error);
@@ -208,7 +206,6 @@ export async function POST(req: NextRequest) {
             entity: 'product',
             entityId: result.insertedId.toString(),
             comment: `Product "${newProduct.name}" created.`,
-            user: user.username,
         });
 
         return NextResponse.json(insertedProduct, { status: 201 });
