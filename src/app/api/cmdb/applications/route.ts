@@ -4,7 +4,7 @@ import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
-import { revalidateDependencyTree } from '@/lib/dependency-graph';
+import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 
 const CmdbPhaseSchema = z.object({
   id: z.string(),
@@ -44,42 +44,66 @@ const ApplicationSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_applications';
 
-const tenantNames = [
-    "Tenant_Shared_Services", "Tenant_App_Platform", "Tenant_Data_Infra", "Tenant_ML_Platform", "Tenant_Retail_Core",
-    "Tenant_ECommerce_Frontend", "Tenant_Finance_Analytics", "Tenant_Marketing_Tools", "Tenant_IoT_Edge", "Tenant_Gaming_Services"
+const tenantIds = [
+    "Tenant_Platform_Foundation", "Tenant_Retail_Services", "Tenant_Data_Analytics", "Tenant_AI_Research", "Tenant_IoT_Core",
+    "Tenant_Cybersecurity", "Tenant_Shared_Services", "Tenant_Gaming_Platform", "Tenant_Fintech_Services", "Tenant_Marketing_Automation"
 ];
 
-const interfacePool = [
-    { id: "Interface_WebApp_UI", name: "WebApp UI" }, { id: "Interface_Public_API_Gateway", name: "Public API Gateway" },
-    { id: "Interface_Internal_GraphQL", name: "Internal GraphQL API" }, { id: "Interface_Data_Ingestion", name: "Data Ingestion API" },
-    { id: "Interface_Data_Query", name: "Data Query API" }, { id: "Interface_Model_Training", name: "Model Training API" },
-    { id: "Interface_Model_Inference", name: "Model Inference API" }, { id: "Interface_Device_Telemetry", name: "Device Telemetry API" },
-    { id: "Interface_Game_State", name: "Game State API" }, { id: "Interface_Leaderboard", name: "Leaderboard API" }
-];
+const initialApplications = [
+    // Apps for Tenant_Platform_Foundation
+    { id: "App_UserDashboard", name: "User Dashboard", version: "2.0.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [{id: "Comp_AuthService", name: "Authentication Service"}, {id: "Comp_SearchService", name: "Search Service"}], dependent_applications: [{id: "App_AdminConsole", name: "Admin Console"}], required_interfaces: [{id: "Interface_AuthService", name: "Auth Service Interface"}], provided_interfaces: [{id: "Interface_UserDashboardAPI", name: "User Dashboard API"}] },
+    { id: "App_AdminConsole", name: "Admin Console", version: "1.1.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{id: "Interface_UserDashboardAPI", name: "User Dashboard API"}], provided_interfaces: [{id: "Interface_AdminAPI", name: "Admin API"}] },
+    { id: "App_MetricsExporter", name: "Metrics Exporter", version: "1.0.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{id: "Interface_Prometheus", name: "Prometheus Endpoint"}], provided_interfaces: [] },
+    { id: "App_BillingProcessor", name: "Billing Processor", version: "1.2.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{id: "Interface_PaymentGateway", name: "Payment Gateway API"}], provided_interfaces: [] },
+    { id: "App_NotificationService", name: "Notification Service", version: "1.0.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{id: "Interface_SendGrid", name: "SendGrid API"}], provided_interfaces: [] },
 
-let appCounter = 0;
-const createApp = (name: string, tenantId: string, provided: number[], required: number[], depComp: string) => {
-    appCounter++;
-    return {
-        "_id": `App_${name.replace(/\s/g, '')}`, "id": `App_${name.replace(/\s/g, '')}`, "name": name, "version": `1.${appCounter}.0`,
-        "tenants": [{ "id": tenantId, "name": tenantId.replace(/_/g, ' ') }],
-        "provided_interfaces": provided.map(i => interfacePool[i]),
-        "dependent_interfaces": required.map(i => interfacePool[i]),
-        "dependent_components": [{ id: `Comp_Monitoring-${tenantId.slice(7)}`, name: `Monitoring-${tenantId.slice(7)}` }],
-        "dependent_applications": [],
-        "created_at": new Date().toISOString(), "updated_at": new Date().toISOString(), "phases": []
-    };
-};
+    // Apps for Tenant_Retail_Services
+    { id: "App_ShoppingCart", name: "Shopping Cart", version: "2.5.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [{id: "Comp_OrderProcessor", name: "Order Processor"}], dependent_applications: [], required_interfaces: [], provided_interfaces: [] },
+    { id: "App_ProductRecs", name: "Product Recommendations", version: "1.8.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], required_interfaces: [], provided_interfaces: [] },
+    { id: "App_CheckoutSvc", name: "Checkout Service", version: "3.0.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [{id: "Comp_OrderProcessor", name: "Order Processor"}], dependent_applications: [], required_interfaces: [], provided_interfaces: [] },
+    { id: "App_CustomerReviews", name: "Customer Reviews", version: "1.2.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], required_interfaces: [], provided_interfaces: [] },
+    { id: "App_StoreLocator", name: "Store Locator", version: "1.0.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], required_interfaces: [], provided_interfaces: [] },
+].map(a => ({
+    ...a,
+    _id: a.id,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    phases: []
+}));
 
-const initialApplications: any[] = [];
-tenantNames.forEach(tenantId => {
-    const suffix = tenantId.slice(7);
-    initialApplications.push(createApp(`Dashboard-${suffix}`, tenantId, [0], [1, 2], `Comp_Logging-${suffix}`));
-    initialApplications.push(createApp(`APIGateway-${suffix}`, tenantId, [1], [3], `Comp_Security-${suffix}`));
-    initialApplications.push(createApp(`DataProcessor-${suffix}`, tenantId, [4], [3], `Comp_Monitoring-${suffix}`));
-    initialApplications.push(createApp(`ReportingSvc-${suffix}`, tenantId, [], [4], `Comp_Logging-${suffix}`));
-    initialApplications.push(createApp(`Orchestrator-${suffix}`, tenantId, [], [1,4], `Comp_Security-${suffix}`));
-});
+// Function to add more applications if needed
+function populateApplications() {
+    const appCountByTenant = initialApplications.reduce((acc, curr) => {
+        curr.tenants.forEach(t => {
+            acc[t.id] = (acc[t.id] || 0) + 1;
+        });
+        return acc;
+    }, {} as Record<string, number>);
+
+    tenantIds.forEach(tenantId => {
+        let currentCount = appCountByTenant[tenantId] || 0;
+        while (currentCount < 5) {
+            const newIndex = initialApplications.length + 1;
+            const newApp = {
+                id: `App_Generated_${tenantId}_${newIndex}`,
+                name: `Generated App ${newIndex}`,
+                version: '1.0.0',
+                tenants: [{ id: tenantId, name: tenantId.replace(/_/g, ' ') }],
+                dependent_components: [],
+                dependent_applications: [],
+                required_interfaces: [],
+                provided_interfaces: [],
+                _id: `App_Generated_${tenantId}_${newIndex}`,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                phases: []
+            };
+            initialApplications.push(newApp);
+            currentCount++;
+        }
+    });
+}
+populateApplications();
 
 
 async function seedApplications() {
@@ -89,7 +113,7 @@ async function seedApplications() {
     const collection = db.collection(COLLECTION_NAME);
     
     await collection.deleteMany({_id: {$in: initialApplications.map(a => a._id)}});
-    await collection.insertMany(initialApplications);
+    await collection.insertMany(initialApplications as any);
 
     console.log('Seeded applications collection.');
 
@@ -147,10 +171,7 @@ export async function POST(req: NextRequest) {
             comment: `Application "${newItem.name}" onboarded.`,
         });
         
-        const products = await db.collection('products').find({}).toArray();
-        for (const product of products) {
-            revalidateDependencyTree(product._id);
-        }
+        await generateAndStoreAllProductTrees();
 
         return NextResponse.json(newItem, { status: 201 });
 

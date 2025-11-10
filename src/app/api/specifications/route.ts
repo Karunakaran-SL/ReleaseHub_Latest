@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
-import { ObjectId } from 'mongodb';
 import { logAuditEvent } from '@/lib/audit';
 import { getUser } from '@/lib/auth';
 
@@ -27,21 +26,21 @@ const SpecificationSchema = z.object({
 });
 
 const initialSpecifications = [
-    // Specs for Product_Observability_Platform
-    { "id": "Spec_Kubernetes_v1.28", "name": "Kubernetes v1.28", "vendor": "CNCF" },
-    { "id": "Spec_Prometheus_v2.45", "name": "Prometheus v2.45", "vendor": "CNCF" },
-    // Specs for Product_Developer_Hub
-    { "id": "Spec_Backstage_v1.18", "name": "Backstage v1.18", "vendor": "CNCF" },
-    { "id": "Spec_ArgoCD_v2.8", "name": "ArgoCD v2.8", "vendor": "CNCF" },
-    // Specs for Product_Data_Analytics_Suite
-    { "id": "Spec_Spark_v3.4", "name": "Apache Spark v3.4", "vendor": "Apache" },
-    { "id": "Spec_Airflow_v2.7", "name": "Airflow v2.7", "vendor": "Apache" },
-    // Specs for Product_AI_ML_Workbench
-    { "id": "Spec_Kubeflow_v1.7", "name": "Kubeflow v1.7", "vendor": "Google" },
-    { "id": "Spec_SeldonCore_v1.16", "name": "Seldon Core v1.16", "vendor": "Seldon" },
-    // Specs for Product_Edge_Computing_Fabric
-    { "id": "Spec_K3s_v1.28", "name": "K3s v1.28", "vendor": "CNCF" },
-    { "id": "Spec_KubeEdge_v1.14", "name": "KubeEdge v1.14", "vendor": "CNCF" }
+  // For Product_OSS_Portal
+  { "id": "Spec_ArgoCD_v2.8", "name": "ArgoCD Sync Spec", "version": "2.8", "vendor": "CNCF" },
+  { "id": "Spec_SSO_v1.2", "name": "Single Sign-On Spec", "version": "1.2", "vendor": "OpenID" },
+  // For Product_Data_Fabric
+  { "id": "Spec_Spark_v3.5", "name": "Spark Processing", "version": "3.5", "vendor": "Apache" },
+  { "id": "Spec_Kafka_v3.7", "name": "Kafka Streaming", "version": "3.7", "vendor": "Apache" },
+  // For Product_ML_Platform
+  { "id": "Spec_Kubeflow_v1.8", "name": "Kubeflow Pipelines", "version": "1.8", "vendor": "Google" },
+  { "id": "Spec_PyTorch_v2.1", "name": "PyTorch Distribution", "version": "2.1", "vendor": "Facebook" },
+  // For Product_Edge_Orchestrator
+  { "id": "Spec_KubeEdge_v1.15", "name": "KubeEdge Node Spec", "version": "1.15", "vendor": "CNCF" },
+  { "id": "Spec_MQTT_v5.0", "name": "MQTT Broker Spec", "version": "5.0", "vendor": "OASIS" },
+  // For Product_Security_Fabric
+  { "id": "Spec_Istio_v1.20", "name": "Istio Service Mesh", "version": "1.20", "vendor": "CNCF" },
+  { "id": "Spec_SPIFFE_v1.2", "name": "SPIFFE Identity", "version": "1.2", "vendor": "CNCF" }
 ];
 
 const fullSpecifications = initialSpecifications.map(spec => ({
@@ -109,22 +108,26 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         const collection = db.collection('specifications');
         
-        const existing = await collection.findOne({ id: validatedData.data.id });
+        const newItem = {
+            ...validatedData.data,
+            _id: validatedData.data.id,
+        };
+
+        const existing = await collection.findOne({ _id: newItem._id });
         if (existing) {
-             return NextResponse.json({ message: `Specification with ID "${validatedData.data.id}" already exists.` }, { status: 409 });
+             return NextResponse.json({ message: `Specification with ID "${newItem.id}" already exists.` }, { status: 409 });
         }
         
-        const result = await collection.insertOne({_id: validatedData.data.id, ...validatedData.data} as any);
-        const insertedItem = { ...validatedData.data, _id: result.insertedId };
+        await collection.insertOne(newItem as any);
         
         await logAuditEvent({
             action: 'CREATE',
             entity: 'specification',
-            entityId: result.insertedId.toString(),
-            comment: `Specification "${insertedItem.name}" created.`,
+            entityId: newItem.id,
+            comment: `Specification "${newItem.name}" created.`,
         });
 
-        return NextResponse.json(insertedItem, { status: 201 });
+        return NextResponse.json(newItem, { status: 201 });
 
     } catch (error) {
         console.error(error);

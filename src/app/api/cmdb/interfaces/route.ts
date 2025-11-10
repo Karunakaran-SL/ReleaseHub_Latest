@@ -50,36 +50,33 @@ const InterfaceSchema = z.object({
 const COLLECTION_NAME = 'cmdb_interfaces';
 
 const interfacePool = [
-    { id: "Interface_Metrics_API", name: "Metrics API", owner: "SRE Team", type: { id: "Interface_Type_API", name: "API" } }, 
-    { id: "Interface_Tracing_API", name: "Tracing API", owner: "SRE Team", type: { id: "Interface_Type_API", name: "API" } }, 
-    { id: "Interface_Logging_API", name: "Logging API", owner: "SRE Team", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_AuthN_API", name: "AuthN API", owner: "Security Team", type: { id: "Interface_Type_API", name: "API" } }, 
-    { id: "Interface_AuthZ_API", name: "AuthZ API", owner: "Security Team", type: { id: "Interface_Type_API", name: "API" } }, 
-    { id: "Interface_Discovery_API", name: "Discovery API", owner: "Platform Team", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_Storage_S3", name: "S3 Storage API", owner: "Infra Team", type: { id: "Interface_Type_API", name: "API" } }, 
-    { id: "Interface_SQL_DB", name: "SQL Database API", owner: "DBA Team", type: { id: "Interface_Type_API", name: "API" } }, 
-    { id: "Interface_NoSQL_DB", name: "NoSQL Database API", owner: "DBA Team", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_Streaming_Kafka", name: "Kafka Streaming API", owner: "Data Platform", type: { id: "Interface_Type_Topic", name: "Topic" } }, 
-    { id: "Interface_Orchestration_API", name: "Orchestration API", owner: "Platform Team", type: { id: "Interface_Type_API", name: "API" } }, 
-    { id: "Interface_Git_API", name: "Git API", owner: "DevEx Team", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_WebApp_UI", name: "WebApp UI", owner: "Frontend Team", type: { id: "Interface_Type_UI", name: "UI" } },
-    { id: "Interface_Public_API_Gateway", name: "Public API Gateway", owner: "Gateway Team", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_Internal_GraphQL", name: "Internal GraphQL API", owner: "Platform Team", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_Data_Ingestion", name: "Data Ingestion API", owner: "Data Engineering", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_Data_Query", name: "Data Query API", owner: "Data Engineering", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_Model_Training", name: "Model Training API", owner: "ML Team", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_Model_Inference", name: "Model Inference API", owner: "ML Team", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_Device_Telemetry", name: "Device Telemetry API", owner: "IoT Team", type: { id: "Interface_Type_Topic", name: "Topic" } },
-    { id: "Interface_Game_State", name: "Game State API", owner: "Gaming Team", type: { id: "Interface_Type_API", name: "API" } },
-    { id: "Interface_Leaderboard", name: "Leaderboard API", owner: "Gaming Team", type: { id: "Interface_Type_API", name: "API" } }
+    // Provided by Components
+    { id: "Interface_AuthService", name: "Auth Service Interface", type: { id: "Interface_Type_API", name: "API" }, owner_name: "Platform Foundation", source: { id: "Comp_AuthService", name: "Authentication Service" } },
+    { id: "Interface_UserProfileAPI", name: "User Profile API", type: { id: "Interface_Type_API", name: "API" }, owner_name: "Platform Foundation", source: { id: "Comp_UserProfile", name: "User Profile Service" } },
+    { id: "Interface_LogQuery", name: "Log Query API", type: { id: "Interface_Type_API", name: "API" }, owner_name: "Platform Foundation", source: { id: "Comp_LoggingService", name: "Centralized Logging" } },
+    { id: "Interface_OrderAPI", name: "Order API", type: { id: "Interface_Type_API", name: "API" }, owner_name: "Retail Services", source: { id: "Comp_OrderProcessor", name: "Order Processor" } },
+    { id: "Interface_InventoryAPI", name: "Inventory API", type: { id: "Interface_Type_API", name: "API" }, owner_name: "Retail Services", source: { id: "Comp_InventoryMgmt", name: "Inventory Management" } },
+    { id: "Interface_CatalogAPI", name: "Catalog API", type: { id: "Interface_Type_API", name: "API" }, owner_name: "Retail Services", source: { id: "Comp_ProductCatalog", name: "Product Catalog" } },
+    { id: "Interface_Generic_Output", name: "Generic Output", type: { id: "Interface_Type_API", name: "API" }, owner_name: "Platform Foundation", source: { id: "Comp_Generated", name: "Generated Component" } },
+
+    // Provided by Applications
+    { id: "Interface_UserDashboardAPI", name: "User Dashboard API", type: { id: "Interface_Type_API", "name": "API" }, owner_name: "Platform Foundation", source: { id: "App_UserDashboard", name: "User Dashboard" } },
+    { id: "Interface_AdminAPI", name: "Admin API", type: { id: "Interface_Type_API", "name": "API" }, owner_name: "Platform Foundation", source: { id: "App_AdminConsole", name: "Admin Console" } },
+
+    // External / Required Interfaces
+    { id: "Interface_LoginAPI", name: "Login API", type: { id: "Interface_Type_API", name: "API" }, owner_name: "External IDP", source: { id: "External", name: "External" } },
+    { id: "Interface_Database", name: "Database Interface", type: { id: "Interface_Type_DB", name: "Database" }, owner_name: "DBA Team", source: { id: "External", name: "External" } },
+    { id: "Interface_Fluentd", name: "Fluentd Collector", type: { id: "Interface_Type_Collector", name: "Collector" }, owner_name: "Infra Team", source: { id: "External", name: "External" } },
+    { id: "Interface_PaymentGateway", name: "Payment Gateway API", type: { id: "Interface_Type_API", name: "API" }, owner_name: "External Payment Provider", source: { id: "External", name: "External" } },
+    { id: "Interface_Prometheus", name: "Prometheus Endpoint", type: { id: "Interface_Type_Metrics", name: "Metrics" }, owner_name: "Monitoring Team", source: { id: "External", name: "External" } },
+    { id: "Interface_SendGrid", name: "SendGrid API", type: { id: "Interface_Type_API", name: "API" }, owner_name: "SendGrid", source: { id: "External", name: "External" } },
+    { id: "Interface_Generic_Input", name: "Generic Input", type: { id: "Interface_Type_API", name: "API" }, owner_name: "Unknown", source: { id: "External", name: "External" } },
 ].map(iface => ({
     ...iface,
     _id: iface.id,
     version: "1.0.0",
     description: `Interface for ${iface.name}`,
-    owner_name: iface.owner,
-    owner_email: `${iface.owner.toLowerCase().replace(' ', '.')}@example.com`,
-    source: { id: "Unknown", name: "Unknown" }, // This would be populated by the component/app that provides it
+    owner_email: `${iface.owner_name.toLowerCase().replace(/\s/g, '.')}@example.com`,
     security: {
         internal: { secure: true, authentication: true },
         external: { secure: false, authentication: false }

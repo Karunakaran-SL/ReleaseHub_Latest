@@ -44,44 +44,17 @@ const TenantSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_tenants';
 
-const initialTenantOnboardingPhases = [
-    { id: "phase-1", name: "Initiate Onboarding", fields: ["requestFormSubmitted", "csApproved", "pmApproved", "productTeamAgreement"] },
-    { id: "phase-2", name: "Product Definitions", fields: ["architectAgreed", "specChanged", "hlDesignApproved"] },
-    { id: "phase-3", name: "Detail Design", fields: ["detailDesignDone", "dependencyIdentified", "pertReady", "testPlanReady"] },
-    { id: "phase-4", name: "Delivery", fields: ["implementationDone", "unitTestDone", "staticCodeDone", "systemIntegrationDone", "systemIntegrationTestingDone", "allTestCasesAutomated"] },
-    { id: "phase-5", name: "Alpha Qualification", fields: ["uatTestDone", "riskReported", "serviceMetricsDone"] },
-    { id: "phase-6", name: "Prepare customer", fields: ["communicatedChanges", "plannedMCWindow"] },
-    { id: "phase-7", name: "Beta Qualification", fields: ["deploymentRunbookForBeta", "deploymentDone", "betaTestsExecuted"] },
-    { id: "phase-8", name: "Completed", fields: ["onboardingCompleteClosure"] }
-];
-const statuses = ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"];
-const getRandomStatus = () => statuses[Math.floor(Math.random() * statuses.length)];
-
-const generatePhases = () => {
-    return initialTenantOnboardingPhases.map(p => ({
-        id: p.id,
-        name: p.name,
-        version: "1.0",
-        status: getRandomStatus(),
-        fields: p.fields.map(f => ({
-            name: f,
-            value: Math.random() > 0.5,
-            proof: { link: '' }
-        }))
-    }));
-};
-
 const initialTenants = [
-    { "id": "Tenant_Shared_Services", "name": "Shared Services", "products": [{ "id": "Product_Observability_Platform", "name": "Cloud-Native Observability Platform" }], "dependent_tenants": [] },
-    { "id": "Tenant_App_Platform", "name": "Application Platform", "products": [{ "id": "Product_Developer_Hub", "name": "Internal Developer Hub" }], "dependent_tenants": [{ "id": "Tenant_Shared_Services", "name": "Shared Services" }] },
-    { "id": "Tenant_Data_Infra", "name": "Data Infrastructure", "products": [{ "id": "Product_Data_Analytics_Suite", "name": "Data & Analytics Suite" }], "dependent_tenants": [{ "id": "Tenant_Shared_Services", "name": "Shared Services" }] },
-    { "id": "Tenant_ML_Platform", "name": "ML Platform", "products": [{ "id": "Product_AI_ML_Workbench", "name": "AI/ML Workbench" }], "dependent_tenants": [{ "id": "Tenant_Data_Infra", "name": "Data Infrastructure" }] },
-    { "id": "Tenant_Retail_Core", "name": "Retail Core Services", "products": [{ "id": "Product_Developer_Hub", "name": "Internal Developer Hub" }], "dependent_tenants": [{ "id": "Tenant_App_Platform", "name": "Application Platform" }] },
-    { "id": "Tenant_ECommerce_Frontend", "name": "E-Commerce Frontend", "products": [{ "id": "Product_Observability_Platform", "name": "Cloud-Native Observability Platform" }, { "id": "Product_Developer_Hub", "name": "Internal Developer Hub" }], "dependent_tenants": [{ "id": "Tenant_Retail_Core", "name": "Retail Core Services" }] },
-    { "id": "Tenant_Finance_Analytics", "name": "Finance & Analytics", "products": [{ "id": "Product_Data_Analytics_Suite", "name": "Data & Analytics Suite" }], "dependent_tenants": [{ "id": "Tenant_Data_Infra", "name": "Data Infrastructure" }] },
-    { "id": "Tenant_Marketing_Tools", "name": "Marketing Tools", "products": [{ "id": "Product_Developer_Hub", "name": "Internal Developer Hub" }], "dependent_tenants": [{ "id": "Tenant_App_Platform", "name": "Application Platform" }] },
-    { "id": "Tenant_IoT_Edge", "name": "IoT Edge Platform", "products": [{ "id": "Product_Edge_Computing_Fabric", "name": "Edge Computing Fabric" }], "dependent_tenants": [] },
-    { "id": "Tenant_Gaming_Services", "name": "Online Gaming Services", "products": [{ "id": "Product_Observability_Platform", "name": "Cloud-Native Observability Platform" }], "dependent_tenants": [{ "id": "Tenant_App_Platform", "name": "Application Platform" }] }
+    { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }, { "id": "Product_Data_Fabric", "name": "Unified Data Fabric" }], "dependent_tenants": [] },
+    { "id": "Tenant_Retail_Services", "name": "Retail Services", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }], "dependent_tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }] },
+    { "id": "Tenant_Data_Analytics", "name": "Data & Analytics", "products": [{ "id": "Product_Data_Fabric", "name": "Unified Data Fabric" }, { "id": "Product_ML_Platform", "name": "AI/ML Workbench" }], "dependent_tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }] },
+    { "id": "Tenant_AI_Research", "name": "AI Research", "products": [{ "id": "Product_ML_Platform", "name": "AI/ML Workbench" }], "dependent_tenants": [{ "id": "Tenant_Data_Analytics", "name": "Data & Analytics" }] },
+    { "id": "Tenant_IoT_Core", "name": "IoT Core", "products": [{ "id": "Product_Edge_Orchestrator", "name": "Edge Computing Orchestrator" }], "dependent_tenants": [] },
+    { "id": "Tenant_Cybersecurity", "name": "Cybersecurity Ops", "products": [{ "id": "Product_Security_Fabric", "name": "Zero-Trust Security Fabric" }], "dependent_tenants": [] },
+    { "id": "Tenant_Shared_Services", "name": "Shared Services", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }, { "id": "Product_Security_Fabric", "name": "Zero-Trust Security Fabric" }], "dependent_tenants": [] },
+    { "id": "Tenant_Gaming_Platform", "name": "Gaming Platform", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }], "dependent_tenants": [{ "id": "Tenant_Shared_Services", "name": "Shared Services" }] },
+    { "id": "Tenant_Fintech_Services", "name": "Fintech Services", "products": [{ "id": "Product_Data_Fabric", "name": "Unified Data Fabric" }], "dependent_tenants": [{ "id": "Tenant_Data_Analytics", "name": "Data & Analytics" }] },
+    { "id": "Tenant_Marketing_Automation", "name": "Marketing Automation", "products": [{ "id": "Product_ML_Platform", "name": "AI/ML Workbench" }], "dependent_tenants": [{ "id": "Tenant_Data_Analytics", "name": "Data & Analytics" }] }
 ].map(t => ({
     ...t,
     _id: t.id,
@@ -89,7 +62,7 @@ const initialTenants = [
     version: "1.0.0",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    phases: generatePhases()
+    phases: []
 }));
 
 
@@ -117,7 +90,7 @@ export async function GET(req: NextRequest) {
     
     await seedTenants();
     
-    const items = await collection.find({}).toArray();
+    const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
     console.error(error);
@@ -144,8 +117,8 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         
         const newItem = {
+            ...validatedData.data,
             _id: validatedData.data.id,
-            ...validatedData.data
         };
         
         await db.collection(COLLECTION_NAME).insertOne(newItem as any);

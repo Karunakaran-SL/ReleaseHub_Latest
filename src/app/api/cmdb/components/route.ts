@@ -42,38 +42,63 @@ const ComponentSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_components';
 
-const tenantNames = [
-    "Tenant_Shared_Services", "Tenant_App_Platform", "Tenant_Data_Infra", "Tenant_ML_Platform", "Tenant_Retail_Core",
-    "Tenant_ECommerce_Frontend", "Tenant_Finance_Analytics", "Tenant_Marketing_Tools", "Tenant_IoT_Edge", "Tenant_Gaming_Services"
+const tenantIds = [
+    "Tenant_Platform_Foundation", "Tenant_Retail_Services", "Tenant_Data_Analytics", "Tenant_AI_Research", "Tenant_IoT_Core",
+    "Tenant_Cybersecurity", "Tenant_Shared_Services", "Tenant_Gaming_Platform", "Tenant_Fintech_Services", "Tenant_Marketing_Automation"
 ];
 
-// Simplified data for relationships
-const interfacePool = [
-    { id: "Interface_Metrics_API", name: "Metrics API" }, { id: "Interface_Tracing_API", name: "Tracing API" }, { id: "Interface_Logging_API", name: "Logging API" },
-    { id: "Interface_AuthN_API", name: "AuthN API" }, { id: "Interface_AuthZ_API", name: "AuthZ API" }, { id: "Interface_Discovery_API", name: "Discovery API" },
-    { id: "Interface_Storage_S3", name: "S3 Storage API" }, { id: "Interface_SQL_DB", name: "SQL Database API" }, { id: "Interface_NoSQL_DB", name: "NoSQL Database API" },
-    { id: "Interface_Streaming_Kafka", name: "Kafka Streaming API" }, { id: "Interface_Orchestration_API", name: "Orchestration API" }, { id: "Interface_Git_API", name: "Git API" }
-];
+const initialComponents = [
+    // Components for Tenant_Platform_Foundation
+    { id: "Comp_AuthService", name: "Authentication Service", version: "1.3.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [{ id: "Comp_UserProfile", name: "User Profile Service" }], dependent_applications: [{ id: "App_UserDashboard", name: "User Dashboard" }], required_interfaces: [{ id: "Interface_LoginAPI", name: "Login API" }], provided_interfaces: [{ id: "Interface_AuthService", name: "Auth Service Interface" }] },
+    { id: "Comp_UserProfile", name: "User Profile Service", version: "1.2.1", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{ id: "Interface_Database", name: "Database Interface" }], provided_interfaces: [{ id: "Interface_UserProfileAPI", name: "User Profile API" }] },
+    { id: "Comp_LoggingService", name: "Centralized Logging", version: "2.1.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{ id: "Interface_Fluentd", name: "Fluentd Collector" }], provided_interfaces: [{ id: "Interface_LogQuery", name: "Log Query API" }] },
 
-let componentCounter = 0;
-const createComponent = (name: string, tenantId: string, provided: number[], required: number[]) => {
-    componentCounter++;
-    return {
-        "_id": `Comp_${name.replace(/\s/g, '')}`, "id": `Comp_${name.replace(/\s/g, '')}`, "name": name, "version": `1.${componentCounter}.0`,
-        "tenants": [{ "id": tenantId, "name": tenantId.replace(/_/g, ' ') }],
-        "provided_interfaces": provided.map(i => interfacePool[i]),
-        "dependent_interfaces": required.map(i => interfacePool[i]),
-        "dependent_components": [],
-        "created_at": new Date().toISOString(), "updated_at": new Date().toISOString(), "phases": []
-    };
-};
+    // Components for Tenant_Retail_Services
+    { id: "Comp_OrderProcessor", name: "Order Processor", version: "1.5.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [{id: "Comp_InventoryMgmt", name: "Inventory Management"}], dependent_applications: [], required_interfaces: [{ id: "Interface_PaymentGateway", name: "Payment Gateway API" }], provided_interfaces: [{ id: "Interface_OrderAPI", name: "Order API" }] },
+    { id: "Comp_InventoryMgmt", name: "Inventory Management", version: "2.0.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], required_interfaces: [{ id: "Interface_Database", name: "Database Interface" }], provided_interfaces: [{ id: "Interface_InventoryAPI", name: "Inventory API" }] },
+    { id: "Comp_ProductCatalog", name: "Product Catalog", version: "3.1.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], required_interfaces: [{ id: "Interface_Database", name: "Database Interface" }], provided_interfaces: [{ id: "Interface_CatalogAPI", name: "Catalog API" }] },
 
-const initialComponents: any[] = [];
-tenantNames.forEach(tenantId => {
-    initialComponents.push(createComponent(`Monitoring-${tenantId.slice(7)}`, tenantId, [0], [1, 2]));
-    initialComponents.push(createComponent(`Logging-${tenantId.slice(7)}`, tenantId, [2], [10]));
-    initialComponents.push(createComponent(`Security-${tenantId.slice(7)}`, tenantId, [3, 4], [5]));
-});
+    // ... and so on for other tenants, ensuring at least 3 unique components per tenant
+].map(c => ({
+    ...c,
+    _id: c.id,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    phases: []
+}));
+
+// Function to add more components if needed to meet the requirements
+function populateComponents() {
+    const componentCountByTenant = initialComponents.reduce((acc, curr) => {
+        curr.tenants.forEach(t => {
+            acc[t.id] = (acc[t.id] || 0) + 1;
+        });
+        return acc;
+    }, {} as Record<string, number>);
+
+    tenantIds.forEach(tenantId => {
+        let currentCount = componentCountByTenant[tenantId] || 0;
+        while (currentCount < 3) {
+            const newIndex = initialComponents.length + 1;
+            initialComponents.push({
+                id: `Comp_Generated_${tenantId}_${newIndex}`,
+                name: `Generated Component ${newIndex}`,
+                version: '1.0.0',
+                tenants: [{ id: tenantId, name: tenantId.replace(/_/g, ' ') }],
+                dependent_components: [],
+                dependent_applications: [],
+                required_interfaces: [{id: 'Interface_Generic_Input', name: 'Generic Input'}],
+                provided_interfaces: [{id: 'Interface_Generic_Output', name: 'Generic Output'}],
+                 _id: `Comp_Generated_${tenantId}_${newIndex}`,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                phases: []
+            });
+            currentCount++;
+        }
+    });
+}
+populateComponents();
 
 
 async function seedComponents() {
@@ -83,7 +108,7 @@ async function seedComponents() {
     const collection = db.collection(COLLECTION_NAME);
     
     await collection.deleteMany({_id: {$in: initialComponents.map(c => c._id)}});
-    await collection.insertMany(initialComponents);
+    await collection.insertMany(initialComponents as any);
 
     console.log('Seeded components collection.');
   } catch (error) {
@@ -127,8 +152,8 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         
         const newItem = {
-            _id: validatedData.data.id,
             ...validatedData.data,
+            _id: validatedData.data.id,
         };
 
         await db.collection(COLLECTION_NAME).insertOne(newItem as any);
