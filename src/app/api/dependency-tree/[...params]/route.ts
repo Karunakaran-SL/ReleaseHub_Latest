@@ -18,17 +18,10 @@ export async function GET(req: NextRequest, { params }: { params: { params: stri
     }
 
     try {
-        const client = await clientPromise;
-        const db = client.db();
-        const collection = db.collection(COLLECTION_NAME);
+        let tree = await generateDependencyTree(entityType, entityId);
         
-        let tree = await collection.findOne({ rootEntityId: entityId });
-
         if (!tree) {
-            tree = await generateDependencyTree(entityType, entityId);
-            if (!tree) {
-                 return NextResponse.json({ message: 'Dependency tree could not be generated.' }, { status: 404 });
-            }
+            return NextResponse.json({ message: `Dependency tree could not be generated for ${entityType}:${entityId}.` }, { status: 404 });
         }
 
         return NextResponse.json(tree, { status: 200 });

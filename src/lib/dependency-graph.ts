@@ -38,6 +38,14 @@ async function fetchAllData(): Promise<AllData> {
 
 export async function generateDependencyTree(entityType: string, entityId: string): Promise<DependencyTree | null> {
     const allData = await fetchAllData();
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection('dependency_trees');
+
+    const treeFromCache = await collection.findOne({ rootEntityId: entityId });
+    if (treeFromCache) {
+        return treeFromCache as DependencyTree;
+    }
 
     const allEntities = [
         ...allData.tenants.map(t => ({ ...t, entityType: 'tenant' })),
@@ -138,7 +146,7 @@ export async function generateDependencyTree(entityType: string, entityId: strin
         }
     }
     
-    const tree: Omit<DependencyTree, '_id' | 'productId'> = {
+    const tree: Omit<DependencyTree, '_id'> = {
         rootEntityType: rootEntity.entityType,
         rootEntityId: rootEntity._id.toString(),
         product: allData.products.find(p => p._id.toString() === Array.from(relatedProducts)[0]) || null,
@@ -154,9 +162,6 @@ export async function generateDependencyTree(entityType: string, entityId: strin
     };
     
     // Upsert into DB
-    const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection('dependency_trees');
     await collection.updateOne(
         { rootEntityId: rootEntity._id.toString() },
         { $set: tree },
@@ -171,10 +176,8 @@ export async function generateDependencyTree(entityType: string, entityId: strin
 export async function revalidateDependencyTree(entityId: string): Promise<void> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
   try {
-    // We do not await this, it can run in the background. This is a bit of a simplification.
-    // In a real-world scenario, you might want to know the entity type to rebuild.
-    // For now, we assume we're always rebuilding from a product context if not specified.
-    // Let's just revalidate the product tree for simplicity.
+    // We do not await this, it can run in the background.
+    // This will hit the PUT endpoint in [...params]/route.ts to regenerate the tree for the given entity.
     fetch(`${baseUrl}/api/dependency-tree/product/${entityId}`, {
         method: 'PUT'
     }).catch(e => console.error("background fetch for revalidation failed", e));
