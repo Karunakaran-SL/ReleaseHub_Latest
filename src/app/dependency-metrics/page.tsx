@@ -143,13 +143,13 @@ export default function DependencyMetricsPage() {
     };
 
     const { selectedItem, usedBy, dependsOn, inherits } = useMemo(() => {
-        if (!selectedItemId || !selectedEntityType) return { selectedItem: null, usedBy: [], dependsOn: [], inherits: [] };
+        if (!selectedItemId) return { selectedItem: null, usedBy: [], dependsOn: [], inherits: [] };
 
         const allEntities = Object.values(allData).flat();
         const item = allEntities.find(e => e._id === selectedItemId);
 
         if (!item) return { selectedItem: null, usedBy: [], dependsOn: [], inherits: [] };
-
+        
         const usedBySet = new Set<AnyCmdbEntity>();
         const dependsOnSet = new Set<AnyCmdbEntity>();
         
@@ -157,22 +157,25 @@ export default function DependencyMetricsPage() {
             const found = allEntities.find(e => e._id === id);
             if (found) set.add(found);
         };
-        
-        // "Depends On": What the selected item needs
+
+        // Calculate "Depends On" for the selected item
         const itemAsTenant = item as CmdbTenant;
         itemAsTenant.dependent_tenants?.forEach(d => findAndAddEntity(d.id, dependsOnSet));
         itemAsTenant.products?.forEach(p => findAndAddEntity(p.id, dependsOnSet));
-        
+
         const itemAsCommon = item as (CmdbComponent | CmdbApplication);
         itemAsCommon.tenants?.forEach(t => findAndAddEntity(t.id, dependsOnSet));
         itemAsCommon.dependent_components?.forEach(d => findAndAddEntity(d.id, dependsOnSet));
         itemAsCommon.dependent_applications?.forEach(d => findAndAddEntity(d.id, dependsOnSet));
         itemAsCommon.dependent_interfaces?.forEach(d => findAndAddEntity(d.id, dependsOnSet));
 
+        const itemAsProduct = item as Product;
+        itemAsProduct.specifications?.forEach(s => findAndAddEntity(s.id, dependsOnSet));
+
         const itemAsInterface = item as CmdbInterface;
         if (itemAsInterface.source?.id) findAndAddEntity(itemAsInterface.source.id, dependsOnSet);
-
-        // "Used By": Which other items need the selected item
+        
+        // Calculate "Used By" for the selected item
         allEntities.forEach(entity => {
             if (entity._id === item._id) return;
             
@@ -187,24 +190,27 @@ export default function DependencyMetricsPage() {
             if(entityAsCommon.dependent_interfaces?.some(d => d.id === item._id)) usedBySet.add(entity);
             if(entityAsCommon.provided_interfaces?.some(d => d.id === item._id)) usedBySet.add(entity);
 
+             const entityAsProduct = entity as Product;
+             if (entityAsProduct.specifications?.some(s => s.id === item._id)) usedBySet.add(entity);
+
             const entityAsInterface = entity as CmdbInterface;
             if (entityAsInterface.source?.id === item._id) usedBySet.add(entity);
         });
 
         // Simplified inheritance/composition view
         const inheritsSet = new Set<AnyCmdbEntity>();
-        if ((item as CmdbComponent).provided_interfaces) {
-             (item as CmdbComponent).provided_interfaces?.forEach(pi => {
-                 const found = allEntities.find(e => e.id === pi.id);
+        if ((item as CmdbComponent | CmdbApplication).provided_interfaces) {
+             (item as CmdbComponent | CmdbApplication).provided_interfaces?.forEach(pi => {
+                 const found = allEntities.find(e => e._id === pi.id);
                  if (found) inheritsSet.add(found)
              })
         }
-        if ((item as CmdbApplication).provided_interfaces) {
-            (item as CmdbApplication).provided_interfaces?.forEach(pi => {
-                const found = allEntities.find(e => e.id === pi.id);
-                if (found) inheritsSet.add(found)
-            })
-       }
+        if ((item as CmdbTenant).products) {
+            (item as CmdbTenant).products?.forEach(p => {
+                const found = allEntities.find(e => e._id === p.id);
+                if (found) inheritsSet.add(found);
+            });
+        }
 
 
         return {
@@ -213,7 +219,7 @@ export default function DependencyMetricsPage() {
             dependsOn: Array.from(dependsOnSet),
             inherits: Array.from(inheritsSet)
         };
-    }, [allData, selectedEntityType, selectedItemId]);
+    }, [allData, selectedItemId]);
     
      const summaryData = [
         ...usedBy.map(item => ({ relationship: 'Used By', item })),
@@ -356,7 +362,5 @@ export default function DependencyMetricsPage() {
         </DashboardLayout>
     );
 }
-
-    
 
     
