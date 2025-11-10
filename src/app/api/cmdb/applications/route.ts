@@ -70,10 +70,7 @@ const initialApplications = [
         "name": "Order Processing Backend",
         "description": "Handles order creation, payment processing, and fulfillment.",
         "version": "1.5.0",
-        "tenants": [
-            { "id": "Tenant_Medium_Level", "name": "Medium Level Services" },
-            { "id": "Tenant_High_Level", "name": "High Level Services" }
-        ],
+        "tenants": [ { "id": "Tenant_Medium_Level", "name": "Medium Level Services" } ],
         "dependent_components": [
             { "id": "Comp_Payment_Gateway", "name": "Payment Gateway" },
             { "id": "Comp_Inventory_Service", "name": "Inventory Service" }
@@ -112,10 +109,7 @@ const initialApplications = [
         "name": "CRM Platform",
         "description": "Manages customer relationships, support tickets, and marketing campaigns.",
         "version": "4.0.1",
-        "tenants": [
-            { "id": "Tenant_Low_Level", "name": "Low Level Services" },
-            { "id": "Tenant_Analytics", "name": "Analytics" }
-        ],
+        "tenants": [ { "id": "Tenant_Low_Level", "name": "Low Level Services" } ],
         "dependent_components": [{ "id": "Comp_Email_Service", "name": "Email Service" }],
         "provided_interfaces": [{ "id": "Interface_Customer_Data_API", "name": "Customer Data API" }],
         "created_at": "2024-02-20T16:00:00Z", "updated_at": "2024-02-20T16:00:00Z",
@@ -160,6 +154,39 @@ const initialApplications = [
         "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
         "dependent_applications": [{ "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront" }],
         "created_at": "2024-04-12T11:00:00Z", "updated_at": "2024-04-12T11:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_PIM_Platform",
+        "name": "Product Information Management",
+        "description": "Centralizes and harmonizes all marketing and technical information for product listings.",
+        "version": "1.3.0",
+        "tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }],
+        "dependent_components": [
+            { "id": "Comp_Inventory_Service", "name": "Inventory Service" }
+        ],
+        "created_at": "2024-05-01T09:00:00Z", "updated_at": "2024-05-01T09:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_Support_Chatbot",
+        "name": "Customer Support Chatbot",
+        "description": "AI-powered chatbot for handling customer support queries.",
+        "version": "1.0.0",
+        "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
+        "dependent_applications": [{ "id": "App_CRM_Platform", "name": "CRM Platform" }],
+        "created_at": "2024-05-05T11:00:00Z", "updated_at": "2024-05-05T11:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_Returns_Management",
+        "name": "Returns Management System",
+        "description": "Manages the product returns and refund process.",
+        "version": "1.6.0",
+        "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
+        "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
+        "dependent_components": [{ "id": "Comp_Inventory_Service", "name": "Inventory Service" }],
+        "created_at": "2024_05_10T14:00:00Z", "updated_at": "2024-05-10T14:00:00Z",
         "phases": []
     }
 ];
@@ -236,5 +263,3 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
-
-    
