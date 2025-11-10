@@ -1,4 +1,5 @@
 
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -49,11 +50,109 @@ const InterfaceSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_interfaces';
 
+const initialInterfaces = [
+    {
+        "id": "Interface_Product_Catalog_API", "name": "Product Catalog API",
+        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.0",
+        "owner_name": "E-com Team", "owner_email": "ecom@example.com",
+        "source": { "id": "Comp_Inventory_Service", "name": "Inventory Service" },
+        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": true, "authentication": false } },
+        "created_at": "2024-01-20T10:00:00Z", "updated_at": "2024-01-20T10:00:00Z"
+    },
+    {
+        "id": "Interface_User_Auth_API", "name": "User Authentication API",
+        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "2.1",
+        "owner_name": "Security Team", "owner_email": "security@example.com",
+        "source": { "id": "Comp_Auth_Service", "name": "Authentication Service" },
+        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": true, "authentication": true } },
+        "created_at": "2024-01-21T11:00:00Z", "updated_at": "2024-01-21T11:00:00Z"
+    },
+    {
+        "id": "Interface_Payment_API", "name": "Payment Processing API",
+        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.5",
+        "owner_name": "Finance Team", "owner_email": "finance@example.com",
+        "source": { "id": "Comp_Payment_Gateway", "name": "Payment Gateway" },
+        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": true, "authentication": true } },
+        "created_at": "2024-01-22T12:00:00Z", "updated_at": "2024-01-22T12:00:00Z"
+    },
+    {
+        "id": "Interface_Order_API", "name": "Order Management API",
+        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "3.0",
+        "owner_name": "E-com Team", "owner_email": "ecom@example.com",
+        "source": { "id": "App_Order_Processing", "name": "Order Processing Backend" },
+        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": false, "authentication": false } },
+        "created_at": "2024-01-23T13:00:00Z", "updated_at": "2024-01-23T13:00:00Z"
+    },
+    {
+        "id": "Interface_Customer_Data_API", "name": "Customer Data API",
+        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.1",
+        "owner_name": "CRM Team", "owner_email": "crm@example.com",
+        "source": { "id": "App_CRM_Platform", "name": "CRM Platform" },
+        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": false, "authentication": false } },
+        "created_at": "2024-01-24T14:00:00Z", "updated_at": "2024-01-24T14:00:00Z"
+    },
+    {
+        "id": "Interface_Reporting_API", "name": "Reporting API",
+        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.0",
+        "owner_name": "Analytics Team", "owner_email": "analytics@example.com",
+        "source": { "id": "Comp_Data_Warehouse_Connector", "name": "Data Warehouse Connector" },
+        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": false, "authentication": false } },
+        "created_at": "2024-01-25T15:00:00Z", "updated_at": "2024-01-25T15:00:00Z"
+    },
+    {
+        "id": "Interface_Compliance_Check_API", "name": "Compliance Check API",
+        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.0",
+        "owner_name": "Compliance Team", "owner_email": "compliance@example.com",
+        "source": { "id": "Comp_Payment_Gateway", "name": "Payment Gateway" },
+        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": true, "authentication": true } },
+        "created_at": "2024-01-26T16:00:00Z", "updated_at": "2024-01-26T16:00:00Z"
+    },
+    {
+        "id": "Interface_Web_UI", "name": "Main Web UI",
+        "type": { "id": "Interface_Type_UI", "name": "UI" }, "version": "1.0",
+        "owner_name": "Frontend Team", "owner_email": "frontend@example.com",
+        "source": { "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront" },
+        "security": { "internal": { "secure": false, "authentication": false }, "external": { "secure": false, "authentication": false } },
+        "created_at": "2024-01-27T17:00:00Z", "updated_at": "2024-01-27T17:00:00Z"
+    },
+    {
+        "id": "Interface_Analytics_UI", "name": "Analytics Web UI",
+        "type": { "id": "Interface_Type_UI", "name": "UI" }, "version": "1.0",
+        "owner_name": "Analytics Team", "owner_email": "analytics@example.com",
+        "source": { "id": "App_Analytics_Dashboard", "name": "Analytics Dashboard" },
+        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": false, "authentication": false } },
+        "created_at": "2024-01-28T18:00:00Z", "updated_at": "2024-01-28T18:00:00Z"
+    }
+];
+
+
+async function seedInterfaces() {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection(COLLECTION_NAME);
+    
+    await collection.deleteMany({});
+    await collection.insertMany(initialInterfaces as any);
+    console.log('Seeded interfaces collection.');
+
+  } catch (error) {
+    console.error('Error seeding interfaces:', error);
+  }
+}
+
 // List all interfaces
 export async function GET(req: NextRequest) {
   try {
     const client = await clientPromise;
     const db = client.db();
+    const collection = db.collection(COLLECTION_NAME);
+
+    const count = await collection.countDocuments();
+    if (count === 0) {
+        await seedInterfaces();
+    }
+    
     const items = await db.collection(COLLECTION_NAME).find({}).sort({updated_at: -1}).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {

@@ -44,11 +44,109 @@ const ApplicationSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_applications';
 
+
+const initialApplications = [
+    {
+        "id": "App_Ecom_Storefront",
+        "name": "E-Commerce Storefront",
+        "description": "Customer-facing web application for browsing and purchasing products.",
+        "version": "2.1.0",
+        "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
+        "dependent_components": [
+            { "id": "Comp_Auth_Service", "name": "Authentication Service" },
+            { "id": "Comp_Search_Service", "name": "Search Service" }
+        ],
+        "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
+        "provided_interfaces": [{ "id": "Interface_Web_UI", "name": "Main Web UI" }],
+        "dependent_interfaces": [
+            { "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" },
+            { "id": "Interface_User_Auth_API", "name": "User Authentication API" }
+        ],
+        "created_at": "2024-01-15T10:00:00Z", "updated_at": "2024-01-15T10:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_Order_Processing",
+        "name": "Order Processing Backend",
+        "description": "Handles order creation, payment processing, and fulfillment.",
+        "version": "1.5.0",
+        "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
+        "dependent_components": [
+            { "id": "Comp_Payment_Gateway", "name": "Payment Gateway" },
+            { "id": "Comp_Inventory_Service", "name": "Inventory Service" }
+        ],
+        "provided_interfaces": [{ "id": "Interface_Order_API", "name": "Order Management API" }],
+        "dependent_interfaces": [{ "id": "Interface_Payment_API", "name": "Payment Processing API" }],
+        "created_at": "2024-01-16T11:00:00Z", "updated_at": "2024-01-16T11:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_Analytics_Dashboard",
+        "name": "Analytics Dashboard",
+        "description": "Provides business intelligence and sales analytics.",
+        "version": "3.0.0",
+        "tenants": [{ "id": "Tenant_Analytics", "name": "Analytics" }],
+        "dependent_components": [{ "id": "Comp_Data_Warehouse_Connector", "name": "Data Warehouse Connector" }],
+        "provided_interfaces": [{ "id": "Interface_Analytics_UI", "name": "Analytics Web UI" }],
+        "dependent_interfaces": [{ "id": "Interface_Reporting_API", "name": "Reporting API" }],
+        "created_at": "2024-02-10T09:00:00Z", "updated_at": "2024-02-10T09:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_Mobile_Companion",
+        "name": "Mobile Companion App",
+        "description": "iOS and Android app for on-the-go shopping.",
+        "version": "1.2.0",
+        "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
+        "dependent_applications": [{ "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront" }],
+        "provided_interfaces": [],
+        "dependent_interfaces": [{ "id": "Interface_Order_API", "name": "Order Management API" }],
+        "created_at": "2024-03-05T14:00:00Z", "updated_at": "2024-03-05T14:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "App_CRM_Platform",
+        "name": "CRM Platform",
+        "description": "Manages customer relationships, support tickets, and marketing campaigns.",
+        "version": "4.0.1",
+        "tenants": [
+            { "id": "Tenant_Low_Level", "name": "Low Level Services" },
+            { "id": "Tenant_Analytics", "name": "Analytics" }
+        ],
+        "dependent_components": [{ "id": "Comp_Email_Service", "name": "Email Service" }],
+        "provided_interfaces": [{ "id": "Interface_Customer_Data_API", "name": "Customer Data API" }],
+        "created_at": "2024-02-20T16:00:00Z", "updated_at": "2024-02-20T16:00:00Z",
+        "phases": []
+    }
+];
+
+async function seedApplications() {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection(COLLECTION_NAME);
+    
+    await collection.deleteMany({});
+    await collection.insertMany(initialApplications as any);
+    console.log('Seeded applications collection.');
+
+  } catch (error) {
+    console.error('Error seeding applications:', error);
+  }
+}
+
 // List all applications
 export async function GET(req: NextRequest) {
   try {
     const client = await clientPromise;
     const db = client.db();
+    const collection = db.collection(COLLECTION_NAME);
+    
+    const count = await collection.countDocuments();
+    if (count === 0) {
+        await seedApplications();
+    }
+    
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {

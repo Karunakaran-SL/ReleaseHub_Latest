@@ -43,11 +43,92 @@ const ComponentSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_components';
 
+const initialComponents = [
+    {
+        "id": "Comp_Auth_Service",
+        "name": "Authentication Service",
+        "version": "1.2.0",
+        "tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }],
+        "provided_interfaces": [{ "id": "Interface_User_Auth_API", "name": "User Authentication API" }],
+        "created_at": "2024-01-10T09:00:00Z", "updated_at": "2024-01-10T09:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Payment_Gateway",
+        "name": "Payment Gateway",
+        "version": "3.0.0",
+        "tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }],
+        "provided_interfaces": [{ "id": "Interface_Payment_API", "name": "Payment Processing API" }],
+        "dependent_interfaces": [{ "id": "Interface_Compliance_Check_API", "name": "Compliance Check API" }],
+        "created_at": "2024-01-11T14:00:00Z", "updated_at": "2024-01-11T14:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Inventory_Service",
+        "name": "Inventory Service",
+        "version": "2.5.0",
+        "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
+        "provided_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
+        "created_at": "2024-01-12T11:00:00Z", "updated_at": "2024-01-12T11:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Search_Service",
+        "name": "Search Service",
+        "version": "1.8.0",
+        "tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }],
+        "dependent_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
+        "created_at": "2024-01-13T16:00:00Z", "updated_at": "2024-01-13T16:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Email_Service",
+        "name": "Email Service",
+        "version": "2.0.0",
+        "tenants": [{ "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }],
+        "provided_interfaces": [],
+        "created_at": "2024-01-14T10:00:00Z", "updated_at": "2024-01-14T10:00:00Z",
+        "phases": []
+    },
+    {
+        "id": "Comp_Data_Warehouse_Connector",
+        "name": "Data Warehouse Connector",
+        "version": "1.0.0",
+        "tenants": [{ "id": "Tenant_Analytics", "name": "Analytics" }],
+        "provided_interfaces": [{ "id": "Interface_Reporting_API", "name": "Reporting API" }],
+        "created_at": "2024-02-01T12:00:00Z", "updated_at": "2024-02-01T12:00:00Z",
+        "phases": []
+    }
+];
+
+
+async function seedComponents() {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection(COLLECTION_NAME);
+    
+    await collection.deleteMany({});
+    await collection.insertMany(initialComponents as any);
+    console.log('Seeded components collection.');
+
+  } catch (error) {
+    console.error('Error seeding components:', error);
+  }
+}
+
 // List all components
 export async function GET(req: NextRequest) {
   try {
     const client = await clientPromise;
     const db = client.db();
+    const collection = db.collection(COLLECTION_NAME);
+
+    const count = await collection.countDocuments();
+    if (count === 0) {
+        await seedComponents();
+    }
+    
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {

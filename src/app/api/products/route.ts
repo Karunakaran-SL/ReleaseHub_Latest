@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import type { Product } from '@/lib/definitions';
@@ -8,171 +9,81 @@ import { getUser } from '@/lib/auth';
 
 const initialProducts: Omit<Product, '_id'>[] = [
   {
-    "id": "Product_A",
+    "id": "Product_OSS_Portal",
     "name": "OneStopShop Portal",
-    "owner": "Admin User",
-    "owner_email": "admin@onestopshop.com",
+    "owner": "Admin User", "owner_email": "admin@onestopshop.com",
     "product_image": "https://picsum.photos/seed/productA/40/40",
     "approval_needed": true,
-    "default_workflow": {
-      "id": "Workflow_Flow_2",
-      "name": "Flow 2"
-    },
+    "default_workflow": { "id": "Workflow_Flow_2", "name": "Flow 2" },
     "custom_workflows": [
       { "id": "Workflow_Flow_1", "name": "Flow 1" },
       { "id": "Workflow_Security_Review", "name": "Security Review" }
     ],
-    "cmdb": {
-      "id": "CMDB_1",
-      "name": "CMDB 1"
-    },
+    "cmdb": { "id": "CMDB_1", "name": "CMDB 1" },
     "compliance_checks": [
       { "id": "Compliance_Security", "name": "Security" },
       { "id": "Compliance_IT_Policy", "name": "IT Policy" }
     ],
-    "deployment_type": {
-      "id": "Deployment_Airgapped",
-      "name": "Airgapped"
-    },
+    "deployment_type": { "id": "Deployment_Airgapped", "name": "Airgapped" },
     "git_repo": "http://git.example.com/onestopshop-portal",
     "artifacts_repo": "http://artifacts.example.com/onestopshop-portal",
     "pipeline": "http://pipeline.example.com/onestopshop-portal",
-    "specifications": [
-      {
-        "id": "HW_PowerEdge_R740",
-        "name": "PowerEdge R740"
-      }
-    ],
-    "created_at": "2023-11-20T09:00:00Z",
-    "updated_at": "2023-11-20T09:00:00Z"
+    "specifications": [{ "id": "HW_PowerEdge_R740", "name": "PowerEdge R740" }],
+    "created_at": "2023-11-20T09:00:00Z", "updated_at": "2023-11-20T09:00:00Z"
   },
-    {
-    "id": "Product_B",
+  {
+    "id": "Product_Data_Platform",
     "name": "Data Analytics Platform",
-    "owner": "Data Team",
-    "owner_email": "data@onestopshop.com",
+    "owner": "Data Team", "owner_email": "data@onestopshop.com",
     "product_image": "https://picsum.photos/seed/productB/40/40",
     "approval_needed": false,
-    "default_workflow": {
-      "id": "Workflow_Flow_1",
-      "name": "Flow 1"
-    },
+    "default_workflow": { "id": "Workflow_Flow_1", "name": "Flow 1" },
     "custom_workflows": [],
-    "cmdb": {
-      "id": "CMDB_2",
-      "name": "CMDB 2"
-    },
-    "compliance_checks": [
-      { "id": "Compliance_IT_Policy", "name": "IT Policy" }
-    ],
-    "deployment_type": {
-      "id": "Deployment_Cloud",
-      "name": "Cloud"
-    },
+    "cmdb": { "id": "CMDB_2", "name": "CMDB 2" },
+    "compliance_checks": [{ "id": "Compliance_IT_Policy", "name": "IT Policy" }],
+    "deployment_type": { "id": "Deployment_Cloud", "name": "Cloud" },
     "git_repo": "http://git.example.com/data-analytics",
     "artifacts_repo": "http://artifacts.example.com/data-analytics",
     "pipeline": "http://pipeline.example.com/data-analytics",
-    "created_at": "2023-10-15T14:30:00Z",
-    "updated_at": "2023-11-21T11:00:00Z"
+    "specifications": [],
+    "created_at": "2023-10-15T14:30:00Z", "updated_at": "2023-11-21T11:00:00Z"
   },
   {
-    "id": "Product_C",
-    "name": "Mobile Banking App",
-    "owner": "Finance Team",
-    "owner_email": "finance@onestopshop.com",
-    "product_image": "https://picsum.photos/seed/productC/40/40",
+    "id": "Product_Orchestration_Engine",
+    "name": "Orchestration Engine",
+    "owner": "Platform Team", "owner_email": "platform@onestopshop.com",
+    "product_image": "https://picsum.photos/seed/productOrch/40/40",
     "approval_needed": true,
-    "default_workflow": {
-      "id": "Workflow_Flow_2",
-      "name": "Flow 2"
-    },
-    "custom_workflows": [
-        { "id": "Workflow_Security_Review", "name": "Security Review" }
-    ],
-    "cmdb": {
-      "id": "CMDB_1",
-      "name": "CMDB 1"
-    },
-    "compliance_checks": [
-      { "id": "Compliance_Security", "name": "Security" },
-      { "id": "Compliance_IT_Policy", "name": "IT Policy" }
-    ],
-    "deployment_type": {
-      "id": "Deployment_Cloud",
-      "name": "Cloud"
-    },
-    "git_repo": "http://git.example.com/mobile-banking",
-    "artifacts_repo": "http://artifacts.example.com/mobile-banking",
-    "pipeline": "http://pipeline.example.com/mobile-banking",
-    "created_at": "2023-11-22T10:00:00Z",
-    "updated_at": "2023-11-22T10:00:00Z"
-  },
-    {
-    "id": "Product_D",
-    "name": "Internal CRM",
-    "owner": "Sales Team",
-    "owner_email": "sales@onestopshop.com",
-    "product_image": "https://picsum.photos/seed/productD/40/40",
-    "approval_needed": false,
-    "default_workflow": {
-      "id": "Workflow_Flow_1",
-      "name": "Flow 1"
-    },
+    "default_workflow": { "id": "Workflow_Security_Review", "name": "Security Review" },
     "custom_workflows": [],
-    "cmdb": {
-      "id": "CMDB_2",
-      "name": "CMDB 2"
-    },
-    "compliance_checks": [
-        { "id": "Compliance_IT_Policy", "name": "IT Policy" }
+    "cmdb": { "id": "CMDB_1", "name": "CMDB 1" },
+    "compliance_checks": [{ "id": "Compliance_Security", "name": "Security" }],
+    "deployment_type": { "id": "Deployment_OnPrem", "name": "On-Prem" },
+    "git_repo": "http://git.example.com/orchestration-engine",
+    "artifacts_repo": "http://artifacts.example.com/orchestration-engine",
+    "pipeline": "http://pipeline.example.com/orchestration-engine",
+    "specifications": [
+      { "id": "HW_ProLiant_DL380", "name": "ProLiant DL380 Gen10" },
+      { "id": "HW_Cisco_UCS_B200_M5", "name": "Cisco UCS B200 M5 Blade" }
     ],
-    "deployment_type": {
-      "id": "Deployment_Cloud",
-      "name": "Cloud"
-    },
-    "git_repo": "http://git.example.com/internal-crm",
-    "artifacts_repo": "http://artifacts.example.com/internal-crm",
-    "pipeline": "http://pipeline.example.com/internal-crm",
-    "created_at": "20_23-11-23T12:00:00Z",
-    "updated_at": "2023-11-23T12:00:00Z"
+    "created_at": "2024-01-05T10:00:00Z", "updated_at": "2024-01-10T12:00:00Z"
   },
   {
-    "id": "Product_E",
-    "name": "HR Management Suite",
-    "owner": "HR Department",
-    "owner_email": "hr@onestopshop.com",
-    "product_image": "https://picsum.photos/seed/productE/40/40",
-    "approval_needed": true,
-    "default_workflow": {
-      "id": "Workflow_Flow_2",
-      "name": "Flow 2"
-    },
-    "custom_workflows": [
-        { "id": "Workflow_Flow_1", "name": "Flow 1" },
-        { "id": "Workflow_Security_Review", "name": "Security Review" }
-    ],
-    "cmdb": {
-      "id": "CMDB_3",
-      "name": "CMDB 3"
-    },
-    "compliance_checks": [
-      { "id": "Compliance_Security", "name": "Security" }
-    ],
-    "deployment_type": {
-      "id": "Deployment_Airgapped",
-      "name": "Airgapped"
-    },
-     "specifications": [
-      {
-        "id": "HW_ProLiant_DL380",
-        "name": "ProLiant DL380 Gen10"
-      }
-    ],
-    "git_repo": "http://git.example.com/hr-suite",
-    "artifacts_repo": "http://artifacts.example.com/hr-suite",
-    "pipeline": "http://pipeline.example.com/hr-suite",
-    "created_at": "2023-11-24T15:00:00Z",
-    "updated_at": "2023-11-24T15:00:00Z"
+    "id": "Product_Discovery_Service",
+    "name": "Discovery Service",
+    "owner": "Infra Team", "owner_email": "infra@onestopshop.com",
+    "product_image": "https://picsum.photos/seed/productDiscovery/40/40",
+    "approval_needed": false,
+    "default_workflow": { "id": "Workflow_Flow_1", "name": "Flow 1" },
+    "custom_workflows": [],
+    "cmdb": { "id": "CMDB_2", "name": "CMDB 2" },
+    "compliance_checks": [],
+    "deployment_type": { "id": "Deployment_Cloud", "name": "Cloud" },
+    "git_repo": "http://git.example.com/discovery-service",
+    "artifacts_repo": "http://artifacts.example.com/discovery-service",
+    "pipeline": "http://pipeline.example.com/discovery-service",
+    "specifications": [],
+    "created_at": "2024-02-01T09:00:00Z", "updated_at": "2024-02-05T15:00:00Z"
   }
 ];
 
