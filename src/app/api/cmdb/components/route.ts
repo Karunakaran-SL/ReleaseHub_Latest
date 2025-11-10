@@ -32,7 +32,7 @@ const ComponentSchema = z.object({
   }).optional(),
   custom_labels: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
   provided_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
-  dependent_interfaces: z.array(z.object({ id: z.string(), name: zstring() })).optional(),
+  dependent_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   dependent_components: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   dependent_applications: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   phases: z.array(CmdbPhaseSchema),
@@ -129,10 +129,7 @@ export async function GET(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
     
-    const count = await db.collection(COLLECTION_NAME).countDocuments();
-    if (count === 0) {
-        await seedComponents();
-    }
+    await seedComponents();
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });
@@ -182,3 +179,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
+
+    
