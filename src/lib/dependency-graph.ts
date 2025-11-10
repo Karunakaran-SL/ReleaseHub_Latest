@@ -48,10 +48,10 @@ export async function generateDependencyTree(entityType: EntityType, entityId: s
         ...allData.products.map(p => ({ ...p, entityType: 'product' as EntityType })),
     ] as EntityWithRelations[];
     
-    const rootEntity = allEntities.find(e => e._id === entityId && e.entityType === entityType);
+    const rootEntity = allEntities.find(e => e._id === entityId);
     
     if (!rootEntity) {
-        console.error(`Root entity not found for type: ${entityType} and id: ${entityId}`);
+        console.error(`Root entity not found with _id: ${entityId}`);
         return null;
     }
 
@@ -110,11 +110,13 @@ export async function generateDependencyTree(entityType: EntityType, entityId: s
 
     const finalEntities = Array.from(relatedEntities.values());
 
+    const rootProduct = finalEntities.find(e => e.entityType === 'product' && e._id === (rootEntity.entityType === 'product' ? rootEntity._id : (rootEntity as any).products?.[0]?.id)) as Product;
+
     const tree: DependencyTree = {
-        _id: rootEntity._id,
+        _id: rootEntity.id,
         rootEntityType: rootEntity.entityType,
         rootEntityId: rootEntity.id,
-        product: finalEntities.find(e => e.entityType === 'product') as Product || null,
+        product: rootProduct || null,
         specifications: allData.specifications.filter(s => finalEntities.some(e => e.entityType === 'product' && (e as Product).specifications?.some(sp => sp.id === s.id))),
         tenants: finalEntities.filter(e => e.entityType === 'tenant') as CmdbTenant[],
         components: finalEntities.filter(e => e.entityType === 'component') as CmdbComponent[],
@@ -129,6 +131,15 @@ export async function generateDependencyTree(entityType: EntityType, entityId: s
     return tree;
 }
 
-export async function revalidateDependencyTree(entityId: string): Promise<void> {
-  // No-op as we are generating on the fly and not caching in DB anymore
+export async function revalidateDependencyTree(productId: string): Promise<void> {
+    const client = await clientPromise;
+    const db = client.db();
+    const tree = await generateDependencyTree('product', productId);
+    if (tree) {
+        await db.collection('dependency_trees').updateOne(
+            { _id: productId },
+            { $set: tree },
+            { upsert: true }
+        );
+    }
 }

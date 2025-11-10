@@ -69,6 +69,31 @@ export default function DependencyMetricsPage() {
     const selectedEntityType = searchParams.get('type') as EntityType || 'product';
     const selectedEntityId = searchParams.get('id');
 
+    const [isUpdatingMetrics, setIsUpdatingMetrics] = useState(false);
+
+    const handleUpdateMetrics = async () => {
+        setIsUpdatingMetrics(true);
+        toast({ title: 'Updating Metrics', description: 'Generating dependency trees for all products...' });
+        try {
+            const response = await fetch('/api/dependency-tree/update-all', { method: 'POST' });
+            const result = await response.json();
+            if (response.ok) {
+                toast({ title: 'Success', description: result.message });
+                // Optionally re-fetch the current tree if it was affected
+                if (selectedEntityId) {
+                    fetchTree();
+                }
+            } else {
+                throw new Error(result.message || 'Failed to update metrics.');
+            }
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: error.message });
+        } finally {
+            setIsUpdatingMetrics(false);
+        }
+    };
+
+
     const fetchEntityList = useCallback(async (type: EntityType) => {
         setLoading(true);
         setEntityList([]);
@@ -78,11 +103,7 @@ export default function DependencyMetricsPage() {
             if (res.ok) {
                 const data = await res.json();
                 setEntityList(data);
-                // If no entity is selected in the URL for the new type, select the first one.
-                if (type === selectedEntityType && !selectedEntityId && data.length > 0) {
-                     router.push(`/dependency-metrics?type=${type}&id=${data[0].id}`);
-                } else if (type !== selectedEntityType && data.length > 0) {
-                    // If the type is changing, automatically select the first item of the new list
+                if (data.length > 0 && (!selectedEntityId || type !== selectedEntityType)) {
                     router.push(`/dependency-metrics?type=${type}&id=${data[0].id}`);
                 }
             } else {
@@ -95,6 +116,33 @@ export default function DependencyMetricsPage() {
         }
     }, [router, selectedEntityId, selectedEntityType, toast]);
 
+     const fetchTree = useCallback(async () => {
+        if (!selectedEntityId) {
+            setDependencyTree(null);
+            return;
+        }
+        
+        setLoadingTree(true);
+        setDependencyTree(null);
+        
+        try {
+            const res = await fetch(`/api/dependency-tree/${selectedEntityType}/${selectedEntityId}`);
+
+            if (res.ok) {
+                setDependencyTree(await res.json());
+            } else if (res.status !== 404) {
+                const errorText = await res.text();
+                console.error(`Failed to fetch dependency tree for ${selectedEntityType}:${selectedEntityId}. Response: ${errorText}`);
+                toast({ variant: 'destructive', title: 'Error', description: `Failed to load dependency tree.` });
+            }
+        } catch (error) {
+             console.error("Error fetching dependency tree:", error);
+             toast({ variant: 'destructive', title: 'Error', description: 'An error occurred while loading the dependency tree.' });
+        } finally {
+            setLoadingTree(false);
+        }
+    }, [selectedEntityId, selectedEntityType, toast]);
+
 
     useEffect(() => {
         getUser().then(setUser);
@@ -103,52 +151,15 @@ export default function DependencyMetricsPage() {
 
 
     useEffect(() => {
-        if (!selectedEntityId) {
-            setDependencyTree(null);
-            return;
-        };
-
-        async function fetchTree() {
-            setLoadingTree(true);
-            setDependencyTree(null);
-            
-            const entity = entityList.find(e => e.id === selectedEntityId);
-            
-            if (!entity) {
-                if(!loading) { // Avoid error message while entity list is still loading
-                     console.error(`Entity not found for type ${selectedEntityType} and id: ${selectedEntityId}`);
-                }
-                setLoadingTree(false);
-                return;
-            }
-
-            try {
-                const idToFetch = entity._id;
-                
-                const res = await fetch(`/api/dependency-tree/${selectedEntityType}/${idToFetch}`);
-                if (res.ok) {
-                    setDependencyTree(await res.json());
-                } else {
-                    const errorText = await res.text();
-                    console.error(`Failed to fetch dependency tree for ${selectedEntityType}:${idToFetch}. Response: ${errorText}`);
-                    toast({ variant: 'destructive', title: 'Error', description: `Failed to load dependency tree for ${selectedEntityType}:${idToFetch}`})
-                }
-            } catch (error) {
-                 console.error("Error fetching dependency tree:", error);
-                 toast({ variant: 'destructive', title: 'Error', description: 'An error occurred while loading the dependency tree.'})
-            } finally {
-                setLoadingTree(false);
+        if (selectedEntityId && entityList.length > 0) {
+            const entityExists = entityList.some(e => e.id === selectedEntityId);
+            if (entityExists) {
+                fetchTree();
             }
         }
-        
-        if (entityList.length > 0) {
-            fetchTree();
-        }
-
-    }, [selectedEntityId, entityList, selectedEntityType, toast, loading]);
+    }, [selectedEntityId, entityList, fetchTree]);
     
     const handleEntityTypeChange = (type: EntityType) => {
-        // This will trigger the fetchEntityList effect
         router.push(`/dependency-metrics?type=${type}`);
     };
     
@@ -227,7 +238,10 @@ export default function DependencyMetricsPage() {
             <main className="flex-1 p-6 md:p-10 space-y-6">
                 <div className="flex items-center justify-between">
                     <h1 className="text-3xl font-bold">Dependency Metrics</h1>
-                    <Button>Update Metrics</Button>
+                    <Button onClick={handleUpdateMetrics} disabled={isUpdatingMetrics}>
+                        {isUpdatingMetrics && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Update Metrics
+                    </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
