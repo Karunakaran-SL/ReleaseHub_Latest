@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import type { Product } from '@/lib/definitions';
 import { z } from 'zod';
-import { ObjectId } from 'mongodb';
 import { logAuditEvent } from '@/lib/audit';
 import { getUser } from '@/lib/auth';
 import { revalidateDependencyTree } from '@/lib/dependency-graph';
@@ -57,9 +56,15 @@ async function seedProducts() {
     const productsCollection = db.collection('products');
     
     for (const product of initialProducts) {
+        const productWithDates = {
+            ...product,
+            _id: product.id,
+            updated_at: new Date().toISOString(),
+            created_at: new Date().toISOString()
+        };
         await productsCollection.updateOne(
-            { id: product.id },
-            { $set: { ...product, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
+            { _id: product.id },
+            { $set: productWithDates },
             { upsert: true }
         );
     }
@@ -156,25 +161,25 @@ export async function POST(req: NextRequest) {
         
         const newProduct = {
             ...validatedData.data,
+            _id: validatedData.data.id,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         };
 
         const result = await productsCollection.insertOne(newProduct as any);
-        const insertedProduct = { ...newProduct, _id: result.insertedId };
-
+        
         await logAuditEvent({
             action: 'CREATE',
             entity: 'product',
-            entityId: result.insertedId.toString(),
+            entityId: newProduct.id,
             comment: `Product "${newProduct.name}" created.`,
         });
         
         // Revalidate dependency tree in the background
-        revalidateDependencyTree(result.insertedId.toString());
+        revalidateDependencyTree(newProduct.id);
 
 
-        return NextResponse.json(insertedProduct, { status: 201 });
+        return NextResponse.json(newProduct, { status: 201 });
 
     } catch (error) {
         console.error(error);

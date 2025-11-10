@@ -1,6 +1,6 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
@@ -47,13 +47,9 @@ const ProductUpdateSchema = z.object({
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid product ID.' }, { status: 400 });
-        }
-
         const client = await clientPromise;
         const db = client.db();
-        const product = await db.collection('products').findOne({ _id: new ObjectId(id) });
+        const product = await db.collection('products').findOne({ _id: id });
 
         if (!product) {
             return NextResponse.json({ message: 'Product not found.' }, { status: 404 });
@@ -76,9 +72,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         }
 
         const { id } = params;
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid product ID.' }, { status: 400 });
-        }
 
         const body = await req.json();
         const validatedData = ProductUpdateSchema.safeParse(body);
@@ -99,7 +92,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         };
 
         const result = await productsCollection.updateOne(
-            { _id: new ObjectId(id) },
+            { _id: id },
             { $set: updateData }
         );
 
@@ -118,7 +111,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         revalidateDependencyTree(id);
 
 
-        const updatedProduct = await productsCollection.findOne({ _id: new ObjectId(id) });
+        const updatedProduct = await productsCollection.findOne({ _id: id });
 
         return NextResponse.json(updatedProduct, { status: 200 });
 
@@ -138,9 +131,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         }
 
         const { id } = params;
-         if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid product ID.' }, { status: 400 });
-        }
         
         const { comment } = await req.json();
         if (!comment) {
@@ -149,7 +139,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
         const client = await clientPromise;
         const db = client.db();
-        const result = await db.collection('products').deleteOne({ _id: new ObjectId(id) });
+        const result = await db.collection('products').deleteOne({ _id: id });
 
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Product not found.' }, { status: 404 });
