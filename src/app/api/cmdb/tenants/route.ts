@@ -89,11 +89,12 @@ async function seedTenants() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    // This will only delete the initial seed items, preserving user-added data
-    await collection.deleteMany({ id: { $in: initialTenants.map(i => i.id) } });
-    await collection.insertMany(initialTenants as any);
-    console.log('Seeded tenants collection.');
-
+    const count = await collection.countDocuments({ id: { $in: initialTenants.map(i => i.id) } });
+    if (count < initialTenants.length) {
+      await collection.deleteMany({ id: { $in: initialTenants.map(i => i.id) } });
+      await collection.insertMany(initialTenants as any);
+      console.log('Seeded tenants collection.');
+    }
   } catch (error) {
     console.error('Error seeding tenants:', error);
   }

@@ -132,11 +132,12 @@ async function seedInterfaces() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    // This will only delete the initial seed items, preserving user-added data
-    await collection.deleteMany({ id: { $in: initialInterfaces.map(i => i.id) } });
-    await collection.insertMany(initialInterfaces as any);
-    console.log('Seeded interfaces collection.');
-
+    const count = await collection.countDocuments({ id: { $in: initialInterfaces.map(i => i.id) } });
+    if (count < initialInterfaces.length) {
+      await collection.deleteMany({ id: { $in: initialInterfaces.map(i => i.id) } });
+      await collection.insertMany(initialInterfaces as any);
+      console.log('Seeded interfaces collection.');
+    }
   } catch (error) {
     console.error('Error seeding interfaces:', error);
   }

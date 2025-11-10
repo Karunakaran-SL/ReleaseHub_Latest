@@ -95,11 +95,12 @@ async function seedSpecifications() {
     const db = client.db();
     const collection = db.collection('specifications');
     
-    // This will only delete the initial seed items, preserving user-added data
-    await collection.deleteMany({ id: { $in: initialSpecifications.map(i => i.id) } });
-    await collection.insertMany(initialSpecifications as any);
-    console.log('Seeded specifications collection.');
-
+    const count = await collection.countDocuments({ id: { $in: initialSpecifications.map(i => i.id) } });
+    if (count < initialSpecifications.length) {
+      await collection.deleteMany({ id: { $in: initialSpecifications.map(i => i.id) } });
+      await collection.insertMany(initialSpecifications as any);
+      console.log('Seeded specifications collection.');
+    }
   } catch (error) {
     console.error('Error seeding specifications:', error);
   }

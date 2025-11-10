@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import type { Product } from '@/lib/definitions';
@@ -94,10 +95,12 @@ async function seedProducts() {
     const db = client.db();
     const productsCollection = db.collection('products');
     
-    // This will only delete the initial seed items, preserving user-added data
-    await productsCollection.deleteMany({ id: { $in: initialProducts.map(i => i.id) } });
-    await productsCollection.insertMany(initialProducts as any);
-    console.log('Seeded products collection.');
+    const count = await productsCollection.countDocuments({ id: { $in: initialProducts.map(p => p.id) } });
+    if (count < initialProducts.length) {
+      await productsCollection.deleteMany({ id: { $in: initialProducts.map(i => i.id) } });
+      await productsCollection.insertMany(initialProducts as any);
+      console.log('Seeded products collection.');
+    }
 
   } catch (error) {
     console.error('Error seeding products:', error);
@@ -107,15 +110,11 @@ async function seedProducts() {
 // Search and list products
 export async function GET(req: NextRequest) {
   try {
+    await seedProducts();
     const client = await clientPromise;
     const db = client.db();
     const productsCollection = db.collection('products');
     
-    const count = await productsCollection.countDocuments();
-    if (count === 0) {
-        await seedProducts();
-    }
-
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('q');
     
