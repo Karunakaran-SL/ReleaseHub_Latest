@@ -44,60 +44,43 @@ const ApplicationSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_applications';
 
-const initialApplicationOnboardingPhases = [
-    { id: "phase-1", name: "Initiate Onboarding", fields: ["requestFormSubmitted", "csApproved", "pmApproved", "productTeamAgreement"] },
-    { id: "phase-2", name: "Product Definitions", fields: ["architectAgreed", "specChanged", "hlDesignApproved"] },
-    { id: "phase-3", name: "Detail Design", fields: ["detailDesignDone", "dependencyIdentified", "pertReady", "testPlanReady"] },
-    { id: "phase-4", name: "Delivery", fields: ["implementationDone", "unitTestDone", "staticCodeDone", "systemIntegrationDone", "systemIntegrationTestingDone", "allTestCasesAutomated"] },
-    { id: "phase-5", name: "Alpha Qualification", fields: ["uatTestDone", "riskReported", "serviceMetricsDone"] },
-    { id: "phase-6", name: "Prepare customer", fields: ["communicatedChanges", "plannedMCWindow"] },
-    { id: "phase-7", name: "Beta Qualification", fields: ["deploymentRunbookForBeta", "deploymentDone", "betaTestsExecuted"] },
-    { id: "phase-8", name: "Completed", fields: ["onboardingCompleteClosure"] }
+const tenantNames = [
+    "Tenant_Shared_Services", "Tenant_App_Platform", "Tenant_Data_Infra", "Tenant_ML_Platform", "Tenant_Retail_Core",
+    "Tenant_ECommerce_Frontend", "Tenant_Finance_Analytics", "Tenant_Marketing_Tools", "Tenant_IoT_Edge", "Tenant_Gaming_Services"
 ];
-const statuses = ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"];
-const getRandomStatus = () => statuses[Math.floor(Math.random() * statuses.length)];
 
-const generatePhases = () => {
-    return initialApplicationOnboardingPhases.map(p => ({
-        id: p.id,
-        name: p.name,
-        version: "1.0",
-        status: getRandomStatus(),
-        fields: p.fields.map(f => ({
-            name: f,
-            value: Math.random() > 0.5,
-            proof: { link: '' }
-        }))
-    }));
+const interfacePool = [
+    { id: "Interface_WebApp_UI", name: "WebApp UI" }, { id: "Interface_Public_API_Gateway", name: "Public API Gateway" },
+    { id: "Interface_Internal_GraphQL", name: "Internal GraphQL API" }, { id: "Interface_Data_Ingestion", name: "Data Ingestion API" },
+    { id: "Interface_Data_Query", name: "Data Query API" }, { id: "Interface_Model_Training", name: "Model Training API" },
+    { id: "Interface_Model_Inference", name: "Model Inference API" }, { id: "Interface_Device_Telemetry", name: "Device Telemetry API" },
+    { id: "Interface_Game_State", name: "Game State API" }, { id: "Interface_Leaderboard", name: "Leaderboard API" }
+];
+
+let appCounter = 0;
+const createApp = (name: string, tenantId: string, provided: number[], required: number[], depComp: string) => {
+    appCounter++;
+    return {
+        "_id": `App_${name.replace(/\s/g, '')}`, "id": `App_${name.replace(/\s/g, '')}`, "name": name, "version": `1.${appCounter}.0`,
+        "tenants": [{ "id": tenantId, "name": tenantId.replace(/_/g, ' ') }],
+        "provided_interfaces": provided.map(i => interfacePool[i]),
+        "dependent_interfaces": required.map(i => interfacePool[i]),
+        "dependent_components": [{ id: `Comp_Monitoring-${tenantId.slice(7)}`, name: `Monitoring-${tenantId.slice(7)}` }],
+        "dependent_applications": [],
+        "created_at": new Date().toISOString(), "updated_at": new Date().toISOString(), "phases": []
+    };
 };
 
-const initialApplications = [
-    {
-        "_id": "App_Ecom_Storefront", "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront", "description": "Customer-facing web application for browsing and purchasing products.", "version": "2.1.0",
-        "tenants": [{ "id": "Tenant_High_Level", "name": "High Level Services" }],
-        "dependent_components": [{ "id": "Comp_Auth_Service", "name": "Authentication Service" }, { "id": "Comp_Search_Service", "name": "Search Service" }],
-        "dependent_applications": [{ "id": "App_Order_Processing", "name": "Order Processing Backend" }],
-        "provided_interfaces": [{ "id": "Interface_Web_UI", "name": "Main Web UI" }],
-        "dependent_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }, { "id": "Interface_User_Auth_API", "name": "User Authentication API" }],
-        "created_at": "2024-01-15T10:00:00Z", "updated_at": "2024-01-15T10:00:00Z", "phases": generatePhases()
-    },
-    {
-        "_id": "App_Order_Processing", "id": "App_Order_Processing", "name": "Order Processing Backend", "description": "Handles order creation, payment processing, and fulfillment.", "version": "1.5.0",
-        "tenants": [ { "id": "Tenant_Medium_Level", "name": "Medium Level Services" } ],
-        "dependent_components": [{ "id": "Comp_Payment_Gateway", "name": "Payment Gateway" }, { "id": "Comp_Inventory_Service", "name": "Inventory Service" }],
-        "provided_interfaces": [{ "id": "Interface_Order_API", "name": "Order Management API" }],
-        "dependent_interfaces": [{ "id": "Interface_Payment_API", "name": "Payment Processing API" }],
-        "created_at": "2024-01-16T11:00:00Z", "updated_at": "2024-01-16T11:00:00Z", "phases": generatePhases()
-    },
-    {
-        "_id": "App_Analytics_Dashboard", "id": "App_Analytics_Dashboard", "name": "Analytics Dashboard", "description": "Provides business intelligence and sales analytics.", "version": "3.0.0",
-        "tenants": [{ "id": "Tenant_Analytics", "name": "Analytics" }],
-        "dependent_components": [{ "id": "Comp_Data_Warehouse_Connector", "name": "Data Warehouse Connector" }],
-        "provided_interfaces": [{ "id": "Interface_Analytics_UI", "name": "Analytics Web UI" }],
-        "dependent_interfaces": [{ "id": "Interface_Reporting_API", "name": "Reporting API" }],
-        "created_at": "2024-02-10T09:00:00Z", "updated_at": "2024-02-10T09:00:00Z", "phases": generatePhases()
-    }
-];
+const initialApplications: any[] = [];
+tenantNames.forEach(tenantId => {
+    const suffix = tenantId.slice(7);
+    initialApplications.push(createApp(`Dashboard-${suffix}`, tenantId, [0], [1, 2], `Comp_Logging-${suffix}`));
+    initialApplications.push(createApp(`APIGateway-${suffix}`, tenantId, [1], [3], `Comp_Security-${suffix}`));
+    initialApplications.push(createApp(`DataProcessor-${suffix}`, tenantId, [4], [3], `Comp_Monitoring-${suffix}`));
+    initialApplications.push(createApp(`ReportingSvc-${suffix}`, tenantId, [], [4], `Comp_Logging-${suffix}`));
+    initialApplications.push(createApp(`Orchestrator-${suffix}`, tenantId, [], [1,4], `Comp_Security-${suffix}`));
+});
+
 
 async function seedApplications() {
   try {
@@ -105,13 +88,9 @@ async function seedApplications() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    for (const app of initialApplications) {
-        await collection.updateOne(
-            { _id: app._id },
-            { $set: app },
-            { upsert: true }
-        );
-    }
+    await collection.deleteMany({_id: {$in: initialApplications.map(a => a._id)}});
+    await collection.insertMany(initialApplications);
+
     console.log('Seeded applications collection.');
 
   } catch (error) {
@@ -125,10 +104,7 @@ export async function GET(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
     
-    const count = await db.collection(COLLECTION_NAME).countDocuments();
-    if (count === 0) {
-      await seedApplications();
-    }
+    await seedApplications();
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });

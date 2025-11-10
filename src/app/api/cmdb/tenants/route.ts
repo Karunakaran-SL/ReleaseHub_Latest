@@ -72,14 +72,25 @@ const generatePhases = () => {
 };
 
 const initialTenants = [
-    { "_id": "Tenant_Platform_Foundation", "id": "Tenant_Platform_Foundation", "name": "Platform Foundation", "description": "Core platform services and infrastructure foundation.", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }], "dependent_tenants": [], "version": "1.0.0", "created_at": "2023-12-01T10:00:00Z", "updated_at": "2023-12-01T10:00:00Z", "phases": generatePhases() },
-    { "_id": "Tenant_Platform_Infra", "id": "Tenant_Platform_Infra", "name": "Platform Infra", "description": "Infrastructure services for compute, storage, and networking.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }], "version": "1.1.0", "created_at": "2023-12-01T11:00:00Z", "updated_at": "2023-12-01T11:00:00Z", "phases": generatePhases() },
-    { "_id": "Tenant_Platform_Mediations", "id": "Tenant_Platform_Mediations", "name": "Platform Mediations", "description": "Integration and mediation services for connecting systems.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "version": "1.2.0", "created_at": "2023-12-01T12:00:00Z", "updated_at": "2023-12-01T12:00:00Z", "phases": generatePhases() },
-    { "_id": "Tenant_Analytics", "id": "Tenant_Analytics", "name": "Analytics", "description": "Data analytics and business intelligence services.", "products": [{ "id": "Product_Data_Platform", "name": "Data Analytics Platform" }], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "version": "2.0.0", "created_at": "2023-12-02T09:00:00Z", "updated_at": "2023-12-02T09:00:00Z", "phases": generatePhases() },
-    { "_id": "Tenant_Low_Level", "id": "Tenant_Low_Level", "name": "Low Level Services", "description": "Fundamental services for e-commerce operations.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }], "version": "1.0.0", "created_at": "2023-12-02T10:00:00Z", "updated_at": "2023-12-02T10:00:00Z", "phases": generatePhases() },
-    { "_id": "Tenant_Medium_Level", "id": "Tenant_Medium_Level", "name": "Medium Level Services", "description": "Business logic and orchestration for e-commerce.", "products": [], "dependent_tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }], "version": "1.0.0", "created_at": "2023-12-02T11:00:00Z", "updated_at": "2023-12-02T11:00:00Z", "phases": generatePhases() },
-    { "_id": "Tenant_High_Level", "id": "Tenant_High_Level", "name": "High Level Services", "description": "Customer-facing e-commerce applications and APIs.", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }], "dependent_tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }], "version": "1.0.0", "created_at": "2023-12-02T12:00:00Z", "updated_at": "2023-12-02T12:00:00Z", "phases": generatePhases() }
-];
+    { "id": "Tenant_Shared_Services", "name": "Shared Services", "products": [{ "id": "Product_Observability_Platform", "name": "Cloud-Native Observability Platform" }], "dependent_tenants": [] },
+    { "id": "Tenant_App_Platform", "name": "Application Platform", "products": [{ "id": "Product_Developer_Hub", "name": "Internal Developer Hub" }], "dependent_tenants": [{ "id": "Tenant_Shared_Services", "name": "Shared Services" }] },
+    { "id": "Tenant_Data_Infra", "name": "Data Infrastructure", "products": [{ "id": "Product_Data_Analytics_Suite", "name": "Data & Analytics Suite" }], "dependent_tenants": [{ "id": "Tenant_Shared_Services", "name": "Shared Services" }] },
+    { "id": "Tenant_ML_Platform", "name": "ML Platform", "products": [{ "id": "Product_AI_ML_Workbench", "name": "AI/ML Workbench" }], "dependent_tenants": [{ "id": "Tenant_Data_Infra", "name": "Data Infrastructure" }] },
+    { "id": "Tenant_Retail_Core", "name": "Retail Core Services", "products": [{ "id": "Product_Developer_Hub", "name": "Internal Developer Hub" }], "dependent_tenants": [{ "id": "Tenant_App_Platform", "name": "Application Platform" }] },
+    { "id": "Tenant_ECommerce_Frontend", "name": "E-Commerce Frontend", "products": [{ "id": "Product_Observability_Platform", "name": "Cloud-Native Observability Platform" }, { "id": "Product_Developer_Hub", "name": "Internal Developer Hub" }], "dependent_tenants": [{ "id": "Tenant_Retail_Core", "name": "Retail Core Services" }] },
+    { "id": "Tenant_Finance_Analytics", "name": "Finance & Analytics", "products": [{ "id": "Product_Data_Analytics_Suite", "name": "Data & Analytics Suite" }], "dependent_tenants": [{ "id": "Tenant_Data_Infra", "name": "Data Infrastructure" }] },
+    { "id": "Tenant_Marketing_Tools", "name": "Marketing Tools", "products": [{ "id": "Product_Developer_Hub", "name": "Internal Developer Hub" }], "dependent_tenants": [{ "id": "Tenant_App_Platform", "name": "Application Platform" }] },
+    { "id": "Tenant_IoT_Edge", "name": "IoT Edge Platform", "products": [{ "id": "Product_Edge_Computing_Fabric", "name": "Edge Computing Fabric" }], "dependent_tenants": [] },
+    { "id": "Tenant_Gaming_Services", "name": "Online Gaming Services", "products": [{ "id": "Product_Observability_Platform", "name": "Cloud-Native Observability Platform" }], "dependent_tenants": [{ "id": "Tenant_App_Platform", "name": "Application Platform" }] }
+].map(t => ({
+    ...t,
+    _id: t.id,
+    description: `Description for ${t.name}`,
+    version: "1.0.0",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    phases: generatePhases()
+}));
 
 
 async function seedTenants() {
@@ -88,13 +99,9 @@ async function seedTenants() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    for (const tenant of initialTenants) {
-        await collection.updateOne(
-            { _id: tenant._id },
-            { $set: tenant },
-            { upsert: true }
-        );
-    }
+    await collection.deleteMany({ _id: { $in: initialTenants.map(t => t._id) } });
+    await collection.insertMany(initialTenants as any[]);
+    
     console.log('Seeded tenants collection.');
   } catch (error) {
     console.error('Error seeding tenants:', error);
@@ -108,10 +115,7 @@ export async function GET(req: NextRequest) {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedTenants();
-    }
+    await seedTenants();
     
     const items = await collection.find({}).toArray();
     return NextResponse.json(items, { status: 200 });

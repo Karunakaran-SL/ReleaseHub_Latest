@@ -9,42 +9,84 @@ import { revalidateDependencyTree } from '@/lib/dependency-graph';
 
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
-    "id": "Product_OSS_Portal",
-    "name": "OneStopShop Portal",
-    "owner": "Admin User", "owner_email": "admin@onestopshop.com",
-    "product_image": "https://picsum.photos/seed/productA/40/40",
+    "id": "Product_Observability_Platform",
+    "name": "Cloud-Native Observability Platform",
+    "owner": "SRE Team", "owner_email": "sre@example.com",
+    "product_image": "https://picsum.photos/seed/product1/40/40",
     "approval_needed": true,
     "default_workflow": { "id": "Workflow_Flow_2", "name": "Flow 2" },
-    "custom_workflows": [
-      { "id": "Workflow_Flow_1", "name": "Flow 1" },
-      { "id": "Workflow_Security_Review", "name": "Security Review" }
-    ],
+    "custom_workflows": [],
     "cmdb": { "id": "CMDB_1", "name": "CMDB 1" },
-    "compliance_checks": [
-      { "id": "Compliance_Security", "name": "Security" },
-      { "id": "Compliance_IT_Policy", "name": "IT Policy" }
-    ],
-    "deployment_type": { "id": "Deployment_Airgapped", "name": "Airgapped" },
-    "git_repo": "http://git.example.com/onestopshop-portal",
-    "artifacts_repo": "http://artifacts.example.com/onestopshop-portal",
-    "pipeline": "http://pipeline.example.com/onestopshop-portal",
-    "specifications": [{ "id": "HW_PowerEdge_R740", "name": "PowerEdge R740" }]
+    "compliance_checks": [{ "id": "Compliance_Security", "name": "Security" }],
+    "deployment_type": { "id": "Deployment_Cloud", "name": "Cloud" },
+    "git_repo": "http://git.example.com/platform/observability",
+    "artifacts_repo": "http://artifacts.example.com/observability",
+    "pipeline": "http://pipeline.example.com/observability",
+    "specifications": [{ "id": "Spec_Kubernetes_v1.28", "name": "Kubernetes v1.28" }, { "id": "Spec_Prometheus_v2.45", "name": "Prometheus v2.45" }]
   },
   {
-    "id": "Product_Data_Platform",
-    "name": "Data Analytics Platform",
-    "owner": "Data Team", "owner_email": "data@onestopshop.com",
-    "product_image": "https://picsum.photos/seed/productB/40/40",
+    "id": "Product_Developer_Hub",
+    "name": "Internal Developer Hub",
+    "owner": "DevEx Team", "owner_email": "devex@example.com",
+    "product_image": "https://picsum.photos/seed/product2/40/40",
     "approval_needed": false,
     "default_workflow": { "id": "Workflow_Flow_1", "name": "Flow 1" },
     "custom_workflows": [],
-    "cmdb": { "id": "CMDB_2", "name": "CMDB 2" },
+    "cmdb": { "id": "CMDB_1", "name": "CMDB 1" },
     "compliance_checks": [{ "id": "Compliance_IT_Policy", "name": "IT Policy" }],
     "deployment_type": { "id": "Deployment_Cloud", "name": "Cloud" },
-    "git_repo": "http://git.example.com/data-analytics",
-    "artifacts_repo": "http://artifacts.example.com/data-analytics",
-    "pipeline": "http://pipeline.example.com/data-analytics",
-    "specifications": []
+    "git_repo": "http://git.example.com/platform/devhub",
+    "artifacts_repo": "http://artifacts.example.com/devhub",
+    "pipeline": "http://pipeline.example.com/devhub",
+    "specifications": [{ "id": "Spec_Backstage_v1.18", "name": "Backstage v1.18" }, { "id": "Spec_ArgoCD_v2.8", "name": "ArgoCD v2.8" }]
+  },
+  {
+    "id": "Product_Data_Analytics_Suite",
+    "name": "Data & Analytics Suite",
+    "owner": "Data Science Team", "owner_email": "datasci@example.com",
+    "product_image": "https://picsum.photos/seed/product3/40/40",
+    "approval_needed": true,
+    "default_workflow": { "id": "Workflow_Security_Review", "name": "Security Review" },
+    "custom_workflows": [],
+    "cmdb": { "id": "CMDB_2", "name": "CMDB 2" },
+    "compliance_checks": [],
+    "deployment_type": { "id": "Deployment_OnPrem", "name": "On-Prem" },
+    "git_repo": "http://git.example.com/platform/analytics",
+    "artifacts_repo": "http://artifacts.example.com/analytics",
+    "pipeline": "http://pipeline.example.com/analytics",
+    "specifications": [{ "id": "Spec_Spark_v3.4", "name": "Apache Spark v3.4" }, { "id": "Spec_Airflow_v2.7", "name": "Airflow v2.7" }]
+  },
+  {
+    "id": "Product_AI_ML_Workbench",
+    "name": "AI/ML Workbench",
+    "owner": "AI Research", "owner_email": "ai-research@example.com",
+    "product_image": "https://picsum.photos/seed/product4/40/40",
+    "approval_needed": true,
+    "default_workflow": { "id": "Workflow_Flow_2", "name": "Flow 2" },
+    "custom_workflows": [],
+    "cmdb": { "id": "CMDB_2", "name": "CMDB 2" },
+    "compliance_checks": [{ "id": "Compliance_Security", "name": "Security" }],
+    "deployment_type": { "id": "Deployment_Cloud", "name": "Cloud" },
+    "git_repo": "http://git.example.com/platform/ml-workbench",
+    "artifacts_repo": "http://artifacts.example.com/ml-workbench",
+    "pipeline": "http://pipeline.example.com/ml-workbench",
+    "specifications": [{ "id": "Spec_Kubeflow_v1.7", "name": "Kubeflow v1.7" }, { "id": "Spec_SeldonCore_v1.16", "name": "Seldon Core v1.16" }]
+  },
+  {
+    "id": "Product_Edge_Computing_Fabric",
+    "name": "Edge Computing Fabric",
+    "owner": "IoT Division", "owner_email": "iot@example.com",
+    "product_image": "https://picsum.photos/seed/product5/40/40",
+    "approval_needed": true,
+    "default_workflow": { "id": "Workflow_Security_Review", "name": "Security Review" },
+    "custom_workflows": [],
+    "cmdb": { "id": "CMDB_1", "name": "CMDB 1" },
+    "compliance_checks": [{ "id": "Compliance_IT_Policy", "name": "IT Policy" }],
+    "deployment_type": { "id": "Deployment_Airgapped", "name": "Airgapped" },
+    "git_repo": "http://git.example.com/platform/edge-fabric",
+    "artifacts_repo": "http://artifacts.example.com/edge-fabric",
+    "pipeline": "http://pipeline.example.com/edge-fabric",
+    "specifications": [{ "id": "Spec_K3s_v1.28", "name": "K3s v1.28" }, { "id": "Spec_KubeEdge_v1.14", "name": "KubeEdge v1.14" }]
   }
 ];
 
@@ -55,6 +97,8 @@ async function seedProducts() {
     const db = client.db();
     const productsCollection = db.collection('products');
     
+    await productsCollection.deleteMany({ id: { $in: initialProducts.map(p => p.id) } });
+
     for (const product of initialProducts) {
         const productWithDates = {
             ...product,
@@ -62,11 +106,7 @@ async function seedProducts() {
             updated_at: new Date().toISOString(),
             created_at: new Date().toISOString()
         };
-        await productsCollection.updateOne(
-            { _id: product.id },
-            { $set: productWithDates },
-            { upsert: true }
-        );
+        await productsCollection.insertOne(productWithDates as any);
     }
     console.log('Seeded products collection.');
 
@@ -160,8 +200,8 @@ export async function POST(req: NextRequest) {
         const productsCollection = db.collection('products');
         
         const newProduct = {
-            ...validatedData.data,
             _id: validatedData.data.id,
+            ...validatedData.data,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         };

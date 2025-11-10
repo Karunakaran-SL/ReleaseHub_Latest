@@ -42,65 +42,38 @@ const ComponentSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_components';
 
-const initialComponentOnboardingPhases = [
-    { id: "phase-1", name: "Initiate Onboarding", fields: ["requestFormSubmitted", "csApproved", "pmApproved", "productTeamAgreement"] },
-    { id: "phase-2", name: "Product Definitions", fields: ["architectAgreed", "specChanged", "hlDesignApproved"] },
-    { id: "phase-3", name: "Detail Design", fields: ["detailDesignDone", "dependencyIdentified", "pertReady", "testPlanReady"] },
-    { id: "phase-4", name: "Delivery", fields: ["implementationDone", "unitTestDone", "staticCodeDone", "systemIntegrationDone", "systemIntegrationTestingDone", "allTestCasesAutomated"] },
-    { id: "phase-5", name: "Alpha Qualification", fields: ["uatTestDone", "riskReported", "serviceMetricsDone"] },
-    { id: "phase-6", name: "Prepare customer", fields: ["communicatedChanges", "plannedMCWindow"] },
-    { id: "phase-7", name: "Beta Qualification", fields: ["deploymentRunbookForBeta", "deploymentDone", "betaTestsExecuted"] },
-    { id: "phase-8", name: "Completed", fields: ["onboardingCompleteClosure"] }
+const tenantNames = [
+    "Tenant_Shared_Services", "Tenant_App_Platform", "Tenant_Data_Infra", "Tenant_ML_Platform", "Tenant_Retail_Core",
+    "Tenant_ECommerce_Frontend", "Tenant_Finance_Analytics", "Tenant_Marketing_Tools", "Tenant_IoT_Edge", "Tenant_Gaming_Services"
 ];
-const statuses = ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"];
-const getRandomStatus = () => statuses[Math.floor(Math.random() * statuses.length)];
 
-const generatePhases = () => {
-    return initialComponentOnboardingPhases.map(p => ({
-        id: p.id,
-        name: p.name,
-        version: "1.0",
-        status: getRandomStatus(),
-        fields: p.fields.map(f => ({
-            name: f,
-            value: Math.random() > 0.5,
-            proof: { link: '' }
-        }))
-    }));
+// Simplified data for relationships
+const interfacePool = [
+    { id: "Interface_Metrics_API", name: "Metrics API" }, { id: "Interface_Tracing_API", name: "Tracing API" }, { id: "Interface_Logging_API", name: "Logging API" },
+    { id: "Interface_AuthN_API", name: "AuthN API" }, { id: "Interface_AuthZ_API", name: "AuthZ API" }, { id: "Interface_Discovery_API", name: "Discovery API" },
+    { id: "Interface_Storage_S3", name: "S3 Storage API" }, { id: "Interface_SQL_DB", name: "SQL Database API" }, { id: "Interface_NoSQL_DB", name: "NoSQL Database API" },
+    { id: "Interface_Streaming_Kafka", name: "Kafka Streaming API" }, { id: "Interface_Orchestration_API", name: "Orchestration API" }, { id: "Interface_Git_API", name: "Git API" }
+];
+
+let componentCounter = 0;
+const createComponent = (name: string, tenantId: string, provided: number[], required: number[]) => {
+    componentCounter++;
+    return {
+        "_id": `Comp_${name.replace(/\s/g, '')}`, "id": `Comp_${name.replace(/\s/g, '')}`, "name": name, "version": `1.${componentCounter}.0`,
+        "tenants": [{ "id": tenantId, "name": tenantId.replace(/_/g, ' ') }],
+        "provided_interfaces": provided.map(i => interfacePool[i]),
+        "dependent_interfaces": required.map(i => interfacePool[i]),
+        "dependent_components": [],
+        "created_at": new Date().toISOString(), "updated_at": new Date().toISOString(), "phases": []
+    };
 };
 
-const initialComponents = [
-    {
-        "_id": "Comp_Auth_Service", "id": "Comp_Auth_Service", "name": "Authentication Service", "version": "1.2.0",
-        "tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }],
-        "provided_interfaces": [{ "id": "Interface_User_Auth_API", "name": "User Authentication API" }],
-        "created_at": "2024-01-10T09:00:00Z", "updated_at": "2024-01-10T09:00:00Z", "phases": generatePhases()
-    },
-    {
-        "_id": "Comp_Payment_Gateway", "id": "Comp_Payment_Gateway", "name": "Payment Gateway", "version": "3.0.0",
-        "tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }],
-        "provided_interfaces": [{ "id": "Interface_Payment_API", "name": "Payment Processing API" }],
-        "dependent_interfaces": [{ "id": "Interface_Compliance_Check_API", "name": "Compliance Check API" }],
-        "created_at": "2024-01-11T14:00:00Z", "updated_at": "2024-01-11T14:00:00Z", "phases": generatePhases()
-    },
-    {
-        "_id": "Comp_Inventory_Service", "id": "Comp_Inventory_Service", "name": "Inventory Service", "version": "2.5.0",
-        "tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }],
-        "provided_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
-        "created_at": "2024-01-12T11:00:00Z", "updated_at": "2024-01-12T11:00:00Z", "phases": generatePhases()
-    },
-    {
-        "_id": "Comp_Search_Service", "id": "Comp_Search_Service", "name": "Search Service", "version": "1.8.0",
-        "tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }],
-        "dependent_interfaces": [{ "id": "Interface_Product_Catalog_API", "name": "Product Catalog API" }],
-        "created_at": "2024-01-13T16:00:00Z", "updated_at": "2024-01-13T16:00:00Z", "phases": generatePhases()
-    },
-    {
-        "_id": "Comp_Email_Service", "id": "Comp_Email_Service", "name": "Email Service", "version": "2.0.0",
-        "tenants": [ { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" } ],
-        "created_at": "2024-01-14T10:00:00Z", "updated_at": "2024-01-14T10:00:00Z", "phases": generatePhases()
-    }
-];
+const initialComponents: any[] = [];
+tenantNames.forEach(tenantId => {
+    initialComponents.push(createComponent(`Monitoring-${tenantId.slice(7)}`, tenantId, [0], [1, 2]));
+    initialComponents.push(createComponent(`Logging-${tenantId.slice(7)}`, tenantId, [2], [10]));
+    initialComponents.push(createComponent(`Security-${tenantId.slice(7)}`, tenantId, [3, 4], [5]));
+});
 
 
 async function seedComponents() {
@@ -109,15 +82,10 @@ async function seedComponents() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    for (const component of initialComponents) {
-        await collection.updateOne(
-            { _id: component._id },
-            { $set: component },
-            { upsert: true }
-        );
-    }
-    console.log('Seeded components collection.');
+    await collection.deleteMany({_id: {$in: initialComponents.map(c => c._id)}});
+    await collection.insertMany(initialComponents);
 
+    console.log('Seeded components collection.');
   } catch (error) {
     console.error('Error seeding components:', error);
   }
@@ -159,8 +127,8 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         
         const newItem = {
-            ...validatedData.data,
             _id: validatedData.data.id,
+            ...validatedData.data,
         };
 
         await db.collection(COLLECTION_NAME).insertOne(newItem as any);
@@ -179,5 +147,3 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
-
-    

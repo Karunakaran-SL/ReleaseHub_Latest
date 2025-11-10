@@ -49,56 +49,45 @@ const InterfaceSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_interfaces';
 
-const initialInterfaces = [
-    {
-        "_id": "Interface_Product_Catalog_API", "id": "Interface_Product_Catalog_API", "name": "Product Catalog API",
-        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.0",
-        "owner_name": "E-com Team", "owner_email": "ecom@example.com",
-        "source": { "id": "Comp_Inventory_Service", "name": "Inventory Service" },
-        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": true, "authentication": false } },
-        "created_at": "2024-01-20T10:00:00Z", "updated_at": "2024-01-20T10:00:00Z"
+const interfacePool = [
+    { id: "Interface_Metrics_API", name: "Metrics API", owner: "SRE Team", type: { id: "Interface_Type_API", name: "API" } }, 
+    { id: "Interface_Tracing_API", name: "Tracing API", owner: "SRE Team", type: { id: "Interface_Type_API", name: "API" } }, 
+    { id: "Interface_Logging_API", name: "Logging API", owner: "SRE Team", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_AuthN_API", name: "AuthN API", owner: "Security Team", type: { id: "Interface_Type_API", name: "API" } }, 
+    { id: "Interface_AuthZ_API", name: "AuthZ API", owner: "Security Team", type: { id: "Interface_Type_API", name: "API" } }, 
+    { id: "Interface_Discovery_API", name: "Discovery API", owner: "Platform Team", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_Storage_S3", name: "S3 Storage API", owner: "Infra Team", type: { id: "Interface_Type_API", name: "API" } }, 
+    { id: "Interface_SQL_DB", name: "SQL Database API", owner: "DBA Team", type: { id: "Interface_Type_API", name: "API" } }, 
+    { id: "Interface_NoSQL_DB", name: "NoSQL Database API", owner: "DBA Team", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_Streaming_Kafka", name: "Kafka Streaming API", owner: "Data Platform", type: { id: "Interface_Type_Topic", name: "Topic" } }, 
+    { id: "Interface_Orchestration_API", name: "Orchestration API", owner: "Platform Team", type: { id: "Interface_Type_API", name: "API" } }, 
+    { id: "Interface_Git_API", name: "Git API", owner: "DevEx Team", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_WebApp_UI", name: "WebApp UI", owner: "Frontend Team", type: { id: "Interface_Type_UI", name: "UI" } },
+    { id: "Interface_Public_API_Gateway", name: "Public API Gateway", owner: "Gateway Team", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_Internal_GraphQL", name: "Internal GraphQL API", owner: "Platform Team", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_Data_Ingestion", name: "Data Ingestion API", owner: "Data Engineering", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_Data_Query", name: "Data Query API", owner: "Data Engineering", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_Model_Training", name: "Model Training API", owner: "ML Team", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_Model_Inference", name: "Model Inference API", owner: "ML Team", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_Device_Telemetry", name: "Device Telemetry API", owner: "IoT Team", type: { id: "Interface_Type_Topic", name: "Topic" } },
+    { id: "Interface_Game_State", name: "Game State API", owner: "Gaming Team", type: { id: "Interface_Type_API", name: "API" } },
+    { id: "Interface_Leaderboard", name: "Leaderboard API", owner: "Gaming Team", type: { id: "Interface_Type_API", name: "API" } }
+].map(iface => ({
+    ...iface,
+    _id: iface.id,
+    version: "1.0.0",
+    description: `Interface for ${iface.name}`,
+    owner_name: iface.owner,
+    owner_email: `${iface.owner.toLowerCase().replace(' ', '.')}@example.com`,
+    source: { id: "Unknown", name: "Unknown" }, // This would be populated by the component/app that provides it
+    security: {
+        internal: { secure: true, authentication: true },
+        external: { secure: false, authentication: false }
     },
-    {
-        "_id": "Interface_User_Auth_API", "id": "Interface_User_Auth_API", "name": "User Authentication API",
-        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "2.1",
-        "owner_name": "Security Team", "owner_email": "security@example.com",
-        "source": { "id": "Comp_Auth_Service", "name": "Authentication Service" },
-        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": true, "authentication": true } },
-        "created_at": "2024-01-21T11:00:00Z", "updated_at": "2024-01-21T11:00:00Z"
-    },
-    {
-        "_id": "Interface_Payment_API", "id": "Interface_Payment_API", "name": "Payment Processing API",
-        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "1.5",
-        "owner_name": "Finance Team", "owner_email": "finance@example.com",
-        "source": { "id": "Comp_Payment_Gateway", "name": "Payment Gateway" },
-        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": true, "authentication": true } },
-        "created_at": "2024-01-22T12:00:00Z", "updated_at": "2024-01-22T12:00:00Z"
-    },
-    {
-        "_id": "Interface_Order_API", "id": "Interface_Order_API", "name": "Order Management API",
-        "type": { "id": "Interface_Type_API", "name": "API" }, "version": "3.0",
-        "owner_name": "E-com Team", "owner_email": "ecom@example.com",
-        "source": { "id": "App_Order_Processing", "name": "Order Processing Backend" },
-        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": false, "authentication": false } },
-        "created_at": "2024-01-23T13:00:00Z", "updated_at": "2024-01-23T13:00:00Z"
-    },
-    {
-        "_id": "Interface_Web_UI", "id": "Interface_Web_UI", "name": "Main Web UI",
-        "type": { "id": "Interface_Type_UI", "name": "UI" }, "version": "1.0",
-        "owner_name": "Frontend Team", "owner_email": "frontend@example.com",
-        "source": { "id": "App_Ecom_Storefront", "name": "E-Commerce Storefront" },
-        "security": { "internal": { "secure": false, "authentication": false }, "external": { "secure": false, "authentication": false } },
-        "created_at": "2024-01-27T17:00:00Z", "updated_at": "2024-01-27T17:00:00Z"
-    },
-    {
-        "_id": "Interface_Analytics_UI", "id": "Interface_Analytics_UI", "name": "Analytics Web UI",
-        "type": { "id": "Interface_Type_UI", "name": "UI" }, "version": "1.0",
-        "owner_name": "Analytics Team", "owner_email": "analytics@example.com",
-        "source": { "id": "App_Analytics_Dashboard", "name": "Analytics Dashboard" },
-        "security": { "internal": { "secure": true, "authentication": true }, "external": { "secure": false, "authentication": false } },
-        "created_at": "2024-01-28T18:00:00Z", "updated_at": "2024-01-28T18:00:00Z"
-    }
-];
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+}));
+
 
 
 async function seedInterfaces() {
@@ -107,13 +96,9 @@ async function seedInterfaces() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    for (const iface of initialInterfaces) {
-        await collection.updateOne(
-            { _id: iface._id },
-            { $set: iface },
-            { upsert: true }
-        );
-    }
+    await collection.deleteMany({_id: {$in: interfacePool.map(i => i._id)}})
+    await collection.insertMany(interfacePool as any[]);
+
     console.log('Seeded interfaces collection.');
   } catch (error) {
     console.error('Error seeding interfaces:', error);
@@ -126,10 +111,7 @@ export async function GET(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
     
-    const count = await db.collection(COLLECTION_NAME).countDocuments();
-    if (count === 0) {
-      await seedInterfaces();
-    }
+    await seedInterfaces();
     
     const items = await db.collection(COLLECTION_NAME).find({}).sort({updated_at: -1}).toArray();
     return NextResponse.json(items, { status: 200 });
