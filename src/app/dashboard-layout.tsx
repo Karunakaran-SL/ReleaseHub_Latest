@@ -37,6 +37,7 @@ import {
   Users,
   Warehouse,
   Workflow as WorkflowIcon,
+  GitGraph,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -149,6 +150,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isAuditPage = pathname.startsWith('/audits');
     const isSettingsPage = pathname.startsWith('/settings');
     const isCmdbPage = pathname.startsWith('/cmdb');
+    const isDependencyMetricsPage = pathname.startsWith('/dependency-metrics');
 
   return (
     <SidebarProvider>
@@ -158,11 +160,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage}
+                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage}
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -251,11 +253,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </SidebarMenuItem>
                 </Collapsible>
 
-                <Collapsible asChild defaultOpen={isCmdbPage}>
+                <Collapsible asChild defaultOpen={isCmdbPage || isDependencyMetricsPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton 
-                        isActive={isCmdbPage}
+                        isActive={isCmdbPage || isDependencyMetricsPage}
                         tooltip={{ children: 'CMDB' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -284,6 +286,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <SidebarMenuSubItem>
                             <SidebarMenuSubButton href="/cmdb/interfaces" isActive={pathname.startsWith('/cmdb/interfaces')}>
                                 <Network className="mr-2"/> Interfaces
+                            </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/dependency-metrics" isActive={isDependencyMetricsPage}>
+                                <GitGraph className="mr-2"/> Dependency Metrics
                             </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>

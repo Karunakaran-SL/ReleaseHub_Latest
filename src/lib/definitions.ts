@@ -192,3 +192,7 @@ export type CmdbInterface = {
   created_at: string;
   updated_at: string;
 };
+
+export type AnyCmdbEntity = (CmdbTenant | CmdbComponent | CmdbApplication | CmdbInterface | Product) & { entityType: EntityType };
+
+export type EntityType = 'tenant' | 'component' | 'application' | 'interface' | 'product';
