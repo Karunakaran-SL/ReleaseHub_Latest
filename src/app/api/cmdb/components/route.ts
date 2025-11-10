@@ -1,4 +1,5 @@
 
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -33,6 +34,8 @@ const ComponentSchema = z.object({
   custom_labels: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
   provided_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   dependent_interfaces: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  dependent_components: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  dependent_applications: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   phases: z.array(CmdbPhaseSchema),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
@@ -80,7 +83,6 @@ export async function POST(req: NextRequest) {
             entity: 'component',
             entityId: result.insertedId.toString(),
             comment: `Component "${insertedItem.name}" onboarded.`,
-            user: user.username,
         });
 
         return NextResponse.json(insertedItem, { status: 201 });

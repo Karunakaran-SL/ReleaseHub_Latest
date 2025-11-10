@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,18 +9,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, CmdbApplication, OnboardingConfiguration, CmdbTenant } from '@/lib/definitions';
+import type { User, CmdbApplication, OnboardingConfiguration, CmdbTenant, CmdbComponent, CmdbInterface } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Loader2, ArrowRight, PlusCircle, Trash2 } from 'lucide-react';
 import OnboardingStepper from '../../tenants/create/_components/onboarding-stepper';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
 
 type NewApplicationFormState = Partial<Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at' | 'phases'>>;
 
 export default function CreateApplicationPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
-    const [formState, setFormState] = useState<NewApplicationFormState>({ custom_labels: [], tenants: [] });
+    const [formState, setFormState] = useState<NewApplicationFormState>({ custom_labels: [], tenants: [], dependent_components: [], dependent_applications: [], provided_interfaces: [], dependent_interfaces: [] });
     const router = useRouter();
     const { toast } = useToast();
 
@@ -28,18 +29,27 @@ export default function CreateApplicationPage() {
     const [newItem, setNewItem] = useState<CmdbApplication | null>(null);
     
     const [allTenants, setAllTenants] = useState<CmdbTenant[]>([]);
-    
+    const [allComponents, setAllComponents] = useState<CmdbComponent[]>([]);
+    const [allApplications, setAllApplications] = useState<CmdbApplication[]>([]);
+    const [allInterfaces, setAllInterfaces] = useState<CmdbInterface[]>([]);
+
     useEffect(() => {
         getUser().then(setUser);
         async function fetchDependencies() {
             setLoading(true);
             try {
-                const [tenantRes, configRes] = await Promise.all([
+                const [tenantRes, configRes, componentsRes, applicationsRes, interfacesRes] = await Promise.all([
                     fetch('/api/cmdb/tenants'),
-                    fetch('/api/settings/application-onboarding')
+                    fetch('/api/settings/application-onboarding'),
+                    fetch('/api/cmdb/components'),
+                    fetch('/api/cmdb/applications'),
+                    fetch('/api/cmdb/interfaces'),
                 ]);
 
                 if (tenantRes.ok) setAllTenants(await tenantRes.json());
+                if (componentsRes.ok) setAllComponents(await componentsRes.json());
+                if (applicationsRes.ok) setAllApplications(await applicationsRes.json());
+                if (interfacesRes.ok) setAllInterfaces(await interfacesRes.json());
                 
                 if (configRes.ok) {
                     const configs = await configRes.json();
@@ -68,13 +78,8 @@ export default function CreateApplicationPage() {
         }
     };
     
-    const handleSelectChange = (field: 'tenants', value: string) => {
-        if (field === 'tenants') {
-            const selectedTenant = allTenants.find(t => t._id === value);
-            if (selectedTenant) {
-                 setFormState(prev => ({ ...prev, tenants: [{ id: selectedTenant._id, name: selectedTenant.name }] }));
-            }
-        }
+    const handleMultiSelectChange = (field: 'tenants' | 'dependent_components' | 'dependent_applications' | 'provided_interfaces' | 'dependent_interfaces', selectedItems: { id: string; name: string }[]) => {
+        setFormState(prev => ({ ...prev, [field]: selectedItems }));
     };
     
     const handleCustomLabelChange = (index: number, key: 'key' | 'value', value: string) => {
@@ -88,7 +93,7 @@ export default function CreateApplicationPage() {
     };
     
     const removeCustomLabel = (index: number) => {
-        setFormState(prev => ({ ...prev, custom_labels: (prev.custom_labels || []).filter((_, i) => i !== index) }));
+        setFormState(prev => ({ ...prev, custom_labels: (formState.custom_labels || []).filter((_, i) => i !== index) }));
     };
 
 
@@ -134,6 +139,37 @@ export default function CreateApplicationPage() {
         }
     };
     
+    const renderMultiSelect = (
+        fieldName: 'tenants' | 'dependent_components' | 'dependent_applications' | 'provided_interfaces' | 'dependent_interfaces',
+        allOptions: Option[]
+    ) => {
+        const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
+        const chosenIds = new Set(chosenItems.map(item => item.id));
+
+        const available: Option[] = allOptions.filter(opt => !chosenIds.has(opt.id));
+        const chosen: Option[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
+
+        const moveItems = (ids: string[], source: Option[], dest: Option[]) => {
+            const itemsToMove = source.filter(item => ids.includes(item.id));
+            const newDest = [...dest, ...itemsToMove];
+            handleMultiSelectChange(fieldName, newDest.map(i => ({id: i.id, name: i.label})));
+        };
+
+        return (
+            <MultiSelectListBox
+                available={available}
+                chosen={chosen}
+                onMoveToChosen={(ids) => moveItems(ids, available, chosen)}
+                onMoveToAvailable={(ids) => {
+                    const newChosen = chosen.filter(item => !ids.includes(item.id));
+                    handleMultiSelectChange(fieldName, newChosen.map(i => ({id: i.id, name: i.label})));
+                }}
+                onMoveAllToChosen={() => handleMultiSelectChange(fieldName, available.map(i => ({id: i.id, name: i.label})))}
+                onMoveAllToAvailable={() => handleMultiSelectChange(fieldName, [])}
+            />
+        );
+    };
+    
     if (loading && !onboardingConfig) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
@@ -165,30 +201,24 @@ export default function CreateApplicationPage() {
                                     <Input id="name" value={formState.name || ''} onChange={handleInputChange} required />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="tenants">Tenants</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('tenants', value)} required>
-                                        <SelectTrigger><SelectValue placeholder="Select tenant..." /></SelectTrigger>
-                                        <SelectContent>
-                                            {allTenants.map(tenant => (
-                                                <SelectItem key={tenant._id} value={tenant._id}>{tenant.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <Label htmlFor="version">Version</Label>
+                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} required />
                                 </div>
                             </div>
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="version">Version</Label>
-                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} required />
-                                </div>
-                                <div className="space-y-2">
                                     <Label htmlFor="artifact_location">Artifact Location</Label>
                                     <Input id="artifact_location" value={formState.artifact_location || ''} onChange={handleInputChange} />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="artifact_name">Artifact Name</Label>
+                                    <Input id="artifact_name" value={formState.artifact_name || ''} onChange={handleInputChange} />
+                                </div>
                              </div>
+
                              <div className="space-y-2">
-                                <Label htmlFor="artifact_name">Artifact Name</Label>
-                                <Input id="artifact_name" value={formState.artifact_name || ''} onChange={handleInputChange} />
+                                <Label>Tenants</Label>
+                                {renderMultiSelect('tenants', allTenants.map(t => ({ id: t._id, label: t.name })))}
                             </div>
 
                             <div className="space-y-4">
@@ -228,14 +258,22 @@ export default function CreateApplicationPage() {
                                 </div>
                                 <Button type="button" variant="outline" size="sm" onClick={addCustomLabel}><PlusCircle className="mr-2 h-4 w-4" /> Add Label</Button>
                             </div>
-
+                            
+                            <div className="space-y-2">
+                                <Label>Dependent Components</Label>
+                                {renderMultiSelect('dependent_components', allComponents.map(c => ({ id: c._id, label: c.name })))}
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Dependent Applications</Label>
+                                {renderMultiSelect('dependent_applications', allApplications.map(a => ({ id: a._id, label: a.name })))}
+                            </div>
                             <div className="space-y-2">
                                 <Label>Provided Interfaces</Label>
-                                <Select disabled><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger></Select>
+                                {renderMultiSelect('provided_interfaces', allInterfaces.map(i => ({ id: i._id, label: i.name })))}
                             </div>
-                             <div className="space-y-2">
-                                <Label>Dependent Interfaces</Label>
-                                <Select disabled><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger></Select>
+                            <div className="space-y-2">
+                                <Label>Dependent (Required) Interfaces</Label>
+                                {renderMultiSelect('dependent_interfaces', allInterfaces.map(i => ({ id: i._id, label: i.name })))}
                             </div>
 
                         </CardContent>

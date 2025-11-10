@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -9,10 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, CmdbComponent, OnboardingConfiguration, CmdbTenant } from '@/lib/definitions';
+import type { User, CmdbComponent, OnboardingConfiguration, CmdbTenant, CmdbApplication, CmdbInterface } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, ArrowRight, PlusCircle, Trash2, ChevronRight } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, PlusCircle, Trash2, ChevronRight } from 'lucide-react';
+import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
 import OnboardingPhaseComponent from '../../../tenants/create/_components/onboarding-phase';
 import { cn } from '@/lib/utils';
 
@@ -37,6 +38,9 @@ export default function EditComponentPage() {
 
     const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfiguration | null>(null);
     const [allTenants, setAllTenants] = useState<CmdbTenant[]>([]);
+    const [allComponents, setAllComponents] = useState<CmdbComponent[]>([]);
+    const [allApplications, setAllApplications] = useState<CmdbApplication[]>([]);
+    const [allInterfaces, setAllInterfaces] = useState<CmdbInterface[]>([]);
     
     const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
     const [phasesState, setPhasesState] = useState<Record<string, any>>({});
@@ -52,10 +56,13 @@ export default function EditComponentPage() {
         setLoading(true);
         async function fetchData() {
             try {
-                const [componentRes, configRes, tenantsRes] = await Promise.all([
+                const [componentRes, configRes, tenantsRes, componentsRes, applicationsRes, interfacesRes] = await Promise.all([
                     fetch(`/api/cmdb/components/${id}`),
                     fetch('/api/settings/component-onboarding'),
                     fetch('/api/cmdb/tenants'),
+                    fetch('/api/cmdb/components'),
+                    fetch('/api/cmdb/applications'),
+                    fetch('/api/cmdb/interfaces'),
                 ]);
 
                 if (!componentRes.ok) throw new Error('Failed to fetch component');
@@ -79,6 +86,9 @@ export default function EditComponentPage() {
                     }
                 }
                 if (tenantsRes.ok) setAllTenants(await tenantsRes.json());
+                if (componentsRes.ok) setAllComponents(await componentsRes.json());
+                if (applicationsRes.ok) setAllApplications(await applicationsRes.json());
+                if (interfacesRes.ok) setAllInterfaces(await interfacesRes.json());
                 
             } catch(err: any) {
                 toast({ variant: 'destructive', title: 'Error', description: err.message });
@@ -136,13 +146,8 @@ export default function EditComponentPage() {
         }
     };
     
-    const handleSelectChange = (field: 'tenants', value: string) => {
-        if (field === 'tenants') {
-            const selectedTenant = allTenants.find(t => t._id === value);
-            if (selectedTenant) {
-                 setFormState(prev => ({ ...prev, tenants: [{ id: selectedTenant._id, name: selectedTenant.name }] }));
-            }
-        }
+    const handleMultiSelectChange = (field: 'tenants' | 'dependent_components' | 'dependent_applications' | 'provided_interfaces' | 'dependent_interfaces', selectedItems: { id: string; name: string }[]) => {
+        setFormState(prev => ({ ...prev, [field]: selectedItems }));
     };
     
     const handleCustomLabelChange = (index: number, key: 'key' | 'value', value: string) => {
@@ -206,6 +211,37 @@ export default function EditComponentPage() {
             setLoading(false);
         }
     };
+    
+    const renderMultiSelect = (
+        fieldName: 'tenants' | 'dependent_components' | 'dependent_applications' | 'provided_interfaces' | 'dependent_interfaces',
+        allOptions: Option[]
+    ) => {
+        const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
+        const chosenIds = new Set(chosenItems.map(item => item.id));
+
+        const available: Option[] = allOptions.filter(opt => !chosenIds.has(opt.id));
+        const chosen: Option[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
+
+        const moveItems = (ids: string[], source: Option[], dest: Option[]) => {
+            const itemsToMove = source.filter(item => ids.includes(item.id));
+            const newDest = [...dest, ...itemsToMove];
+            handleMultiSelectChange(fieldName, newDest.map(i => ({id: i.id, name: i.label})));
+        };
+
+        return (
+            <MultiSelectListBox
+                available={available}
+                chosen={chosen}
+                onMoveToChosen={(ids) => moveItems(ids, available, chosen)}
+                onMoveToAvailable={(ids) => {
+                    const newChosen = chosen.filter(item => !ids.includes(item.id));
+                    handleMultiSelectChange(fieldName, newChosen.map(i => ({id: i.id, name: i.label})))
+                }}
+                onMoveAllToChosen={() => handleMultiSelectChange(fieldName, available.map(i => ({id: i.id, name: i.label})))}
+                onMoveAllToAvailable={() => handleMultiSelectChange(fieldName, [])}
+            />
+        );
+    };
 
     if (loading || !formState.id) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
@@ -226,30 +262,24 @@ export default function EditComponentPage() {
                                     <Input id="name" value={formState.name || ''} onChange={handleInputChange} required />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="tenants">Tenants</Label>
-                                    <Select value={formState.tenants?.[0]?.id} onValueChange={(value) => handleSelectChange('tenants', value)}>
-                                        <SelectTrigger><SelectValue placeholder="Select tenant..." /></SelectTrigger>
-                                        <SelectContent>
-                                            {allTenants.map(tenant => (
-                                                <SelectItem key={tenant._id} value={tenant._id}>{tenant.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <Label htmlFor="version">Version</Label>
+                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} required />
                                 </div>
                             </div>
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="version">Version</Label>
-                                    <Input id="version" value={formState.version || ''} onChange={handleInputChange} required />
-                                </div>
-                                <div className="space-y-2">
                                     <Label htmlFor="artifact_location">Artifact Location</Label>
                                     <Input id="artifact_location" value={formState.artifact_location || ''} onChange={handleInputChange} />
                                 </div>
+                                 <div className="space-y-2">
+                                    <Label htmlFor="artifact_name">Artifact Name</Label>
+                                    <Input id="artifact_name" value={formState.artifact_name || ''} onChange={handleInputChange} />
+                                </div>
                              </div>
+
                              <div className="space-y-2">
-                                <Label htmlFor="artifact_name">Artifact Name</Label>
-                                <Input id="artifact_name" value={formState.artifact_name || ''} onChange={handleInputChange} />
+                                <Label>Tenants</Label>
+                                {renderMultiSelect('tenants', allTenants.map(t => ({ id: t._id, label: t.name })))}
                             </div>
 
                             <div className="space-y-4">
@@ -288,6 +318,23 @@ export default function EditComponentPage() {
                                     ))}
                                 </div>
                                 <Button type="button" variant="outline" size="sm" onClick={addCustomLabel}><PlusCircle className="mr-2 h-4 w-4" /> Add Label</Button>
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <Label>Dependent Components</Label>
+                                {renderMultiSelect('dependent_components', allComponents.map(c => ({ id: c._id, label: c.name })))}
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Dependent Applications</Label>
+                                {renderMultiSelect('dependent_applications', allApplications.map(a => ({ id: a._id, label: a.name })))}
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Provided Interfaces</Label>
+                                {renderMultiSelect('provided_interfaces', allInterfaces.map(i => ({ id: i._id, label: i.name })))}
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Dependent (Required) Interfaces</Label>
+                                {renderMultiSelect('dependent_interfaces', allInterfaces.map(i => ({ id: i._id, label: i.name })))}
                             </div>
                         </CardContent>
                     </Card>

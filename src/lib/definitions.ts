@@ -136,10 +136,12 @@ export type CmdbCommon = {
   custom_labels?: { key: string; value: string; }[];
   provided_interfaces?: { id: string; name: string; }[];
   dependent_interfaces?: { id: string; name: string; }[];
+  dependent_components?: { id: string; name: string; }[];
+  dependent_applications?: { id: string; name: string; }[];
   phases: CmdbPhase[];
   created_at: string;
   updated_at: string;
-  tenants?: { id: string, name: string }[];
+  tenants?: { id: string; name: string; }[];
   description?: string;
 };
 

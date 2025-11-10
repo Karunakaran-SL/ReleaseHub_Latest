@@ -1,4 +1,5 @@
 
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -45,11 +46,44 @@ const TenantSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_tenants';
 
+const initialTenants = [
+    { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation", "description": "Core platform services and infrastructure foundation.", "products": [], "dependent_tenants": [], "created_at": "2023-12-01T10:00:00Z", "updated_at": "2023-12-01T10:00:00Z" },
+    { "id": "Tenant_Platform_Infra", "name": "Platform Infra", "description": "Infrastructure services for compute, storage, and networking.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }], "created_at": "2023-12-01T11:00:00Z", "updated_at": "2023-12-01T11:00:00Z" },
+    { "id": "Tenant_Platform_Mediations", "name": "Platform Mediations", "description": "Integration and mediation services for connecting systems.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "created_at": "2023-12-01T12:00:00Z", "updated_at": "2023-12-01T12:00:00Z" },
+    { "id": "Tenant_Analytics", "name": "Analytics", "description": "Data analytics and business intelligence services.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Infra", "name": "Platform Infra" }], "created_at": "2023-12-02T09:00:00Z", "updated_at": "2023-12-02T09:00:00Z" },
+    { "id": "Tenant_Low_Level", "name": "Low Level Services", "description": "Fundamental services for e-commerce operations.", "products": [], "dependent_tenants": [{ "id": "Tenant_Platform_Mediations", "name": "Platform Mediations" }], "created_at": "2023-12-02T10:00:00Z", "updated_at": "2023-12-02T10:00:00Z" },
+    { "id": "Tenant_Medium_Level", "name": "Medium Level Services", "description": "Business logic and orchestration for e-commerce.", "products": [], "dependent_tenants": [{ "id": "Tenant_Low_Level", "name": "Low Level Services" }], "created_at": "2023-12-02T11:00:00Z", "updated_at": "2023-12-02T11:00:00Z" },
+    { "id": "Tenant_High_Level", "name": "High Level Services", "description": "Customer-facing e-commerce applications and APIs.", "products": [], "dependent_tenants": [{ "id": "Tenant_Medium_Level", "name": "Medium Level Services" }], "created_at": "2023-12-02T12:00:00Z", "updated_at": "2023-12-02T12:00:00Z" }
+];
+
+
+async function seedTenants() {
+  try {
+    const client = await clientPromise;
+    const db = client.db();
+    const collection = db.collection(COLLECTION_NAME);
+    
+    await collection.deleteMany({});
+    await collection.insertMany(initialTenants as any);
+    console.log('Cleared and re-seeded tenants collection.');
+
+  } catch (error) {
+    console.error('Error seeding tenants:', error);
+  }
+}
+
 // List all tenants
 export async function GET(req: NextRequest) {
   try {
     const client = await clientPromise;
     const db = client.db();
+    const collection = db.collection(COLLECTION_NAME);
+
+    const count = await collection.countDocuments();
+    if (count === 0) {
+        await seedTenants();
+    }
+    
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
@@ -84,7 +118,6 @@ export async function POST(req: NextRequest) {
             entity: 'tenant',
             entityId: result.insertedId.toString(),
             comment: `Tenant "${insertedItem.name}" onboarded.`,
-            user: user.username,
         });
 
         return NextResponse.json(insertedItem, { status: 201 });
