@@ -89,9 +89,9 @@ function BasicInfoBlock({ component }: { component: CmdbComponent }) {
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Resources</Label>
                         <div className="col-span-3 grid grid-cols-3 gap-2">
-                             <Input value={`CPU: ${component?.resources?.cpu || 'N/A'}`} disabled />
-                             <Input value={`Mem: ${component?.resources?.memory || 'N/A'} GB`} disabled />
-                             <Input value={`Sto: ${component?.resources?.storage || 'N/A'} GB`} disabled />
+                             <Input value={`CPU: ${component.resources?.cpu || 'N/A'}`} disabled />
+                             <Input value={`Mem: ${component.resources?.memory || 'N/A'} GB`} disabled />
+                             <Input value={`Sto: ${component.resources?.storage || 'N/A'} GB`} disabled />
                         </div>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -296,3 +296,5 @@ export default function ViewComponentPage() {
         </DashboardLayout>
     );
 }
+
+    
