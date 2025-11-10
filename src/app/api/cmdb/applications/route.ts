@@ -125,10 +125,7 @@ export async function GET(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
     
-    const count = await db.collection(COLLECTION_NAME).countDocuments();
-    if (count === 0) {
-        await seedApplications();
-    }
+    await seedApplications();
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });
