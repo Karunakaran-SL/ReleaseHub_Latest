@@ -109,7 +109,7 @@ async function seedInterfaces() {
     
     for (const iface of initialInterfaces) {
         await collection.updateOne(
-            { _id: iface.id },
+            { id: iface.id },
             { $set: { ...iface, _id: iface.id, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
             { upsert: true }
         );

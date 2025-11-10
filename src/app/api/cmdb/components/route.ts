@@ -111,7 +111,7 @@ async function seedComponents() {
     
     for (const component of initialComponents) {
         await collection.updateOne(
-            { _id: component.id },
+            { id: component.id },
             { $set: { ...component, _id: component.id, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
             { upsert: true }
         );

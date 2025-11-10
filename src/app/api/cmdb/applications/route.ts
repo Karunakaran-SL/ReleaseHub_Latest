@@ -107,7 +107,7 @@ async function seedApplications() {
     
     for (const app of initialApplications) {
         await collection.updateOne(
-            { _id: app.id },
+            { id: app.id },
             { $set: { ...app, _id: app.id, updated_at: new Date().toISOString() }, $setOnInsert: { created_at: new Date().toISOString() } },
             { upsert: true }
         );
