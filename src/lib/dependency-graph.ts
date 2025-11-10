@@ -75,7 +75,7 @@ export async function generateDependencyTree(productId: string): Promise<Depende
         // Find tenants using this product
         if (current.entityType === 'product') {
             allData.tenants.forEach(tenant => {
-                if (tenant.products?.some(p => p.id === current._id.toString()) && !visited.has(tenant._id.toString())) {
+                if (tenant.products?.some(p => p.id === current.id) && !visited.has(tenant._id.toString())) {
                     relatedTenants.add(tenant._id.toString());
                     visited.add(tenant._id.toString());
                     queue.push(allEntities.find(e => e._id.toString() === tenant._id.toString())!);
@@ -86,14 +86,14 @@ export async function generateDependencyTree(productId: string): Promise<Depende
         // Find components/apps using this tenant
         if (current.entityType === 'tenant') {
              allData.components.forEach(comp => {
-                if (comp.tenants?.some(t => t.id === current._id.toString()) && !visited.has(comp._id.toString())) {
+                if (comp.tenants?.some(t => t.id === current.id) && !visited.has(comp._id.toString())) {
                     relatedComponents.add(comp._id.toString());
                     visited.add(comp._id.toString());
                     queue.push(allEntities.find(e => e._id.toString() === comp._id.toString())!);
                 }
             });
             allData.applications.forEach(app => {
-                if (app.tenants?.some(t => t.id === current._id.toString()) && !visited.has(app._id.toString())) {
+                if (app.tenants?.some(t => t.id === current.id) && !visited.has(app._id.toString())) {
                     relatedApplications.add(app._id.toString());
                     visited.add(app._id.toString());
                     queue.push(allEntities.find(e => e._id.toString() === app._id.toString())!);
@@ -111,7 +111,7 @@ export async function generateDependencyTree(productId: string): Promise<Depende
 
             dependencies.forEach(dep => {
                  if (dep.id && !visited.has(dep.id)) {
-                    const found = findById(allEntities, dep.id);
+                    const found = allEntities.find(e => e.id === dep.id);
                     if (found) {
                         if(found.entityType === 'component') relatedComponents.add(found._id.toString());
                         if(found.entityType === 'application') relatedApplications.add(found._id.toString());
@@ -123,7 +123,7 @@ export async function generateDependencyTree(productId: string): Promise<Depende
 
              entity.dependent_interfaces?.forEach(dep => {
                  if (dep.id && !visited.has(dep.id)) {
-                    const found = findById(allEntities, dep.id);
+                    const found = allEntities.find(e => e.id === dep.id);
                     if (found) {
                         relatedInterfaces.add(found._id.toString());
                         visited.add(found._id.toString());
@@ -137,7 +137,7 @@ export async function generateDependencyTree(productId: string): Promise<Depende
         if (current.entityType === 'interface') {
             const intf = current as CmdbInterface;
             if (intf.source && intf.source.id && !visited.has(intf.source.id)) {
-                const source = findById(allEntities, intf.source.id);
+                const source = allEntities.find(e => e.id === intf.source.id);
                  if (source) {
                     if(source.entityType === 'component') relatedComponents.add(source._id.toString());
                     if(source.entityType === 'application') relatedApplications.add(source._id.toString());
