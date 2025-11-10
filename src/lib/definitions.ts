@@ -197,20 +197,18 @@ export type AnyCmdbEntity = (CmdbTenant | CmdbComponent | CmdbApplication | Cmdb
 
 export type EntityType = 'tenant' | 'component' | 'application' | 'interface' | 'product';
 
-
 export type DependencyTree = {
   _id: string; // Mongo ObjectID
-  productId: string; // The ID of the root product
-  product: {
-    id: string;
-    name: string;
-    version: string;
-    description?: string;
-  };
+  rootEntityType: EntityType;
+  rootEntityId: string;
+  product: Product | null;
   specifications: { id: string; name: string; version: string; }[];
   tenants: Partial<CmdbTenant>[];
   components: Partial<CmdbComponent>[];
   applications: Partial<CmdbApplication>[];
   interfaces: Partial<CmdbInterface>[];
   metadata: {
-    created_
+    created_at: string;
+    updated_at: string;
+  };
+};

@@ -1,25 +1,27 @@
+
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowUp, ArrowDown, Building, Puzzle, AppWindow, Network, Box, GitMerge, ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowUp, ArrowDown, Building, Puzzle, AppWindow, Network, Box, GitMerge, ExternalLink } from 'lucide-react';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, AnyCmdbEntity, EntityType, DependencyTree, Product } from '@/lib/definitions';
+import type { User, AnyCmdbEntity, EntityType, DependencyTree, Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterface } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
-const entityTypeDetails: Record<EntityType, { label: string; icon: React.ElementType; linkPrefix: string }> = {
-    product: { label: 'Product', icon: Box, linkPrefix: '/products' },
-    tenant: { label: 'Tenant', icon: Building, linkPrefix: '/cmdb/tenants' },
-    component: { label: 'Component', icon: Puzzle, linkPrefix: '/cmdb/components' },
-    application: { label: 'Application', icon: AppWindow, linkPrefix: '/cmdb/applications' },
-    interface: { label: 'Interface', icon: Network, linkPrefix: '/cmdb/interfaces' },
+const entityTypeDetails: Record<EntityType, { label: string; icon: React.ElementType; linkPrefix: string; apiPath: string }> = {
+    product: { label: 'Product', icon: Box, linkPrefix: '/products', apiPath: '/api/products' },
+    tenant: { label: 'Tenant', icon: Building, linkPrefix: '/cmdb/tenants', apiPath: '/api/cmdb/tenants' },
+    component: { label: 'Component', icon: Puzzle, linkPrefix: '/cmdb/components', apiPath: '/api/cmdb/components' },
+    application: { label: 'Application', icon: AppWindow, linkPrefix: '/cmdb/applications', apiPath: '/api/cmdb/applications' },
+    interface: { label: 'Interface', icon: Network, linkPrefix: '/cmdb/interfaces', apiPath: '/api/cmdb/interfaces' },
 };
 
 function DependencyCard({ item, entityType, onSelect, isSelected }: { item: any, entityType: EntityType, onSelect: () => void, isSelected?: boolean }) {
@@ -54,109 +56,139 @@ function DependencyCard({ item, entityType, onSelect, isSelected }: { item: any,
 export default function DependencyMetricsPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const [allProducts, setAllProducts] = useState<Product[]>([]);
+    const [allEntities, setAllEntities] = useState<Record<EntityType, AnyCmdbEntity[]>>({ product: [], tenant: [], component: [], application: [], interface: [] });
     const [dependencyTree, setDependencyTree] = useState<DependencyTree | null>(null);
+    const { toast } = useToast();
     
     const router = useRouter();
     const searchParams = useSearchParams();
     
-    const selectedProductId = searchParams.get('productId');
+    const selectedEntityType = searchParams.get('type') as EntityType || 'product';
+    const selectedEntityId = searchParams.get('id');
+
+    const fetchAllEntities = useCallback(async () => {
+        setLoading(true);
+        try {
+            const types = Object.keys(entityTypeDetails) as EntityType[];
+            const responses = await Promise.all(
+                types.map(type => fetch(entityTypeDetails[type].apiPath))
+            );
+            
+            const newAllEntities: Record<EntityType, AnyCmdbEntity[]> = { product: [], tenant: [], component: [], application: [], interface: [] };
+
+            for (let i = 0; i < types.length; i++) {
+                if (responses[i].ok) {
+                    newAllEntities[types[i]] = await responses[i].json();
+                }
+            }
+            setAllEntities(newAllEntities);
+
+            if (!selectedEntityId && newAllEntities.product.length > 0) {
+                 router.push(`/dependency-metrics?type=product&id=${newAllEntities.product[0]._id}`);
+            }
+
+        } catch (error) {
+            console.error("Failed to fetch all entities:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not load entity lists.'})
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedEntityId, router, toast]);
 
     useEffect(() => {
         getUser().then(setUser);
-        async function fetchProducts() {
-            setLoading(true);
-            try {
-                const res = await fetch('/api/products');
-                if (res.ok) {
-                    const products = await res.json();
-                    setAllProducts(products);
-                    if (!selectedProductId && products.length > 0) {
-                        router.push(`/dependency-metrics?productId=${products[0]._id}`);
-                    }
-                }
-            } catch (error) {
-                console.error("Failed to fetch products:", error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        fetchAllEntities();
+    }, [fetchAllEntities]);
 
     useEffect(() => {
-        if (!selectedProductId) return;
+        if (!selectedEntityType || !selectedEntityId) return;
 
         async function fetchTree() {
             setLoading(true);
             setDependencyTree(null);
             try {
-                const res = await fetch(`/api/dependency-tree/${selectedProductId}`);
+                const res = await fetch(`/api/dependency-tree/${selectedEntityType}/${selectedEntityId}`);
                 if (res.ok) {
                     setDependencyTree(await res.json());
                 } else {
-                    console.error("Failed to fetch dependency tree for product:", selectedProductId);
+                    console.error(`Failed to fetch dependency tree for ${selectedEntityType}:${selectedEntityId}`);
+                    toast({ variant: 'destructive', title: 'Error', description: 'Failed to load dependency tree.'})
                 }
             } catch (error) {
                  console.error("Error fetching dependency tree:", error);
+                 toast({ variant: 'destructive', title: 'Error', description: 'An error occurred while loading the dependency tree.'})
             } finally {
                 setLoading(false);
             }
         }
         fetchTree();
-    }, [selectedProductId]);
+    }, [selectedEntityType, selectedEntityId, toast]);
     
-    const handleProductChange = (productId: string) => {
-        router.push(`/dependency-metrics?productId=${productId}`);
+    const handleEntityTypeChange = (type: EntityType) => {
+        router.push(`/dependency-metrics?type=${type}`);
+    };
+    
+    const handleEntityChange = (id: string) => {
+        router.push(`/dependency-metrics?type=${selectedEntityType}&id=${id}`);
     };
 
     const { selectedItem, usedBy, dependsOn } = useMemo(() => {
-        if (!dependencyTree) return { selectedItem: null, usedBy: [], dependsOn: [] };
-
-        const allEntitiesInTree: (AnyCmdbEntity)[] = [
+        if (!dependencyTree || !selectedEntityId) return { selectedItem: null, usedBy: [], dependsOn: [] };
+        
+        const allTreeEntities: (AnyCmdbEntity & { entityType: EntityType })[] = [
+            ...(dependencyTree.product ? [{ ...dependencyTree.product, entityType: 'product' as EntityType }] : []),
             ...dependencyTree.tenants.map(t => ({ ...t, entityType: 'tenant' as EntityType })),
             ...dependencyTree.components.map(c => ({ ...c, entityType: 'component' as EntityType })),
             ...dependencyTree.applications.map(a => ({ ...a, entityType: 'application' as EntityType })),
             ...dependencyTree.interfaces.map(i => ({ ...i, entityType: 'interface' as EntityType })),
-        ];
-
-        const rootProductEntity = { ...dependencyTree.product, _id: dependencyTree.productId, entityType: 'product' as EntityType };
+        ] as any;
         
-        let selectedItem: AnyCmdbEntity | null = rootProductEntity; // Default to root product
+        const currentItem = allTreeEntities.find(e => e._id.toString() === selectedEntityId);
+        if (!currentItem) return { selectedItem: null, usedBy: [], dependsOn: [] };
         
         const usedBySet = new Set<AnyCmdbEntity>();
         const dependsOnSet = new Set<AnyCmdbEntity>();
-
-        // For now, this just calculates dependencies for the root product
-        // A full implementation would need to recalculate this if another item is clicked.
         
-        // Who uses the root product? -> Tenants that list this product
-        allEntitiesInTree.forEach(entity => {
-            if (entity.entityType === 'tenant' && entity.products?.some(p => p.id === rootProductEntity.id)) {
+        // Find what depends on the current item
+        allTreeEntities.forEach(entity => {
+            if ((entity as CmdbTenant).products?.some(p => p.id === currentItem.id) ||
+                (entity as CmdbComponent | CmdbApplication).dependent_components?.some(d => d.id === currentItem.id) ||
+                (entity as CmdbComponent | CmdbApplication).dependent_applications?.some(d => d.id === currentItem.id) ||
+                (entity as CmdbComponent | CmdbApplication).dependent_interfaces?.some(d => d.id === currentItem.id) ||
+                 (entity as CmdbInterface).source?.id === currentItem.id) {
                 usedBySet.add(entity);
             }
         });
-        
-        // What does the root product depend on? -> Its specifications
-        dependencyTree.specifications.forEach(spec => {
-             // We'd need a full entity for specs to add them properly
-        });
 
+        // Find what the current item depends on
+        const currentAsAny = currentItem as any;
+         const dependencies = [
+            ...(currentAsAny.dependent_tenants || []),
+            ...(currentAsAny.dependent_components || []),
+            ...(currentAsAny.dependent_applications || []),
+            ...(currentAsAny.dependent_interfaces || []),
+            ...(currentAsAny.specifications || [])
+         ];
+         if (currentAsAny.source) dependencies.push(currentAsAny.source);
+
+         dependencies.forEach(dep => {
+            const found = allTreeEntities.find(e => e.id === dep.id);
+            if (found) dependsOnSet.add(found);
+         });
 
         return {
-            selectedItem,
+            selectedItem: currentItem,
             usedBy: Array.from(usedBySet),
             dependsOn: Array.from(dependsOnSet),
         };
-    }, [dependencyTree]);
+    }, [dependencyTree, selectedEntityId]);
     
-     const summaryData = [
+    const summaryData = [
         ...usedBy.map(item => ({ relationship: 'Used By', item })),
         ...dependsOn.map(item => ({ relationship: 'Depends On', item })),
     ];
     
-    if (loading && !dependencyTree) {
+     if (loading && !dependencyTree && !selectedEntityId) {
          return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 
@@ -165,18 +197,31 @@ export default function DependencyMetricsPage() {
             <main className="flex-1 p-6 md:p-10 space-y-6">
                 <h1 className="text-3xl font-bold">Dependency Metrics</h1>
 
-                <div className="w-full">
-                    <label className="text-sm font-medium">Select Product</label>
-                     <Select value={selectedProductId || ''} onValueChange={handleProductChange}>
-                        <SelectTrigger><SelectValue placeholder="Select a product..." /></SelectTrigger>
-                        <SelectContent>
-                            {allProducts.map(product => (
-                                <SelectItem key={product._id} value={product._id}>
-                                    {product.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="w-full">
+                        <Label>Select Entity Type</Label>
+                         <Select value={selectedEntityType} onValueChange={handleEntityTypeChange}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                {Object.entries(entityTypeDetails).map(([type, {label}]) => (
+                                    <SelectItem key={type} value={type}>{label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="w-full">
+                         <Label>Select Entity</Label>
+                         <Select value={selectedEntityId || ''} onValueChange={handleEntityChange}>
+                            <SelectTrigger><SelectValue placeholder="Select an entity..." /></SelectTrigger>
+                            <SelectContent>
+                                {allEntities[selectedEntityType]?.map(entity => (
+                                    <SelectItem key={entity._id} value={entity._id}>
+                                        {entity.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 {loading ? (
@@ -196,7 +241,7 @@ export default function DependencyMetricsPage() {
                                                     <div className={cn("w-full h-px bg-blue-500 absolute top-1/2" )}></div>
                                                 </div>
                                                 <div className="flex-1">
-                                                    <DependencyCard item={item} entityType={item.entityType} onSelect={() => {}} />
+                                                    <DependencyCard item={item} entityType={item.entityType} onSelect={() => handleEntityChange(item._id)} />
                                                 </div>
                                             </div>
                                         ))}
@@ -216,7 +261,7 @@ export default function DependencyMetricsPage() {
                                                     <div className="w-full h-px bg-orange-500 absolute top-1/2"></div>
                                                 </div>
                                                 <div className="flex-1">
-                                                     <DependencyCard item={item} entityType={item.entityType} onSelect={() => {}} />
+                                                     <DependencyCard item={item} entityType={item.entityType} onSelect={() => handleEntityChange(item._id)} />
                                                 </div>
                                             </div>
                                         ))}
@@ -247,7 +292,9 @@ export default function DependencyMetricsPage() {
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Link href={`/dependency-metrics?type=${item.entityType}&id=${item._id}`} className="hover:underline">{item.name}</Link>
+                                                    <Button variant="link" className="p-0 h-auto" onClick={() => handleEntityChange(item._id)}>
+                                                        {item.name}
+                                                    </Button>
                                                 </TableCell>
                                                 <TableCell><Badge variant="outline" className="capitalize">{item.entityType}</Badge></TableCell>
                                                 <TableCell>{item.version || 'N/A'}</TableCell>
@@ -264,7 +311,7 @@ export default function DependencyMetricsPage() {
                     </div>
                 ) : (
                      <div className="text-center text-muted-foreground py-12">
-                        <p>Please select a product to view its dependencies.</p>
+                        <p>Please select an entity to view its dependencies.</p>
                     </div>
                 )}
             </main>
