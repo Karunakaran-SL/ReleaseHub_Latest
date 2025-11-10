@@ -1,6 +1,6 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
@@ -44,13 +44,9 @@ const COLLECTION_NAME = 'cmdb_applications';
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
-        }
-
         const client = await clientPromise;
         const db = client.db();
-        const item = await db.collection(COLLECTION_NAME).findOne({ _id: new ObjectId(id) });
+        const item = await db.collection(COLLECTION_NAME).findOne({ _id: id });
 
         if (!item) {
             return NextResponse.json({ message: 'Application not found.' }, { status: 404 });
@@ -73,10 +69,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         }
 
         const { id } = params;
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
-        }
-
         const body = await req.json();
         const validatedData = ApplicationUpdateSchema.safeParse(body);
 
@@ -90,7 +82,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const { updateComment, ...applicationData } = validatedData.data;
 
         const result = await db.collection(COLLECTION_NAME).updateOne(
-            { _id: new ObjectId(id) },
+            { _id: id },
             { $set: applicationData }
         );
 
@@ -110,7 +102,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             revalidateDependencyTree(product._id.toString());
         }
 
-        const updatedItem = await db.collection(COLLECTION_NAME).findOne({ _id: new ObjectId(id) });
+        const updatedItem = await db.collection(COLLECTION_NAME).findOne({ _id: id });
         return NextResponse.json(updatedItem, { status: 200 });
 
     } catch (error) {
@@ -129,10 +121,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         }
 
         const { id } = params;
-         if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
-        }
-
         const { comment } = await req.json();
         if (!comment) {
             return NextResponse.json({ message: 'Delete comment is required.' }, { status: 400 });
@@ -140,7 +128,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
         const client = await clientPromise;
         const db = client.db();
-        const result = await db.collection(COLLECTION_NAME).deleteOne({ _id: new ObjectId(id) });
+        const result = await db.collection(COLLECTION_NAME).deleteOne({ _id: id });
 
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Application not found.' }, { status: 404 });
