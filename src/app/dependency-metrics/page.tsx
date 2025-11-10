@@ -46,7 +46,7 @@ function DependencyCard({ item, entityType, onSelect, isSelected }: { item: any,
             </div>
             <Badge variant={isSelected ? 'secondary' : 'outline'} className="capitalize text-xs">{entityType}</Badge>
             <Button asChild variant="ghost" size="icon" className={cn("absolute top-1 right-1 h-6 w-6", isSelected ? 'text-primary-foreground hover:bg-primary/80' : 'text-muted-foreground')} onClick={(e) => e.stopPropagation()}>
-                <Link href={`${linkPrefix}/${item._id}/view`} target="_blank">
+                <Link href={`${linkPrefix}/${item.id}/view`} target="_blank">
                     <ExternalLink className="h-4 w-4" />
                 </Link>
             </Button>
@@ -85,7 +85,7 @@ export default function DependencyMetricsPage() {
             setAllEntities(newAllEntities);
 
             if (!selectedEntityId && newAllEntities.product.length > 0) {
-                 router.push(`/dependency-metrics?type=product&id=${newAllEntities.product[0]._id}`);
+                 router.push(`/dependency-metrics?type=product&id=${newAllEntities.product[0].id}`);
             }
 
         } catch (error) {
@@ -126,7 +126,12 @@ export default function DependencyMetricsPage() {
     }, [selectedEntityType, selectedEntityId, toast]);
     
     const handleEntityTypeChange = (type: EntityType) => {
-        router.push(`/dependency-metrics?type=${type}`);
+        const firstEntityId = allEntities[type]?.[0]?.id;
+        if (firstEntityId) {
+            router.push(`/dependency-metrics?type=${type}&id=${firstEntityId}`);
+        } else {
+            router.push(`/dependency-metrics?type=${type}`);
+        }
     };
     
     const handleEntityChange = (id: string) => {
@@ -144,19 +149,26 @@ export default function DependencyMetricsPage() {
             ...dependencyTree.interfaces.map(i => ({ ...i, entityType: 'interface' as EntityType })),
         ] as any;
         
-        const currentItem = allTreeEntities.find(e => e._id.toString() === selectedEntityId);
+        const currentItem = allTreeEntities.find(e => e.id.toString() === selectedEntityId);
         if (!currentItem) return { selectedItem: null, usedBy: [], dependsOn: [] };
         
-        const usedBySet = new Set<AnyCmdbEntity>();
-        const dependsOnSet = new Set<AnyCmdbEntity>();
+        const usedBySet = new Set<AnyCmdbEntity & { entityType: EntityType }>();
+        const dependsOnSet = new Set<AnyCmdbEntity & { entityType: EntityType }>();
         
         // Find what depends on the current item
         allTreeEntities.forEach(entity => {
-            if ((entity as CmdbTenant).products?.some(p => p.id === currentItem.id) ||
-                (entity as CmdbComponent | CmdbApplication).dependent_components?.some(d => d.id === currentItem.id) ||
-                (entity as CmdbComponent | CmdbApplication).dependent_applications?.some(d => d.id === currentItem.id) ||
-                (entity as CmdbComponent | CmdbApplication).dependent_interfaces?.some(d => d.id === currentItem.id) ||
-                 (entity as CmdbInterface).source?.id === currentItem.id) {
+            if (entity.id === currentItem.id) return;
+            const dependencies = [
+                ...((entity as CmdbTenant).dependent_tenants || []),
+                ...((entity as CmdbComponent | CmdbApplication).dependent_components || []),
+                ...((entity as CmdbComponent | CmdbApplication).dependent_applications || []),
+                ...((entity as CmdbComponent | CmdbApplication).dependent_interfaces || []),
+                 ...((entity as Product).specifications || []),
+                ((entity as CmdbInterface).source ? [((entity as CmdbInterface).source)] : []),
+                ...((entity as CmdbTenant).products || [])
+            ].filter(Boolean);
+            
+            if (dependencies.some(dep => dep.id === currentItem.id)) {
                 usedBySet.add(entity);
             }
         });
@@ -168,9 +180,10 @@ export default function DependencyMetricsPage() {
             ...(currentAsAny.dependent_components || []),
             ...(currentAsAny.dependent_applications || []),
             ...(currentAsAny.dependent_interfaces || []),
-            ...(currentAsAny.specifications || [])
-         ];
-         if (currentAsAny.source) dependencies.push(currentAsAny.source);
+            ...(currentAsAny.specifications || []),
+            (currentAsAny.source ? [currentAsAny.source] : []),
+             ...(currentAsAny.products || [])
+         ].filter(Boolean);
 
          dependencies.forEach(dep => {
             const found = allTreeEntities.find(e => e.id === dep.id);
@@ -216,7 +229,7 @@ export default function DependencyMetricsPage() {
                             <SelectTrigger><SelectValue placeholder="Select an entity..." /></SelectTrigger>
                             <SelectContent>
                                 {allEntities[selectedEntityType]?.map(entity => (
-                                    <SelectItem key={entity._id} value={entity._id}>
+                                    <SelectItem key={entity.id} value={entity.id}>
                                         {entity.name}
                                     </SelectItem>
                                 ))}
@@ -237,12 +250,12 @@ export default function DependencyMetricsPage() {
                                      {usedBy.length > 0 ? (
                                         <div className="w-full space-y-2 pl-4">
                                         {usedBy.map((item) => (
-                                            <div key={item._id} className="flex items-center gap-2">
+                                            <div key={item.id} className="flex items-center gap-2">
                                                 <div className="w-4 h-full border-l-2 border-blue-500 relative">
                                                     <div className={cn("w-full h-px bg-blue-500 absolute top-1/2" )}></div>
                                                 </div>
                                                 <div className="flex-1">
-                                                    <DependencyCard item={item} entityType={item.entityType} onSelect={() => handleEntityChange(item._id)} />
+                                                    <DependencyCard item={item} entityType={item.entityType} onSelect={() => handleEntityChange(item.id)} />
                                                 </div>
                                             </div>
                                         ))}
@@ -257,12 +270,12 @@ export default function DependencyMetricsPage() {
                                       {dependsOn.length > 0 ? (
                                         <div className="w-full space-y-2 pl-4">
                                         {dependsOn.map((item) => (
-                                            <div key={item._id} className="flex items-center gap-2">
+                                            <div key={item.id} className="flex items-center gap-2">
                                                 <div className="w-4 h-full border-l-2 border-orange-500 relative">
                                                     <div className="w-full h-px bg-orange-500 absolute top-1/2"></div>
                                                 </div>
                                                 <div className="flex-1">
-                                                     <DependencyCard item={item} entityType={item.entityType} onSelect={() => handleEntityChange(item._id)} />
+                                                     <DependencyCard item={item} entityType={item.entityType} onSelect={() => handleEntityChange(item.id)} />
                                                 </div>
                                             </div>
                                         ))}
@@ -285,7 +298,7 @@ export default function DependencyMetricsPage() {
                                     </TableHeader>
                                     <TableBody>
                                         {summaryData.length > 0 ? summaryData.map(({ relationship, item }) => (
-                                            <TableRow key={`${relationship}-${item._id}`}>
+                                            <TableRow key={`${relationship}-${item.id}`}>
                                                 <TableCell>
                                                     <Badge variant={relationship === 'Used By' ? 'default' : 'secondary'} className={relationship === 'Used By' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}>
                                                         {relationship === 'Used By' ? <ArrowUp className="mr-1 h-3 w-3" /> : <ArrowDown className="mr-1 h-3 w-3" />}
@@ -293,7 +306,7 @@ export default function DependencyMetricsPage() {
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Button variant="link" className="p-0 h-auto" onClick={() => handleEntityChange(item._id)}>
+                                                    <Button variant="link" className="p-0 h-auto" onClick={() => handleEntityChange(item.id)}>
                                                         {item.name}
                                                     </Button>
                                                 </TableCell>

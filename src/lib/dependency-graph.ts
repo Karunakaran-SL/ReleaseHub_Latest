@@ -40,7 +40,6 @@ export async function generateDependencyTree(entityType: string, entityId: strin
     const allData = await fetchAllData();
     const client = await clientPromise;
     const db = client.db();
-    const collection = db.collection('dependency_trees');
     
     const allEntities = [
         ...allData.tenants.map(t => ({ ...t, entityType: 'tenant' as EntityType })),
@@ -50,7 +49,7 @@ export async function generateDependencyTree(entityType: string, entityId: strin
         ...allData.products.map(p => ({ ...p, entityType: 'product' as EntityType })),
     ] as (AnyCmdbEntity & { entityType: EntityType })[];
 
-    const rootEntity = allEntities.find(e => e._id.toString() === entityId && e.entityType === entityType);
+    const rootEntity = allEntities.find(e => e.id === entityId && e.entityType === entityType);
     
     if (!rootEntity) {
         console.error(`Root entity not found for type: ${entityType} and id: ${entityId}`);
@@ -65,25 +64,25 @@ export async function generateDependencyTree(entityType: string, entityId: strin
     const relatedProducts = new Set<string>();
     
     const queue: (AnyCmdbEntity & { entityType: EntityType })[] = [rootEntity];
-    const visited = new Set<string>([`${rootEntity.entityType}:${rootEntity._id.toString()}`]);
+    const visited = new Set<string>([`${rootEntity.entityType}:${rootEntity.id}`]);
 
     const addEntityToQueue = (entity: AnyCmdbEntity & { entityType: EntityType }) => {
-        const key = `${entity.entityType}:${entity._id.toString()}`;
+        const key = `${entity.entityType}:${entity.id}`;
         if (!visited.has(key)) {
             visited.add(key);
             queue.push(entity);
-            
-            switch (entity.entityType) {
-                case 'product': relatedProducts.add(entity._id.toString()); break;
-                case 'tenant': relatedTenants.add(entity._id.toString()); break;
-                case 'component': relatedComponents.add(entity._id.toString()); break;
-                case 'application': relatedApplications.add(entity._id.toString()); break;
-                case 'interface': relatedInterfaces.add(entity._id.toString()); break;
-            }
         }
     };
     
-    addEntityToQueue(rootEntity);
+     // Initial population of sets based on root entity
+    switch (rootEntity.entityType) {
+        case 'product': relatedProducts.add(rootEntity.id); break;
+        case 'tenant': relatedTenants.add(rootEntity.id); break;
+        case 'component': relatedComponents.add(rootEntity.id); break;
+        case 'application': relatedApplications.add(rootEntity.id); break;
+        case 'interface': relatedInterfaces.add(rootEntity.id); break;
+    }
+
 
     while (queue.length > 0) {
         const current = queue.shift()!;
@@ -98,7 +97,7 @@ export async function generateDependencyTree(entityType: string, entityId: strin
                 ...((upstreamEntity as Product).specifications || []),
                 ((upstreamEntity as CmdbInterface).source ? [((upstreamEntity as CmdbInterface).source)] : []),
                 ...((upstreamEntity as CmdbTenant).products || [])
-            ];
+            ].filter(Boolean);
             
             if (dependencies.some(dep => dep.id === current.id)) {
                 addEntityToQueue(upstreamEntity);
@@ -114,7 +113,7 @@ export async function generateDependencyTree(entityType: string, entityId: strin
             ...((current as Product).specifications || []),
             ((current as CmdbInterface).source ? [((current as CmdbInterface).source)] : []),
             ...((current as CmdbTenant).products || [])
-        ];
+        ].filter(Boolean);
 
         downstreamDeps.forEach(dep => {
             const found = allEntities.find(e => e.id === dep.id);
@@ -124,45 +123,40 @@ export async function generateDependencyTree(entityType: string, entityId: strin
         });
     }
 
-    const tree: Omit<DependencyTree, '_id'> = {
+    // Populate sets after traversal
+    visited.forEach(key => {
+        const [type, id] = key.split(':');
+        const entity = allEntities.find(e => e.entityType === type && e.id === id);
+        if (entity) {
+             switch (entity.entityType) {
+                case 'product': relatedProducts.add(entity.id); break;
+                case 'tenant': relatedTenants.add(entity.id); break;
+                case 'component': relatedComponents.add(entity.id); break;
+                case 'application': relatedApplications.add(entity.id); break;
+                case 'interface': relatedInterfaces.add(entity.id); break;
+            }
+        }
+    });
+
+    const tree: DependencyTree = {
+        _id: new ObjectId().toString(),
         rootEntityType: rootEntity.entityType,
-        rootEntityId: rootEntity._id.toString(),
-        product: allData.products.find(p => relatedProducts.has(p._id.toString())) || null,
-        specifications: Array.from(relatedSpecifications).map(id => allData.specifications.find(s => s._id.toString() === id)).filter(Boolean) as any,
-        tenants: Array.from(relatedTenants).map(id => allData.tenants.find(t => t._id.toString() === id)).filter(Boolean) as CmdbTenant[],
-        components: Array.from(relatedComponents).map(id => allData.components.find(c => c._id.toString() === id)).filter(Boolean) as CmdbComponent[],
-        applications: Array.from(relatedApplications).map(id => allData.applications.find(a => a._id.toString() === id)).filter(Boolean) as CmdbApplication[],
-        interfaces: Array.from(relatedInterfaces).map(id => allData.interfaces.find(i => i._id.toString() === id)).filter(Boolean) as CmdbInterface[],
+        rootEntityId: rootEntity.id,
+        product: allData.products.find(p => relatedProducts.has(p.id)) || null,
+        specifications: Array.from(relatedSpecifications).map(id => allData.specifications.find(s => s.id === id)).filter(Boolean) as any,
+        tenants: Array.from(relatedTenants).map(id => allData.tenants.find(t => t.id === id)).filter(Boolean) as CmdbTenant[],
+        components: Array.from(relatedComponents).map(id => allData.components.find(c => c.id === id)).filter(Boolean) as CmdbComponent[],
+        applications: Array.from(relatedApplications).map(id => allData.applications.find(a => a.id === id)).filter(Boolean) as CmdbApplication[],
+        interfaces: Array.from(relatedInterfaces).map(id => allData.interfaces.find(i => i.id === id)).filter(Boolean) as CmdbInterface[],
         metadata: {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         }
     };
     
-    // Upsert into DB
-    await collection.updateOne(
-        { rootEntityId: rootEntity._id.toString() },
-        { $set: tree },
-        { upsert: true }
-    );
-    
-    const finalDoc = await collection.findOne({ rootEntityId: rootEntity._id.toString() });
-
-    return finalDoc as DependencyTree | null;
+    return tree;
 }
 
 export async function revalidateDependencyTree(entityId: string): Promise<void> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
-  try {
-    // We do not await this, it can run in the background.
-    // This will hit the PUT endpoint in [...params]/route.ts to regenerate the tree for the given entity.
-    fetch(`${baseUrl}/api/dependency-tree/product/${entityId}`, {
-        method: 'PUT'
-    }).catch(e => console.error("background fetch for revalidation failed", e));
-  } catch (error) {
-      console.error(
-        `Failed to trigger dependency tree revalidation for entity ${entityId}:`,
-        error
-      );
-  }
+  // No-op as we are generating on the fly and not caching in DB anymore
 }
