@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import type { Product } from '@/lib/definitions';
@@ -6,6 +5,7 @@ import { z } from 'zod';
 import { ObjectId } from 'mongodb';
 import { logAuditEvent } from '@/lib/audit';
 import { getUser } from '@/lib/auth';
+import { revalidateDependencyTree } from '@/lib/dependency-graph';
 
 const initialProducts: Omit<Product, '_id'>[] = [
   {
@@ -107,10 +107,15 @@ async function seedProducts() {
 // Search and list products
 export async function GET(req: NextRequest) {
   try {
-    await seedProducts();
     const client = await clientPromise;
     const db = client.db();
     const productsCollection = db.collection('products');
+    
+    const count = await productsCollection.countDocuments();
+    if (count === 0) {
+        await seedProducts();
+    }
+
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('q');
     
@@ -204,6 +209,10 @@ export async function POST(req: NextRequest) {
             entityId: result.insertedId.toString(),
             comment: `Product "${newProduct.name}" created.`,
         });
+        
+        // Revalidate dependency tree in the background
+        revalidateDependencyTree(result.insertedId.toString());
+
 
         return NextResponse.json(insertedProduct, { status: 201 });
 
