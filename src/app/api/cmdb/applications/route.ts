@@ -49,26 +49,51 @@ const tenantIds = [
     "Tenant_Cybersecurity", "Tenant_Shared_Services", "Tenant_Gaming_Platform", "Tenant_Fintech_Services", "Tenant_Marketing_Automation"
 ];
 
+const onboardingConfigPhases = [
+    { id: "phase-1", name: "Initiate Onboarding", fields: [ { name: "requestFormSubmitted" }, { name: "csApproved" }, { name: "pmApproved" }, { name: "productTeamAgreement" } ] },
+    { id: "phase-2", name: "Product Definitions", fields: [ { name: "architectAgreed" }, { name: "specChanged" }, { name: "hlDesignApproved" } ] },
+    { id: "phase-3", name: "Detail Design", fields: [ { name: "detailDesignDone" }, { name: "dependencyIdentified" }, { name: "pertReady" }, { name: "testPlanReady" } ] },
+    { id: "phase-4", name: "Delivery", fields: [ { name: "implementationDone" }, { name: "unitTestDone" }, { name: "staticCodeDone" }, { name: "systemIntegrationDone" }, { name: "systemIntegrationTestingDone" }, { name: "allTestCasesAutomated" } ] },
+    { id: "phase-5", name: "Alpha Qualification", fields: [ { name: "uatTestDone" }, { name: "riskReported" }, { name: "serviceMetricsDone" } ] },
+    { id: "phase-6", name: "Prepare customer", fields: [ { name: "communicatedChanges" }, { name: "plannedMCWindow" } ] },
+    { id: "phase-7", name: "Beta Qualification", fields: [ { name: "deploymentRunbookForBeta" }, { name: "deploymentDone" }, { name: "betaTestsExecuted" } ] },
+    { id: "phase-8", name: "Completed", fields: [ { name: "onboardingCompleteClosure" } ] }
+];
+
+const generatePhases = () => {
+    return onboardingConfigPhases.map(phase => ({
+        id: phase.id,
+        name: phase.name,
+        version: "1.0",
+        status: "Done",
+        fields: phase.fields.map(field => ({
+            name: field.name,
+            value: true,
+            proof: { link: "https://example.com/proof" }
+        }))
+    }));
+};
+
 const initialApplications = [
     // Apps for Tenant_Platform_Foundation
-    { id: "App_UserDashboard", name: "User Dashboard", version: "2.0.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [{id: "Comp_AuthService", name: "Authentication Service"}, {id: "Comp_SearchService", name: "Search Service"}], dependent_applications: [{id: "App_AdminConsole", name: "Admin Console"}], required_interfaces: [{id: "Interface_AuthService", name: "Auth Service Interface"}], provided_interfaces: [{id: "Interface_UserDashboardAPI", name: "User Dashboard API"}] },
-    { id: "App_AdminConsole", name: "Admin Console", version: "1.1.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{id: "Interface_UserDashboardAPI", name: "User Dashboard API"}], provided_interfaces: [{id: "Interface_AdminAPI", name: "Admin API"}] },
-    { id: "App_MetricsExporter", name: "Metrics Exporter", version: "1.0.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{id: "Interface_Prometheus", name: "Prometheus Endpoint"}], provided_interfaces: [] },
-    { id: "App_BillingProcessor", name: "Billing Processor", version: "1.2.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{id: "Interface_PaymentGateway", name: "Payment Gateway API"}], provided_interfaces: [] },
-    { id: "App_NotificationService", name: "Notification Service", version: "1.0.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{id: "Interface_SendGrid", name: "SendGrid API"}], provided_interfaces: [] },
+    { id: "App_UserDashboard", name: "User Dashboard", version: "2.0.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [{id: "Comp_AuthService", name: "Authentication Service"}, {id: "Comp_SearchService", name: "Search Service"}], dependent_applications: [{id: "App_AdminConsole", name: "Admin Console"}], dependent_interfaces: [{id: "Interface_AuthService", name: "Auth Service Interface"}], provided_interfaces: [{id: "Interface_UserDashboardAPI", name: "User Dashboard API"}] },
+    { id: "App_AdminConsole", name: "Admin Console", version: "1.1.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], dependent_interfaces: [{id: "Interface_UserDashboardAPI", name: "User Dashboard API"}], provided_interfaces: [{id: "Interface_AdminAPI", name: "Admin API"}] },
+    { id: "App_MetricsExporter", name: "Metrics Exporter", version: "1.0.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], dependent_interfaces: [{id: "Interface_Prometheus", name: "Prometheus Endpoint"}], provided_interfaces: [] },
+    { id: "App_BillingProcessor", name: "Billing Processor", version: "1.2.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], dependent_interfaces: [{id: "Interface_PaymentGateway", name: "Payment Gateway API"}], provided_interfaces: [] },
+    { id: "App_NotificationService", name: "Notification Service", version: "1.0.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], dependent_interfaces: [{id: "Interface_SendGrid", name: "SendGrid API"}], provided_interfaces: [] },
 
     // Apps for Tenant_Retail_Services
-    { id: "App_ShoppingCart", name: "Shopping Cart", version: "2.5.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [{id: "Comp_OrderProcessor", name: "Order Processor"}], dependent_applications: [], required_interfaces: [], provided_interfaces: [] },
-    { id: "App_ProductRecs", name: "Product Recommendations", version: "1.8.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], required_interfaces: [], provided_interfaces: [] },
-    { id: "App_CheckoutSvc", name: "Checkout Service", version: "3.0.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [{id: "Comp_OrderProcessor", name: "Order Processor"}], dependent_applications: [], required_interfaces: [], provided_interfaces: [] },
-    { id: "App_CustomerReviews", name: "Customer Reviews", version: "1.2.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], required_interfaces: [], provided_interfaces: [] },
-    { id: "App_StoreLocator", name: "Store Locator", version: "1.0.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], required_interfaces: [], provided_interfaces: [] },
+    { id: "App_ShoppingCart", name: "Shopping Cart", version: "2.5.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [{id: "Comp_OrderProcessor", name: "Order Processor"}], dependent_applications: [], dependent_interfaces: [], provided_interfaces: [] },
+    { id: "App_ProductRecs", name: "Product Recommendations", version: "1.8.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], dependent_interfaces: [], provided_interfaces: [] },
+    { id: "App_CheckoutSvc", name: "Checkout Service", version: "3.0.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [{id: "Comp_OrderProcessor", name: "Order Processor"}], dependent_applications: [], dependent_interfaces: [], provided_interfaces: [] },
+    { id: "App_CustomerReviews", name: "Customer Reviews", version: "1.2.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], dependent_interfaces: [], provided_interfaces: [] },
+    { id: "App_StoreLocator", name: "Store Locator", version: "1.0.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], dependent_interfaces: [], provided_interfaces: [] },
 ].map(a => ({
     ...a,
     _id: a.id,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    phases: []
+    phases: generatePhases()
 }));
 
 // Function to add more applications if needed
@@ -92,11 +117,11 @@ function populateApplications() {
                 tenants: [{ id: tenantId, name: tenantId.replace(/_/g, ' ') }],
                 dependent_components: [],
                 dependent_applications: [],
-                required_interfaces: [],
+                dependent_interfaces: [],
                 provided_interfaces: [],
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-                phases: []
+                phases: generatePhases()
             };
             initialApplications.push(newApp);
             currentCount++;

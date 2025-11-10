@@ -44,6 +44,31 @@ const TenantSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_tenants';
 
+const onboardingConfigPhases = [
+    { id: "phase-1", name: "Initiate Onboarding", fields: [ { name: "requestFormSubmitted" }, { name: "csApproved" }, { name: "pmApproved" }, { name: "productTeamAgreement" } ] },
+    { id: "phase-2", name: "Product Definitions", fields: [ { name: "architectAgreed" }, { name: "specChanged" }, { name: "hlDesignApproved" } ] },
+    { id: "phase-3", name: "Detail Design", fields: [ { name: "detailDesignDone" }, { name: "dependencyIdentified" }, { name: "pertReady" }, { name: "testPlanReady" } ] },
+    { id: "phase-4", name: "Delivery", fields: [ { name: "implementationDone" }, { name: "unitTestDone" }, { name: "staticCodeDone" }, { name: "systemIntegrationDone" }, { name: "systemIntegrationTestingDone" }, { name: "allTestCasesAutomated" } ] },
+    { id: "phase-5", name: "Alpha Qualification", fields: [ { name: "uatTestDone" }, { name: "riskReported" }, { name: "serviceMetricsDone" } ] },
+    { id: "phase-6", name: "Prepare customer", fields: [ { name: "communicatedChanges" }, { name: "plannedMCWindow" } ] },
+    { id: "phase-7", name: "Beta Qualification", fields: [ { name: "deploymentRunbookForBeta" }, { name: "deploymentDone" }, { name: "betaTestsExecuted" } ] },
+    { id: "phase-8", name: "Completed", fields: [ { name: "onboardingCompleteClosure" } ] }
+];
+
+const generatePhases = () => {
+    return onboardingConfigPhases.map(phase => ({
+        id: phase.id,
+        name: phase.name,
+        version: "1.0",
+        status: "Done",
+        fields: phase.fields.map(field => ({
+            name: field.name,
+            value: true,
+            proof: { link: "https://example.com/proof" }
+        }))
+    }));
+};
+
 const initialTenants = [
     { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }, { "id": "Product_Data_Fabric", "name": "Unified Data Fabric" }], "dependent_tenants": [] },
     { "id": "Tenant_Retail_Services", "name": "Retail Services", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }], "dependent_tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }] },
@@ -66,7 +91,7 @@ const initialTenants = [
         memory_gb: 64,
         storage_gb: 1024
     },
-    phases: [],
+    phases: generatePhases(),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
 }));

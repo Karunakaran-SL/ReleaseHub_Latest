@@ -47,16 +47,41 @@ const tenantIds = [
     "Tenant_Cybersecurity", "Tenant_Shared_Services", "Tenant_Gaming_Platform", "Tenant_Fintech_Services", "Tenant_Marketing_Automation"
 ];
 
+const onboardingConfigPhases = [
+    { id: "phase-1", name: "Initiate Onboarding", fields: [ { name: "requestFormSubmitted" }, { name: "csApproved" }, { name: "pmApproved" }, { name: "productTeamAgreement" } ] },
+    { id: "phase-2", name: "Product Definitions", fields: [ { name: "architectAgreed" }, { name: "specChanged" }, { name: "hlDesignApproved" } ] },
+    { id: "phase-3", name: "Detail Design", fields: [ { name: "detailDesignDone" }, { name: "dependencyIdentified" }, { name: "pertReady" }, { name: "testPlanReady" } ] },
+    { id: "phase-4", name: "Delivery", fields: [ { name: "implementationDone" }, { name: "unitTestDone" }, { name: "staticCodeDone" }, { name: "systemIntegrationDone" }, { name: "systemIntegrationTestingDone" }, { name: "allTestCasesAutomated" } ] },
+    { id: "phase-5", name: "Alpha Qualification", fields: [ { name: "uatTestDone" }, { name: "riskReported" }, { name: "serviceMetricsDone" } ] },
+    { id: "phase-6", name: "Prepare customer", fields: [ { name: "communicatedChanges" }, { name: "plannedMCWindow" } ] },
+    { id: "phase-7", name: "Beta Qualification", fields: [ { name: "deploymentRunbookForBeta" }, { name: "deploymentDone" }, { name: "betaTestsExecuted" } ] },
+    { id: "phase-8", name: "Completed", fields: [ { name: "onboardingCompleteClosure" } ] }
+];
+
+const generatePhases = () => {
+    return onboardingConfigPhases.map(phase => ({
+        id: phase.id,
+        name: phase.name,
+        version: "1.0",
+        status: "Done",
+        fields: phase.fields.map(field => ({
+            name: field.name,
+            value: true,
+            proof: { link: "https://example.com/proof" }
+        }))
+    }));
+};
+
 const initialComponents = [
     // Components for Tenant_Platform_Foundation
-    { id: "Comp_AuthService", name: "Authentication Service", version: "1.3.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [{ id: "Comp_UserProfile", name: "User Profile Service" }], dependent_applications: [{ id: "App_UserDashboard", name: "User Dashboard" }], required_interfaces: [{ id: "Interface_LoginAPI", name: "Login API" }], provided_interfaces: [{ id: "Interface_AuthService", name: "Auth Service Interface" }] },
-    { id: "Comp_UserProfile", name: "User Profile Service", version: "1.2.1", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{ id: "Interface_Database", name: "Database Interface" }], provided_interfaces: [{ id: "Interface_UserProfileAPI", name: "User Profile API" }] },
-    { id: "Comp_LoggingService", name: "Centralized Logging", version: "2.1.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], required_interfaces: [{ id: "Interface_Fluentd", name: "Fluentd Collector" }], provided_interfaces: [{ id: "Interface_LogQuery", name: "Log Query API" }] },
+    { id: "Comp_AuthService", name: "Authentication Service", version: "1.3.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [{ id: "Comp_UserProfile", name: "User Profile Service" }], dependent_applications: [{ id: "App_UserDashboard", name: "User Dashboard" }], provided_interfaces: [{ id: "Interface_AuthService", name: "Auth Service Interface" }], dependent_interfaces: [{ id: "Interface_LoginAPI", name: "Login API" }] },
+    { id: "Comp_UserProfile", name: "User Profile Service", version: "1.2.1", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], provided_interfaces: [{ id: "Interface_UserProfileAPI", name: "User Profile API" }], dependent_interfaces: [{ id: "Interface_Database", name: "Database Interface" }] },
+    { id: "Comp_LoggingService", name: "Centralized Logging", version: "2.1.0", tenants: [{ id: "Tenant_Platform_Foundation", name: "Platform Foundation" }], dependent_components: [], dependent_applications: [], provided_interfaces: [{ id: "Interface_LogQuery", name: "Log Query API" }], dependent_interfaces: [{ id: "Interface_Fluentd", name: "Fluentd Collector" }] },
 
     // Components for Tenant_Retail_Services
-    { id: "Comp_OrderProcessor", name: "Order Processor", version: "1.5.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [{id: "Comp_InventoryMgmt", name: "Inventory Management"}], dependent_applications: [], required_interfaces: [{ id: "Interface_PaymentGateway", name: "Payment Gateway API" }], provided_interfaces: [{ id: "Interface_OrderAPI", name: "Order API" }] },
-    { id: "Comp_InventoryMgmt", name: "Inventory Management", version: "2.0.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], required_interfaces: [{ id: "Interface_Database", name: "Database Interface" }], provided_interfaces: [{ id: "Interface_InventoryAPI", name: "Inventory API" }] },
-    { id: "Comp_ProductCatalog", name: "Product Catalog", version: "3.1.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], required_interfaces: [{ id: "Interface_Database", name: "Database Interface" }], provided_interfaces: [{ id: "Interface_CatalogAPI", name: "Catalog API" }] },
+    { id: "Comp_OrderProcessor", name: "Order Processor", version: "1.5.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [{id: "Comp_InventoryMgmt", name: "Inventory Management"}], dependent_applications: [], provided_interfaces: [{ id: "Interface_OrderAPI", name: "Order API" }], dependent_interfaces: [{ id: "Interface_PaymentGateway", name: "Payment Gateway API" }] },
+    { id: "Comp_InventoryMgmt", name: "Inventory Management", version: "2.0.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], provided_interfaces: [{ id: "Interface_InventoryAPI", name: "Inventory API" }], dependent_interfaces: [{ id: "Interface_Database", name: "Database Interface" }] },
+    { id: "Comp_ProductCatalog", name: "Product Catalog", version: "3.1.0", tenants: [{ id: "Tenant_Retail_Services", name: "Retail Services" }], dependent_components: [], dependent_applications: [], provided_interfaces: [{ id: "Interface_CatalogAPI", name: "Catalog API" }], dependent_interfaces: [{ id: "Interface_Database", name: "Database Interface" }] },
 
     // ... and so on for other tenants, ensuring at least 3 unique components per tenant
 ].map(c => ({
@@ -64,7 +89,7 @@ const initialComponents = [
     _id: c.id,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    phases: []
+    phases: generatePhases()
 }));
 
 // Function to add more components if needed to meet the requirements
@@ -88,11 +113,11 @@ function populateComponents() {
                 tenants: [{ id: tenantId, name: tenantId.replace(/_/g, ' ') }],
                 dependent_components: [],
                 dependent_applications: [],
-                required_interfaces: [{id: 'Interface_Generic_Input', name: 'Generic Input'}],
-                provided_interfaces: [{id: 'Interface_Generic_Output', name: 'Generic Output'}],
+                provided_interfaces: [{id: `Interface_Generic_Output_${newIndex}`, name: 'Generic Output'}, {id: `Interface_Second_Output_${newIndex}`, name: 'Second Output'}],
+                dependent_interfaces: [{id: 'Interface_Generic_Input', name: 'Generic Input'}],
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-                phases: []
+                phases: generatePhases()
             });
             currentCount++;
         }
