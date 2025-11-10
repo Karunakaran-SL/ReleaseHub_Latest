@@ -8,7 +8,6 @@ import { getUser } from '@/lib/auth';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
-  // 5 Products
   {
     "id": "Product_OSS_Portal",
     "name": "OneStopShop Portal",
@@ -99,21 +98,21 @@ async function seedProducts() {
     
     await productsCollection.deleteMany({ id: { $in: initialProducts.map(p => p.id) } });
 
-    for (const product of initialProducts) {
-        const productWithDates = {
-            ...product,
-            _id: product.id, // Set _id as a string
-            updated_at: new Date().toISOString(),
-            created_at: new Date().toISOString()
-        };
-        await productsCollection.insertOne(productWithDates as any);
-    }
+    const productsWithDates = initialProducts.map(product => ({
+      ...product,
+      _id: product.id,
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString()
+    }));
+
+    await productsCollection.insertMany(productsWithDates as any[]);
     console.log('Seeded products collection.');
 
   } catch (error) {
     console.error('Error seeding products:', error);
   }
 }
+
 
 // Search and list products
 export async function GET(req: NextRequest) {

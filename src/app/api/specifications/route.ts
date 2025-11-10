@@ -27,35 +27,39 @@ const SpecificationSchema = z.object({
 
 const initialSpecifications = [
   // For Product_OSS_Portal
-  { "id": "Spec_ArgoCD_v2.8", "name": "ArgoCD Sync Spec", "version": "2.8", "vendor": "CNCF" },
-  { "id": "Spec_SSO_v1.2", "name": "Single Sign-On Spec", "version": "1.2", "vendor": "OpenID" },
+  { "id": "Spec_ArgoCD_v2.8", "name": "ArgoCD Sync Spec", "vendor": "CNCF" },
+  { "id": "Spec_SSO_v1.2", "name": "Single Sign-On Spec", "vendor": "OpenID" },
   // For Product_Data_Fabric
-  { "id": "Spec_Spark_v3.5", "name": "Spark Processing", "version": "3.5", "vendor": "Apache" },
-  { "id": "Spec_Kafka_v3.7", "name": "Kafka Streaming", "version": "3.7", "vendor": "Apache" },
+  { "id": "Spec_Spark_v3.5", "name": "Spark Processing", "vendor": "Apache" },
+  { "id": "Spec_Kafka_v3.7", "name": "Kafka Streaming", "vendor": "Apache" },
   // For Product_ML_Platform
-  { "id": "Spec_Kubeflow_v1.8", "name": "Kubeflow Pipelines", "version": "1.8", "vendor": "Google" },
-  { "id": "Spec_PyTorch_v2.1", "name": "PyTorch Distribution", "version": "2.1", "vendor": "Facebook" },
+  { "id": "Spec_Kubeflow_v1.8", "name": "Kubeflow Pipelines", "vendor": "Google" },
+  { "id": "Spec_PyTorch_v2.1", "name": "PyTorch Distribution", "vendor": "Facebook" },
   // For Product_Edge_Orchestrator
-  { "id": "Spec_KubeEdge_v1.15", "name": "KubeEdge Node Spec", "version": "1.15", "vendor": "CNCF" },
-  { "id": "Spec_MQTT_v5.0", "name": "MQTT Broker Spec", "version": "5.0", "vendor": "OASIS" },
+  { "id": "Spec_KubeEdge_v1.15", "name": "KubeEdge Node Spec", "vendor": "CNCF" },
+  { "id": "Spec_MQTT_v5.0", "name": "MQTT Broker Spec", "vendor": "OASIS" },
   // For Product_Security_Fabric
-  { "id": "Spec_Istio_v1.20", "name": "Istio Service Mesh", "version": "1.20", "vendor": "CNCF" },
-  { "id": "Spec_SPIFFE_v1.2", "name": "SPIFFE Identity", "version": "1.2", "vendor": "CNCF" }
+  { "id": "Spec_Istio_v1.20", "name": "Istio Service Mesh", "vendor": "CNCF" },
+  { "id": "Spec_SPIFFE_v1.2", "name": "SPIFFE Identity", "vendor": "CNCF" }
 ];
 
 const fullSpecifications = initialSpecifications.map(spec => ({
     ...spec,
     _id: spec.id,
     hw_type: { "id": "HWType_Virtual", "name": "Virtual" },
-    total_cpu: 32, "memory_gb": 128, "storage_gb": 1024,
+    total_cpu: 32, 
+    memory_gb: 128, 
+    storage_gb: 1024,
     hypervisor: { "id": "Hypervisor_KVM", "name": "KVM" },
     image: `https://picsum.photos/seed/${spec.id}/40/40`,
     service_contract_type: { "id": "ServiceContract_Community", "name": "Community Support" },
-    contact_point_email": "community@cncf.io", "contact_point_phone": "N/A",
-    network_cards: [{ "id": "NetworkCard_Virtual", "name": "Virtual NIC" }],
-    plug_power_cords: [{ "id": "PowerCord_Virtual", "name": "Virtual" }],
+    contact_point_email: "community@cncf.io",
+    contact_point_phone: "N/A",
+    network_cards: [{ "id": "NetworkCard_Virtual_10G", "name": "Virtual NIC 10Gbps" }],
+    plug_power_cords: [{ "id": "PowerCord_Virtual", "name": "Virtual Power" }],
     custom_fields: [{ "key": "Managed By", "value": "Platform Team" }],
-    created_at: new Date().toISOString(), "updated_at": new Date().toISOString()
+    created_at: new Date().toISOString(), 
+    updated_at: new Date().toISOString()
 }));
 
 
@@ -65,7 +69,7 @@ async function seedSpecifications() {
     const db = client.db();
     const collection = db.collection('specifications');
     
-    await collection.deleteMany({ id: { $in: fullSpecifications.map(i => i.id) } });
+    await collection.deleteMany({ _id: { $in: fullSpecifications.map(i => i._id) } });
     await collection.insertMany(fullSpecifications as any[]);
     console.log('Seeded specifications collection.');
     

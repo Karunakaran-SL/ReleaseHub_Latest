@@ -86,6 +86,7 @@ function populateApplications() {
             const newIndex = initialApplications.length + 1;
             const newApp = {
                 id: `App_Generated_${tenantId}_${newIndex}`,
+                _id: `App_Generated_${tenantId}_${newIndex}`,
                 name: `Generated App ${newIndex}`,
                 version: '1.0.0',
                 tenants: [{ id: tenantId, name: tenantId.replace(/_/g, ' ') }],
@@ -93,7 +94,6 @@ function populateApplications() {
                 dependent_applications: [],
                 required_interfaces: [],
                 provided_interfaces: [],
-                _id: `App_Generated_${tenantId}_${newIndex}`,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 phases: []

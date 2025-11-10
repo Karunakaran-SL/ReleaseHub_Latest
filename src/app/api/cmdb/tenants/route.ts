@@ -60,9 +60,15 @@ const initialTenants = [
     _id: t.id,
     description: `Description for ${t.name}`,
     version: "1.0.0",
+    artifact_location: `s3://artifacts/${t.id}/`,
+    resources: {
+        cpu: 16,
+        memory_gb: 64,
+        storage_gb: 1024
+    },
+    phases: [],
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    phases: []
+    updated_at: new Date().toISOString()
 }));
 
 

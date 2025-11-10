@@ -82,6 +82,7 @@ function populateComponents() {
             const newIndex = initialComponents.length + 1;
             initialComponents.push({
                 id: `Comp_Generated_${tenantId}_${newIndex}`,
+                _id: `Comp_Generated_${tenantId}_${newIndex}`,
                 name: `Generated Component ${newIndex}`,
                 version: '1.0.0',
                 tenants: [{ id: tenantId, name: tenantId.replace(/_/g, ' ') }],
@@ -89,7 +90,6 @@ function populateComponents() {
                 dependent_applications: [],
                 required_interfaces: [{id: 'Interface_Generic_Input', name: 'Generic Input'}],
                 provided_interfaces: [{id: 'Interface_Generic_Output', name: 'Generic Output'}],
-                 _id: `Comp_Generated_${tenantId}_${newIndex}`,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 phases: []
