@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { generateDependencyTree } from '@/lib/dependency-graph';
-import { ObjectId } from 'mongodb';
+import type { EntityType } from '@/lib/definitions';
 
 // GET /api/dependency-tree/[entityType]/[entityId]
 export async function GET(req: NextRequest, { params }: { params: { params: string[] } }) {
@@ -10,15 +10,9 @@ export async function GET(req: NextRequest, { params }: { params: { params: stri
     if (!entityType || !entityId) {
         return NextResponse.json({ message: 'Entity Type and Entity ID are required.' }, { status: 400 });
     }
-    
-    // The ID from the URL for products is a string `id`, not an ObjectId.
-    // All others use MongoDB ObjectId.
-    if (entityType !== 'product' && !ObjectId.isValid(entityId)) {
-        return NextResponse.json({ message: 'Invalid Entity ID format.' }, { status: 400 });
-    }
 
     try {
-        let tree = await generateDependencyTree(entityType, entityId);
+        let tree = await generateDependencyTree(entityType as EntityType, entityId);
         
         if (!tree) {
             return NextResponse.json({ message: `Dependency tree could not be generated for ${entityType}:${entityId}.` }, { status: 404 });

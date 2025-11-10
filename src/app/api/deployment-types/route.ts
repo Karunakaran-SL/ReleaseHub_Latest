@@ -10,9 +10,9 @@ const DeploymentTypeSchema = z.object({
 });
 
 const initialDeploymentTypes = [
-    { "id": "Deployment_Airgapped", "name": "Airgapped", "description": "Deployment in an isolated, offline environment." },
-    { "id": "Deployment_Cloud", "name": "Cloud", "description": "Deployment to a public or private cloud." },
-    { "id": "Deployment_OnPrem", "name": "On-Prem", "description": "Deployment to on-premises servers." }
+    { "_id": "Deployment_Airgapped", "id": "Deployment_Airgapped", "name": "Airgapped", "description": "Deployment in an isolated, offline environment." },
+    { "_id": "Deployment_Cloud", "id": "Deployment_Cloud", "name": "Cloud", "description": "Deployment to a public or private cloud." },
+    { "_id": "Deployment_OnPrem", "id": "Deployment_OnPrem", "name": "On-Prem", "description": "Deployment to on-premises servers." }
 ];
 
 async function seedDeploymentTypes() {
@@ -21,9 +21,13 @@ async function seedDeploymentTypes() {
     const db = client.db();
     const collection = db.collection('deployment_types');
     
-    // This will only delete the initial seed items, preserving user-added data
-    await collection.deleteMany({ id: { $in: initialDeploymentTypes.map(i => i.id) } });
-    await collection.insertMany(initialDeploymentTypes as any);
+    for (const item of initialDeploymentTypes) {
+        await collection.updateOne(
+            { _id: item._id },
+            { $set: item },
+            { upsert: true }
+        );
+    }
     console.log('Seeded deployment_types collection.');
 
   } catch (error) {
@@ -65,11 +69,14 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         const collection = db.collection('deployment_types');
         
-        const result = await collection.insertOne(validatedData.data as any);
-        const insertedItem = { ...validatedData.data, _id: result.insertedId };
+        const newItem = {
+            _id: validatedData.data.id,
+            ...validatedData.data
+        };
+        
+        await collection.insertOne(newItem as any);
 
-
-        return NextResponse.json(insertedItem, { status: 201 });
+        return NextResponse.json(newItem, { status: 201 });
 
     } catch (error) {
         console.error(error);

@@ -10,9 +10,9 @@ const WorkflowSchema = z.object({
 });
 
 const initialWorkflows = [
-    { "id": "Workflow_Flow_1", "name": "Flow 1", "description": "Standard linear workflow." },
-    { "id": "Workflow_Flow_2", "name": "Flow 2", "description": "Workflow with parallel approval steps." },
-    { "id": "Workflow_Security_Review", "name": "Security Review", "description": "Mandatory security review for sensitive products." }
+    { "_id": "Workflow_Flow_1", "id": "Workflow_Flow_1", "name": "Flow 1", "description": "Standard linear workflow." },
+    { "_id": "Workflow_Flow_2", "id": "Workflow_Flow_2", "name": "Flow 2", "description": "Workflow with parallel approval steps." },
+    { "_id": "Workflow_Security_Review", "id": "Workflow_Security_Review", "name": "Security Review", "description": "Mandatory security review for sensitive products." }
 ];
 
 
@@ -22,9 +22,13 @@ async function seedWorkflows() {
     const db = client.db();
     const collection = db.collection('workflows');
     
-    // This will only delete the initial seed items, preserving user-added data
-    await collection.deleteMany({ id: { $in: initialWorkflows.map(i => i.id) } });
-    await collection.insertMany(initialWorkflows as any);
+    for (const item of initialWorkflows) {
+        await collection.updateOne(
+            { _id: item._id },
+            { $set: item },
+            { upsert: true }
+        );
+    }
     console.log('Seeded workflows collection.');
 
   } catch (error) {
@@ -66,11 +70,15 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         const collection = db.collection('workflows');
         
-        const result = await collection.insertOne(validatedData.data as any);
-        const insertedItem = { ...validatedData.data, _id: result.insertedId };
+        const newItem = {
+            _id: validatedData.data.id,
+            ...validatedData.data
+        };
+        
+        await collection.insertOne(newItem as any);
 
 
-        return NextResponse.json(insertedItem, { status: 201 });
+        return NextResponse.json(newItem, { status: 201 });
 
     } catch (error) {
         console.error(error);

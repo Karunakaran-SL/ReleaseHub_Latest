@@ -10,8 +10,8 @@ const ComplianceCheckSchema = z.object({
 });
 
 const initialComplianceChecks = [
-    { "id": "Compliance_Security", "name": "Security", "description": "Full security audit." },
-    { "id": "Compliance_IT_Policy", "name": "IT Policy", "description": "Adherence to internal IT policies." }
+    { "_id": "Compliance_Security", "id": "Compliance_Security", "name": "Security", "description": "Full security audit." },
+    { "_id": "Compliance_IT_Policy", "id": "Compliance_IT_Policy", "name": "IT Policy", "description": "Adherence to internal IT policies." }
 ];
 
 async function seedComplianceChecks() {
@@ -20,9 +20,13 @@ async function seedComplianceChecks() {
     const db = client.db();
     const collection = db.collection('compliance_checks');
     
-    // This will only delete the initial seed items, preserving user-added data
-    await collection.deleteMany({ id: { $in: initialComplianceChecks.map(i => i.id) } });
-    await collection.insertMany(initialComplianceChecks as any);
+    for (const item of initialComplianceChecks) {
+        await collection.updateOne(
+            { _id: item._id },
+            { $set: item },
+            { upsert: true }
+        );
+    }
     console.log('Seeded compliance_checks collection.');
 
   } catch (error) {
@@ -64,11 +68,14 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         const collection = db.collection('compliance_checks');
         
-        const result = await collection.insertOne(validatedData.data as any);
-        const insertedItem = { ...validatedData.data, _id: result.insertedId };
+        const newItem = {
+            _id: validatedData.data.id,
+            ...validatedData.data
+        };
+        
+        await collection.insertOne(newItem as any);
 
-
-        return NextResponse.json(insertedItem, { status: 201 });
+        return NextResponse.json(newItem, { status: 201 });
 
     } catch (error) {
         console.error(error);

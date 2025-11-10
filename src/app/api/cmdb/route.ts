@@ -10,9 +10,9 @@ const CmdbSchema = z.object({
 });
 
 const initialCmdb = [
-    { "id": "CMDB_1", "name": "CMDB 1", "description": "Primary configuration database." },
-    { "id": "CMDB_2", "name": "CMDB 2", "description": "Secondary configuration for analytics." },
-    { "id": "CMDB_3", "name": "CMDB 3", "description": "HR systems configuration." }
+    { "_id": "CMDB_1", "id": "CMDB_1", "name": "CMDB 1", "description": "Primary configuration database." },
+    { "_id": "CMDB_2", "id": "CMDB_2", "name": "CMDB 2", "description": "Secondary configuration for analytics." },
+    { "_id": "CMDB_3", "id": "CMDB_3", "name": "CMDB 3", "description": "HR systems configuration." }
 ];
 
 async function seedCmdb() {
@@ -21,9 +21,13 @@ async function seedCmdb() {
     const db = client.db();
     const collection = db.collection('cmdb');
     
-    // This will only delete the initial seed items, preserving user-added data
-    await collection.deleteMany({ id: { $in: initialCmdb.map(i => i.id) } });
-    await collection.insertMany(initialCmdb as any);
+    for (const item of initialCmdb) {
+        await collection.updateOne(
+            { _id: item._id },
+            { $set: item },
+            { upsert: true }
+        );
+    }
     console.log('Seeded cmdb collection.');
 
   } catch (error) {
@@ -65,11 +69,14 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         const collection = db.collection('cmdb');
         
-        const result = await collection.insertOne(validatedData.data as any);
-        const insertedItem = { ...validatedData.data, _id: result.insertedId };
+        const newItem = {
+            _id: validatedData.data.id,
+            ...validatedData.data
+        };
+        
+        await collection.insertOne(newItem as any);
 
-
-        return NextResponse.json(insertedItem, { status: 201 });
+        return NextResponse.json(newItem, { status: 201 });
 
     } catch (error) {
         console.error(error);

@@ -1,6 +1,6 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 
 const CmdbUpdateSchema = z.object({
@@ -14,13 +14,9 @@ const CmdbUpdateSchema = z.object({
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
-        }
-
         const client = await clientPromise;
         const db = client.db();
-        const item = await db.collection('cmdb').findOne({ _id: new ObjectId(id) });
+        const item = await db.collection('cmdb').findOne({ _id: id });
 
         if (!item) {
             return NextResponse.json({ message: 'Item not found.' }, { status: 404 });
@@ -38,10 +34,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
-        }
-
         const body = await req.json();
         const validatedData = CmdbUpdateSchema.safeParse(body);
 
@@ -54,7 +46,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const collection = db.collection('cmdb');
 
         const result = await collection.updateOne(
-            { _id: new ObjectId(id) },
+            { _id: id },
             { $set: validatedData.data }
         );
 
@@ -62,7 +54,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             return NextResponse.json({ message: 'Item not found.' }, { status: 404 });
         }
 
-        const updatedItem = await collection.findOne({ _id: new ObjectId(id) });
+        const updatedItem = await collection.findOne({ _id: id });
 
         return NextResponse.json(updatedItem, { status: 200 });
 
@@ -77,13 +69,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
-         if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
-        }
-
         const client = await clientPromise;
         const db = client.db();
-        const result = await db.collection('cmdb').deleteOne({ _id: new ObjectId(id) });
+        const result = await db.collection('cmdb').deleteOne({ _id: id });
 
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Item not found.' }, { status: 404 });

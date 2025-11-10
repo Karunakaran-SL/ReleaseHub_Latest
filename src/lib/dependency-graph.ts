@@ -1,5 +1,5 @@
+
 import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
 import type { AnyCmdbEntity, DependencyTree, Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterface, EntityType } from './definitions';
 
 type AllData = {
@@ -37,7 +37,7 @@ async function fetchAllData(): Promise<AllData> {
 }
 
 
-export async function generateDependencyTree(entityType: string, entityId: string): Promise<DependencyTree | null> {
+export async function generateDependencyTree(entityType: EntityType, entityId: string): Promise<DependencyTree | null> {
     const allData = await fetchAllData();
     
     const allEntities = [
@@ -48,7 +48,6 @@ export async function generateDependencyTree(entityType: string, entityId: strin
         ...allData.products.map(p => ({ ...p, entityType: 'product' as EntityType })),
     ] as EntityWithRelations[];
 
-    // Correctly find the root entity by checking the string `id` field, not `_id`.
     const rootEntity = allEntities.find(e => e.id === entityId && e.entityType === entityType);
     
     if (!rootEntity) {
@@ -99,7 +98,7 @@ export async function generateDependencyTree(entityType: string, entityId: strin
                 ...((upstreamEntity as CmdbTenant).products || [])
             ].filter(Boolean);
             
-            if (dependencies.some(dep => dep.id === current.id)) {
+            if (dependencies.some(dep => dep && dep.id === current.id)) {
                 addEntityToQueue(upstreamEntity);
             }
         });
@@ -116,14 +115,13 @@ export async function generateDependencyTree(entityType: string, entityId: strin
         ].filter(Boolean);
 
         downstreamDeps.forEach(dep => {
-            // Find in all entities, which could be any type
             const found = allEntities.find(e => e.id === dep.id);
             addEntityToQueue(found);
         });
     }
 
     const tree: DependencyTree = {
-        _id: new ObjectId().toString(),
+        _id: rootEntity.id,
         rootEntityType: rootEntity.entityType,
         rootEntityId: rootEntity.id,
         product: allData.products.find(p => relatedProducts.has(p.id)) || null,
