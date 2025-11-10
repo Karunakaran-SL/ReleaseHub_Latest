@@ -69,34 +69,37 @@ export default function DependencyMetricsPage() {
     const selectedEntityType = searchParams.get('type') as EntityType || 'product';
     const selectedEntityId = searchParams.get('id');
 
-    useEffect(() => {
-        getUser().then(setUser);
-    }, []);
+    const fetchEntityList = useCallback(async (type: EntityType) => {
+        setLoading(true);
+        setEntityList([]);
+        try {
+            const apiPath = entityTypeDetails[type].apiPath;
+            const res = await fetch(apiPath);
+            if (res.ok) {
+                const data = await res.json();
+                setEntityList(data);
+                // If no entity is selected in the URL for the new type, select the first one.
+                if (type === selectedEntityType && !selectedEntityId && data.length > 0) {
+                     router.push(`/dependency-metrics?type=${type}&id=${data[0].id}`);
+                } else if (type !== selectedEntityType && data.length > 0) {
+                    // If the type is changing, automatically select the first item of the new list
+                    router.push(`/dependency-metrics?type=${type}&id=${data[0].id}`);
+                }
+            } else {
+                toast({ variant: 'destructive', title: 'Error', description: `Failed to load ${type} list.` });
+            }
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not load entity list.' });
+        } finally {
+            setLoading(false);
+        }
+    }, [router, selectedEntityId, selectedEntityType, toast]);
+
 
     useEffect(() => {
-        async function fetchEntityList() {
-            setLoading(true);
-            setEntityList([]);
-            try {
-                const apiPath = entityTypeDetails[selectedEntityType].apiPath;
-                const res = await fetch(apiPath);
-                if (res.ok) {
-                    const data = await res.json();
-                    setEntityList(data);
-                    if (!selectedEntityId && data.length > 0) {
-                        router.push(`/dependency-metrics?type=${selectedEntityType}&id=${data[0].id}`);
-                    }
-                } else {
-                    toast({ variant: 'destructive', title: 'Error', description: `Failed to load ${selectedEntityType} list.` });
-                }
-            } catch (error) {
-                toast({ variant: 'destructive', title: 'Error', description: 'Could not load entity list.' });
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchEntityList();
-    }, [selectedEntityType, toast, router, selectedEntityId]);
+        getUser().then(setUser);
+        fetchEntityList(selectedEntityType);
+    }, [selectedEntityType, fetchEntityList]);
 
 
     useEffect(() => {
@@ -128,7 +131,7 @@ export default function DependencyMetricsPage() {
                 } else {
                     const errorText = await res.text();
                     console.error(`Failed to fetch dependency tree for ${selectedEntityType}:${idToFetch}. Response: ${errorText}`);
-                    toast({ variant: 'destructive', title: 'Error', description: 'Failed to load dependency tree.'})
+                    toast({ variant: 'destructive', title: 'Error', description: `Failed to load dependency tree for ${selectedEntityType}:${idToFetch}`})
                 }
             } catch (error) {
                  console.error("Error fetching dependency tree:", error);
@@ -145,6 +148,7 @@ export default function DependencyMetricsPage() {
     }, [selectedEntityId, entityList, selectedEntityType, toast, loading]);
     
     const handleEntityTypeChange = (type: EntityType) => {
+        // This will trigger the fetchEntityList effect
         router.push(`/dependency-metrics?type=${type}`);
     };
     
@@ -214,14 +218,17 @@ export default function DependencyMetricsPage() {
         ...dependsOn.map(item => ({ relationship: 'Depends On', item })),
     ];
     
-     if (loading) {
+     if (loading && entityList.length === 0) {
          return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10 space-y-6">
-                <h1 className="text-3xl font-bold">Dependency Metrics</h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-3xl font-bold">Dependency Metrics</h1>
+                    <Button>Update Metrics</Button>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="w-full">
