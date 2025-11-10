@@ -12,9 +12,6 @@ type AllData = {
     specifications: any[]; // Assuming specifications have a similar structure
 };
 
-// Helper function to find an entity by its string ID
-const findById = (collection: AnyCmdbEntity[], id: string) => collection.find(item => item._id.toString() === id);
-
 async function fetchAllData(): Promise<AllData> {
     const client = await clientPromise;
     const db = client.db();
@@ -78,7 +75,8 @@ export async function generateDependencyTree(productId: string): Promise<Depende
                 if (tenant.products?.some(p => p.id === current.id) && !visited.has(tenant._id.toString())) {
                     relatedTenants.add(tenant._id.toString());
                     visited.add(tenant._id.toString());
-                    queue.push(allEntities.find(e => e._id.toString() === tenant._id.toString())!);
+                    const tenantEntity = allEntities.find(e => e._id.toString() === tenant._id.toString());
+                    if (tenantEntity) queue.push(tenantEntity);
                 }
             });
         }
@@ -89,14 +87,16 @@ export async function generateDependencyTree(productId: string): Promise<Depende
                 if (comp.tenants?.some(t => t.id === current.id) && !visited.has(comp._id.toString())) {
                     relatedComponents.add(comp._id.toString());
                     visited.add(comp._id.toString());
-                    queue.push(allEntities.find(e => e._id.toString() === comp._id.toString())!);
+                     const componentEntity = allEntities.find(e => e._id.toString() === comp._id.toString());
+                    if (componentEntity) queue.push(componentEntity);
                 }
             });
             allData.applications.forEach(app => {
                 if (app.tenants?.some(t => t.id === current.id) && !visited.has(app._id.toString())) {
                     relatedApplications.add(app._id.toString());
                     visited.add(app._id.toString());
-                    queue.push(allEntities.find(e => e._id.toString() === app._id.toString())!);
+                    const appEntity = allEntities.find(e => e._id.toString() === app._id.toString());
+                    if (appEntity) queue.push(appEntity);
                 }
             });
         }
@@ -110,35 +110,31 @@ export async function generateDependencyTree(productId: string): Promise<Depende
             ];
 
             dependencies.forEach(dep => {
-                 if (dep.id && !visited.has(dep.id)) {
-                    const found = allEntities.find(e => e.id === dep.id);
-                    if (found) {
-                        if(found.entityType === 'component') relatedComponents.add(found._id.toString());
-                        if(found.entityType === 'application') relatedApplications.add(found._id.toString());
-                        visited.add(found._id.toString());
-                        queue.push(found);
-                    }
-                 }
+                const found = allEntities.find(e => e.id === dep.id);
+                if (found && !visited.has(found._id.toString())) {
+                    if(found.entityType === 'component') relatedComponents.add(found._id.toString());
+                    if(found.entityType === 'application') relatedApplications.add(found._id.toString());
+                    visited.add(found._id.toString());
+                    queue.push(found);
+                }
             });
 
              entity.dependent_interfaces?.forEach(dep => {
-                 if (dep.id && !visited.has(dep.id)) {
-                    const found = allEntities.find(e => e.id === dep.id);
-                    if (found) {
-                        relatedInterfaces.add(found._id.toString());
-                        visited.add(found._id.toString());
-                        queue.push(found);
-                    }
-                 }
+                const found = allEntities.find(e => e.id === dep.id);
+                if (found && !visited.has(found._id.toString())) {
+                    relatedInterfaces.add(found._id.toString());
+                    visited.add(found._id.toString());
+                    queue.push(found);
+                }
             });
         }
         
         // Follow interface sources
         if (current.entityType === 'interface') {
             const intf = current as CmdbInterface;
-            if (intf.source && intf.source.id && !visited.has(intf.source.id)) {
+            if (intf.source && intf.source.id) {
                 const source = allEntities.find(e => e.id === intf.source.id);
-                 if (source) {
+                 if (source && !visited.has(source._id.toString())) {
                     if(source.entityType === 'component') relatedComponents.add(source._id.toString());
                     if(source.entityType === 'application') relatedApplications.add(source._id.toString());
                     visited.add(source._id.toString());
