@@ -13,7 +13,7 @@ type AllData = {
 };
 
 // Helper function to find an entity by its string ID
-const findById = (collection: AnyCmdbEntity[], id: string) => collection.find(item => item.id === id || item._id.toString() === id);
+const findById = (collection: AnyCmdbEntity[], id: string) => collection.find(item => item._id.toString() === id);
 
 async function fetchAllData(): Promise<AllData> {
     const client = await clientPromise;
@@ -52,7 +52,10 @@ export async function generateDependencyTree(productId: string): Promise<Depende
     const relatedSpecifications = new Set<string>();
     
     // Add product's direct specifications
-    rootProduct.specifications?.forEach(spec => relatedSpecifications.add(spec.id));
+    rootProduct.specifications?.forEach(spec => {
+        const foundSpec = allData.specifications.find(s => s.id === spec.id);
+        if (foundSpec) relatedSpecifications.add(foundSpec._id.toString());
+    });
 
     const queue: AnyCmdbEntity[] = [{...rootProduct, entityType: 'product'} as any];
     const visited = new Set<string>([rootProduct._id.toString()]);
@@ -154,7 +157,7 @@ export async function generateDependencyTree(productId: string): Promise<Depende
             description: 'Core product for this dependency tree',
         },
         specifications: Array.from(relatedSpecifications).map(id => {
-            const spec = allData.specifications.find(s => s.id === id);
+            const spec = allData.specifications.find(s => s._id.toString() === id);
             return { id: spec?.id, name: spec?.name, version: spec?.version || '1.0' };
         }).filter(Boolean) as any,
         tenants: Array.from(relatedTenants).map(id => allData.tenants.find(t => t._id.toString() === id)).filter(Boolean) as CmdbTenant[],
