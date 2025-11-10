@@ -1,13 +1,50 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
+const SecuritySchema = z.object({
+  internal: z.object({
+    secure: z.boolean(),
+    authentication: z.boolean(),
+  }),
+  external: z.object({
+    secure: z.boolean(),
+    authentication: z.boolean(),
+  }),
+});
+
 const InterfaceSchema = z.object({
   id: z.string().min(1, 'ID is required'),
   name: z.string().min(1, 'Name is required'),
+  type: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+  version: z.string().min(1),
   description: z.string().optional(),
+  owner_name: z.string().min(1),
+  owner_email: z.string().email(),
+  documentation: z.string().url().optional(),
+  source: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+  security: SecuritySchema,
+  additional_docs: z.array(z.object({
+    id: z.string(),
+    key: z.string(),
+    name: z.string(),
+    url: z.string().url(),
+  })).optional(),
+  custom_fields: z.array(z.object({
+      key: z.string(),
+      value: z.string()
+  })).optional(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
 });
 
 const COLLECTION_NAME = 'cmdb_interfaces';
@@ -17,7 +54,7 @@ export async function GET(req: NextRequest) {
   try {
     const client = await clientPromise;
     const db = client.db();
-    const items = await db.collection(COLLECTION_NAME).find({}).toArray();
+    const items = await db.collection(COLLECTION_NAME).find({}).sort({updated_at: -1}).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
     console.error(error);
@@ -37,6 +74,7 @@ export async function POST(req: NextRequest) {
         const validatedData = InterfaceSchema.safeParse(body);
 
         if (!validatedData.success) {
+            console.error(validatedData.error.flatten().fieldErrors)
             return NextResponse.json({ message: 'Invalid data.', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
         }
 
@@ -50,7 +88,7 @@ export async function POST(req: NextRequest) {
             action: 'CREATE',
             entity: 'interface',
             entityId: result.insertedId.toString(),
-            comment: `Interface "${insertedItem.name}" onboarded.`,
+            comment: `Interface "${insertedItem.name}" created.`,
             user: user.username,
         });
 

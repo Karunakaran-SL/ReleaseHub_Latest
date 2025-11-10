@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
@@ -5,9 +6,37 @@ import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
+const SecuritySchema = z.object({
+  internal: z.object({
+    secure: z.boolean(),
+    authentication: z.boolean(),
+  }),
+  external: z.object({
+    secure: z.boolean(),
+    authentication: z.boolean(),
+  }),
+});
+
 const InterfaceUpdateSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
+  name: z.string().min(1, 'Name is required').optional(),
+  type: z.object({ id: z.string(), name: z.string() }).optional(),
+  version: z.string().min(1).optional(),
+  description: z.string().optional().nullable(),
+  owner_name: z.string().min(1).optional(),
+  owner_email: z.string().email().optional(),
+  documentation: z.string().url().optional().nullable(),
+  source: z.object({ id: z.string(), name: z.string() }).optional(),
+  security: SecuritySchema.optional(),
+  additional_docs: z.array(z.object({
+    id: z.string(),
+    key: z.string(),
+    name: z.string(),
+    url: z.string().url(),
+  })).optional().nullable(),
+  custom_fields: z.array(z.object({
+      key: z.string(),
+      value: z.string()
+  })).optional().nullable(),
   updateComment: z.string().min(1, 'Update comment is required.'),
 });
 
@@ -64,7 +93,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
         const result = await db.collection(COLLECTION_NAME).updateOne(
             { _id: new ObjectId(id) },
-            { $set: interfaceData }
+            { $set: { ...interfaceData, updated_at: new Date().toISOString() } }
         );
 
         if (result.matchedCount === 0) {

@@ -124,7 +124,6 @@ export type CmdbCommon = {
   _id: string;
   id: string;
   name: string;
-  tenants: { id: string; name: string; }[];
   version: string;
   artifact_location?: string;
   artifact_name?: string;
@@ -140,14 +139,54 @@ export type CmdbCommon = {
   phases: CmdbPhase[];
   created_at: string;
   updated_at: string;
+  tenants?: { id: string, name: string }[];
+  description?: string;
 };
 
 export type CmdbComponent = CmdbCommon;
-export type CmdbApplication = CmdbCommon & { description?: string };
+export type CmdbApplication = CmdbCommon;
+
+export type CmdbInterfaceType = {
+  _id: string;
+  id: string;
+  name: string;
+  description?: string;
+};
 
 export type CmdbInterface = {
   _id: string;
   id: string;
   name: string;
+  type: {
+    id: string;
+    name: string;
+  };
+  version: string;
   description?: string;
+  owner_name: string;
+  owner_email: string;
+  documentation?: string;
+  source: {
+    id: string;
+    name: string;
+  };
+  security: {
+    internal: {
+      secure: boolean;
+      authentication: boolean;
+    };
+    external: {
+      secure: boolean;
+      authentication: boolean;
+    };
+  };
+  additional_docs?: {
+    id: string;
+    key: string;
+    name: string;
+    url: string;
+  }[];
+  custom_fields?: { key: string; value: string; }[];
+  created_at: string;
+  updated_at: string;
 };

@@ -242,15 +242,16 @@ export default function ApiDocsPage() {
             </Section>
 
             <Section title="CMDB" id="cmdb">
-                <ApiEndpoint method="GET" path="/api/cmdb" description="Retrieves a list of all CMDB entries." responses={genericGetListResponses}/>
+                <p className="text-muted-foreground mb-4">Endpoints for managing the Configuration Management Database.</p>
+                <ApiEndpoint method="GET" path="/api/cmdb/tenants" description="Retrieves a list of all tenants." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
-                <ApiEndpoint method="POST" path="/api/cmdb" description="Creates a new CMDB entry." requestBody={`{ "id": "...", "name": "...", "description": "..." }`} responses={genericPostResponses}/>
+                <ApiEndpoint method="GET" path="/api/cmdb/components" description="Retrieves a list of all components." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
-                <ApiEndpoint method="GET" path="/api/cmdb/{id}" description="Retrieves a single CMDB entry by its MongoDB ObjectId." responses={genericGetOneResponses}/>
-                <Separator className="my-8" />
-                <ApiEndpoint method="PUT" path="/api/cmdb/{id}" description="Updates an existing CMDB entry." requestBody={`{ "name": "New Name" }`} responses={genericPutResponses}/>
-                <Separator className="my-8" />
-                <ApiEndpoint method="DELETE" path="/api/cmdb/{id}" description="Deletes a CMDB entry." responses={genericDeleteResponses}/>
+                <ApiEndpoint method="GET" path="/api/cmdb/applications" description="Retrieves a list of all applications." responses={genericGetListResponses}/>
+                 <Separator className="my-8" />
+                <ApiEndpoint method="GET" path="/api/cmdb/interfaces" description="Retrieves a list of all interfaces." responses={genericGetListResponses}/>
+                 <Separator className="my-8" />
+                <ApiEndpoint method="GET" path="/api/cmdb/interface-types" description="Retrieves a list of all interface types." responses={genericGetListResponses}/>
             </Section>
 
             <Section title="Compliance Checks" id="compliance-checks">

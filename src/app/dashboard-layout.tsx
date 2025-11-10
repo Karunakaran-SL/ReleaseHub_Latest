@@ -286,6 +286,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                                 <Network className="mr-2"/> Interfaces
                             </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/interface-types" isActive={pathname.startsWith('/cmdb/interface-types')}>
+                                <Network className="mr-2"/> Interface Types
+                            </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>

@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, CmdbInterface } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { 
     AlertDialog,
@@ -24,7 +24,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-
+import { format, parseISO } from 'date-fns';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function ViewInterfacePage() {
     const [user, setUser] = useState<User | null>(null);
@@ -104,19 +105,73 @@ export default function ViewInterfacePage() {
                     <CardHeader>
                         <CardTitle>View Interface: {item.name}</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <Label htmlFor="name">Interface Name</Label>
-                            <Input id="name" value={item.name} disabled />
-                        </div>
-                        <div>
-                            <Label htmlFor="id">Interface ID</Label>
-                            <Input id="id" value={item.id} disabled />
-                        </div>
-                        <div>
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea id="description" value={item.description || ''} disabled />
-                        </div>
+                    <CardContent className="space-y-6">
+                        <Accordion type="multiple" defaultValue={['item-1', 'item-2', 'item-3', 'item-4']} className="w-full">
+                            <AccordionItem value="item-1">
+                                <AccordionTrigger>Basic Information</AccordionTrigger>
+                                <AccordionContent className="p-4 space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div><Label>Interface Name</Label><Input value={item.name} disabled /></div>
+                                        <div><Label>Interface ID</Label><Input value={item.id} disabled /></div>
+                                        <div><Label>Interface Type</Label><Input value={item.type.name} disabled /></div>
+                                        <div><Label>Version</Label><Input value={item.version} disabled /></div>
+                                        <div><Label>Source Component/Application</Label><Input value={item.source.name} disabled /></div>
+                                    </div>
+                                    <div><Label>Description</Label><Textarea value={item.description || 'N/A'} disabled /></div>
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-2">
+                                <AccordionTrigger>Ownership & Documentation</AccordionTrigger>
+                                <AccordionContent className="p-4 space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div><Label>Owner Name</Label><Input value={item.owner_name} disabled /></div>
+                                        <div><Label>Owner Email</Label><Input value={item.owner_email} disabled /></div>
+                                    </div>
+                                    <div><Label>Main Documentation URL</Label><Input value={item.documentation || 'N/A'} disabled /></div>
+                                    <div><Label>Additional Documents</Label>
+                                    {item.additional_docs && item.additional_docs.length > 0 ? (
+                                        <div className="border rounded-md p-2 space-y-2">
+                                            {item.additional_docs.map(doc => (
+                                                <div key={doc.id}><Link href={doc.url} target="_blank" className="text-blue-500 hover:underline">{doc.name}</Link></div>
+                                            ))}
+                                        </div>
+                                    ) : <p className="text-sm text-muted-foreground">No additional documents.</p>}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-3">
+                                <AccordionTrigger>Security</AccordionTrigger>
+                                <AccordionContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <Card>
+                                        <CardHeader><CardTitle className="text-lg">Internal Security</CardTitle></CardHeader>
+                                        <CardContent className="space-y-2">
+                                            <div className="flex items-center gap-2">{item.security.internal.secure ? <CheckCircle className="h-5 w-5 text-green-500"/> : <XCircle className="h-5 w-5 text-red-500"/>} Is Secure</div>
+                                            <div className="flex items-center gap-2">{item.security.internal.authentication ? <CheckCircle className="h-5 w-5 text-green-500"/> : <XCircle className="h-5 w-5 text-red-500"/>} Needs Authentication</div>
+                                        </CardContent>
+                                    </Card>
+                                    <Card>
+                                        <CardHeader><CardTitle className="text-lg">External Security</CardTitle></CardHeader>
+                                        <CardContent className="space-y-2">
+                                           <div className="flex items-center gap-2">{item.security.external.secure ? <CheckCircle className="h-5 w-5 text-green-500"/> : <XCircle className="h-5 w-5 text-red-500"/>} Is Secure</div>
+                                            <div className="flex items-center gap-2">{item.security.external.authentication ? <CheckCircle className="h-5 w-5 text-green-500"/> : <XCircle className="h-5 w-5 text-red-500"/>} Needs Authentication</div>
+                                        </CardContent>
+                                    </Card>
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-4">
+                                <AccordionTrigger>Custom Fields</AccordionTrigger>
+                                <AccordionContent className="p-4 space-y-4">
+                                    {item.custom_fields && item.custom_fields.length > 0 ? (
+                                        item.custom_fields.map((field, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <Input value={field.key} disabled className="font-semibold" />
+                                                <Input value={field.value} disabled />
+                                            </div>
+                                        ))
+                                    ) : <p className="text-sm text-muted-foreground">No custom fields.</p>}
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
                     </CardContent>
                      <CardFooter className="flex justify-end gap-2">
                         <Button variant="outline" asChild>
@@ -172,3 +227,4 @@ export default function ViewInterfacePage() {
         </DashboardLayout>
     );
 }
+
