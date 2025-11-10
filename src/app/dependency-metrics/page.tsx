@@ -108,11 +108,26 @@ export default function DependencyMetricsPage() {
         async function fetchTree() {
             setLoading(true);
             setDependencyTree(null);
+            
+            const entityList = allEntities[selectedEntityType];
+            if (!entityList || entityList.length === 0) {
+                 // Data might still be fetching, wait for it.
+                 if (loading) return;
+                 console.error(`Entity list for type ${selectedEntityType} is empty.`);
+                 setLoading(false);
+                 return;
+            }
+
+            const entity = entityList.find(e => e.id === selectedEntityId);
+            if (!entity) {
+                console.error(`Entity not found for type ${selectedEntityType} and id: ${selectedEntityId}`);
+                // Don't toast here, as it can happen during normal navigation
+                setLoading(false);
+                return;
+            }
+
             try {
-                // For products, we use the string `id`. For others, we use `_id`.
-                const idToFetch = selectedEntityType === 'product' 
-                    ? selectedEntityId 
-                    : allEntities[selectedEntityType]?.find(e => e.id === selectedEntityId)?._id || selectedEntityId;
+                const idToFetch = entity._id;
                 
                 const res = await fetch(`/api/dependency-tree/${selectedEntityType}/${idToFetch}`);
                 if (res.ok) {
@@ -128,8 +143,13 @@ export default function DependencyMetricsPage() {
                 setLoading(false);
             }
         }
-        fetchTree();
-    }, [selectedEntityType, selectedEntityId, toast, allEntities]);
+        
+        // Only run fetchTree if we have the entity data available
+        if (allEntities[selectedEntityType] && allEntities[selectedEntityType].length > 0) {
+             fetchTree();
+        }
+
+    }, [selectedEntityType, selectedEntityId, toast, allEntities, loading]);
     
     const handleEntityTypeChange = (type: EntityType) => {
         const firstEntityId = allEntities[type]?.[0]?.id;

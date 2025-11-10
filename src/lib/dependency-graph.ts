@@ -47,8 +47,8 @@ export async function generateDependencyTree(entityType: EntityType, entityId: s
         ...allData.interfaces.map(i => ({ ...i, entityType: 'interface' as EntityType })),
         ...allData.products.map(p => ({ ...p, entityType: 'product' as EntityType })),
     ] as EntityWithRelations[];
-
-    const rootEntity = allEntities.find(e => e.id === entityId && e.entityType === entityType);
+    
+    const rootEntity = allEntities.find(e => e._id === entityId && e.entityType === entityType);
     
     if (!rootEntity) {
         console.error(`Root entity not found for type: ${entityType} and id: ${entityId}`);
