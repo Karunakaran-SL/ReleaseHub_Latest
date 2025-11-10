@@ -24,8 +24,7 @@ interface SelectOption {
 
 type NewProductFormState = Omit<Product, '_id' | 'created_at' | 'updated_at'>;
 
-const initialFormState: NewProductFormState = {
-    id: '',
+const initialFormState: Partial<NewProductFormState> = {
     name: '',
     owner: '',
     owner_email: '',
@@ -68,7 +67,7 @@ export default function CreateProductPage() {
                     fetch('/api/specifications'),
                 ]);
                 
-                const mapToOptions = (items: any[]): Option[] => items.map(item => ({ id: item.id, label: item.name }));
+                const mapToOptions = (items: any[]): Option[] => items.map(item => ({ id: item._id, label: item.name }));
 
                 setAllWorkflows(mapToOptions(await workflowsRes.json()));
                 setAllCmdbItems(mapToOptions(await cmdbRes.json()));
@@ -130,7 +129,7 @@ export default function CreateProductPage() {
         const payload = {
             ...initialFormState,
             ...formState,
-            id: productId,
+            _id: productId,
             product_image: imageUrl,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -169,18 +168,28 @@ export default function CreateProductPage() {
         const available = allOptions.filter(opt => !chosenIds.has(opt.id));
         const chosen = allOptions.filter(opt => chosenIds.has(opt.id));
 
-        const onMove = (ids: string[], source: Option[], dest: Option[], destFieldName: keyof NewProductFormState) => {
+        const onMove = (ids: string[], source: Option[], dest: Option[]) => {
             const itemsToMove = source.filter(item => ids.includes(item.id));
             const newDest = [...dest, ...itemsToMove];
             handleMultiSelectUpdate(fieldName, newDest.map(i => ({id: i.id, name: i.label})));
+        }
+        
+        const onMoveToChosen = (ids: string[]) => {
+            const newChosen = [...(formState[fieldName] || []), ...available.filter(i => ids.includes(i.id)).map(i => ({id: i.id, name: i.label}))];
+            handleMultiSelectUpdate(fieldName, newChosen);
+        }
+
+        const onMoveToAvailable = (ids: string[]) => {
+            const newChosen = (formState[fieldName] || []).filter(i => !ids.includes(i.id));
+            handleMultiSelectUpdate(fieldName, newChosen);
         }
 
         return (
             <MultiSelectListBox
                 available={available}
                 chosen={chosen}
-                onMoveToChosen={(ids) => onMove(ids, available, chosen, fieldName)}
-                onMoveToAvailable={(ids) => onMove(ids, chosen, available, fieldName)}
+                onMoveToChosen={onMoveToChosen}
+                onMoveToAvailable={onMoveToAvailable}
                 onMoveAllToChosen={() => handleMultiSelectUpdate(fieldName, allOptions.map(i => ({id: i.id, name: i.label})))}
                 onMoveAllToAvailable={() => handleMultiSelectUpdate(fieldName, [])}
             />

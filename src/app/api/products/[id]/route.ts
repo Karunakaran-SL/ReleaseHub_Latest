@@ -4,10 +4,10 @@ import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
-import { revalidateDependencyTree } from '@/lib/dependency-graph';
+import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 
 const ProductUpdateSchema = z.object({
-  id: z.string().optional(),
+  _id: z.string().optional(),
   name: z.string().optional(),
   owner: z.string().optional(),
   owner_email: z.string().email().optional(),
@@ -108,7 +108,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         });
         
         // Revalidate dependency tree in the background
-        revalidateDependencyTree(id);
+        await generateAndStoreAllProductTrees();
 
 
         const updatedProduct = await productsCollection.findOne({ _id: id });
@@ -153,7 +153,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         });
         
         // Since the product is deleted, we can remove its dependency tree
-        await db.collection('dependency_trees').deleteOne({ productId: id });
+        await db.collection('dependency_trees').deleteOne({ _id: `${id}_Tree` });
 
 
         return NextResponse.json({ message: 'Product deleted successfully.' }, { status: 200 });

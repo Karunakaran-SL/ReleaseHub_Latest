@@ -14,7 +14,6 @@ export type SessionPayload = {
 
 export type Product = {
   _id: string;
-  id: string;
   name: string;
   owner: string;
   owner_email: string;
@@ -103,7 +102,6 @@ export type CmdbPhase = {
 
 export type CmdbTenant = {
   _id: string;
-  id: string;
   name: string;
   description?: string;
   version?: string;
@@ -122,7 +120,6 @@ export type CmdbTenant = {
 
 export type CmdbCommon = {
   _id: string;
-  id: string;
   name: string;
   version: string;
   artifact_location?: string;
@@ -150,14 +147,12 @@ export type CmdbApplication = CmdbCommon;
 
 export type CmdbInterfaceType = {
   _id: string;
-  id: string;
   name: string;
   description?: string;
 };
 
 export type CmdbInterface = {
   _id: string;
-  id: string;
   name: string;
   type: {
     id: string;

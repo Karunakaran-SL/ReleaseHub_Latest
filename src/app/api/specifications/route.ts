@@ -6,7 +6,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { getUser } from '@/lib/auth';
 
 const SpecificationSchema = z.object({
-  id: z.string(),
+  _id: z.string(),
   name: z.string(),
   hw_type: z.object({ id: z.string(), name: z.string() }),
   vendor: z.string(),
@@ -27,31 +27,30 @@ const SpecificationSchema = z.object({
 
 const initialSpecifications = [
   // For Product_OSS_Portal
-  { "id": "Spec_ArgoCD_v2.8", "name": "ArgoCD Sync Spec", "vendor": "CNCF" },
-  { "id": "Spec_SSO_v1.2", "name": "Single Sign-On Spec", "vendor": "OpenID" },
+  { "_id": "Spec_ArgoCD_v2.8", "name": "ArgoCD Sync Spec", "vendor": "CNCF" },
+  { "_id": "Spec_SSO_v1.2", "name": "Single Sign-On Spec", "vendor": "OpenID" },
   // For Product_Data_Fabric
-  { "id": "Spec_Spark_v3.5", "name": "Spark Processing", "vendor": "Apache" },
-  { "id": "Spec_Kafka_v3.7", "name": "Kafka Streaming", "vendor": "Apache" },
+  { "_id": "Spec_Spark_v3.5", "name": "Spark Processing", "vendor": "Apache" },
+  { "_id": "Spec_Kafka_v3.7", "name": "Kafka Streaming", "vendor": "Apache" },
   // For Product_ML_Platform
-  { "id": "Spec_Kubeflow_v1.8", "name": "Kubeflow Pipelines", "vendor": "Google" },
-  { "id": "Spec_PyTorch_v2.1", "name": "PyTorch Distribution", "vendor": "Facebook" },
+  { "_id": "Spec_Kubeflow_v1.8", "name": "Kubeflow Pipelines", "vendor": "Google" },
+  { "_id": "Spec_PyTorch_v2.1", "name": "PyTorch Distribution", "vendor": "Facebook" },
   // For Product_Edge_Orchestrator
-  { "id": "Spec_KubeEdge_v1.15", "name": "KubeEdge Node Spec", "vendor": "CNCF" },
-  { "id": "Spec_MQTT_v5.0", "name": "MQTT Broker Spec", "vendor": "OASIS" },
+  { "_id": "Spec_KubeEdge_v1.15", "name": "KubeEdge Node Spec", "vendor": "CNCF" },
+  { "_id": "Spec_MQTT_v5.0", "name": "MQTT Broker Spec", "vendor": "OASIS" },
   // For Product_Security_Fabric
-  { "id": "Spec_Istio_v1.20", "name": "Istio Service Mesh", "vendor": "CNCF" },
-  { "id": "Spec_SPIFFE_v1.2", "name": "SPIFFE Identity", "vendor": "CNCF" }
+  { "_id": "Spec_Istio_v1.20", "name": "Istio Service Mesh", "vendor": "CNCF" },
+  { "_id": "Spec_SPIFFE_v1.2", "name": "SPIFFE Identity", "vendor": "CNCF" }
 ];
 
 const fullSpecifications = initialSpecifications.map(spec => ({
     ...spec,
-    _id: spec.id,
     hw_type: { "id": "HWType_Virtual", "name": "Virtual" },
     total_cpu: 32, 
     memory_gb: 128, 
     storage_gb: 1024,
     hypervisor: { "id": "Hypervisor_KVM", "name": "KVM" },
-    image: `https://picsum.photos/seed/${spec.id}/40/40`,
+    image: `https://picsum.photos/seed/${spec._id}/40/40`,
     service_contract_type: { "id": "ServiceContract_Community", "name": "Community Support" },
     contact_point_email: "community@cncf.io",
     contact_point_phone: "N/A",
@@ -114,12 +113,11 @@ export async function POST(req: NextRequest) {
         
         const newItem = {
             ...validatedData.data,
-            _id: validatedData.data.id,
         };
 
         const existing = await collection.findOne({ _id: newItem._id });
         if (existing) {
-             return NextResponse.json({ message: `Specification with ID "${newItem.id}" already exists.` }, { status: 409 });
+             return NextResponse.json({ message: `Specification with ID "${newItem._id}" already exists.` }, { status: 409 });
         }
         
         await collection.insertOne(newItem as any);
@@ -127,7 +125,7 @@ export async function POST(req: NextRequest) {
         await logAuditEvent({
             action: 'CREATE',
             entity: 'specification',
-            entityId: newItem.id,
+            entityId: newItem._id,
             comment: `Specification "${newItem.name}" created.`,
         });
 

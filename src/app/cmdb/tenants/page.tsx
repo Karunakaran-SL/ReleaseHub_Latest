@@ -193,7 +193,7 @@ export default function TenantsPage() {
                           {item.name}
                         </Link>
                       </TableCell>
-                       <TableCell>{item.id}</TableCell>
+                       <TableCell>{item._id}</TableCell>
                       <TableCell>{item.description}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

@@ -9,7 +9,6 @@ import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
-    "id": "Product_OSS_Portal",
     "name": "OneStopShop Portal",
     "owner": "Platform Engineering", "owner_email": "platform@example.com",
     "product_image": "https://picsum.photos/seed/product1/40/40",
@@ -25,7 +24,6 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
     "specifications": [{ "id": "Spec_ArgoCD_v2.8", "name": "ArgoCD Sync Spec" }, { "id": "Spec_SSO_v1.2", "name": "Single Sign-On Spec" }]
   },
   {
-    "id": "Product_Data_Fabric",
     "name": "Unified Data Fabric",
     "owner": "Data Platform Team", "owner_email": "data-platform@example.com",
     "product_image": "https://picsum.photos/seed/product2/40/40",
@@ -41,7 +39,6 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
     "specifications": [{ "id": "Spec_Spark_v3.5", "name": "Spark Processing" }, { "id": "Spec_Kafka_v3.7", "name": "Kafka Streaming" }]
   },
   {
-    "id": "Product_ML_Platform",
     "name": "AI/ML Workbench",
     "owner": "AI Research Group", "owner_email": "ai-research@example.com",
     "product_image": "https://picsum.photos/seed/product3/40/40",
@@ -57,7 +54,6 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
     "specifications": [{ "id": "Spec_Kubeflow_v1.8", "name": "Kubeflow Pipelines" }, { "id": "Spec_PyTorch_v2.1", "name": "PyTorch Distribution" }]
   },
   {
-    "id": "Product_Edge_Orchestrator",
     "name": "Edge Computing Orchestrator",
     "owner": "IoT Division", "owner_email": "iot@example.com",
     "product_image": "https://picsum.photos/seed/product4/40/40",
@@ -73,7 +69,6 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
     "specifications": [{ "id": "Spec_KubeEdge_v1.15", "name": "KubeEdge Node Spec" }, { "id": "Spec_MQTT_v5.0", "name": "MQTT Broker Spec" }]
   },
   {
-    "id": "Product_Security_Fabric",
     "name": "Zero-Trust Security Fabric",
     "owner": "Cybersecurity Office", "owner_email": "security@example.com",
     "product_image": "https://picsum.photos/seed/product5/40/40",
@@ -96,15 +91,17 @@ async function seedProducts() {
     const db = client.db();
     const productsCollection = db.collection('products');
     
-    await productsCollection.deleteMany({ id: { $in: initialProducts.map(p => p.id) } });
-
-    const productsWithDates = initialProducts.map(product => ({
-      ...product,
-      _id: product.id,
-      updated_at: new Date().toISOString(),
-      created_at: new Date().toISOString()
-    }));
-
+    const productsWithDates = initialProducts.map(product => {
+      const id = `Product_${product.name.replace(/\s+/g, '_')}`;
+      return {
+        ...product,
+        _id: id,
+        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString()
+      };
+    });
+    
+    await productsCollection.deleteMany({ _id: { $in: productsWithDates.map(p => p._id) } });
     await productsCollection.insertMany(productsWithDates as any[]);
     console.log('Seeded products collection.');
 
@@ -145,7 +142,7 @@ export async function GET(req: NextRequest) {
 
 // Create Product Schema (without _id)
 const ProductSchema = z.object({
-  id: z.string(),
+  _id: z.string(),
   name: z.string(),
   owner: z.string(),
   owner_email: z.string().email(),
@@ -202,7 +199,6 @@ export async function POST(req: NextRequest) {
         
         const newProduct = {
             ...validatedData.data,
-            _id: validatedData.data.id, // Explicitly set _id to the string id
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         };
@@ -212,7 +208,7 @@ export async function POST(req: NextRequest) {
         await logAuditEvent({
             action: 'CREATE',
             entity: 'product',
-            entityId: newProduct.id,
+            entityId: newProduct._id,
             comment: `Product "${newProduct.name}" created.`,
         });
         

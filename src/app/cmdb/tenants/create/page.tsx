@@ -106,8 +106,10 @@ export default function CreateTenantPage() {
             }))
         }));
 
+        const tenantId = formState.name?.replace(/\s+/g, '_') || `Tenant_${Date.now()}`;
         const payload = {
             ...formState,
+            _id: tenantId,
             phases: phases,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -205,8 +207,8 @@ export default function CreateTenantPage() {
                                 <Input id="name" value={formState.name || ''} onChange={handleInputChange} required />
                             </div>
                              <div className="space-y-2">
-                                <Label htmlFor="id">Tenant ID</Label>
-                                <Input id="id" value={formState.id || ''} onChange={handleInputChange} required />
+                                <Label htmlFor="_id">Tenant ID</Label>
+                                <Input id="_id" value={formState._id || ''} onChange={handleInputChange} required />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="description">Description</Label>
