@@ -57,8 +57,9 @@ function DependencyCard({ item, entityType, onSelect, isSelected }: { item: any,
 
 export default function DependencyMetricsPage() {
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [allEntities, setAllEntities] = useState<Record<EntityType, AnyCmdbEntity[]>>({ product: [], tenant: [], component: [], application: [], interface: [] });
+    const [loading, setLoading] = useState(false);
+    const [loadingTree, setLoadingTree] = useState(false);
+    const [entityList, setEntityList] = useState<AnyCmdbEntity[]>([]);
     const [dependencyTree, setDependencyTree] = useState<DependencyTree | null>(null);
     const { toast } = useToast();
     
@@ -68,59 +69,53 @@ export default function DependencyMetricsPage() {
     const selectedEntityType = searchParams.get('type') as EntityType || 'product';
     const selectedEntityId = searchParams.get('id');
 
-    const fetchAllEntities = useCallback(async () => {
-        setLoading(true);
-        try {
-            const types = Object.keys(entityTypeDetails) as EntityType[];
-            const responses = await Promise.all(
-                types.map(type => fetch(entityTypeDetails[type].apiPath))
-            );
-            
-            const newAllEntities: Record<EntityType, AnyCmdbEntity[]> = { product: [], tenant: [], component: [], application: [], interface: [] };
-
-            for (let i = 0; i < types.length; i++) {
-                if (responses[i].ok) {
-                    newAllEntities[types[i]] = await responses[i].json();
-                }
-            }
-            setAllEntities(newAllEntities);
-
-            if (!selectedEntityId && newAllEntities.product.length > 0) {
-                 router.push(`/dependency-metrics?type=product&id=${newAllEntities.product[0].id}`);
-            }
-
-        } catch (error) {
-            console.error("Failed to fetch all entities:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not load entity lists.'})
-        } finally {
-            setLoading(false);
-        }
-    }, [router, toast, selectedEntityId]);
-
     useEffect(() => {
         getUser().then(setUser);
-        fetchAllEntities();
-    }, [fetchAllEntities]);
+    }, []);
 
     useEffect(() => {
-        if (!selectedEntityType || !selectedEntityId) return;
+        async function fetchEntityList() {
+            setLoading(true);
+            setEntityList([]);
+            try {
+                const apiPath = entityTypeDetails[selectedEntityType].apiPath;
+                const res = await fetch(apiPath);
+                if (res.ok) {
+                    const data = await res.json();
+                    setEntityList(data);
+                    if (!selectedEntityId && data.length > 0) {
+                        router.push(`/dependency-metrics?type=${selectedEntityType}&id=${data[0].id}`);
+                    }
+                } else {
+                    toast({ variant: 'destructive', title: 'Error', description: `Failed to load ${selectedEntityType} list.` });
+                }
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not load entity list.' });
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchEntityList();
+    }, [selectedEntityType, toast, router, selectedEntityId]);
+
+
+    useEffect(() => {
+        if (!selectedEntityId) {
+            setDependencyTree(null);
+            return;
+        };
 
         async function fetchTree() {
-            setLoading(true);
+            setLoadingTree(true);
             setDependencyTree(null);
             
-            const entityList = allEntities[selectedEntityType];
-            if (!entityList || entityList.length === 0) {
-                 if (loading) return;
-                 console.error(`Entity list for type ${selectedEntityType} is empty.`);
-                 setLoading(false);
-                 return;
-            }
-
             const entity = entityList.find(e => e.id === selectedEntityId);
+            
             if (!entity) {
-                console.error(`Entity not found for type ${selectedEntityType} and id: ${selectedEntityId}`);
-                setLoading(false);
+                if(!loading) { // Avoid error message while entity list is still loading
+                     console.error(`Entity not found for type ${selectedEntityType} and id: ${selectedEntityId}`);
+                }
+                setLoadingTree(false);
                 return;
             }
 
@@ -131,26 +126,26 @@ export default function DependencyMetricsPage() {
                 if (res.ok) {
                     setDependencyTree(await res.json());
                 } else {
-                    console.error(`Failed to fetch dependency tree for ${selectedEntityType}:${idToFetch}`);
+                    const errorText = await res.text();
+                    console.error(`Failed to fetch dependency tree for ${selectedEntityType}:${idToFetch}. Response: ${errorText}`);
                     toast({ variant: 'destructive', title: 'Error', description: 'Failed to load dependency tree.'})
                 }
             } catch (error) {
                  console.error("Error fetching dependency tree:", error);
                  toast({ variant: 'destructive', title: 'Error', description: 'An error occurred while loading the dependency tree.'})
             } finally {
-                setLoading(false);
+                setLoadingTree(false);
             }
         }
         
-        if (allEntities[selectedEntityType] && allEntities[selectedEntityType].length > 0) {
-             fetchTree();
+        if (entityList.length > 0) {
+            fetchTree();
         }
 
-    }, [selectedEntityType, selectedEntityId, toast, allEntities, loading]);
+    }, [selectedEntityId, entityList, selectedEntityType, toast, loading]);
     
     const handleEntityTypeChange = (type: EntityType) => {
-        const firstEntityId = allEntities[type]?.[0]?.id;
-        router.push(`/dependency-metrics?type=${type}${firstEntityId ? `&id=${firstEntityId}` : ''}`);
+        router.push(`/dependency-metrics?type=${type}`);
     };
     
     const handleEntityChange = (id: string) => {
@@ -212,14 +207,14 @@ export default function DependencyMetricsPage() {
             usedBy: Array.from(usedBySet),
             dependsOn: Array.from(dependsOnSet),
         };
-    }, [dependencyTree, selectedEntityId, allEntities]);
+    }, [dependencyTree, selectedEntityId]);
     
     const summaryData = [
         ...usedBy.map(item => ({ relationship: 'Used By', item })),
         ...dependsOn.map(item => ({ relationship: 'Depends On', item })),
     ];
     
-     if (loading && !allEntities.product.length) {
+     if (loading) {
          return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 
@@ -245,7 +240,7 @@ export default function DependencyMetricsPage() {
                          <Select value={selectedEntityId || ''} onValueChange={handleEntityChange}>
                             <SelectTrigger><SelectValue placeholder="Select an entity..." /></SelectTrigger>
                             <SelectContent>
-                                {allEntities[selectedEntityType]?.map(entity => (
+                                {entityList.map(entity => (
                                     <SelectItem key={entity._id} value={entity.id}>
                                         {entity.name}
                                     </SelectItem>
@@ -255,7 +250,7 @@ export default function DependencyMetricsPage() {
                     </div>
                 </div>
 
-                {loading ? (
+                {loadingTree ? (
                     <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
                 ) : selectedItem ? (
                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
