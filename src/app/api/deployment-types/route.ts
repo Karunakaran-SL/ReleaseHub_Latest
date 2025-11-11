@@ -1,4 +1,5 @@
 
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -9,32 +10,6 @@ const DeploymentTypeSchema = z.object({
   description: z.string().optional(),
 });
 
-const initialDeploymentTypes = [
-    { "_id": "Deployment_Airgapped", "id": "Deployment_Airgapped", "name": "Airgapped", "description": "Deployment in an isolated, offline environment." },
-    { "_id": "Deployment_Cloud", "id": "Deployment_Cloud", "name": "Cloud", "description": "Deployment to a public or private cloud." },
-    { "_id": "Deployment_OnPrem", "id": "Deployment_OnPrem", "name": "On-Prem", "description": "Deployment to on-premises servers." }
-];
-
-async function seedDeploymentTypes() {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection('deployment_types');
-    
-    for (const item of initialDeploymentTypes) {
-        await collection.updateOne(
-            { _id: item._id },
-            { $set: item },
-            { upsert: true }
-        );
-    }
-    console.log('Seeded deployment_types collection.');
-
-  } catch (error) {
-    console.error('Error seeding deployment_types:', error);
-  }
-}
-
 // List all or search
 export async function GET(req: NextRequest) {
   try {
@@ -42,11 +17,6 @@ export async function GET(req: NextRequest) {
     const db = client.db();
     const collection = db.collection('deployment_types');
     
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedDeploymentTypes();
-    }
-
     const items = await collection.find({}).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
