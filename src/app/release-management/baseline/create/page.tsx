@@ -97,12 +97,18 @@ export default function CreateBaselinePage() {
             return;
         }
         
-        // Navigate to the review page with the data
-        const query = new URLSearchParams({
-            data: JSON.stringify(dependencyTree),
-        });
-        
-        router.push(`/release-management/baseline/review?${query.toString()}`);
+        try {
+            // Store the large data in sessionStorage
+            sessionStorage.setItem(`baseline-data-${selectedProductId}`, JSON.stringify(dependencyTree));
+            // Navigate with only the ID
+            router.push(`/release-management/baseline/review?productId=${selectedProductId}`);
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not prepare data for the next step. The data might be too large for the session.'
+            });
+        }
     };
 
     return (

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, CheckCircle, ShieldCheck, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 
 function BaselineReviewContent() {
     const searchParams = useSearchParams();
@@ -17,21 +18,38 @@ function BaselineReviewContent() {
     const [user, setUser] = useState<User | null>(null);
     const [baselineData, setBaselineData] = useState<DependencyTree | null>(null);
     const [loading, setLoading] = useState(false);
+    const { toast } = useToast();
 
     useEffect(() => {
         getUser().then(setUser);
-        const data = searchParams.get('data');
-        if (data) {
+        const productId = searchParams.get('productId');
+
+        if (productId) {
             try {
-                setBaselineData(JSON.parse(data));
-            } catch (error) {
+                const data = sessionStorage.getItem(`baseline-data-${productId}`);
+                if (data) {
+                    setBaselineData(JSON.parse(data));
+                } else {
+                    throw new Error('Baseline data not found in session. Please start over.');
+                }
+            } catch (error: any) {
                 console.error("Failed to parse baseline data", error);
+                toast({
+                    variant: 'destructive',
+                    title: 'Error Loading Data',
+                    description: error.message,
+                });
                 router.push('/release-management/baseline/create');
             }
         } else {
+             toast({
+                variant: 'destructive',
+                title: 'Missing Information',
+                description: 'No product ID provided. Please start over.',
+             });
              router.push('/release-management/baseline/create');
         }
-    }, [searchParams, router]);
+    }, [searchParams, router, toast]);
 
     if (!baselineData) {
         return (
@@ -44,10 +62,22 @@ function BaselineReviewContent() {
     
     const handleCreateBaseline = () => {
         setLoading(true);
-        // Placeholder for API call
+        // Placeholder for API call to save the baseline
         console.log("Creating baseline...", baselineData);
+        
+        toast({
+            title: "Creating Baseline...",
+            description: "Submitting the new baseline for product: " + baselineData.name,
+        });
+
         setTimeout(() => {
              setLoading(false);
+             // Clean up session storage
+             sessionStorage.removeItem(`baseline-data-${baselineData.product?.id}`);
+             toast({
+                title: "Success!",
+                description: "Baseline created successfully.",
+             });
              router.push('/release-management/baseline');
         }, 1500);
     }
@@ -58,12 +88,12 @@ function BaselineReviewContent() {
                 <Card className="w-full max-w-6xl">
                     <CardHeader>
                         <CardTitle>Review New Baseline</CardTitle>
-                        <CardDescription>Phase 2: Review and confirm the components of the new baseline for <strong>{baselineData.name} v{baselineData.version}</strong>.</CardDescription>
+                        <CardDescription>Phase 2: Review and confirm the components of the new baseline for <strong>{baselineData.name}</strong>.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Root Product</h3>
-                            <p className="text-muted-foreground">{baselineData.name} - v{baselineData.version}</p>
+                            <p className="text-muted-foreground">{baselineData.name}</p>
                         </div>
                         <Separator />
                         <div>
@@ -132,4 +162,3 @@ export default function ReviewBaselinePage() {
         </Suspense>
     );
 }
-
