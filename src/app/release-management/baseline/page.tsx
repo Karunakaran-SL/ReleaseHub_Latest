@@ -13,22 +13,47 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import type { User } from '@/lib/definitions';
+import type { User, Baseline } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import DashboardLayout from '@/app/dashboard-layout';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { Badge } from '@/components/ui/badge';
+
+const statusColors: Record<string, string> = {
+    DRAFT: 'bg-gray-200 text-gray-800',
+    VALIDATING: 'bg-blue-200 text-blue-800',
+    VALIDATED: 'bg-green-200 text-green-800',
+    RELEASED: 'bg-purple-200 text-purple-800',
+    ARCHIVED: 'bg-red-200 text-red-800',
+};
 
 export default function BaselineListPage() {
+  const [baselines, setBaselines] = useState<Baseline[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     getUser().then(setUser);
-    // Mock loading
-    setTimeout(() => setLoading(false), 500);
-  }, []);
+    async function fetchBaselines() {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/baselines');
+            if (response.ok) {
+                setBaselines(await response.json());
+            } else {
+                toast({ variant: "destructive", title: "Error", description: "Failed to fetch baselines." });
+            }
+        } catch (error) {
+            toast({ variant: "destructive", title: "Error", description: "An error occurred while fetching baselines." });
+        } finally {
+            setLoading(false);
+        }
+    }
+    fetchBaselines();
+  }, [toast]);
 
   return (
     <DashboardLayout user={user}>
@@ -60,6 +85,23 @@ export default function BaselineListPage() {
                         <Loader2 className="mx-auto h-8 w-8 animate-spin" />
                     </TableCell>
                   </TableRow>
+                ) : baselines.length > 0 ? (
+                    baselines.map(baseline => (
+                        <TableRow key={baseline._id}>
+                            <TableCell className="font-mono text-xs">{baseline._id}</TableCell>
+                            <TableCell>{baseline.product.name}</TableCell>
+                            <TableCell>{baseline.product.version}</TableCell>
+                            <TableCell>
+                                <Badge variant="outline" className={statusColors[baseline.status]}>{baseline.status}</Badge>
+                            </TableCell>
+                            <TableCell>{format(new Date(baseline.created_at), 'yyyy-MM-dd HH:mm')}</TableCell>
+                            <TableCell>
+                                <Button variant="outline" size="sm" asChild>
+                                    <Link href={`/release-management/baseline/${baseline._id}/summary`}>View</Link>
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center">No baselines found.</TableCell>

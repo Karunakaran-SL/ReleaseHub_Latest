@@ -1,5 +1,6 @@
 
 
+
 export type User = {
   _id: string;
   username: string;
@@ -48,6 +49,7 @@ export type Product = {
   }[];
   created_at: string;
   updated_at: string;
+  version: string;
 };
 
 export type AuditLog = {
@@ -102,11 +104,12 @@ export type CmdbPhase = {
 
 export type CmdbTenant = {
   _id: string;
+  id: string;
   name: string;
   description?: string;
   version?: string;
   artifact_location?: string;
-  dependent_tenants?: { id: string; name: string }[];
+  dependent_tenants?: { id: string; name: string, version?: string }[];
   resources?: {
     cpu?: number;
     memory_gb?: number;
@@ -120,6 +123,7 @@ export type CmdbTenant = {
 
 export type CmdbCommon = {
   _id: string;
+  id: string;
   name: string;
   version: string;
   artifact_location?: string;
@@ -147,12 +151,14 @@ export type CmdbApplication = CmdbCommon;
 
 export type CmdbInterfaceType = {
   _id: string;
+  id: string;
   name: string;
   description?: string;
 };
 
 export type CmdbInterface = {
   _id: string;
+  id: string;
   name: string;
   type: {
     id: string;
@@ -194,16 +200,33 @@ export type EntityType = 'tenant' | 'component' | 'application' | 'interface' | 
 
 export type DependencyTree = {
   _id: string; // Mongo ObjectID
-  rootEntityType: EntityType;
-  rootEntityId: string;
-  product: Product | null;
+  product: Product;
   specifications: { id: string; name: string; version: string; }[];
-  tenants: Partial<CmdbTenant>[];
-  components: Partial<CmdbComponent>[];
-  applications: Partial<CmdbApplication>[];
-  interfaces: Partial<CmdbInterface>[];
-  metadata: {
+  tenants: CmdbTenant[];
+  // These were removed for the simpler model
+  // components: Partial<CmdbComponent>[];
+  // applications: Partial<CmdbApplication>[];
+  // interfaces: Partial<CmdbInterface>[];
+};
+
+
+export type Baseline = {
+    _id: string;
+    product: {
+        id: string;
+        name: string;
+        version: string;
+    };
+    specifications: { id: string; name: string; version: string; }[];
+    tenants: any[]; // Simplified for now
+    status: 'DRAFT' | 'VALIDATING' | 'VALIDATED' | 'RELEASED' | 'ARCHIVED';
     created_at: string;
     updated_at: string;
-  };
+    created_by: string;
+    artifacts: { name: string; url: string; size: string; }[];
+    package_properties: {
+        location: string;
+        checksum_md5: string;
+        checksum_sha256: string;
+    };
 };

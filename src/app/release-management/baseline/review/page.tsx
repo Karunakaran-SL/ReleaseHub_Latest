@@ -1,14 +1,14 @@
 
 'use client';
 
-import { useEffect, useState, Suspense, useMemo } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
-import type { User, DependencyTree, CmdbTenant } from '@/lib/definitions';
+import type { User, DependencyTree, CmdbTenant, Baseline } from '@/lib/definitions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, Package, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Package as PackageIcon, Loader2, AlertTriangle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -43,7 +43,7 @@ function validateDependencies(baselineData: any): ValidationResult {
 
         for (const dependency of fullTenantData.dependent_tenants) {
             const requiredTenantName = dependency.name;
-            const requiredTenantVersion = dependency.version; // Assuming version is in dependency object
+            const requiredTenantVersion = dependency.version; 
 
             const actualTenantInBaseline = selectedTenants.find(t => t.name === requiredTenantName);
 
@@ -81,7 +81,7 @@ function BaselineReviewContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
-    const [baselineData, setBaselineData] = useState<DependencyTree | null>(null);
+    const [baselineData, setBaselineData] = useState<any | null>(null);
     const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
@@ -95,12 +95,9 @@ function BaselineReviewContent() {
                 const data = sessionStorage.getItem(`baseline-data-${productId}`);
                 if (data) {
                     const parsedData = JSON.parse(data);
-                    
                     const validation = validateDependencies(parsedData);
                     setValidationResult(validation);
-
                     setBaselineData(parsedData);
-                    
                     if (!validation.isValid) {
                         toast({
                             variant: "default",
@@ -108,44 +105,62 @@ function BaselineReviewContent() {
                             description: "Some tenant versions were automatically updated to satisfy dependencies.",
                         });
                     }
-
                 } else {
                     throw new Error('Baseline data not found in session. Please start over.');
                 }
             } catch (error: any) {
-                console.error("Failed to parse baseline data", error);
-                toast({
-                    variant: 'destructive',
-                    title: 'Error Loading Data',
-                    description: error.message,
-                });
+                toast({ variant: 'destructive', title: 'Error Loading Data', description: error.message });
                 router.push('/release-management/baseline/create');
             }
         } else {
-             toast({
-                variant: 'destructive',
-                title: 'Missing Information',
-                description: 'No product ID provided. Please start over.',
-             });
+             toast({ variant: 'destructive', title: 'Missing Information', description: 'No product ID provided. Please start over.' });
              router.push('/release-management/baseline/create');
         }
     }, [searchParams, router, toast]);
 
-    const compatibilityMatrixItems = useMemo(() => {
-        if (!baselineData) return [];
-        const items = [];
-        for (const tenant of baselineData.tenants) {
-            items.push({ type: 'Tenant', name: tenant.name, version: tenant.version });
-            for (const comp of (tenant as any).components) {
-                items.push({ type: 'Component', name: comp.name, version: comp.version });
-            }
-            for (const app of (tenant as any).applications) {
-                items.push({ type: 'Application', name: app.name, version: app.version });
-            }
-        }
-        return items;
-    }, [baselineData]);
+    const compatibilityMatrixItems = baselineData ? [
+        ...baselineData.tenants.map((t: any) => ({ type: 'Tenant', ...t})),
+        ...baselineData.tenants.flatMap((t: any) => t.components.map((c: any) => ({ type: 'Component', ...c}))),
+        ...baselineData.tenants.flatMap((t: any) => t.applications.map((a: any) => ({ type: 'Application', ...a}))),
+    ] : [];
 
+    const handleBuildPackage = async () => {
+        setLoading(true);
+        const finalBaselineData = { ...baselineData };
+        delete finalBaselineData.allTenants; // Clean up data before sending
+
+        try {
+            const response = await fetch('/api/baselines', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(finalBaselineData),
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create baseline package.');
+            }
+            
+            const newBaseline = await response.json();
+            
+            toast({
+                title: "Baseline Created",
+                description: `Successfully created baseline for product: ${finalBaselineData.product.name}`,
+            });
+
+            // Clean up session storage
+            sessionStorage.removeItem(`baseline-data-${searchParams.get('productId')}`);
+
+            // Navigate to the summary page
+            router.push(`/release-management/baseline/${newBaseline._id}/summary`);
+            
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: error.message });
+        } finally {
+            setLoading(false);
+        }
+    }
+    
     if (!baselineData) {
         return (
              <div className="flex justify-center items-center h-64">
@@ -154,36 +169,14 @@ function BaselineReviewContent() {
             </div>
         );
     }
-    
-    const handleBuildPackage = () => {
-        setLoading(true);
-        const finalBaselineData = { ...baselineData };
-        delete (finalBaselineData as any).allTenants; // Clean up data before sending
 
-        toast({
-            title: "Building Baseline Package...",
-            description: "Submitting the new baseline for product: " + finalBaselineData.name,
-        });
-
-        setTimeout(() => {
-             setLoading(false);
-             // Clean up session storage
-             sessionStorage.removeItem(`baseline-data-${searchParams.get('productId')}`);
-             toast({
-                title: "Success!",
-                description: "Test baseline package built successfully.",
-             });
-             router.push('/release-management/baseline');
-        }, 1500);
-    }
-    
     return (
          <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10 flex justify-center items-start">
                 <Card className="w-full max-w-6xl">
                     <CardHeader>
                         <CardTitle>Review New Baseline</CardTitle>
-                        <CardDescription>Phase 2: Review and confirm the components of the new baseline for <strong>{baselineData.name}</strong>.</CardDescription>
+                        <CardDescription>Phase 2: Review and confirm the components of the new baseline for <strong>{baselineData.product.name}</strong>.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         
@@ -206,13 +199,13 @@ function BaselineReviewContent() {
 
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Root Product</h3>
-                            <p className="text-muted-foreground">{baselineData.name}</p>
+                            <p className="text-muted-foreground">{baselineData.product.name}</p>
                         </div>
                         <Separator />
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Specifications ({baselineData.specifications.length})</h3>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                                {baselineData.specifications.map(spec => (
+                                {baselineData.specifications.map((spec: any) => (
                                     <div key={spec.id} className="text-sm p-2 bg-muted rounded-md">{spec.name} - v{spec.version || 'N/A'}</div>
                                 ))}
                             </div>
@@ -295,7 +288,7 @@ function BaselineReviewContent() {
                             Back to Selection
                         </Button>
                         <Button onClick={handleBuildPackage} disabled={loading}>
-                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Package className="mr-2 h-4 w-4" />}
+                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PackageIcon className="mr-2 h-4 w-4" />}
                             Build Test Baseline Package
                         </Button>
                     </CardFooter>
@@ -304,7 +297,6 @@ function BaselineReviewContent() {
         </DashboardLayout>
     );
 }
-
 
 export default function ReviewBaselinePage() {
     return (
