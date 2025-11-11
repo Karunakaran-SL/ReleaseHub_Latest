@@ -1,7 +1,7 @@
 
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
-import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType } from './definitions';
+import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface } from './definitions';
 
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
@@ -17,7 +17,7 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
     "git_repo": "http://git.example.com/platform/oss-portal",
     "artifacts_repo": "http://artifacts.example.com/oss-portal",
     "pipeline": "http://cicd.example.com/oss-portal",
-    "specifications": [{ "id": "ArgoCDSyncSpec", "name": "ArgoCD Sync Spec" }, { "id": "SingleSign-OnSpec", "name": "Single Sign-On Spec" }],
+    "specifications": [{ "id": "ArgoCDSyncSpec", "name": "ArgoCD Sync Spec" }, { "id": "SingleSignOnSpec", "name": "Single Sign-On Spec" }],
     "version": "1.0.0",
   },
   {
@@ -106,6 +106,7 @@ const initialSpecifications = [
 
 const fullSpecifications = initialSpecifications.map(spec => ({
     _id: spec.name.replace(/[^a-zA-Z0-9]/g, ''),
+    id: spec.name.replace(/[^a-zA-Z0-9]/g, ''),
     ...spec,
     hw_type: { "id": "Virtual", "name": "Virtual" },
     total_cpu: 32, 
@@ -136,6 +137,93 @@ const initialWorkflows = [
     { "name": "Security Review", "description": "Mandatory security review for sensitive products." }
 ];
 
+const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
+    { id: 'REST', name: 'REST API' },
+    { id: 'GraphQL', name: 'GraphQL API' },
+    { id: 'gRPC', name: 'gRPC Service' },
+    { id: 'KafkaTopic', name: 'Kafka Topic' },
+];
+
+const initialInterfaces: Omit<CmdbInterface, '_id' | 'created_at' | 'updated_at'>[] = [
+  {
+    id: 'AuthServiceREST',
+    name: 'Authentication Service REST API',
+    type: { id: 'REST', name: 'REST API' },
+    version: 'v1.2.0',
+    owner_name: 'Identity Team',
+    owner_email: 'identity@example.com',
+    source: { id: 'AuthService', name: 'Authentication Service' },
+    security: { internal: { secure: true, authentication: true }, external: { secure: true, authentication: true } },
+  },
+  {
+    id: 'DataIngestKafka',
+    name: 'Data Ingest Kafka Topic',
+    type: { id: 'KafkaTopic', name: 'Kafka Topic' },
+    version: 'v1.0.0',
+    owner_name: 'Data Platform Team',
+    owner_email: 'data-platform@example.com',
+    source: { id: 'DataIngestService', name: 'Data Ingest Service' },
+    security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } },
+  },
+];
+
+const initialComponents: Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'>[] = [
+    {
+        id: 'AuthService',
+        name: 'Authentication Service',
+        version: '1.5.2',
+        tenants: [{id: 'PlatformTenant', name: 'Platform Tenant'}],
+        provided_interfaces: [{ id: 'AuthServiceREST', name: 'Authentication Service REST API' }],
+        phases: [],
+    },
+    {
+        id: 'DataIngestService',
+        name: 'Data Ingest Service',
+        version: '2.1.0',
+        tenants: [{id: 'PlatformTenant', name: 'Platform Tenant'}],
+        provided_interfaces: [{ id: 'DataIngestKafka', name: 'Data Ingest Kafka Topic' }],
+        phases: [],
+    }
+];
+
+const initialApplications: Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at'>[] = [
+    {
+        id: 'DashboardApp',
+        name: 'Dashboard Application',
+        version: '3.0.0',
+        tenants: [{id: 'PlatformTenant', name: 'Platform Tenant'}],
+        dependent_interfaces: [{ id: 'AuthServiceREST', name: 'Authentication Service REST API' }],
+        phases: [],
+    },
+     {
+        id: 'AnalyticsApp',
+        name: 'Analytics Application',
+        version: '1.2.0',
+        tenants: [{id: 'PlatformTenant', name: 'Platform Tenant'}],
+        dependent_interfaces: [{ id: 'DataIngestKafka', name: 'Data Ingest Kafka Topic' }],
+        phases: [],
+    }
+];
+
+const initialTenants: Omit<CmdbTenant, '_id'| 'created_at' | 'updated_at'>[] = [
+    {
+        id: 'PlatformTenant',
+        name: 'Platform Tenant',
+        description: 'The main tenant for all platform services.',
+        version: '1.0.0',
+        products: [{ id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, { id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}],
+        phases: [],
+    },
+    {
+        id: 'FinanceTenant',
+        name: 'Finance Tenant',
+        description: 'Tenant for the finance department applications.',
+        version: '1.0.0',
+        products: [{ id: 'OneStopShopPortal', name: 'OneStopShop Portal'}],
+        phases: [],
+    }
+];
+
 export async function seedDatabase() {
     const client = await clientPromise;
     const db = client.db();
@@ -145,6 +233,11 @@ export async function seedDatabase() {
         { name: 'specifications', data: fullSpecifications },
         { name: 'deployment_types', data: initialDeploymentTypes.map(d => ({ ...d, _id: d.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
+        { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'cmdb_components', data: initialComponents.map(c => ({ ...c, _id: c.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'cmdb_applications', data: initialApplications.map(a => ({ ...a, _id: a.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'cmdb_interface_types', data: initialInterfaceTypes.map(i => ({ ...i, _id: i.id })) },
+        { name: 'cmdb_interfaces', data: initialInterfaces.map(i => ({ ...i, _id: i.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
     ];
     
     let seededCount = 0;
@@ -165,3 +258,4 @@ export async function seedDatabase() {
 
     return { seededCount, skippedCount };
 }
+
