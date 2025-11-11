@@ -27,7 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, OnboardingConfiguration } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { OnboardingForm } from '../onboarding/_components/onboarding-form';
+import { BaselineForm } from './_components/baseline-form';
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -162,7 +162,7 @@ export default function BaselineSettingsPage() {
               </AccordionTrigger>
               <AccordionContent className="p-4 border border-t-0 rounded-b-md">
                 {renderVersionHistory('baseline')}
-                <OnboardingForm
+                <BaselineForm
                     key={getLatestConfig('baseline')?.version || 0}
                     initialData={getLatestConfig('baseline')}
                     onSave={(data) => handleSave('baseline', data)}
@@ -177,5 +177,3 @@ export default function BaselineSettingsPage() {
     </DashboardLayout>
   );
 }
-
-    

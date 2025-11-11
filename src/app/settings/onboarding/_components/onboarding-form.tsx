@@ -90,18 +90,7 @@ export function OnboardingForm({ initialData, onSave, isLoading, name }: Onboard
 
     const renderField = (phase: OnboardingPhase, field: OnboardingFormField, phaseIndex: number, fieldIndex: number) => {
         const fieldId = `${phase.id}-${field.name}`;
-        // The state might not be initialized, so we provide default empty values.
-        const value = config.phases[phaseIndex]?.fields[fieldIndex]?.label || '';
-        const proofLink = config.phases[phaseIndex]?.fields[fieldIndex]?.proofLink || '';
-
-        const handleValueChange = (newValue: any) => {
-            updateField(phaseIndex, fieldIndex, { label: newValue });
-        };
-
-        const handleProofLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-            updateField(phaseIndex, fieldIndex, { proofLink: e.target.value });
-        };
-
+        
         return (
             <Card key={fieldIndex}>
                 <CardContent className="p-4 space-y-4">
