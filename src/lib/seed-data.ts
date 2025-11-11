@@ -7,7 +7,7 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
     "name": "OneStopShop Portal",
     "owner": "Platform Engineering", "owner_email": "platform@example.com",
-    "product_image": "https://picsum.photos/seed/product1/40/40",
+    "product_image": "https://picsum.photos/seed/OneStopShopPortal/40/40",
     "approval_needed": true,
     "default_workflow": { "id": "StandardApproval", "name": "Standard Approval" },
     "custom_workflows": [],
@@ -23,7 +23,7 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
     "name": "Unified Data Fabric",
     "owner": "Data Platform Team", "owner_email": "data-platform@example.com",
-    "product_image": "https://picsum.photos/seed/product2/40/40",
+    "product_image": "https://picsum.photos/seed/UnifiedDataFabric/40/40",
     "approval_needed": true,
     "default_workflow": { "id": "DataGovernanceReview", "name": "Data Governance Review" },
     "custom_workflows": [],
@@ -35,71 +35,18 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
     "pipeline": "http://cicd.example.com/data-fabric",
     "specifications": [{ "id": "SparkProcessing", "name": "Spark Processing" }, { "id": "KafkaStreaming", "name": "Kafka Streaming" }],
     "version": "1.0.0",
-  },
-  {
-    "name": "AI/ML Workbench",
-    "owner": "AI Research Group", "owner_email": "ai-research@example.com",
-    "product_image": "https://picsum.photos/seed/product3/40/40",
-    "approval_needed": false,
-    "default_workflow": { "id": "StandardApproval", "name": "Standard Approval" },
-    "custom_workflows": [],
-    "cmdb": { "id": "GlobalCMDB", "name": "Global CMDB" },
-    "compliance_checks": [],
-    "deployment_type": { "id": "Cloud", "name": "Cloud" },
-    "git_repo": "http://git.example.com/platform/ml-workbench",
-    "artifacts_repo": "http://artifacts.example.com/ml-workbench",
-    "pipeline": "http://cicd.example.com/ml-workbench",
-    "specifications": [{ "id": "KubeflowPipelines", "name": "Kubeflow Pipelines" }, { "id": "PyTorchDistribution", "name": "PyTorch Distribution" }],
-    "version": "1.0.0",
-  },
-  {
-    "name": "Edge Computing Orchestrator",
-    "owner": "IoT Division", "owner_email": "iot@example.com",
-    "product_image": "https://picsum.photos/seed/product4/40/40",
-    "approval_needed": true,
-    "default_workflow": { "id": "HardwareCompatibilityReview", "name": "Hardware Compatibility Review" },
-    "custom_workflows": [],
-    "cmdb": { "id": "EdgeCMDB", "name": "Edge CMDB" },
-    "compliance_checks": [{ "id": "FedRAMP", "name": "FedRAMP" }],
-    "deployment_type": { "id": "Airgapped", "name": "Airgapped" },
-    "git_repo": "http://git.example.com/platform/edge-orchestrator",
-    "artifacts_repo": "http://artifacts.example.com/edge-orchestrator",
-    "pipeline": "http://cicd.example.com/edge-orchestrator",
-    "specifications": [{ "id": "KubeEdgeNodeSpec", "name": "KubeEdge Node Spec" }, { "id": "MQTTSpec", "name": "MQTT Broker Spec" }],
-    "version": "1.0.0",
-  },
-  {
-    "name": "Zero-Trust Security Fabric",
-    "owner": "Cybersecurity Office", "owner_email": "security@example.com",
-    "product_image": "https://picsum.photos/seed/product5/40/40",
-    "approval_needed": true,
-    "default_workflow": { "id": "PeerSecurityReview", "name": "Peer Security Review" },
-    "custom_workflows": [],
-    "cmdb": { "id": "GlobalCMDB", "name": "Global CMDB" },
-    "compliance_checks": [{ "id": "SOC2", "name": "SOC2" }, { "id": "FedRAMP", "name": "FedRAMP" }],
-    "deployment_type": { "id": "Cloud", "name": "Cloud" },
-    "git_repo": "http://git.example.com/platform/security-fabric",
-    "artifacts_repo": "http://artifacts.example.com/security-fabric",
-    "pipeline": "http://cicd.example.com/security-fabric",
-    "specifications": [{ "id": "IstioServiceMesh", "name": "Istio Service Mesh" }, { "id": "SPIFFEIdentity", "name": "SPIFFE Identity" }],
-    "version": "1.0.0",
   }
 ];
 
 const initialSpecifications = [
-  // For Product_OSS_Portal
   { "name": "ArgoCD Sync Spec", "vendor": "CNCF" },
   { "name": "Single Sign-On Spec", "vendor": "OpenID" },
-  // For Product_Data_Fabric
   { "name": "Spark Processing", "vendor": "Apache" },
   { "name": "Kafka Streaming", "vendor": "Apache" },
-  // For Product_ML_Platform
   { "name": "Kubeflow Pipelines", "vendor": "Google" },
   { "name": "PyTorch Distribution", "vendor": "Facebook" },
-  // For Product_Edge_Orchestrator
   { "name": "KubeEdge Node Spec", "vendor": "CNCF" },
   { "name": "MQTT Broker Spec", "vendor": "OASIS" },
-  // For Product_Security_Fabric
   { "name": "Istio Service Mesh", "vendor": "CNCF" },
   { "name": "SPIFFE Identity", "vendor": "CNCF" }
 ];
@@ -132,9 +79,10 @@ const initialDeploymentTypes = [
 ];
 
 const initialWorkflows = [
-    { "name": "Flow 1", "description": "Standard linear workflow." },
-    { "name": "Flow 2", "description": "Workflow with parallel approval steps." },
-    { "name": "Security Review", "description": "Mandatory security review for sensitive products." }
+    { "name": "Standard Approval", "description": "Standard linear workflow." },
+    { "name": "Data Governance Review", "description": "Workflow with parallel approval steps." },
+    { "name": "Hardware Compatibility Review", "description": "Security review for hardware." },
+    { "name": "Peer Security Review", "description": "Mandatory security review for sensitive products." }
 ];
 
 const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
@@ -142,87 +90,60 @@ const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
     { id: 'GraphQL', name: 'GraphQL API' },
     { id: 'gRPC', name: 'gRPC Service' },
     { id: 'KafkaTopic', name: 'Kafka Topic' },
+    { id: 'DatabaseConnection', name: 'Database Connection' },
 ];
+
+const initialTenants: Omit<CmdbTenant, '_id'| 'created_at' | 'updated_at'>[] = Array.from({ length: 10 }, (_, i) => ({
+    id: `Tenant${i + 1}`,
+    name: `Tenant ${i + 1}`,
+    description: `Description for Tenant ${i + 1}.`,
+    version: `1.0.${i}`,
+    products: i < 5 ? [{ id: 'OneStopShopPortal', name: 'OneStopShop Portal'}] : [{ id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}],
+    dependent_tenants: i > 0 ? [{ id: `Tenant${i}`, name: `Tenant ${i}`, version: `1.0.${i-1}` }] : [],
+    phases: [],
+}));
+
+const initialComponents: Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'>[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `Component${i+1}`,
+    name: `Component ${i+1}`,
+    version: `1.${i % 5}.0`,
+    tenants: [{id: `Tenant${(i % 10) + 1}`, name: `Tenant ${(i % 10) + 1}`}],
+    provided_interfaces: [{id: `InterfaceComp${i+1}`, name: `Interface from Component ${i+1}`}],
+    phases: [],
+}));
+
+const initialApplications: Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at'>[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `App${i+1}`,
+    name: `Application ${i+1}`,
+    version: `2.${i % 3}.0`,
+    tenants: [{id: `Tenant${(i % 10) + 1}`, name: `Tenant ${(i % 10) + 1}`}],
+    dependent_interfaces: [{id: `InterfaceComp${i+1}`, name: `Interface from Component ${i+1}`}],
+    phases: [],
+}));
 
 const initialInterfaces: Omit<CmdbInterface, '_id' | 'created_at' | 'updated_at'>[] = [
-  {
-    id: 'AuthServiceREST',
-    name: 'Authentication Service REST API',
-    type: { id: 'REST', name: 'REST API' },
-    version: 'v1.2.0',
-    owner_name: 'Identity Team',
-    owner_email: 'identity@example.com',
-    source: { id: 'AuthService', name: 'Authentication Service' },
-    security: { internal: { secure: true, authentication: true }, external: { secure: true, authentication: true } },
-  },
-  {
-    id: 'DataIngestKafka',
-    name: 'Data Ingest Kafka Topic',
-    type: { id: 'KafkaTopic', name: 'Kafka Topic' },
-    version: 'v1.0.0',
-    owner_name: 'Data Platform Team',
-    owner_email: 'data-platform@example.com',
-    source: { id: 'DataIngestService', name: 'Data Ingest Service' },
-    security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } },
-  },
+    ...Array.from({ length: 20 }, (_, i) => ({
+        id: `InterfaceComp${i+1}`,
+        name: `Interface from Component ${i+1}`,
+        type: { id: 'REST', name: 'REST API' },
+        version: `v1`,
+        owner_name: `Team for Component ${i+1}`,
+        owner_email: `team-comp${i+1}@example.com`,
+        source: { id: `Component${i+1}`, name: `Component ${i+1}` },
+        security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } },
+    })),
+     ...Array.from({ length: 30 }, (_, i) => ({
+        id: `ExternalInterface${i+1}`,
+        name: `External Interface ${i+1}`,
+        type: { id: 'GraphQL', name: 'GraphQL API' },
+        version: `v2`,
+        owner_name: `Partner Team ${i+1}`,
+        owner_email: `partner${i+1}@example.com`,
+        source: { id: `Application${(i % 20) + 1}`, name: `Application ${(i % 20) + 1}` },
+        security: { internal: { secure: true, authentication: true }, external: { secure: true, authentication: true } },
+    })),
 ];
 
-const initialComponents: Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'>[] = [
-    {
-        id: 'AuthService',
-        name: 'Authentication Service',
-        version: '1.5.2',
-        tenants: [{id: 'PlatformTenant', name: 'Platform Tenant'}],
-        provided_interfaces: [{ id: 'AuthServiceREST', name: 'Authentication Service REST API' }],
-        phases: [],
-    },
-    {
-        id: 'DataIngestService',
-        name: 'Data Ingest Service',
-        version: '2.1.0',
-        tenants: [{id: 'PlatformTenant', name: 'Platform Tenant'}],
-        provided_interfaces: [{ id: 'DataIngestKafka', name: 'Data Ingest Kafka Topic' }],
-        phases: [],
-    }
-];
-
-const initialApplications: Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at'>[] = [
-    {
-        id: 'DashboardApp',
-        name: 'Dashboard Application',
-        version: '3.0.0',
-        tenants: [{id: 'PlatformTenant', name: 'Platform Tenant'}],
-        dependent_interfaces: [{ id: 'AuthServiceREST', name: 'Authentication Service REST API' }],
-        phases: [],
-    },
-     {
-        id: 'AnalyticsApp',
-        name: 'Analytics Application',
-        version: '1.2.0',
-        tenants: [{id: 'PlatformTenant', name: 'Platform Tenant'}],
-        dependent_interfaces: [{ id: 'DataIngestKafka', name: 'Data Ingest Kafka Topic' }],
-        phases: [],
-    }
-];
-
-const initialTenants: Omit<CmdbTenant, '_id'| 'created_at' | 'updated_at'>[] = [
-    {
-        id: 'PlatformTenant',
-        name: 'Platform Tenant',
-        description: 'The main tenant for all platform services.',
-        version: '1.0.0',
-        products: [{ id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, { id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}],
-        phases: [],
-    },
-    {
-        id: 'FinanceTenant',
-        name: 'Finance Tenant',
-        description: 'Tenant for the finance department applications.',
-        version: '1.0.0',
-        products: [{ id: 'OneStopShopPortal', name: 'OneStopShop Portal'}],
-        phases: [],
-    }
-];
 
 export async function seedDatabase() {
     const client = await clientPromise;
@@ -233,11 +154,11 @@ export async function seedDatabase() {
         { name: 'specifications', data: fullSpecifications },
         { name: 'deployment_types', data: initialDeploymentTypes.map(d => ({ ...d, _id: d.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
-        { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
-        { name: 'cmdb_components', data: initialComponents.map(c => ({ ...c, _id: c.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
-        { name: 'cmdb_applications', data: initialApplications.map(a => ({ ...a, _id: a.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
-        { name: 'cmdb_interface_types', data: initialInterfaceTypes.map(i => ({ ...i, _id: i.id })) },
-        { name: 'cmdb_interfaces', data: initialInterfaces.map(i => ({ ...i, _id: i.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'cmdb_components', data: initialComponents.map(c => ({ ...c, _id: c.id.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'cmdb_applications', data: initialApplications.map(a => ({ ...a, _id: a.id.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'cmdb_interface_types', data: initialInterfaceTypes.map(i => ({ ...i, _id: i.id.replace(/[^a-zA-Z0-9]/g, '') })) },
+        { name: 'cmdb_interfaces', data: initialInterfaces.map(i => ({ ...i, _id: i.id.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
     ];
     
     let seededCount = 0;
@@ -258,4 +179,3 @@ export async function seedDatabase() {
 
     return { seededCount, skippedCount };
 }
-
