@@ -12,7 +12,7 @@ type AllData = {
 };
 
 // Fetches all data from the database collections.
-async function fetchAllData(): Promise<AllData> {
+export async function fetchAllData(): Promise<AllData> {
     const client = await clientPromise;
     const db = client.db();
     
@@ -45,13 +45,13 @@ export async function generateDependencyTree(product: Product, allData: AllData)
 
     // 2. Find tenants associated with the product
     const productTenants = allData.tenants.filter(tenant => 
-        tenant.products?.some(p => p.id === product.id)
+        tenant.products?.some(p => p.id === product._id)
     );
 
     const tenantsTree = productTenants.map(tenant => {
         // 3. For each tenant, find its components
         const tenantComponents = allData.components.filter(comp => 
-            comp.tenants?.some(t => t.id === tenant.id)
+            comp.tenants?.some(t => t.id === tenant._id)
         ).map(comp => {
             return {
                 id: comp.id,
@@ -69,7 +69,7 @@ export async function generateDependencyTree(product: Product, allData: AllData)
 
         // 4. For each tenant, find its applications
         const tenantApplications = allData.applications.filter(app => 
-            app.tenants?.some(t => t.id === tenant.id)
+            app.tenants?.some(t => t.id === tenant._id)
         ).map(app => {
             return {
                 id: app.id,
@@ -89,7 +89,7 @@ export async function generateDependencyTree(product: Product, allData: AllData)
             id: tenant.id,
             name: tenant.name,
             version: tenant.version,
-            parents: [{ id: product.id, name: product.name, version: product.version }],
+            parents: [{ id: product._id, name: product.name, version: product.version }],
             dependent_tenants: tenant.dependent_tenants || [],
             components: tenantComponents,
             applications: tenantApplications
@@ -98,8 +98,8 @@ export async function generateDependencyTree(product: Product, allData: AllData)
 
     // 5. Construct the final tree object
     const tree = {
-        _id: `${product.id}_Tree`,
-        id: product.id,
+        _id: `${product._id}_Tree`,
+        id: product._id,
         name: product.name,
         version: product.version,
         specifications: productSpecifications,
