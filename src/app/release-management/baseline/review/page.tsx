@@ -177,8 +177,8 @@ function BaselineReviewContent() {
             <main className="flex-1 p-6 md:p-10 flex justify-center items-start">
                 <Card className="w-full max-w-6xl">
                     <CardHeader>
-                        <CardTitle>Review New Baseline</CardTitle>
-                        <CardDescription>Phase 2: Review and confirm the components of the new baseline for <strong>{baselineData.product.name}</strong>.</CardDescription>
+                        <CardTitle>Review New Baseline: {baselineData.product.name}</CardTitle>
+                        <CardDescription>Phase 2: Review and confirm the components of the new baseline.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         
