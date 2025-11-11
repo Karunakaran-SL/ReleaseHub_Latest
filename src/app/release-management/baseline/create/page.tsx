@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
-import type { User, Product, DependencyTree } from '@/lib/definitions';
+import type { User, Product } from '@/lib/definitions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowRight, Package, Warehouse, Puzzle, AppWindow, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { useRouter } from 'next/navigation';
 
 function DependencyItem({ item, icon }: { item: { id: string, name: string, version: string }, icon: React.ReactNode }) {
     return (
@@ -34,6 +35,7 @@ export default function CreateBaselinePage() {
     const [loadingProducts, setLoadingProducts] = useState(true);
     const [loadingTree, setLoadingTree] = useState(false);
     const { toast } = useToast();
+    const router = useRouter();
 
     useEffect(() => {
         getUser().then(setUser);
@@ -79,24 +81,28 @@ export default function CreateBaselinePage() {
                 title: 'Error',
                 description: error.message
             });
+            setDependencyTree(null);
         } finally {
             setLoadingTree(false);
         }
     };
     
     const handleNext = () => {
-        if (!selectedProductId) {
+        if (!selectedProductId || !dependencyTree) {
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: 'Please select a product to continue.'
+                description: 'Please select a product and wait for the dependency tree to load.'
             });
             return;
         }
-        toast({
-            title: "Next Step: Review",
-            description: `Ready to review baseline for product ID: ${selectedProductId}`
+        
+        // Navigate to the review page with the data
+        const query = new URLSearchParams({
+            data: JSON.stringify(dependencyTree),
         });
+        
+        router.push(`/release-management/baseline/review?${query.toString()}`);
     };
 
     return (
