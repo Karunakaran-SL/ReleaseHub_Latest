@@ -30,6 +30,10 @@ function validateDependencies(baselineData: any): ValidationResult {
     const corrections: ValidationResult['corrections'] = [];
     let isValid = true;
     
+    if (!baselineData || !baselineData.allTenants || !baselineData.tenants) {
+        return { isValid: true, corrections: [] };
+    }
+    
     const allBaselineTenants = baselineData.allTenants as CmdbTenant[];
     const selectedTenants = [...baselineData.tenants]; // Create a mutable copy
 
@@ -44,7 +48,7 @@ function validateDependencies(baselineData: any): ValidationResult {
 
             const actualTenantInBaseline = selectedTenants.find(t => t.name === requiredTenantName);
 
-            if (actualTenantInBaseline && actualTenantInBaseline.version !== requiredTenantVersion) {
+            if (actualTenantInBaseline && requiredTenantVersion && actualTenantInBaseline.version !== requiredTenantVersion) {
                 isValid = false;
                 const correction = {
                     tenantId: actualTenantInBaseline.id,
@@ -269,8 +273,8 @@ function BaselineReviewContent() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {compatibilityMatrixItems.map((item, index) => (
-                                            <TableRow key={index}>
+                                        {compatibilityMatrixItems.map((item) => (
+                                            <TableRow key={`${item.type}-${item.name}-${item.version}`}>
                                                 <TableCell>{item.type}</TableCell>
                                                 <TableCell>{item.name}</TableCell>
                                                 <TableCell>{item.version}</TableCell>
