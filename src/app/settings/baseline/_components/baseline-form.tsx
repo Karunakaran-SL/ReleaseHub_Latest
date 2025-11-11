@@ -90,7 +90,17 @@ export function BaselineForm({ initialData, onSave, isLoading, name }: BaselineF
 
     const renderField = (phase: OnboardingPhase, field: OnboardingFormField, phaseIndex: number, fieldIndex: number) => {
         const fieldId = `${phase.id}-${field.name}`;
+        const value = field.type === 'Checkbox' ? !!field.proof : '';
+        const proofLink = '';
         
+        const handleValueChange = (newValue: any) => {
+            updateField(phaseIndex, fieldIndex, { ...field, proof: newValue });
+        };
+    
+        const handleProofLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            updateField(phaseIndex, fieldIndex, { ...field, proofLink: e.target.value });
+        };
+
         return (
             <Card key={fieldIndex}>
                 <CardContent className="p-4 space-y-4">
@@ -148,7 +158,7 @@ export function BaselineForm({ initialData, onSave, isLoading, name }: BaselineF
             
             <Accordion type="multiple" className="space-y-4">
                 {config.phases.map((phase, phaseIndex) => (
-                    <AccordionItem value={phase.id} key={phase.id} className="border rounded-md">
+                    <AccordionItem value={phase.id} key={phase.id}>
                         <AccordionTrigger className="p-4 hover:no-underline">
                              <div className="flex items-center gap-2 w-full">
                                 <GripVertical className="h-5 w-5 text-muted-foreground" />
