@@ -44,84 +44,12 @@ const TenantSchema = z.object({
 
 const COLLECTION_NAME = 'cmdb_tenants';
 
-const onboardingConfigPhases = [
-    { id: "phase-1", name: "Initiate Onboarding", fields: [ { name: "requestFormSubmitted" }, { name: "csApproved" }, { name: "pmApproved" }, { name: "productTeamAgreement" } ] },
-    { id: "phase-2", name: "Product Definitions", fields: [ { name: "architectAgreed" }, { name: "specChanged" }, { name: "hlDesignApproved" } ] },
-    { id: "phase-3", name: "Detail Design", fields: [ { name: "detailDesignDone" }, { name: "dependencyIdentified" }, { name: "pertReady" }, { name: "testPlanReady" } ] },
-    { id: "phase-4", name: "Delivery", fields: [ { name: "implementationDone" }, { name: "unitTestDone" }, { name: "staticCodeDone" }, { name: "systemIntegrationDone" }, { name: "systemIntegrationTestingDone" }, { name: "allTestCasesAutomated" } ] },
-    { id: "phase-5", name: "Alpha Qualification", fields: [ { name: "uatTestDone" }, { name: "riskReported" }, { name: "serviceMetricsDone" } ] },
-    { id: "phase-6", name: "Prepare customer", fields: [ { name: "communicatedChanges" }, { name: "plannedMCWindow" } ] },
-    { id: "phase-7", name: "Beta Qualification", fields: [ { name: "deploymentRunbookForBeta" }, { name: "deploymentDone" }, { name: "betaTestsExecuted" } ] },
-    { id: "phase-8", name: "Completed", fields: [ { name: "onboardingCompleteClosure" } ] }
-];
-
-const generatePhases = () => {
-    return onboardingConfigPhases.map(phase => ({
-        id: phase.id,
-        name: phase.name,
-        version: "1.0",
-        status: "Done",
-        fields: phase.fields.map(field => ({
-            name: field.name,
-            value: true,
-            proof: { link: "https://example.com/proof" }
-        }))
-    }));
-};
-
-const initialTenants = [
-    { "id": "Tenant_Platform_Foundation", "name": "Platform Foundation", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }, { "id": "Product_Data_Fabric", "name": "Unified Data Fabric" }], "dependent_tenants": [] },
-    { "id": "Tenant_Retail_Services", "name": "Retail Services", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }], "dependent_tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }] },
-    { "id": "Tenant_Data_Analytics", "name": "Data & Analytics", "products": [{ "id": "Product_Data_Fabric", "name": "Unified Data Fabric" }, { "id": "Product_ML_Platform", "name": "AI/ML Workbench" }], "dependent_tenants": [{ "id": "Tenant_Platform_Foundation", "name": "Platform Foundation" }] },
-    { "id": "Tenant_AI_Research", "name": "AI Research", "products": [{ "id": "Product_ML_Platform", "name": "AI/ML Workbench" }], "dependent_tenants": [{ "id": "Tenant_Data_Analytics", "name": "Data & Analytics" }] },
-    { "id": "Tenant_IoT_Core", "name": "IoT Core", "products": [{ "id": "Product_Edge_Orchestrator", "name": "Edge Computing Orchestrator" }], "dependent_tenants": [] },
-    { "id": "Tenant_Cybersecurity", "name": "Cybersecurity Ops", "products": [{ "id": "Product_Security_Fabric", "name": "Zero-Trust Security Fabric" }], "dependent_tenants": [] },
-    { "id": "Tenant_Shared_Services", "name": "Shared Services", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }, { "id": "Product_Security_Fabric", "name": "Zero-Trust Security Fabric" }], "dependent_tenants": [] },
-    { "id": "Tenant_Gaming_Platform", "name": "Gaming Platform", "products": [{ "id": "Product_OSS_Portal", "name": "OneStopShop Portal" }], "dependent_tenants": [{ "id": "Tenant_Shared_Services", "name": "Shared Services" }] },
-    { "id": "Tenant_Fintech_Services", "name": "Fintech Services", "products": [{ "id": "Product_Data_Fabric", "name": "Unified Data Fabric" }], "dependent_tenants": [{ "id": "Tenant_Data_Analytics", "name": "Data & Analytics" }] },
-    { "id": "Tenant_Marketing_Automation", "name": "Marketing Automation", "products": [{ "id": "Product_ML_Platform", "name": "AI/ML Workbench" }], "dependent_tenants": [{ "id": "Tenant_Data_Analytics", "name": "Data & Analytics" }] }
-].map(t => ({
-    ...t,
-    _id: t.id,
-    description: `Description for ${t.name}`,
-    version: "1.0.0",
-    artifact_location: `s3://artifacts/${t.id}/`,
-    resources: {
-        cpu: 16,
-        memory_gb: 64,
-        storage_gb: 1024
-    },
-    phases: generatePhases(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-}));
-
-
-async function seedTenants() {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection(COLLECTION_NAME);
-    
-    await collection.insertMany(initialTenants as any[]);
-    
-    console.log('Seeded tenants collection.');
-  } catch (error) {
-    console.error('Error seeding tenants:', error);
-  }
-}
 
 // List all tenants
 export async function GET(req: NextRequest) {
   try {
     const client = await clientPromise;
     const db = client.db();
-    const collection = db.collection(COLLECTION_NAME);
-    
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedTenants();
-    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });
@@ -167,6 +95,4 @@ export async function POST(req: NextRequest) {
 
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
-    }
-}
+        return NextResponse.json({ message: 'An internal server error occurred.' },

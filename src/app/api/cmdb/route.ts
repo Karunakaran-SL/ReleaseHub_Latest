@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -9,45 +8,14 @@ const CmdbSchema = z.object({
   description: z.string().optional(),
 });
 
-const initialCmdb = [
-    { "_id": "CMDB_1", "id": "CMDB_1", "name": "CMDB 1", "description": "Primary configuration database." },
-    { "_id": "CMDB_2", "id": "CMDB_2", "name": "CMDB 2", "description": "Secondary configuration for analytics." },
-    { "_id": "CMDB_3", "id": "CMDB_3", "name": "CMDB 3", "description": "HR systems configuration." }
-];
-
-async function seedCmdb() {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection('cmdb');
-    
-    for (const item of initialCmdb) {
-        await collection.updateOne(
-            { _id: item._id },
-            { $set: item },
-            { upsert: true }
-        );
-    }
-    console.log('Seeded cmdb collection.');
-
-  } catch (error) {
-    console.error('Error seeding cmdb:', error);
-  }
-}
 
 // List all or search
 export async function GET(req: NextRequest) {
   try {
     const client = await clientPromise;
     const db = client.db();
-    const collection = db.collection('cmdb');
     
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedCmdb();
-    }
-
-    const items = await collection.find({}).toArray();
+    const items = await db.collection('cmdb').find({}).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
     console.error(error);
