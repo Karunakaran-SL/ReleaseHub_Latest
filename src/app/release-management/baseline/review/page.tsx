@@ -8,7 +8,7 @@ import { getUser } from '@/lib/auth';
 import type { User, DependencyTree, CmdbTenant } from '@/lib/definitions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, ShieldCheck, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Package, Loader2, AlertTriangle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -42,7 +42,6 @@ function validateDependencies(baselineData: any): ValidationResult {
         if (!fullTenantData || !fullTenantData.dependent_tenants) continue;
 
         for (const dependency of fullTenantData.dependent_tenants) {
-            const requiredTenantId = dependency.id;
             const requiredTenantName = dependency.name;
             const requiredTenantVersion = dependency.version; // Assuming version is in dependency object
 
@@ -156,13 +155,13 @@ function BaselineReviewContent() {
         );
     }
     
-    const handleCreateBaseline = () => {
+    const handleBuildPackage = () => {
         setLoading(true);
         const finalBaselineData = { ...baselineData };
         delete (finalBaselineData as any).allTenants; // Clean up data before sending
 
         toast({
-            title: "Creating Baseline...",
+            title: "Building Baseline Package...",
             description: "Submitting the new baseline for product: " + finalBaselineData.name,
         });
 
@@ -172,7 +171,7 @@ function BaselineReviewContent() {
              sessionStorage.removeItem(`baseline-data-${searchParams.get('productId')}`);
              toast({
                 title: "Success!",
-                description: "Baseline created successfully.",
+                description: "Test baseline package built successfully.",
              });
              router.push('/release-management/baseline');
         }, 1500);
@@ -295,16 +294,10 @@ function BaselineReviewContent() {
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Selection
                         </Button>
-                        <div className="flex gap-2">
-                            <Button variant="outline">
-                                <ShieldCheck className="mr-2 h-4 w-4" />
-                                Validate Baseline
-                            </Button>
-                             <Button onClick={handleCreateBaseline} disabled={loading}>
-                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                                Create Baseline
-                            </Button>
-                        </div>
+                        <Button onClick={handleBuildPackage} disabled={loading}>
+                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Package className="mr-2 h-4 w-4" />}
+                            Build Test Baseline Package
+                        </Button>
                     </CardFooter>
                 </Card>
             </main>
