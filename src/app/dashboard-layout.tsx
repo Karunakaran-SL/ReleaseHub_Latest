@@ -68,7 +68,7 @@ function Header({ user }: { user: User | null }) {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <div className="relative hidden w-full max-w-sm items-center md:flex">
-            <Search className="absolute left-3 h-5 w-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search..."
@@ -79,9 +79,11 @@ function Header({ user }: { user: User | null }) {
             <LayoutGrid />
             <span className="ml-2 hidden md:inline">Mega Menu</span>
           </Button>
-          <Button variant="ghost" size="icon">
-            <Settings />
-            <span className="ml-2 hidden md:inline">Settings</span>
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/settings">
+              <Settings />
+              <span className="ml-2 hidden md:inline">Settings</span>
+            </Link>
           </Button>
           <Button variant="ghost" size="icon">
             <Bell />
@@ -151,6 +153,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isSettingsPage = pathname.startsWith('/settings');
     const isCmdbPage = pathname.startsWith('/cmdb');
     const isDependencyMetricsPage = pathname.startsWith('/dependency-metrics');
+    const isReleaseManagementPage = pathname.startsWith('/release-management');
 
   return (
     <SidebarProvider>
@@ -160,7 +163,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage && !isReleaseManagementPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
@@ -298,10 +301,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </SidebarMenuItem>
                 </Collapsible>
 
-                <Collapsible asChild>
+                <Collapsible asChild defaultOpen={isReleaseManagementPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton 
+                        isActive={isReleaseManagementPage}
                         tooltip={{ children: 'Release Management' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -310,6 +314,15 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
+                     <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/release-management/baseline" isActive={pathname.startsWith('/release-management/baseline')}>
+                                <FileCode className="mr-2"/> Baseline
+                            </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
                 
@@ -365,8 +378,10 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         tooltip={{ children: 'Settings' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
-                        <Settings />
-                        Settings
+                         <Link href="/settings" className='flex items-center gap-2 w-full'>
+                            <Settings />
+                            Settings
+                         </Link>
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
@@ -380,6 +395,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/cmdb" isActive={pathname.startsWith('/settings/cmdb')}>
                             CMDB
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/settings/baseline" isActive={pathname.startsWith('/settings/baseline')}>
+                            Baseline
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
@@ -468,3 +488,5 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     </SidebarProvider>
   );
 }
+
+    
