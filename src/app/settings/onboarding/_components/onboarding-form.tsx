@@ -41,7 +41,7 @@ export function OnboardingForm({ initialData, onSave, isLoading, name }: Onboard
 
     const addPhase = () => {
         const newPhase: OnboardingPhase = {
-            _id: `phase-${Date.now()}`,
+            id: `phase-${Date.now()}`,
             name: `New Phase ${config.phases.length + 1}`,
             ownerName: '',
             ownerEmail: '',
@@ -95,7 +95,7 @@ export function OnboardingForm({ initialData, onSave, isLoading, name }: Onboard
             
             <Accordion type="multiple" className="space-y-4">
                 {config.phases.map((phase, phaseIndex) => (
-                    <AccordionItem value={phase._id} key={phase._id} className="border rounded-md">
+                    <AccordionItem value={phase.id} key={phase.id} className="border rounded-md">
                         <AccordionTrigger className="p-4 hover:no-underline">
                              <div className="flex items-center gap-2 w-full">
                                 <GripVertical className="h-5 w-5 text-muted-foreground" />
@@ -208,5 +208,3 @@ export function OnboardingForm({ initialData, onSave, isLoading, name }: Onboard
         </div>
     );
 }
-
-    
