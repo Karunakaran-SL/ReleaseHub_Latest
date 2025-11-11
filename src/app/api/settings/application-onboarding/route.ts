@@ -33,7 +33,7 @@ const OnboardingConfigurationSchema = z.object({
 
 const collectionName = 'settings_application_onboarding';
 
-const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
+export const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
   name: 'Application Onboarding',
   version: 1,
   phases: [
@@ -146,22 +146,6 @@ const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
   ],
 };
 
-
-async function seedData() {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection(collectionName);
-    
-    await collection.deleteMany({ name: initialApplicationOnboarding.name });
-    await collection.insertOne(initialApplicationOnboarding as any);
-    console.log(`Seeded ${collectionName} collection.`);
-
-  } catch (error) {
-    console.error(`Error seeding ${collectionName}:`, error);
-  }
-}
-
 // GET all versions for a given onboarding type
 export async function GET(req: NextRequest) {
   try {
@@ -169,11 +153,6 @@ export async function GET(req: NextRequest) {
     const db = client.db();
     const collection = db.collection(collectionName);
     
-    const count = await collection.countDocuments();
-    if (count === 0) {
-        await seedData();
-    }
-
     const configs = await collection.find({}).sort({ version: -1 }).toArray();
     return NextResponse.json(configs, { status: 200 });
   } catch (error) {

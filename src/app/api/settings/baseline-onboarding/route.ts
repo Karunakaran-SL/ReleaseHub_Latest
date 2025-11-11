@@ -33,7 +33,7 @@ const OnboardingConfigurationSchema = z.object({
 
 const collectionName = 'settings_baseline_onboarding';
 
-const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
+export const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
   name: 'Baseline Onboarding',
   version: 1,
   phases: [
@@ -236,23 +236,6 @@ const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
 };
 
 
-async function seedData() {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection(collectionName);
-    
-    const count = await collection.countDocuments({ name: initialBaselineConfig.name });
-    if (count === 0) {
-      await collection.insertOne(initialBaselineConfig as any);
-      console.log(`Seeded ${collectionName} collection.`);
-    }
-
-  } catch (error) {
-    console.error(`Error seeding ${collectionName}:`, error);
-  }
-}
-
 // GET all versions for the baseline onboarding type
 export async function GET(req: NextRequest) {
   try {
@@ -260,8 +243,6 @@ export async function GET(req: NextRequest) {
     const db = client.db();
     const collection = db.collection(collectionName);
     
-    await seedData();
-
     const configs = await collection.find({}).sort({ version: -1 }).toArray();
     return NextResponse.json(configs, { status: 200 });
   } catch (error) {
