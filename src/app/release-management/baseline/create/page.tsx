@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
-import type { User, Product } from '@/lib/definitions';
+import type { User, Product, CmdbTenant } from '@/lib/definitions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowRight, Package, Warehouse, Puzzle, AppWindow, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,12 +26,14 @@ function DependencyItem({ item, icon }: { item: { id: string, name: string, vers
     );
 }
 
-
 export default function CreateBaselinePage() {
     const [user, setUser] = useState<User | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
+    const [allTenants, setAllTenants] = useState<CmdbTenant[]>([]);
     const [selectedProductId, setSelectedProductId] = useState<string>('');
     const [dependencyTree, setDependencyTree] = useState<any | null>(null);
+    const [tenantVersionSelections, setTenantVersionSelections] = useState<Record<string, string>>({});
+    
     const [loadingProducts, setLoadingProducts] = useState(true);
     const [loadingTree, setLoadingTree] = useState(false);
     const { toast } = useToast();
@@ -39,29 +41,41 @@ export default function CreateBaselinePage() {
 
     useEffect(() => {
         getUser().then(setUser);
-        async function fetchProducts() {
+        async function fetchInitialData() {
             try {
-                const response = await fetch('/api/products');
-                if (response.ok) {
-                    setProducts(await response.json());
+                const [productsRes, tenantsRes] = await Promise.all([
+                    fetch('/api/products'),
+                    fetch('/api/cmdb/tenants'),
+                ]);
+
+                if (productsRes.ok) {
+                    setProducts(await productsRes.json());
                 } else {
                     throw new Error('Failed to fetch products');
                 }
+                
+                if (tenantsRes.ok) {
+                    setAllTenants(await tenantsRes.json());
+                } else {
+                    throw new Error('Failed to fetch tenants');
+                }
+
             } catch (error) {
                 toast({
                     variant: 'destructive',
                     title: 'Error',
-                    description: 'Could not load products.'
+                    description: 'Could not load initial data.'
                 });
             } finally {
                 setLoadingProducts(false);
             }
         }
-        fetchProducts();
+        fetchInitialData();
     }, [toast]);
 
     const handleProductSelect = async (productId: string) => {
         setSelectedProductId(productId);
+        setTenantVersionSelections({});
         if (!productId) {
             setDependencyTree(null);
             return;
@@ -72,6 +86,12 @@ export default function CreateBaselinePage() {
             if (response.ok) {
                 const tree = await response.json();
                 setDependencyTree(tree);
+                // Set default versions to latest for each tenant in the tree
+                const initialVersions: Record<string, string> = {};
+                tree.tenants.forEach((tenant: any) => {
+                    initialVersions[tenant.id] = tenant.version; // The tree provides the latest version
+                });
+                setTenantVersionSelections(initialVersions);
             } else {
                  throw new Error('Failed to generate dependency tree.');
             }
@@ -87,6 +107,10 @@ export default function CreateBaselinePage() {
         }
     };
     
+    const handleTenantVersionChange = (tenantId: string, version: string) => {
+        setTenantVersionSelections(prev => ({ ...prev, [tenantId]: version }));
+    };
+
     const handleNext = () => {
         if (!selectedProductId || !dependencyTree) {
             toast({
@@ -97,9 +121,20 @@ export default function CreateBaselinePage() {
             return;
         }
         
+        // Enhance the dependency tree with the selected versions
+        const baselineDataForReview = {
+            ...dependencyTree,
+            tenants: dependencyTree.tenants.map((tenant: any) => ({
+                ...tenant,
+                version: tenantVersionSelections[tenant.id] || tenant.version, // Use selected version
+            })),
+            // Pass all tenant data for version validation on the next page
+            allTenants: allTenants 
+        };
+
         try {
             // Store the large data in sessionStorage
-            sessionStorage.setItem(`baseline-data-${selectedProductId}`, JSON.stringify(dependencyTree));
+            sessionStorage.setItem(`baseline-data-${selectedProductId}`, JSON.stringify(baselineDataForReview));
             // Navigate with only the ID
             router.push(`/release-management/baseline/review?productId=${selectedProductId}`);
         } catch (error) {
@@ -111,13 +146,20 @@ export default function CreateBaselinePage() {
         }
     };
 
+    const getAvailableVersionsForTenant = (tenantId: string): CmdbTenant[] => {
+        // This is a simplification. A real app might have a more direct way to get versions.
+        // For now, we assume all instances of a tenant in the `allTenants` list represent its available versions.
+        // We'll filter by `id` which should be the unique identifier across versions.
+        return allTenants.filter(t => t._id.startsWith(tenantId.split('_')[0] + '_' + tenantId.split('_')[1]));
+    }
+
     return (
         <DashboardLayout user={user}>
              <main className="flex-1 p-6 md:p-10 flex justify-center items-start">
                  <Card className="w-full max-w-4xl">
                     <CardHeader>
                         <CardTitle>Create New Baseline</CardTitle>
-                        <CardDescription>Phase 1: Select the product to create a new baseline for.</CardDescription>
+                        <CardDescription>Phase 1: Select the product and versions to create a new baseline for.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {loadingProducts ? (
@@ -167,7 +209,24 @@ export default function CreateBaselinePage() {
                                                     <span>Tenant: {tenant.name}</span>
                                                 </div>
                                             </AccordionTrigger>
-                                            <AccordionContent className="pl-6 space-y-2">
+                                            <AccordionContent className="pl-6 space-y-4">
+                                                <div className="space-y-2 max-w-xs">
+                                                     <Label htmlFor={`version-${tenant.id}`}>Tenant Version</Label>
+                                                     <Select 
+                                                        value={tenantVersionSelections[tenant.id]} 
+                                                        onValueChange={(version) => handleTenantVersionChange(tenant.id, version)}>
+                                                         <SelectTrigger id={`version-${tenant.id}`}>
+                                                             <SelectValue />
+                                                         </SelectTrigger>
+                                                         <SelectContent>
+                                                             {allTenants.filter(t => t.name === tenant.name).map(t_version => (
+                                                                <SelectItem key={t_version.id} value={t_version.version}>
+                                                                    {t_version.version}
+                                                                </SelectItem>
+                                                             ))}
+                                                         </SelectContent>
+                                                     </Select>
+                                                 </div>
                                                 <h4 className="font-semibold text-sm">Components ({tenant.components.length})</h4>
                                                 {tenant.components.length > 0 ? tenant.components.map((comp: any) => <DependencyItem key={comp.id} item={comp} icon={<Puzzle className="h-6 w-6 text-green-500" />} />) : <p className="text-xs text-muted-foreground">No components found.</p>}
                                                 <h4 className="font-semibold text-sm mt-4">Applications ({tenant.applications.length})</h4>

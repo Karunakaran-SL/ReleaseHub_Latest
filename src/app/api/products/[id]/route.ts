@@ -11,7 +11,7 @@ const ProductUpdateSchema = z.object({
   name: z.string().optional(),
   owner: z.string().optional(),
   owner_email: z.string().email().optional(),
-  product_image: z.string().url().optional(),
+  product_image: z.string().url().optional().nullable(),
   approval_needed: z.boolean().optional(),
   default_workflow: z.object({
     id: z.string(),
@@ -33,9 +33,9 @@ const ProductUpdateSchema = z.object({
     id: z.string(),
     name: z.string(),
   }).optional(),
-  git_repo: z.string().url().optional(),
-  artifacts_repo: z.string().url().optional(),
-  pipeline: z.string().url().optional(),
+  git_repo: z.string().url().optional().nullable(),
+  artifacts_repo: z.string().url().optional().nullable(),
+  pipeline: z.string().url().optional().nullable(),
   specifications: z.array(z.object({
     id: z.string(),
     name: z.string(),

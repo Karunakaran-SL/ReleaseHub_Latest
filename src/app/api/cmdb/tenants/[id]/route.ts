@@ -4,6 +4,7 @@ import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
+import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 
 const OnboardingFieldProofSchema = z.object({
   link: z.string().optional(),
@@ -24,11 +25,12 @@ const TenantPhaseSchema = z.object({
 });
 
 const TenantUpdateSchema = z.object({
+  id: z.string(),
   name: z.string().optional(),
   description: z.string().optional(),
   version: z.string().optional(),
   artifact_location: z.string().optional(),
-  dependent_tenants: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
+  dependent_tenants: z.array(z.object({ id: z.string(), name: z.string(), version: z.string().optional() })).optional(),
   products: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   resources: z.object({
       cpu: z.number().optional(),
@@ -74,6 +76,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const validatedData = TenantUpdateSchema.safeParse(body);
 
         if (!validatedData.success) {
+            console.error(validatedData.error);
             return NextResponse.json({ message: 'Invalid data.', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
         }
         
@@ -102,6 +105,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             entityId: id,
             comment: updateComment,
         });
+
+        // Regenerate dependency trees as tenant dependencies might have changed
+        await generateAndStoreAllProductTrees();
 
         const updatedItem = await db.collection(COLLECTION_NAME).findOne({ _id: id });
         return NextResponse.json(updatedItem, { status: 200 });
@@ -141,6 +147,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
             entityId: id,
             comment: comment,
         });
+        
+        await generateAndStoreAllProductTrees();
 
         return NextResponse.json({ message: 'Tenant deleted successfully.' }, { status: 200 });
 

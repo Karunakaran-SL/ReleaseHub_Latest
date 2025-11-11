@@ -1,22 +1,83 @@
 
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
-import type { User, DependencyTree } from '@/lib/definitions';
+import type { User, DependencyTree, CmdbTenant } from '@/lib/definitions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, ShieldCheck, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, ShieldCheck, Loader2, AlertTriangle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+interface ValidationResult {
+    isValid: boolean;
+    corrections: {
+        tenantId: string;
+        tenantName: string;
+        fromVersion: string;
+        toVersion: string;
+        reason: string;
+    }[];
+}
+
+function validateDependencies(baselineData: any): ValidationResult {
+    const corrections: ValidationResult['corrections'] = [];
+    let isValid = true;
+    
+    const allBaselineTenants = baselineData.allTenants as CmdbTenant[];
+    const selectedTenants = [...baselineData.tenants]; // Create a mutable copy
+
+    for (const tenant of selectedTenants) {
+        const fullTenantData = allBaselineTenants.find(t => t.name === tenant.name && t.version === tenant.version);
+        if (!fullTenantData || !fullTenantData.dependent_tenants) continue;
+
+        for (const dependency of fullTenantData.dependent_tenants) {
+            const requiredTenantId = dependency.id;
+            const requiredTenantName = dependency.name;
+            const requiredTenantVersion = dependency.version; // Assuming version is in dependency object
+
+            const actualTenantInBaseline = selectedTenants.find(t => t.name === requiredTenantName);
+
+            if (actualTenantInBaseline && actualTenantInBaseline.version !== requiredTenantVersion) {
+                isValid = false;
+                const correction = {
+                    tenantId: actualTenantInBaseline.id,
+                    tenantName: actualTenantInBaseline.name,
+                    fromVersion: actualTenantInBaseline.version,
+                    toVersion: requiredTenantVersion,
+                    reason: `Required by ${tenant.name} v${tenant.version}.`,
+                };
+                corrections.push(correction);
+                // Apply correction to our mutable copy for subsequent checks
+                actualTenantInBaseline.version = requiredTenantVersion;
+            }
+        }
+    }
+    
+    // Update baseline data with corrections
+    if (!isValid) {
+        for (const correction of corrections) {
+            const tenantToUpdate = baselineData.tenants.find((t: any) => t.id === correction.tenantId);
+            if (tenantToUpdate) {
+                tenantToUpdate.version = correction.toVersion;
+            }
+        }
+    }
+
+    return { isValid, corrections };
+}
+
 
 function BaselineReviewContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [baselineData, setBaselineData] = useState<DependencyTree | null>(null);
+    const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
 
@@ -28,7 +89,21 @@ function BaselineReviewContent() {
             try {
                 const data = sessionStorage.getItem(`baseline-data-${productId}`);
                 if (data) {
-                    setBaselineData(JSON.parse(data));
+                    const parsedData = JSON.parse(data);
+                    
+                    const validation = validateDependencies(parsedData);
+                    setValidationResult(validation);
+
+                    setBaselineData(parsedData);
+                    
+                    if (!validation.isValid) {
+                        toast({
+                            variant: "default",
+                            title: "Dependencies Corrected",
+                            description: "Some tenant versions were automatically updated to satisfy dependencies.",
+                        });
+                    }
+
                 } else {
                     throw new Error('Baseline data not found in session. Please start over.');
                 }
@@ -62,18 +137,18 @@ function BaselineReviewContent() {
     
     const handleCreateBaseline = () => {
         setLoading(true);
-        // Placeholder for API call to save the baseline
-        console.log("Creating baseline...", baselineData);
-        
+        const finalBaselineData = { ...baselineData };
+        delete (finalBaselineData as any).allTenants; // Clean up data before sending
+
         toast({
             title: "Creating Baseline...",
-            description: "Submitting the new baseline for product: " + baselineData.name,
+            description: "Submitting the new baseline for product: " + finalBaselineData.name,
         });
 
         setTimeout(() => {
              setLoading(false);
              // Clean up session storage
-             sessionStorage.removeItem(`baseline-data-${baselineData.product?.id}`);
+             sessionStorage.removeItem(`baseline-data-${searchParams.get('productId')}`);
              toast({
                 title: "Success!",
                 description: "Baseline created successfully.",
@@ -91,6 +166,24 @@ function BaselineReviewContent() {
                         <CardDescription>Phase 2: Review and confirm the components of the new baseline for <strong>{baselineData.name}</strong>.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                        
+                        {validationResult && !validationResult.isValid && (
+                            <Alert variant="default" className="bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800">
+                                <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                                <AlertTitle className="text-yellow-800 dark:text-yellow-300">Automatic Version Corrections</AlertTitle>
+                                <AlertDescription className="text-yellow-700 dark:text-yellow-400">
+                                    The following tenant versions were automatically updated to maintain dependency integrity:
+                                    <ul className="list-disc pl-5 mt-2 text-xs">
+                                        {validationResult.corrections.map((c, i) => (
+                                            <li key={i}>
+                                                <strong>{c.tenantName}</strong> updated from v{c.fromVersion} to <strong>v{c.toVersion}</strong>. <span className="text-muted-foreground">{c.reason}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Root Product</h3>
                             <p className="text-muted-foreground">{baselineData.name}</p>
@@ -100,7 +193,7 @@ function BaselineReviewContent() {
                             <h3 className="text-lg font-semibold mb-2">Specifications ({baselineData.specifications.length})</h3>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                                 {baselineData.specifications.map(spec => (
-                                    <div key={spec.id} className="text-sm p-2 bg-muted rounded-md">{spec.name} - v{spec.version}</div>
+                                    <div key={spec.id} className="text-sm p-2 bg-muted rounded-md">{spec.name} - v{spec.version || 'N/A'}</div>
                                 ))}
                             </div>
                         </div>
@@ -108,22 +201,27 @@ function BaselineReviewContent() {
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Tenants ({baselineData.tenants.length})</h3>
                             <div className="space-y-4">
-                            {baselineData.tenants.map(tenant => (
+                            {baselineData.tenants.map((tenant: any) => (
                                 <Card key={tenant.id} className="bg-secondary/50">
                                     <CardHeader className="p-4">
-                                        <CardTitle className="text-md">{tenant.name} - v{tenant.version}</CardTitle>
+                                        <CardTitle className="text-md flex items-center">
+                                            {tenant.name} - v{tenant.version}
+                                            {validationResult?.corrections.some(c => c.tenantId === tenant.id) && (
+                                                <span className="ml-2 text-xs font-normal text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded-full">Auto-Corrected</span>
+                                            )}
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent className="p-4 pt-0 space-y-2">
                                         <div>
                                             <h4 className="font-medium text-sm">Components ({tenant.components.length})</h4>
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1">
-                                            {tenant.components.map(comp => <div key={comp.id} className="text-xs p-2 bg-background rounded">{comp.name} - v{comp.version}</div>)}
+                                            {tenant.components.map((comp: any) => <div key={comp.id} className="text-xs p-2 bg-background rounded">{comp.name} - v{comp.version}</div>)}
                                             </div>
                                         </div>
                                          <div>
                                             <h4 className="font-medium text-sm">Applications ({tenant.applications.length})</h4>
                                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1">
-                                            {tenant.applications.map(app => <div key={app.id} className="text-xs p-2 bg-background rounded">{app.name} - v{app.version}</div>)}
+                                            {tenant.applications.map((app: any) => <div key={app.id} className="text-xs p-2 bg-background rounded">{app.name} - v{app.version}</div>)}
                                             </div>
                                         </div>
                                     </CardContent>
@@ -157,7 +255,7 @@ function BaselineReviewContent() {
 
 export default function ReviewBaselinePage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<DashboardLayout user={null}><div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>}>
             <BaselineReviewContent />
         </Suspense>
     );

@@ -40,8 +40,8 @@ export async function generateDependencyTree(product: Product, allData: AllData)
     
     // 1. Find specifications for the product
     const productSpecifications = allData.specifications.filter(spec => 
-        product.specifications?.some(s => s.id === spec.id)
-    ).map(s => ({ id: s.id, name: s.name, version: s.version }));
+        product.specifications?.some(s => s.id === spec._id)
+    ).map(s => ({ id: s.id, name: s.name, version: s.version || '1.0' }));
 
     // 2. Find tenants associated with the product
     const productTenants = allData.tenants.filter(tenant => 
@@ -49,46 +49,20 @@ export async function generateDependencyTree(product: Product, allData: AllData)
     );
 
     const tenantsTree = productTenants.map(tenant => {
-        // 3. For each tenant, find its components
-        const tenantComponents = allData.components.filter(comp => 
-            comp.tenants?.some(t => t.id === tenant._id)
-        ).map(comp => {
-            return {
-                id: comp.id,
-                name: comp.name,
-                version: comp.version,
-                parents: [{ id: tenant.id, name: tenant.name, version: tenant.version }],
-                dependent_components: comp.dependent_components || [],
-                dependent_applications: comp.dependent_applications || [],
-                interfaces: {
-                    provided: (comp.provided_interfaces || []).map(p => ({...p, type: 'provided'})),
-                    required: (comp.dependent_interfaces || []).map(r => ({...r, type: 'required'})),
-                }
-            };
-        });
+        // For each tenant, find its components and applications
+        const tenantComponents = allData.components.filter(comp => comp.tenants?.some(t => t.id === tenant._id))
+            .map(c => ({...c, version: c.version || '1.0.0'}));
+        const tenantApplications = allData.applications.filter(app => app.tenants?.some(t => t.id === tenant._id))
+            .map(a => ({...a, version: a.version || '1.0.0'}));
 
-        // 4. For each tenant, find its applications
-        const tenantApplications = allData.applications.filter(app => 
-            app.tenants?.some(t => t.id === tenant._id)
-        ).map(app => {
-            return {
-                id: app.id,
-                name: app.name,
-                version: app.version,
-                parents: [{ id: tenant.id, name: tenant.name, version: tenant.version }],
-                dependent_components: app.dependent_components || [],
-                dependent_applications: app.dependent_applications || [],
-                interfaces: {
-                    provided: (app.provided_interfaces || []).map(p => ({...p, type: 'provided'})),
-                    required: (app.dependent_interfaces || []).map(r => ({...r, type: 'required'})),
-                }
-            };
-        });
-        
+        // Get the latest version of the tenant for the default tree
+        const allVersionsOfTenant = allData.tenants.filter(t => t.name === tenant.name).sort((a,b) => (b.version || '0').localeCompare(a.version || '0'));
+        const latestVersion = allVersionsOfTenant[0]?.version || tenant.version || '1.0.0';
+
         return {
             id: tenant.id,
             name: tenant.name,
-            version: tenant.version,
+            version: latestVersion,
             parents: [{ id: product._id, name: product.name, version: product.version }],
             dependent_tenants: tenant.dependent_tenants || [],
             components: tenantComponents,
@@ -131,7 +105,7 @@ export async function generateAndStoreAllProductTrees() {
             );
             successfulUpdates++;
         } catch (error) {
-            console.error(`Failed to generate tree for product ${product.id}:`, error);
+            console.error(`Failed to generate tree for product ${product._id}:`, error);
             failedUpdates++;
         }
     }
