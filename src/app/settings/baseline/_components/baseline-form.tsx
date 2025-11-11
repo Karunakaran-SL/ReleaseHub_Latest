@@ -90,17 +90,7 @@ export function BaselineForm({ initialData, onSave, isLoading, name }: BaselineF
 
     const renderField = (phase: OnboardingPhase, field: OnboardingFormField, phaseIndex: number, fieldIndex: number) => {
         const fieldId = `${phase.id}-${field.name}`;
-        const value = field.type === 'Checkbox' ? !!field.proof : '';
-        const proofLink = '';
         
-        const handleValueChange = (newValue: any) => {
-            updateField(phaseIndex, fieldIndex, { ...field, proof: newValue });
-        };
-    
-        const handleProofLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-            updateField(phaseIndex, fieldIndex, { ...field, proofLink: e.target.value });
-        };
-
         return (
             <Card key={fieldIndex}>
                 <CardContent className="p-4 space-y-4">
@@ -149,7 +139,7 @@ export function BaselineForm({ initialData, onSave, isLoading, name }: BaselineF
                         <div className="flex gap-4">
                         {field.options?.map(opt => (
                             <div key={opt} className="flex items-center space-x-2">
-                                <input type="radio" id={`${fieldId}-${opt}`} name={fieldId} value={opt} onChange={e => handleValueChange(e.target.value)} />
+                                <input type="radio" id={`${fieldId}-${opt}`} name={fieldId} value={opt} />
                                 <Label htmlFor={`${fieldId}-${opt}`}>{opt}</Label>
                             </div>
                         ))}
