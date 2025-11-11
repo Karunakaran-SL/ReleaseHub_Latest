@@ -161,7 +161,7 @@ function BaselineReviewContent() {
         }
     }
     
-    if (!baselineData) {
+    if (!baselineData || !baselineData.product) {
         return (
              <DashboardLayout user={user}>
                 <div className="flex justify-center items-center h-64">
