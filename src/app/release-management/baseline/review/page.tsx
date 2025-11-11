@@ -12,6 +12,8 @@ import { ArrowLeft, CheckCircle, ShieldCheck, Loader2, AlertTriangle } from 'luc
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Textarea } from '@/components/ui/textarea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface ValidationResult {
     isValid: boolean;
@@ -126,6 +128,21 @@ function BaselineReviewContent() {
         }
     }, [searchParams, router, toast]);
 
+    const compatibilityMatrixItems = useMemo(() => {
+        if (!baselineData) return [];
+        const items = [];
+        for (const tenant of baselineData.tenants) {
+            items.push({ type: 'Tenant', name: tenant.name, version: tenant.version });
+            for (const comp of (tenant as any).components) {
+                items.push({ type: 'Component', name: comp.name, version: comp.version });
+            }
+            for (const app of (tenant as any).applications) {
+                items.push({ type: 'Application', name: app.name, version: app.version });
+            }
+        }
+        return items;
+    }, [baselineData]);
+
     if (!baselineData) {
         return (
              <div className="flex justify-center items-center h-64">
@@ -228,6 +245,45 @@ function BaselineReviewContent() {
                                 </Card>
                             ))}
                             </div>
+                        </div>
+                        <Separator />
+                        <div>
+                             <h3 className="text-lg font-semibold mb-2">Consolidated Release Notes</h3>
+                             <Textarea 
+                                placeholder="Aggregated release notes will be displayed here..." 
+                                rows={8}
+                                defaultValue={`- [Tenant] Platform Foundation v1.0.0: Initial release.\n- [Component] Authentication Service v1.3.0: Added multi-factor authentication support.\n- [Application] User Dashboard v2.0.0: Redesigned user interface.`}
+                            />
+                        </div>
+                        <Separator />
+                        <div>
+                            <h3 className="text-lg font-semibold mb-2">Compatibility Matrix</h3>
+                            <Card>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Type</TableHead>
+                                            <TableHead>Name</TableHead>
+                                            <TableHead>Version</TableHead>
+                                            <TableHead>Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {compatibilityMatrixItems.map((item, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>{item.type}</TableCell>
+                                                <TableCell>{item.name}</TableCell>
+                                                <TableCell>{item.version}</TableCell>
+                                                <TableCell>
+                                                    <span className="flex items-center text-green-600">
+                                                        <CheckCircle className="h-4 w-4 mr-1" /> Compatible
+                                                    </span>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </Card>
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-between">
