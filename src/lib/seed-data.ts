@@ -628,6 +628,13 @@ const initialWorkflows = [
     { "name": "Peer Security Review", "description": "Mandatory security review for sensitive products." }
 ];
 
+const initialComplianceChecks = [
+    { "name": "SOC2", "description": "SOC 2 Type II Compliance" },
+    { "name": "GDPR", "description": "General Data Protection Regulation" },
+    { "name": "HIPAA", "description": "Health Insurance Portability and Accountability Act" },
+    { "name": "PCI-DSS", "description": "Payment Card Industry Data Security Standard" },
+];
+
 const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
     { id: 'REST', name: 'REST API' },
     { id: 'GraphQL', name: 'GraphQL API' },
@@ -750,6 +757,7 @@ export async function seedDatabase() {
         { name: 'specifications', data: fullSpecifications },
         { name: 'deployment_types', data: initialDeploymentTypes.map(d => ({ ...d, _id: d.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
+        { name: 'compliance_checks', data: initialComplianceChecks.map(c => ({...c, _id: c.name.replace(/[^a-zA-Z0-9]/g, '')})) },
         { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
         { name: 'cmdb_components', data: initialComponents.map(c => ({ ...c, _id: c.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
         { name: 'cmdb_applications', data: initialApplications.map(a => ({ ...a, _id: a.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
@@ -778,3 +786,5 @@ export async function seedDatabase() {
 
     return { seededCount, skippedCount };
 }
+
+    
