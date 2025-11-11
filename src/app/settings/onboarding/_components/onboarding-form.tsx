@@ -64,6 +64,7 @@ export function OnboardingForm({ initialData, onSave, isLoading, name }: Onboard
             label: 'New Field',
             helpText: '',
             options: [],
+            proof: false,
         };
         const newPhases = [...config.phases];
         newPhases[phaseIndex].fields.push(newField);
@@ -139,7 +140,7 @@ export function OnboardingForm({ initialData, onSave, isLoading, name }: Onboard
                             <h4 className="font-semibold">Form Fields</h4>
                             <div className="space-y-4">
                                 {phase.fields.map((field, fieldIndex) => (
-                                    <Card key={fieldIndex}>
+                                    <Card key={field.name}>
                                         <CardContent className="p-4 space-y-4">
                                             <div className="flex justify-between items-start">
                                                 <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
