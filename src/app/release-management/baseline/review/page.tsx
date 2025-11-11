@@ -5,7 +5,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
-import type { User, DependencyTree, CmdbTenant, Baseline } from '@/lib/definitions';
+import type { User, CmdbTenant } from '@/lib/definitions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, CheckCircle, Package as PackageIcon, Loader2, AlertTriangle } from 'lucide-react';
@@ -163,10 +163,12 @@ function BaselineReviewContent() {
     
     if (!baselineData) {
         return (
-             <div className="flex justify-center items-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin" />
-                <p className="ml-4 text-muted-foreground">Loading Baseline Data...</p>
-            </div>
+             <DashboardLayout user={user}>
+                <div className="flex justify-center items-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <p className="ml-4 text-muted-foreground">Loading Baseline Data...</p>
+                </div>
+            </DashboardLayout>
         );
     }
 
