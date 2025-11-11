@@ -38,6 +38,7 @@ import {
   Warehouse,
   Workflow as WorkflowIcon,
   GitGraph,
+  DatabaseZap,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -387,6 +388,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </CollapsibleTrigger>
                      <CollapsibleContent>
                       <SidebarMenuSub>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/settings/general" isActive={pathname.startsWith('/settings/general')}>
+                             <DatabaseZap className="mr-2"/> Development
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/onboarding" isActive={pathname.startsWith('/settings/onboarding')}>
                             Onboarding
@@ -488,5 +494,3 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     </SidebarProvider>
   );
 }
-
-    
