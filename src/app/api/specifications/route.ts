@@ -68,7 +68,6 @@ async function seedSpecifications() {
     const db = client.db();
     const collection = db.collection('specifications');
     
-    await collection.deleteMany({ _id: { $in: fullSpecifications.map(i => i._id) } });
     await collection.insertMany(fullSpecifications as any[]);
     console.log('Seeded specifications collection.');
     
@@ -80,9 +79,14 @@ async function seedSpecifications() {
 // List all or search
 export async function GET(req: NextRequest) {
   try {
-    await seedSpecifications();
     const client = await clientPromise;
     const db = client.db();
+    const collection = db.collection('specifications');
+    
+    const count = await collection.countDocuments();
+    if (count === 0) {
+        await seedSpecifications();
+    }
     
     const items = await db.collection('specifications').find({}).toArray();
     return NextResponse.json(items, { status: 200 });

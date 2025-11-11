@@ -137,7 +137,6 @@ async function seedApplications() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    await collection.deleteMany({_id: {$in: initialApplications.map(a => a._id)}});
     await collection.insertMany(initialApplications as any);
 
     console.log('Seeded applications collection.');
@@ -152,8 +151,12 @@ export async function GET(req: NextRequest) {
   try {
     const client = await clientPromise;
     const db = client.db();
-    
-    await seedApplications();
+    const collection = db.collection(COLLECTION_NAME);
+
+    const count = await collection.countDocuments();
+    if (count === 0) {
+        await seedApplications();
+    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });

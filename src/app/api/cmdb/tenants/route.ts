@@ -103,7 +103,6 @@ async function seedTenants() {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    await collection.deleteMany({ _id: { $in: initialTenants.map(t => t._id) } });
     await collection.insertMany(initialTenants as any[]);
     
     console.log('Seeded tenants collection.');
@@ -119,7 +118,10 @@ export async function GET(req: NextRequest) {
     const db = client.db();
     const collection = db.collection(COLLECTION_NAME);
     
-    await seedTenants();
+    const count = await collection.countDocuments();
+    if (count === 0) {
+        await seedTenants();
+    }
     
     const items = await db.collection(COLLECTION_NAME).find({}).toArray();
     return NextResponse.json(items, { status: 200 });

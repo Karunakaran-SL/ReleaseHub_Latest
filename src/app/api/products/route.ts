@@ -101,7 +101,6 @@ async function seedProducts() {
       };
     });
     
-    await productsCollection.deleteMany({ _id: { $in: productsWithDates.map(p => p._id) } });
     await productsCollection.insertMany(productsWithDates as any[]);
     console.log('Seeded products collection.');
 
@@ -114,12 +113,15 @@ async function seedProducts() {
 // Search and list products
 export async function GET(req: NextRequest) {
   try {
-    await seedProducts();
-    await generateAndStoreAllProductTrees();
-    
     const client = await clientPromise;
     const db = client.db();
     const productsCollection = db.collection('products');
+
+    const count = await productsCollection.countDocuments();
+    if (count === 0) {
+      await seedProducts();
+      await generateAndStoreAllProductTrees();
+    }
     
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('q');
