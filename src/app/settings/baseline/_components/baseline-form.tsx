@@ -145,6 +145,16 @@ export function BaselineForm({ initialData, onSave, isLoading, name }: BaselineF
                             <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                     </div>
+                     {field.type === 'RadioBox' && (
+                        <div className="flex gap-4">
+                        {field.options?.map(opt => (
+                            <div key={opt} className="flex items-center space-x-2">
+                                <input type="radio" id={`${fieldId}-${opt}`} name={fieldId} value={opt} onChange={e => handleValueChange(e.target.value)} />
+                                <Label htmlFor={`${fieldId}-${opt}`}>{opt}</Label>
+                            </div>
+                        ))}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         )
