@@ -88,6 +88,69 @@ export function OnboardingForm({ initialData, onSave, isLoading, name }: Onboard
         onSave({ ...config, version: newVersion });
     }
 
+    const renderField = (phase: OnboardingPhase, field: OnboardingFormField, phaseIndex: number, fieldIndex: number) => {
+        const fieldId = `${phase.id}-${field.name}`;
+        // The state might not be initialized, so we provide default empty values.
+        const value = config.phases[phaseIndex]?.fields[fieldIndex]?.label || '';
+        const proofLink = config.phases[phaseIndex]?.fields[fieldIndex]?.proofLink || '';
+
+        const handleValueChange = (newValue: any) => {
+            updateField(phaseIndex, fieldIndex, { label: newValue });
+        };
+
+        const handleProofLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            updateField(phaseIndex, fieldIndex, { proofLink: e.target.value });
+        };
+
+        return (
+            <Card key={fieldIndex}>
+                <CardContent className="p-4 space-y-4">
+                    <div className="flex justify-between items-start">
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <Label>Field Type</Label>
+                                <Select value={field.type} onValueChange={(value: OnboardingFormField['type']) => updateField(phaseIndex, fieldIndex, { type: value, options: [] })}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="TextField">Text Field</SelectItem>
+                                        <SelectItem value="Checkbox">Checkbox</SelectItem>
+                                        <SelectItem value="RadioBox">Radio Box</SelectItem>
+                                        <SelectItem value="DropDown">Drop Down</SelectItem>
+                                        <SelectItem value="Link">Link</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label>Field Name / Label</Label>
+                                <Input value={field.label} onChange={(e) => updateField(phaseIndex, fieldIndex, { label: e.target.value })} />
+                            </div>
+                            {(field.type === 'RadioBox' || field.type === 'DropDown') && (
+                                <div>
+                                    <Label>Options (comma-separated)</Label>
+                                    <Input value={field.options?.join(', ')} onChange={(e) => updateField(phaseIndex, fieldIndex, { options: e.target.value.split(',').map(s => s.trim()) })} />
+                                </div>
+                            )}
+                                <div>
+                                <Label>Help Text</Label>
+                                <Input value={field.helpText} onChange={(e) => updateField(phaseIndex, fieldIndex, { helpText: e.target.value })} />
+                            </div>
+                            <div className="flex items-center space-x-2 pt-6">
+                                <Checkbox 
+                                    checked={field.proof}
+                                    onCheckedChange={(checked) => updateField(phaseIndex, fieldIndex, { proof: !!checked })}
+                                />
+                                <Label>Requires Proof Link</Label>
+                            </div>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => removeField(phaseIndex, fieldIndex)} className="ml-4">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
     return (
         <div className="space-y-6 pt-4">
              <div className="flex items-center justify-between">
@@ -140,51 +203,7 @@ export function OnboardingForm({ initialData, onSave, isLoading, name }: Onboard
                             <h4 className="font-semibold">Form Fields</h4>
                             <div className="space-y-4">
                                 {phase.fields.map((field, fieldIndex) => (
-                                    <Card key={fieldIndex}>
-                                        <CardContent className="p-4 space-y-4">
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                    <div>
-                                                        <Label>Field Type</Label>
-                                                        <Select value={field.type} onValueChange={(value: OnboardingFormField['type']) => updateField(phaseIndex, fieldIndex, { type: value, options: [] })}>
-                                                            <SelectTrigger><SelectValue /></SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem value="TextField">Text Field</SelectItem>
-                                                                <SelectItem value="Checkbox">Checkbox</SelectItem>
-                                                                <SelectItem value="RadioBox">Radio Box</SelectItem>
-                                                                <SelectItem value="DropDown">Drop Down</SelectItem>
-                                                                <SelectItem value="Link">Link</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-                                                    <div>
-                                                        <Label>Field Name / Label</Label>
-                                                        <Input value={field.label} onChange={(e) => updateField(phaseIndex, fieldIndex, { label: e.target.value })} />
-                                                    </div>
-                                                    {(field.type === 'RadioBox' || field.type === 'DropDown') && (
-                                                        <div>
-                                                            <Label>Options (comma-separated)</Label>
-                                                            <Input value={field.options?.join(', ')} onChange={(e) => updateField(phaseIndex, fieldIndex, { options: e.target.value.split(',').map(s => s.trim()) })} />
-                                                        </div>
-                                                    )}
-                                                     <div>
-                                                        <Label>Help Text</Label>
-                                                        <Input value={field.helpText} onChange={(e) => updateField(phaseIndex, fieldIndex, { helpText: e.target.value })} />
-                                                    </div>
-                                                    <div className="flex items-center space-x-2 pt-6">
-                                                        <Checkbox 
-                                                            checked={field.proof}
-                                                            onCheckedChange={(checked) => updateField(phaseIndex, fieldIndex, { proof: !!checked })}
-                                                        />
-                                                        <Label>Requires Proof Link</Label>
-                                                    </div>
-                                                </div>
-                                                <Button variant="ghost" size="icon" onClick={() => removeField(phaseIndex, fieldIndex)} className="ml-4">
-                                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                                </Button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                                    renderField(phase, field, phaseIndex, fieldIndex)
                                 ))}
                             </div>
                             <Button variant="outline" size="sm" onClick={() => addFieldToPhase(phaseIndex)}>
