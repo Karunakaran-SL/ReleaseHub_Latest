@@ -70,7 +70,7 @@ function ApiEndpoint({
             <div className="space-y-4">
                 {responses.map(({status, description, body}) => (
                     <div key={status}>
-                        <p className="font-mono text-sm"><Badge variant={status >= 400 ? 'destructive' : 'default'}>{status}</Badge> - {description}</p>
+                        <div className="font-mono text-sm"><Badge variant={status >= 400 ? 'destructive' : 'default'}>{status}</Badge> - {description}</div>
                         {body && (
                              <div className="bg-muted p-4 rounded-md text-sm text-muted-foreground mt-2">
                                 <pre><code>{body}</code></pre>
