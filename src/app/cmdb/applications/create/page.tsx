@@ -105,9 +105,10 @@ export default function CreateApplicationPage() {
         }
 
         setLoading(true);
+        const applicationId = formState.name?.replace(/[^a-zA-Z0-9]/g, '') || `Application${Date.now()}`;
         const payload = {
             ...formState,
-            id: formState.name?.replace(/\s+/g, '_') || `item-${Date.now()}`,
+            id: applicationId,
             phases: onboardingConfig.phases.map(phase => ({
                 id: phase.id, name: phase.name, version: "1.0", status: "Not Started",
                 fields: phase.fields.map(field => ({ name: field.name, value: "", proof: {} }))

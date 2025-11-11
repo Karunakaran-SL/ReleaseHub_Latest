@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -37,7 +38,7 @@ export default function CreateInterfaceTypePage() {
 
         const payload = {
             ...formState,
-            id: `Interface_Type_${formState.name?.replace(/\s+/g, '_')}`
+            id: formState.name?.replace(/[^a-zA-Z0-9]/g, '') || `InterfaceType${Date.now()}`,
         };
 
         try {

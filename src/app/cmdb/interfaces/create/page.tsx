@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -71,8 +72,8 @@ export default function CreateInterfacePage() {
         setFormState(prev => ({
             ...prev,
             security: {
-                ...prev.security,
-                [scope]: { ...prev.security![scope], [field]: checked }
+                ...prev!.security,
+                [scope]: { ...prev!.security![scope], [field]: checked }
             }
         }));
     };
@@ -98,9 +99,10 @@ export default function CreateInterfacePage() {
         e.preventDefault();
         setLoading(true);
 
+        const interfaceId = formState.name?.replace(/[^a-zA-Z0-9]/g, '') || `Interface${Date.now()}`;
         const payload: Partial<CmdbInterface> = {
             ...formState,
-            id: `Interface_${formState.name?.replace(/\s+/g, '_')}`,
+            id: interfaceId,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         }

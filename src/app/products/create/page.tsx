@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -34,7 +35,7 @@ const initialFormState: Partial<NewProductFormState> = {
     custom_workflows: [],
     cmdb: { id: '', name: '' },
     compliance_checks: [],
-    deployment_type: { id: 'Deployment_Cloud', name: 'Cloud' },
+    deployment_type: { id: 'Cloud', name: 'Cloud' },
     git_repo: '',
     artifacts_repo: '',
     pipeline: '',
@@ -123,13 +124,12 @@ export default function CreateProductPage() {
         setLoading(true);
 
         const productName = formState.name || 'NewProduct';
-        const productId = `Product_${productName.replace(/\s+/g, '_')}`;
+        const productId = productName.replace(/[^a-zA-Z0-9]/g, '');
         const imageUrl = formState.product_image || `https://picsum.photos/seed/${productId}/40/40`;
 
         const payload = {
             ...initialFormState,
             ...formState,
-            _id: productId,
             product_image: imageUrl,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -312,7 +312,7 @@ export default function CreateProductPage() {
                                     </div>
                                 </div>
 
-                                {formState.deployment_type?.id === 'Deployment_Airgapped' && (
+                                {formState.deployment_type?.id === 'Airgapped' && (
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>

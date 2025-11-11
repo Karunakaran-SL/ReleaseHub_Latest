@@ -7,7 +7,6 @@ import { logAuditEvent } from '@/lib/audit';
 import { getUser } from '@/lib/auth';
 
 const SpecificationSchema = z.object({
-  _id: z.string(),
   name: z.string(),
   hw_type: z.object({ id: z.string(), name: z.string() }),
   vendor: z.string(),
@@ -61,6 +60,7 @@ export async function POST(req: NextRequest) {
         
         const newItem = {
             ...validatedData.data,
+            _id: validatedData.data.name.replace(/[^a-zA-Z0-9]/g, ''),
         };
 
         const existing = await collection.findOne({ _id: newItem._id });

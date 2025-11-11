@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -189,21 +190,21 @@ export default function TenantsPage() {
                   items.map((item) => (
                     <TableRow key={item._id}>
                       <TableCell className="font-medium">
-                        <Link href={`/cmdb/tenants/${item._id}/view`} className="hover:underline">
+                        <Link href={`/cmdb/tenants/${item.id}/view`} className="hover:underline">
                           {item.name}
                         </Link>
                       </TableCell>
-                       <TableCell>{item._id}</TableCell>
+                       <TableCell>{item.id}</TableCell>
                       <TableCell>{item.description}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" asChild>
-                             <Link href={`/cmdb/tenants/${item._id}/view`}>VIEW</Link>
+                             <Link href={`/cmdb/tenants/${item.id}/view`}>VIEW</Link>
                           </Button>
                           <Button variant="outline" size="sm" asChild>
-                             <Link href={`/cmdb/tenants/${item._id}/edit`}>UPDATE</Link>
+                             <Link href={`/cmdb/tenants/${item.id}/edit`}>UPDATE</Link>
                           </Button>
-                           <DeleteTenantDialog tenantId={item._id} tenantName={item.name} onTenantDeleted={fetchItems} />
+                           <DeleteTenantDialog tenantId={item.id} tenantName={item.name} onTenantDeleted={fetchItems} />
                         </div>
                       </TableCell>
                     </TableRow>

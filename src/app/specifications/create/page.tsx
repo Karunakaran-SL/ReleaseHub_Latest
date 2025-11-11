@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -94,7 +95,6 @@ export default function CreateSpecificationPage() {
 
         const payload = {
             ...formState,
-            id: `HW_${formState.name?.replace(/\s+/g, '_')}`,
             image: imageUrl,
             network_cards: formState.network_cards ? formState.network_cards.split(',').map(name => ({ id: name.trim().replace(/\s+/g, '_'), name: name.trim() })) : [],
             plug_power_cords: formState.plug_power_cords ? formState.plug_power_cords.split(',').map(name => ({ id: name.trim().replace(/\s+/g, '_'), name: name.trim() })) : [],
@@ -126,10 +126,10 @@ export default function CreateSpecificationPage() {
     };
     
     // Dummy data for dropdowns
-    const hwTypes = [{ id: 'HWType_Rack', name: 'Rack' }, { id: 'HWType_Blade', name: 'Blade' }];
+    const hwTypes = [{ id: 'Rack', name: 'Rack' }, { id: 'Blade', name: 'Blade' }];
     const vendors = ['Dell EMC', 'HPE', 'Cisco', 'Lenovo'];
-    const contractTypes = [{ id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus' }, { id: 'ServiceContract_Foundation_Care', name: 'Foundation Care' }];
-    const hypervisors = [{ id: 'Hypervisor_VMWare_ESXi', name: 'VMWare ESXi' }, { id: 'Hypervisor_Microsoft_HyperV', name: 'Microsoft Hyper-V' }];
+    const contractTypes = [{ id: 'ProSupportPlus', name: 'ProSupport Plus' }, { id: 'FoundationCare', name: 'Foundation Care' }];
+    const hypervisors = [{ id: 'VMWareESXi', name: 'VMWare ESXi' }, { id: 'MicrosoftHyper-V', name: 'Microsoft Hyper-V' }];
 
     return (
         <DashboardLayout user={user}>

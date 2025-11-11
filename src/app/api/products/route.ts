@@ -36,7 +36,6 @@ export async function GET(req: NextRequest) {
 
 // Create Product Schema (without _id)
 const ProductSchema = z.object({
-  _id: z.string(),
   name: z.string(),
   owner: z.string(),
   owner_email: z.string().email(),
@@ -93,6 +92,7 @@ export async function POST(req: NextRequest) {
         
         const newProduct = {
             ...validatedData.data,
+            _id: validatedData.data.name.replace(/[^a-zA-Z0-9]/g, ''),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         };

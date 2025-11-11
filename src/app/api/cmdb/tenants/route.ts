@@ -1,4 +1,5 @@
 
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -95,4 +96,6 @@ export async function POST(req: NextRequest) {
 
     } catch (error) {
         console.error(error);
-        return NextResponse.json({ message: 'An internal server error occurred.' },
+        return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
+    }
+}
