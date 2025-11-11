@@ -2,10 +2,548 @@
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration } from './definitions';
-import { initialApplicationOnboarding } from '@/app/api/settings/application-onboarding/route';
-import { initialComponentOnboarding } from '@/app/api/settings/component-onboarding/route';
-import { initialTenantOnboarding } from '@/app/api/settings/tenant-onboarding/route';
-import { initialBaselineConfig } from '@/app/api/settings/baseline-onboarding/route';
+
+
+const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
+  name: 'Application Onboarding',
+  version: 1,
+  phases: [
+    {
+      id: "phase-1",
+      name: "Initiate Onboarding",
+      ownerName: "Sales Team",
+      ownerEmail: "sales@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
+        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
+        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
+        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
+      ],
+    },
+    {
+      id: "phase-2",
+      name: "Product Definitions",
+      ownerName: "Product Team",
+      ownerEmail: "product@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
+        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
+        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
+      ],
+    },
+    {
+        id: "phase-3",
+        name: "Detail Design",
+        ownerName: "Engineering Team",
+        ownerEmail: "eng@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
+          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
+          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
+          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
+        ],
+    },
+    {
+        id: "phase-4",
+        name: "Delivery",
+        ownerName: "QA Team",
+        ownerEmail: "qa@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
+            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
+            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
+            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
+        ]
+    },
+     {
+        id: "phase-5",
+        name: "Alpha Qualification",
+        ownerName: "Alpha Team",
+        ownerEmail: "alpha@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
+            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
+            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
+        ]
+    },
+    {
+        id: "phase-6",
+        name: "Prepare customer",
+        ownerName: "Support Team",
+        ownerEmail: "support@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
+            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
+        ]
+    },
+    {
+        id: "phase-7",
+        name: "Beta Qualification",
+        ownerName: "Beta Team",
+        ownerEmail: "beta@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
+            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
+            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
+        ]
+    },
+    {
+        id: "phase-8",
+        name: "Completed",
+        ownerName: "Release Team",
+        ownerEmail: "release@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
+        ]
+    }
+  ],
+};
+
+const initialComponentOnboarding: Omit<OnboardingConfiguration, '_id'> = {
+  name: 'Component Onboarding',
+  version: 1,
+  phases: [
+    {
+      id: "phase-1",
+      name: "Initiate Onboarding",
+      ownerName: "Sales Team",
+      ownerEmail: "sales@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
+        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
+        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
+        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
+      ],
+    },
+    {
+      id: "phase-2",
+      name: "Product Definitions",
+      ownerName: "Product Team",
+      ownerEmail: "product@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
+        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
+        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
+      ],
+    },
+    {
+        id: "phase-3",
+        name: "Detail Design",
+        ownerName: "Engineering Team",
+        ownerEmail: "eng@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
+          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
+          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
+          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
+        ],
+    },
+    {
+        id: "phase-4",
+        name: "Delivery",
+        ownerName: "QA Team",
+        ownerEmail: "qa@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
+            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
+            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
+            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
+        ]
+    },
+     {
+        id: "phase-5",
+        name: "Alpha Qualification",
+        ownerName: "Alpha Team",
+        ownerEmail: "alpha@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
+            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
+            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
+        ]
+    },
+    {
+        id: "phase-6",
+        name: "Prepare customer",
+        ownerName: "Support Team",
+        ownerEmail: "support@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
+            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
+        ]
+    },
+    {
+        id: "phase-7",
+        name: "Beta Qualification",
+        ownerName: "Beta Team",
+        ownerEmail: "beta@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
+            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
+            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
+        ]
+    },
+    {
+        id: "phase-8",
+        name: "Completed",
+        ownerName: "Release Team",
+        ownerEmail: "release@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
+        ]
+    }
+  ],
+};
+
+const initialTenantOnboarding: Omit<OnboardingConfiguration, '_id'> = {
+  name: 'Tenant Onboarding',
+  version: 1,
+  phases: [
+    {
+      id: "phase-1",
+      name: "Initiate Onboarding",
+      ownerName: "Sales Team",
+      ownerEmail: "sales@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
+        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
+        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
+        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
+      ],
+    },
+    {
+      id: "phase-2",
+      name: "Product Definitions",
+      ownerName: "Product Team",
+      ownerEmail: "product@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
+        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
+        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
+      ],
+    },
+    {
+        id: "phase-3",
+        name: "Detail Design",
+        ownerName: "Engineering Team",
+        ownerEmail: "eng@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
+          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
+          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
+          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
+        ],
+    },
+    {
+        id: "phase-4",
+        name: "Delivery",
+        ownerName: "QA Team",
+        ownerEmail: "qa@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
+            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
+            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
+            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
+        ]
+    },
+     {
+        id: "phase-5",
+        name: "Alpha Qualification",
+        ownerName: "Alpha Team",
+        ownerEmail: "alpha@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
+            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
+            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
+        ]
+    },
+    {
+        id: "phase-6",
+        name: "Prepare customer",
+        ownerName: "Support Team",
+        ownerEmail: "support@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
+            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
+        ]
+    },
+    {
+        id: "phase-7",
+        name: "Beta Qualification",
+        ownerName: "Beta Team",
+        ownerEmail: "beta@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
+            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
+            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
+        ]
+    },
+    {
+        id: "phase-8",
+        name: "Completed",
+        ownerName: "Release Team",
+        ownerEmail: "release@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
+        ]
+    }
+  ],
+};
+
+const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
+  name: 'Baseline Onboarding',
+  version: 1,
+  phases: [
+    {
+      id: "phase-sanity-test",
+      name: "Sanity Test",
+      ownerName: "DevOps",
+      ownerEmail: "devops@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
+      fields: [
+        { type: "Link", name: "ciJobUrl", label: "CI Job URL", proof: true },
+        { type: "DropDown", name: "triggerMethod", label: "Trigger Method", options: ["manual", "auto"] },
+        { type: "TextField", name: "status", label: "Status" },
+        { type: "Link", name: "logsLink", label: "Logs Link", proof: true },
+      ],
+    },
+    {
+      id: "phase-static-analysis",
+      name: "Static Code Analysis",
+      ownerName: "Security Team",
+      ownerEmail: "security@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Completed", "Failed"],
+      fields: [
+        { type: "TextField", name: "toolUsed", label: "Tool Used", helpText: "e.g., SonarQube, ESLint" },
+        { type: "TextField", name: "score", label: "Score" },
+        { type: "TextField", name: "issuesSummary", label: "Issues Summary" },
+        { type: "Link", name: "reportUrl", label: "Report URL", proof: true },
+      ],
+    },
+    {
+        id: "phase-vulnerability-scan",
+        name: "Vulnerability / Malware Scan",
+        ownerName: "Security Team",
+        ownerEmail: "security@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Completed", "Failed"],
+        fields: [
+            { type: "TextField", name: "scannerTool", label: "Scanner Tool", helpText: "e.g., Snyk, Trivy" },
+            { type: "TextField", name: "cveList", label: "CVE List (comma-separated)"},
+            { type: "TextField", name: "severityBreakdown", label: "Severity Breakdown" },
+            { type: "Link", name: "reportUrl", label: "Report URL", proof: true },
+        ]
+    },
+    {
+        id: "phase-risk-scoping",
+        name: "Risk Scoping",
+        ownerName: "Risk Management",
+        ownerEmail: "risk@example.com",
+        sendEmailOnComplete: false,
+        statusOptions: ["Not Started", "In Progress", "Completed"],
+        fields: [
+            { type: "TextField", name: "riskCategories", label: "Risk Categories" },
+            { type: "DropDown", name: "impactLevel", label: "Impact Level", options: ["Low", "Medium", "High", "Critical"] },
+            { type: "TextField", name: "mitigationPlan", label: "Mitigation Plan", proof: true },
+            { type: "TextField", name: "owner", label: "Owner" },
+        ]
+    },
+    {
+        id: "phase-pen-testing",
+        name: "Penetration Testing",
+        ownerName: "External Security",
+        ownerEmail: "pentest@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Completed", "Failed"],
+        fields: [
+            { type: "TextField", name: "testScope", label: "Test Scope" },
+            { type: "RadioBox", name: "testType", label: "Test Type", options: ["External", "Internal"] },
+            { type: "TextField", name: "findings", label: "Findings Summary", proof: true },
+            { type: "DropDown", name: "remediationStatus", label: "Remediation Status", options: ["Pending", "In Progress", "Completed"] },
+        ]
+    },
+    {
+        id: "phase-functional-tests",
+        name: "Functional Tests",
+        ownerName: "QA Team",
+        ownerEmail: "qa@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
+        fields: [
+            { type: "TextField", name: "testSuiteName", label: "Test Suite Name" },
+            { type: "TextField", name: "coverage", label: "Coverage %" },
+            { type: "TextField", name: "passFailSummary", label: "Pass/Fail Summary" },
+            { type: "Link", name: "testResultsLink", label: "Link to Test Results", proof: true },
+        ]
+    },
+    {
+        id: "phase-non-functional-tests",
+        name: "Non-Functional Tests",
+        ownerName: "Performance Team",
+        ownerEmail: "performance@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
+        fields: [
+            { type: "DropDown", name: "testType", label: "Type", options: ["Load", "Stress", "Scalability"] },
+            { type: "TextField", name: "metrics", label: "Metrics (TPS, latency, etc.)" },
+            { type: "TextField", name: "thresholds", label: "Thresholds" },
+            { type: "TextField", name: "resultSummary", label: "Result Summary", proof: true },
+        ]
+    },
+    {
+        id: "phase-qa-report",
+        name: "QA Report",
+        ownerName: "QA Lead",
+        ownerEmail: "qalead@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"],
+        fields: [
+            { type: "TextField", name: "qaOwner", label: "QA Owner" },
+            { type: "TextField", name: "summary", label: "Summary", proof: true },
+            { type: "TextField", name: "issues", label: "Open Issues" },
+            { type: "DropDown", name: "finalVerdict", label: "Final Verdict", options: ["GO", "NO-GO"] },
+        ]
+    },
+    {
+        id: "phase-approvals",
+        name: "Approvals",
+        ownerName: "Management",
+        ownerEmail: "mgmt@example.com",
+        sendEmailOnComplete: false,
+        statusOptions: ["Pending", "Approved", "Rejected"],
+        fields: [
+            { type: "TextField", name: "approverList", label: "Approver List" },
+            { type: "TextField", name: "approvalStatus", label: "Approval Status" },
+            { type: "TextField", name: "comments", label: "Comments", proof: true },
+            { type: "TextField", name: "timestamp", label: "Timestamp" },
+        ]
+    },
+    {
+        id: "phase-uat",
+        name: "User Acceptance Test (UAT)",
+        ownerName: "Business Owner",
+        ownerEmail: "business@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Signed-off", "Rejected"],
+        fields: [
+            { type: "TextField", name: "testCases", label: "Test Cases" },
+            { type: "TextField", name: "businessOwner", label: "Business Owner" },
+            { type: "TextField", name: "feedback", label: "Feedback", proof: true },
+            { type: "DropDown", name: "signOffStatus", label: "Sign-off Status", options: ["Pending", "Approved", "Rejected"] },
+        ]
+    },
+    {
+        id: "phase-ux-approval",
+        name: "UX Approval",
+        ownerName: "UX Team",
+        ownerEmail: "ux@example.com",
+        sendEmailOnComplete: false,
+        statusOptions: ["Pending", "Approved", "Rejected"],
+        fields: [
+            { type: "TextField", name: "uxReviewer", label: "UX Reviewer" },
+            { type: "Link", name: "designChecklist", label: "Design Checklist", proof: true },
+            { type: "TextField", name: "accessibilityScore", label: "Accessibility Score" },
+            { type: "DropDown", name: "approvalStatus", label: "Approval Status", options: ["Pending", "Approved", "Rejected"] },
+        ]
+    },
+    {
+        id: "phase-export-compliance",
+        name: "Export Compliance",
+        ownerName: "Legal Team",
+        ownerEmail: "legal@example.com",
+        sendEmailOnComplete: false,
+        statusOptions: ["Pending", "Approved", "Rejected"],
+        fields: [
+            { type: "TextField", name: "region", label: "Region" },
+            { type: "Link", name: "complianceChecklist", label: "Compliance Checklist", proof: true },
+            { type: "DropDown", name: "legalReviewStatus", label: "Legal Review Status", options: ["Pending", "Approved", "Rejected"] },
+        ]
+    },
+    {
+        id: "phase-license-validations",
+        name: "License Validations",
+        ownerName: "Legal Team",
+        ownerEmail: "legal@example.com",
+        sendEmailOnComplete: false,
+        statusOptions: ["Pending", "Completed", "Failed"],
+        fields: [
+            { type: "TextField", name: "licenseTypes", label: "License Types" },
+            { type: "TextField", name: "compatibility", label: "Compatibility" },
+            { type: "TextField", name: "violations", label: "Violations", proof: true },
+            { type: "TextField", name: "legalNotes", label: "Legal Notes" },
+        ]
+    },
+    {
+        id: "phase-contract-testing",
+        name: "Contract Testing",
+        ownerName: "API Governance",
+        ownerEmail: "governance@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
+        fields: [
+            { type: "TextField", name: "consumerProviderServices", label: "Consumer/Provider Services" },
+            { type: "Link", name: "pactFileUrl", label: "Pact File URL", proof: true },
+            { type: "TextField", name: "testResult", label: "Test Result" },
+            { type: "TextField", name: "versionCompatibility", label: "Version Compatibility" },
+        ]
+    }
+  ],
+};
 
 
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
