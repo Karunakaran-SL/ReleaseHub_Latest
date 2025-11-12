@@ -37,15 +37,16 @@ export default function ValidationPhaseComponent({
 
   const renderField = (field: OnboardingFormField) => {
     const fieldId = `${phase.id}-${field.name}`;
-    const value = phaseState?.[field.name]?.value ?? '';
-    const proofLink = phaseState?.[field.name]?.proofLink ?? '';
+    const fieldData = phaseState?.[field.name] || { value: '', proofLink: ''};
+    const value = fieldData.value;
+    const proofLink = fieldData.proofLink;
 
     const handleValueChange = (newValue: any) => {
-        onStateChange(field.name, { value: newValue, proofLink });
+        onStateChange(field.name, { value: newValue, proofLink: proofLink });
     };
 
     const handleProofLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onStateChange(field.name, { value, proofLink: e.target.value });
+        onStateChange(field.name, { value: value, proofLink: e.target.value });
     };
 
     return (
@@ -55,11 +56,11 @@ export default function ValidationPhaseComponent({
            {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
         </div>
         
-        {field.type === 'TextField' && <Input id={fieldId} value={value} onChange={e => handleValueChange(e.target.value)} />}
+        {field.type === 'TextField' && <Input id={fieldId} value={value || ''} onChange={e => handleValueChange(e.target.value)} />}
         {field.type === 'Checkbox' && <Checkbox id={fieldId} checked={!!value} onCheckedChange={checked => handleValueChange(!!checked)} />}
-        {field.type === 'Link' && <Input id={fieldId} value={value} onChange={e => handleValueChange(e.target.value)} placeholder="https://..."/>}
+        {field.type === 'Link' && <Input id={fieldId} value={value || ''} onChange={e => handleValueChange(e.target.value)} placeholder="https://..."/>}
         {field.type === 'DropDown' && (
-             <Select onValueChange={handleValueChange} value={value}>
+             <Select onValueChange={handleValueChange} value={value || ''}>
                 <SelectTrigger id={fieldId}><SelectValue placeholder="Select..."/></SelectTrigger>
                 <SelectContent>
                     {(field.options || []).map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
@@ -80,7 +81,7 @@ export default function ValidationPhaseComponent({
         {field.proof && (
             <div className="mt-2 space-y-1">
                 <Label htmlFor={`${fieldId}-proof`} className="text-xs">Proof Link</Label>
-                <Input id={`${fieldId}-proof`} value={proofLink} onChange={handleProofLinkChange} placeholder="Link to evidence"/>
+                <Input id={`${fieldId}-proof`} value={proofLink || ''} onChange={handleProofLinkChange} placeholder="Link to evidence"/>
             </div>
         )}
 
