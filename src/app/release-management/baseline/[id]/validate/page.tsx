@@ -95,58 +95,64 @@ export default function ValidateBaselinePage() {
     };
 
     const handleSavePopup = async () => {
-        if (expandedPhase && popupState) {
-            setSaving(true);
-            const updatedPhases = baseline!.validation_phases.map(phaseConfig => {
-                if (phaseConfig.id === expandedPhase) {
-                    const phaseData = popupState;
-                     return {
-                        ...phaseConfig,
-                        status: phaseData.status,
-                        fields: phaseConfig.fields.map(fieldConfig => ({
-                            ...fieldConfig,
-                            value: phaseData[`${fieldConfig.name}_value`] || '',
-                            proof: { link: phaseData[`${fieldConfig.name}_proofLink`] || '' }
-                        }))
-                    };
-                }
-                // For other phases, construct their state from the main `phasesState`
-                const existingPhaseData = phasesState[phaseConfig.id] || {};
+        if (!baseline || !expandedPhase || !popupState) return;
+
+        setSaving(true);
+        const updatedPhases = baseline.validation_phases.map(phaseConfig => {
+            if (phaseConfig.id === expandedPhase) {
+                const phaseData = popupState;
                  return {
                     ...phaseConfig,
-                    status: existingPhaseData.status,
+                    status: phaseData.status,
                     fields: phaseConfig.fields.map(fieldConfig => ({
                         ...fieldConfig,
-                        value: existingPhaseData[`${fieldConfig.name}_value`] || '',
-                        proof: { link: existingPhaseData[`${fieldConfig.name}_proofLink`] || '' }
+                        value: phaseData[`${fieldConfig.name}_value`] || '',
+                        proof: { link: phaseData[`${fieldConfig.name}_proofLink`] || '' }
                     }))
                 };
-            });
-
-            try {
-                 const response = await fetch(`/api/baselines/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        validation_phases: updatedPhases,
-                        updateComment: `Updated validation phase: ${baseline!.validation_phases.find(p => p.id === expandedPhase)?.name}`
-                    }),
-                });
-                if (!response.ok) throw new Error('Failed to save phase progress.');
-
-                const updatedBaseline = await response.json();
-                setBaseline(updatedBaseline);
-
-                // Update local state after successful save
-                setPhasesState(prev => ({ ...prev, [expandedPhase]: popupState }));
-                toast({ title: "Progress Saved", description: "Your changes to the validation phase have been saved."});
-
-            } catch (error: any) {
-                toast({ variant: 'destructive', title: 'Error', description: error.message });
-            } finally {
-                setSaving(false);
             }
+            // For other phases, construct their state from the main `phasesState`
+            const existingPhaseData = phasesState[phaseConfig.id] || {};
+             return {
+                ...phaseConfig,
+                status: existingPhaseData.status,
+                fields: phaseConfig.fields.map(fieldConfig => ({
+                    ...fieldConfig,
+                    value: existingPhaseData[`${fieldConfig.name}_value`] || '',
+                    proof: { link: existingPhaseData[`${fieldConfig.name}_proofLink`] || '' }
+                }))
+            };
+        });
+
+        try {
+             const response = await fetch(`/api/baselines/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    status: baseline.status, // Send current status
+                    validation_phases: updatedPhases,
+                    updateComment: `Updated validation phase: ${baseline.validation_phases.find(p => p.id === expandedPhase)?.name}`
+                }),
+            });
+            if (!response.ok) {
+                 const errorData = await response.json();
+                 console.error(errorData);
+                 throw new Error(errorData.message || 'Failed to save phase progress.');
+            }
+
+            const updatedBaseline = await response.json();
+            setBaseline(updatedBaseline);
+
+            // Update local state after successful save
+            setPhasesState(prev => ({ ...prev, [expandedPhase]: popupState }));
+            toast({ title: "Progress Saved", description: "Your changes to the validation phase have been saved."});
+
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: error.message });
+        } finally {
+            setSaving(false);
         }
+        
         handleCancelPopup();
     };
     
@@ -195,7 +201,7 @@ export default function ValidateBaselinePage() {
                                 onStateChange={handlePopupStateChange}
                                 onStatusChange={handlePopupStatusChange}
                                 isExpanded={expandedPhase === phase.id}
-                                onExpand={() => handleExpandPhase(phase.id)}
+                                onExpand={() => !isFinalized && handleExpandPhase(phase.id)}
                                 statusColor={statusColors[phasesState[phase.id]?.status] || 'bg-gray-200 text-gray-800'}
                                 onSave={handleSavePopup}
                                 onCancel={handleCancelPopup}
@@ -215,7 +221,7 @@ export default function ValidateBaselinePage() {
                 )}
 
                  <div className="mt-12 flex justify-end">
-                    <Button asChild size="lg" disabled={saving || isFinalized}>
+                    <Button asChild size="lg" disabled={saving}>
                         <Link href={`/release-management/baseline/${id}/finalize`}>
                             <ArrowRight className="mr-2 h-5 w-5" />
                             Next: Finalize Release

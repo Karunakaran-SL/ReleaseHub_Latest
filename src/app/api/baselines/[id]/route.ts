@@ -4,10 +4,9 @@ import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
-import { ObjectId } from 'mongodb';
 
 const BaselineUpdateSchema = z.object({
-  status: z.enum(['DRAFT', 'VALIDATING', 'VALIDATED', 'RELEASED', 'ARCHIVED', 'REJECTED']),
+  status: z.enum(['DRAFT', 'VALIDATING', 'VALIDATED', 'RELEASED', 'ARCHIVED', 'REJECTED']).optional(),
   updateComment: z.string().min(1, 'Update comment is required.'),
   validation_phases: z.any().optional(),
 });
