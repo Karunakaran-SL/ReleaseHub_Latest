@@ -123,7 +123,7 @@ export default function CreateBaselinePage() {
         
         const selectionsForStorage = {
             productId: selectedProductId,
-            productVersion: dependencyTree.product.version,
+            productVersion: dependencyTree.version,
             tenantVersions: tenantVersionSelections,
         };
 
