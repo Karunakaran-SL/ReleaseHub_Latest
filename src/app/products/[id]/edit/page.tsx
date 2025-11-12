@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -252,19 +253,6 @@ export default function EditProductPage() {
 
                             {/* Part 2 */}
                             <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="cmdb">Select the CMDB</Label>
-                                    <Select value={formState.cmdb?.id} onValueChange={(value) => handleSelectChange('cmdb', value)}>
-                                        <SelectTrigger id="cmdb">
-                                            <SelectValue placeholder="Select the CMDB" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {cmdbItems.map(item => (
-                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
                                  <div>
                                     <Label>Select the compliance check</Label>
                                      {renderMultiSelect('compliance_checks', complianceChecks)}

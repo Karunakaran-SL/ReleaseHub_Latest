@@ -259,19 +259,6 @@ export default function CreateProductPage() {
 
                             {/* Part 2 */}
                             <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="cmdb">Select the CMDB</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('cmdb', value)}>
-                                        <SelectTrigger id="cmdb">
-                                            <SelectValue placeholder="Select the CMDB" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {allCmdbItems.map(item => (
-                                                <SelectItem key={item.id} value={item.id}>{item.label}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
                                  <div>
                                     <Label>Select the compliance check</Label>
                                      {renderMultiSelect('compliance_checks', allComplianceChecks)}
