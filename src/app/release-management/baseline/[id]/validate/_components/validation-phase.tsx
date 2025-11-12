@@ -37,7 +37,7 @@ export default function ValidationPhaseComponent({
 
   const renderField = (field: OnboardingFormField) => {
     const fieldId = `${phase.id}-${field.name}`;
-    const fieldData = phaseState?.[field.name] || { value: '', proofLink: ''};
+    const fieldData = phaseState?.[field.name] || { value: '', proofLink: '' };
     const value = fieldData.value;
     const proofLink = fieldData.proofLink;
 
