@@ -64,11 +64,12 @@ export default function ValidateBaselinePage() {
                 
                 const initialState: Record<string, any> = {};
                 currentBaseline.validation_phases.forEach((phase: OnboardingPhase) => {
-                    initialState[phase.id] = { status: phase.status || 'Not Started' };
+                    const phaseState: any = { status: phase.status || 'Not Started' };
                     phase.fields.forEach(field => {
-                        initialState[phase.id][`${field.name}_value`] = field.value || '';
-                        initialState[phase.id][`${field.name}_proofLink`] = field.proof?.link || '';
+                        phaseState[`${field.name}_value`] = field.value || '';
+                        phaseState[`${field.name}_proofLink`] = field.proof?.link || '';
                     });
+                    initialState[phase.id] = phaseState;
                 });
                 setPhasesState(initialState);
                 
@@ -83,7 +84,7 @@ export default function ValidateBaselinePage() {
 
     const handleExpandPhase = (phaseId: string) => {
         setExpandedPhase(phaseId);
-        setPopupState(JSON.parse(JSON.stringify(phasesState[phaseId] || {})));
+        setPopupState({ ...(phasesState[phaseId] || {}) });
     };
 
     const handleCancelPopup = () => {

@@ -39,7 +39,6 @@ export default function ValidationPhaseComponent({
   const renderField = (field: OnboardingFormField) => {
     const fieldId = `${phase.id}-${field.name}`;
     
-    // Now we get flattened values directly from phaseState
     const value = phaseState?.[`${field.name}_value`] ?? '';
     const proofLink = phaseState?.[`${field.name}_proofLink`] ?? '';
 
