@@ -2,6 +2,7 @@
 
 
 
+
 export type User = {
   _id: string;
   username: string;
@@ -250,4 +251,28 @@ export type Baseline = {
         checksum_md5: string;
         checksum_sha256: string;
     };
+};
+
+export type Deployment = {
+    _id: string;
+    productId: string;
+    specificationId: string;
+    hypervisorId: string;
+    foundationComponentIds: string[];
+    security: {
+        encryptionKey: string;
+        signingCert: string;
+        pkiDetails: string;
+        iamToken: string;
+    };
+    details: {
+        deploymentId: string;
+        customer: string;
+        factory: string;
+        location: string;
+        customerKeyPair: string;
+    };
+    createdBy: string;
+    createdAt: string;
+    status: 'PROVISIONING' | 'ACTIVE' | 'UPGRADING' | 'FAILED' | 'DECOMMISSIONED';
 };

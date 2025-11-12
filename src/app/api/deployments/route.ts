@@ -7,8 +7,23 @@ import { logAuditEvent } from '@/lib/audit';
 
 // This is a placeholder schema. We will expand it as we build the wizard.
 const DeploymentSchema = z.object({
-  productId: z.string(),
-  specificationId: z.string(),
+  productId: z.string().min(1),
+  specificationId: z.string().min(1),
+  hypervisorId: z.string().min(1),
+  foundationComponentIds: z.array(z.string()).min(1),
+  security: z.object({
+    encryptionKey: z.string().optional(),
+    signingCert: z.string().optional(),
+    pkiDetails: z.string().optional(),
+    iamToken: z.string().optional(),
+  }),
+  details: z.object({
+    deploymentId: z.string().min(1),
+    customer: z.string().min(1),
+    factory: z.string().optional(),
+    location: z.string().optional(),
+    customerKeyPair: z.string().optional(),
+  })
 });
 
 // List all deployments
@@ -44,7 +59,7 @@ export async function POST(req: NextRequest) {
         
         const newItem = {
             ...validatedData.data,
-            _id: `dep_${Date.now()}`,
+            _id: validatedData.data.details.deploymentId,
             createdBy: user.username,
             createdAt: new Date().toISOString(),
             status: 'PROVISIONING',

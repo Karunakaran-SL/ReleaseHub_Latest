@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { getUser } from '@/lib/auth';
@@ -16,7 +17,8 @@ const collectionsToClear = [
     'workflows',
     'compliance_checks',
     'deployment_types',
-    'cmdb'
+    'cmdb',
+    'deployments'
 ];
 
 export async function POST(req: NextRequest) {

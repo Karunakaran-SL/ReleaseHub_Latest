@@ -25,14 +25,26 @@ export default function DeploymentDashboardPage() {
                         <p className="text-muted-foreground">Centralized view of all worldwide deployments.</p>
                     </div>
                     <div className="flex gap-2">
-                        <Button variant="outline"><Upload className="mr-2 h-4 w-4" /> Upgrade Wizard</Button>
+                        <Button variant="outline" asChild>
+                           <Link href="/fleet-management/deployment/upgrade">
+                                <Upload className="mr-2 h-4 w-4" /> Upgrade Wizard
+                            </Link>
+                        </Button>
                         <Button asChild>
                             <Link href="/fleet-management/deployment/new">
                                 <PlusCircle className="mr-2 h-4 w-4" /> New Deployment Wizard
                             </Link>
                         </Button>
-                        <Button variant="outline"><GitMerge className="mr-2 h-4 w-4" /> Migration Wizard</Button>
-                        <Button variant="destructive"><Trash2 className="mr-2 h-4 w-4" /> Decommission Wizard</Button>
+                        <Button variant="outline" asChild>
+                           <Link href="/fleet-management/deployment/migration">
+                                <GitMerge className="mr-2 h-4 w-4" /> Migration Wizard
+                            </Link>
+                        </Button>
+                        <Button variant="destructive" asChild>
+                            <Link href="/fleet-management/deployment/decommission">
+                                <Trash2 className="mr-2 h-4 w-4" /> Decommission Wizard
+                            </Link>
+                        </Button>
                     </div>
                 </div>
 
