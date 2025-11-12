@@ -17,11 +17,10 @@ const BaselineUpdateSchema = z.object({
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
-        if (!ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
         
         const client = await clientPromise;
         const db = client.db();
-        const item = await db.collection('baselines').findOne({ _id: new ObjectId(id) });
+        const item = await db.collection('baselines').findOne({ _id: id });
 
         if (!item) {
             return NextResponse.json({ message: 'Baseline not found.' }, { status: 404 });
@@ -44,7 +43,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         }
 
         const { id } = params;
-        if (!ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
 
         const body = await req.json();
         const validatedData = BaselineUpdateSchema.safeParse(body);
@@ -59,7 +57,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const { updateComment, ...baselineData } = validatedData.data;
 
         const result = await db.collection('baselines').updateOne(
-            { _id: new ObjectId(id) },
+            { _id: id },
             { $set: { ...baselineData, updated_at: new Date().toISOString() } }
         );
 
@@ -67,7 +65,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             return NextResponse.json({ message: 'Baseline not found.' }, { status: 404 });
         }
         
-        const baseline = await db.collection('baselines').findOne({ _id: new ObjectId(id) });
+        const baseline = await db.collection('baselines').findOne({ _id: id });
         if (!baseline) {
             return NextResponse.json({ message: 'Baseline not found after update.' }, { status: 404 });
         }
@@ -92,7 +90,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             comment: updateComment,
         });
 
-        const updatedItem = await db.collection('baselines').findOne({ _id: new ObjectId(id) });
+        const updatedItem = await db.collection('baselines').findOne({ _id: id });
         return NextResponse.json(updatedItem, { status: 200 });
 
     } catch (error) {
