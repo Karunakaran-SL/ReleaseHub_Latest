@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, Product, Specification } from '@/lib/definitions';
+import type { User, Product, Specification, CmdbComponent } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
 
 interface Hypervisor {
     _id: string;
@@ -34,23 +35,29 @@ export default function NewDeploymentWizardPage() {
     // Step 2 state
     const [hypervisors, setHypervisors] = useState<Hypervisor[]>([]);
     const [selectedHypervisor, setSelectedHypervisor] = useState<string>('');
+    
+    // Step 3 state
+    const [allComponents, setAllComponents] = useState<CmdbComponent[]>([]);
+    const [selectedComponents, setSelectedComponents] = useState<{ id: string; name: string; }[]>([]);
 
 
     useEffect(() => {
         getUser().then(setUser);
         async function fetchInitialData() {
             try {
-                const [productsRes, specsRes, hypervisorsRes] = await Promise.all([
+                const [productsRes, specsRes, hypervisorsRes, componentsRes] = await Promise.all([
                     fetch('/api/products'),
                     fetch('/api/specifications'),
-                    fetch('/api/settings/specifications/hypervisors')
+                    fetch('/api/settings/specifications/hypervisors'),
+                    fetch('/api/cmdb/components')
                 ]);
-                if (!productsRes.ok || !specsRes.ok || !hypervisorsRes.ok) {
+                if (!productsRes.ok || !specsRes.ok || !hypervisorsRes.ok || !componentsRes.ok) {
                     throw new Error('Failed to fetch initial data.');
                 }
                 setProducts(await productsRes.json());
                 setSpecifications(await specsRes.json());
                 setHypervisors(await hypervisorsRes.json());
+                setAllComponents(await componentsRes.json());
 
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -67,6 +74,40 @@ export default function NewDeploymentWizardPage() {
 
     const handleBack = () => {
         setStep(prev => prev - 1);
+    };
+    
+    const handleMultiSelectChange = (items: { id: string; name: string; }[]) => {
+        setSelectedComponents(items);
+    };
+
+    const renderMultiSelect = () => {
+        const chosenIds = new Set(selectedComponents.map(item => item.id));
+
+        const available: Option[] = allComponents
+            .filter(opt => !chosenIds.has(opt.id))
+            .map(opt => ({ id: opt.id, label: opt.name }));
+
+        const chosen: Option[] = selectedComponents.map(item => ({ id: item.id, label: item.name }));
+
+        const moveItems = (ids: string[], source: Option[], dest: Option[]) => {
+            const itemsToMove = source.filter(item => ids.includes(item.id));
+            const newDest = [...dest, ...itemsToMove];
+            handleMultiSelectChange(newDest.map(i => ({id: i.id, name: i.label})));
+        };
+        
+        return (
+            <MultiSelectListBox
+                available={available}
+                chosen={chosen}
+                onMoveToChosen={(ids) => moveItems(ids, available, chosen)}
+                onMoveToAvailable={(ids) => {
+                    const newChosen = chosen.filter(item => !ids.includes(item.id));
+                    handleMultiSelectChange(newChosen.map(i => ({id: i.id, name: i.label})))
+                }}
+                onMoveAllToChosen={() => handleMultiSelectChange(available.map(i => ({id: i.id, name: i.label})))}
+                onMoveAllToAvailable={() => handleMultiSelectChange([])}
+            />
+        );
     };
 
     const renderStepContent = () => {
@@ -134,6 +175,16 @@ export default function NewDeploymentWizardPage() {
                         </div>
                     </CardContent>
                 );
+            case 3:
+                return (
+                    <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                            <Label>Select Default Platform Foundation</Label>
+                            <p className="text-sm text-muted-foreground">Select the foundational components for this deployment.</p>
+                            {renderMultiSelect()}
+                        </div>
+                    </CardContent>
+                );
             default:
                 return <CardContent><p>End of wizard.</p></CardContent>;
         }
@@ -143,6 +194,7 @@ export default function NewDeploymentWizardPage() {
         switch (step) {
             case 1: return "Step 1: Select Product and Specification";
             case 2: return "Step 2: Select Hypervisor or Platform Type";
+            case 3: return "Step 3: Select Default Platform Foundation";
             default: return "New Deployment";
         }
     }
@@ -151,6 +203,7 @@ export default function NewDeploymentWizardPage() {
         switch (step) {
             case 1: return !selectedProduct || !selectedSpec;
             case 2: return !selectedHypervisor;
+            case 3: return selectedComponents.length === 0;
             default: return true;
         }
     }
