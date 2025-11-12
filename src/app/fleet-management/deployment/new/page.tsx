@@ -110,12 +110,3 @@ export default function NewDeploymentWizardPage() {
         </DashboardLayout>
     );
 }
-
-// Add a placeholder Specification type to definitions if it doesn't exist
-// This is just a temporary fix until we have a proper specification definition
-declare module '@/lib/definitions' {
-    export interface Specification {
-        _id: string;
-        name: string;
-    }
-}
