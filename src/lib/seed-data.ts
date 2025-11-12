@@ -1,4 +1,5 @@
 
+
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration } from './definitions';
@@ -755,7 +756,7 @@ export async function seedDatabase() {
     const collectionsToSeed = [
         { name: 'products', data: initialProducts.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString()})) },
         { name: 'specifications', data: fullSpecifications },
-        { name: 'deployment_types', data: initialDeploymentTypes.map(d => ({ ...d, _id: d.name.replace(/[^a-zA-Z0-9]/g, '') })) },
+        { name: 'deployment_types', data: initialDeploymentTypes.map(d => ({ ...d, _id: d.name })) },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'compliance_checks', data: initialComplianceChecks.map(c => ({...c, _id: c.name.replace(/[^a-zA-Z0-9]/g, '')})) },
         { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
