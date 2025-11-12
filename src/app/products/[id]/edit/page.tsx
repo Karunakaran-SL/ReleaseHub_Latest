@@ -293,7 +293,7 @@ export default function EditProductPage() {
                                     </div>
                                 </div>
 
-                                {formState.deployment_type?.id === 'Deployment_Airgapped' && (
+                                {formState.deployment_type?.id === 'Airgapped' && (
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>

@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -275,7 +276,7 @@ export default function ViewProductPage() {
                                     </div>
                                 </div>
 
-                                {product.deployment_type?.id === 'Deployment_Airgapped' && (
+                                {product.deployment_type?.id === 'Airgapped' && (
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
