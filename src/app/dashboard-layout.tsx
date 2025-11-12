@@ -508,6 +508,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                                         <Link href="/api-docs#specifications">Specifications</Link>
                                     </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#specification-settings')}>
+                                        <Link href="/api-docs#specification-settings">Spec Settings</Link>
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
                             </SidebarMenuSub>
                         </CollapsibleContent>
                     </SidebarMenuItem>
