@@ -142,8 +142,8 @@ export default function EditSpecificationPage() {
         // Transform comma-separated strings back to arrays of objects
         const payload = {
             ...formState,
-            network_cards: typeof formState.network_cards === 'string' ? (formState.network_cards as string).split(',').map(name => ({ id: name.trim(), name: name.trim() })) : [],
-            plug_power_cords: typeof formState.plug_power_cords === 'string' ? (formState.plug_power_cords as string).split(',').map(name => ({ id: name.trim(), name: name.trim() })) : [],
+            network_cards: (formState.network_cards || '').split(',').filter(Boolean).map((name:string) => ({ id: name.trim(), name: name.trim() })),
+            plug_power_cords: (formState.plug_power_cords || '').split(',').filter(Boolean).map((name:string) => ({ id: name.trim(), name: name.trim() })),
             total_cpu: Number(formState.total_cpu),
             memory_gb: Number(formState.memory_gb),
             storage_gb: Number(formState.storage_gb),
@@ -155,7 +155,10 @@ export default function EditSpecificationPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
-            if (!response.ok) throw new Error('Failed to update specification');
+            if (!response.ok) {
+                 const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to update specification');
+            }
             toast({ title: 'Success', description: 'Specification updated successfully.' });
             router.push('/specifications');
             router.refresh();
@@ -209,8 +212,8 @@ export default function EditSpecificationPage() {
                                         </Select>
                                     </div>
                                      <div>
-                                        <Label htmlFor="image">Image</Label>
-                                        <Input id="image" type="file" />
+                                        <Label htmlFor="image">Image URL</Label>
+                                        <Input id="image" value={formState.image || ''} onChange={handleInputChange} />
                                     </div>
                                      <div>
                                         <Label htmlFor="service_contract_type">Service Contract Type</Label>
@@ -310,3 +313,5 @@ export default function EditSpecificationPage() {
         </DashboardLayout>
     );
 }
+
+    
