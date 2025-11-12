@@ -51,7 +51,6 @@ export default function ViewProductPage() {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const [workflows, setWorkflows] = useState<SelectOption[]>([]);
-    const [cmdbItems, setCmdbItems] = useState<SelectOption[]>([]);
     const [complianceChecks, setComplianceChecks] = useState<SelectOption[]>([]);
     const [deploymentTypes, setDeploymentTypes] = useState<SelectOption[]>([]);
     const [specifications, setSpecifications] = useState<SelectOption[]>([]);
@@ -62,10 +61,9 @@ export default function ViewProductPage() {
         async function fetchData() {
             if (!id) return;
             try {
-                const [productRes, workflowsRes, cmdbRes, complianceRes, deploymentRes, specificationsRes] = await Promise.all([
+                const [productRes, workflowsRes, complianceRes, deploymentRes, specificationsRes] = await Promise.all([
                     fetch(`/api/products/${id}`),
                     fetch('/api/workflows'),
-                    fetch('/api/cmdb'),
                     fetch('/api/compliance-checks'),
                     fetch('/api/deployment-types'),
                     fetch('/api/specifications'),
@@ -75,7 +73,6 @@ export default function ViewProductPage() {
                 
                 setProduct(await productRes.json());
                 setWorkflows(await workflowsRes.json());
-                setCmdbItems(await cmdbRes.json());
                 setComplianceChecks(await complianceRes.json());
                 setDeploymentTypes(await deploymentRes.json());
                 setSpecifications(await specificationsRes.json());
@@ -160,20 +157,16 @@ export default function ViewProductPage() {
 
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
 
-    const renderMultiSelect = (fieldName: 'custom_workflows' | 'compliance_checks' | 'specifications', allOptions: SelectOption[]) => {
+    const renderMultiSelect = (fieldName: 'custom_workflows' | 'compliance_checks' | 'specifications') => {
         const chosenItems = (product[fieldName] || []).map(item => ({ id: item.id, label: item.name }));
-        const chosenIds = new Set(chosenItems.map(item => item.id));
-        const availableItems = allOptions.filter(opt => !chosenIds.has(opt.id)).map(opt => ({ id: opt.id, label: opt.name }));
-
         return (
             <MultiSelectListBox
-                available={availableItems}
                 chosen={chosenItems}
+                disabled
                 onMoveToChosen={() => {}}
                 onMoveToAvailable={() => {}}
                 onMoveAllToChosen={() => {}}
                 onMoveAllToAvailable={() => {}}
-                disabled
             />
         );
     };
@@ -191,15 +184,15 @@ export default function ViewProductPage() {
                             {/* Part 1 */}
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="product-name">Product Name *</Label>
+                                    <Label htmlFor="product-name">Product Name</Label>
                                     <Input id="product-name" value={product.name} disabled />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="owner-name">Owner Name *</Label>
+                                    <Label htmlFor="owner-name">Owner Name</Label>
                                     <Input id="owner-name" value={product.owner} disabled />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="owner-email">Owner Email *</Label>
+                                    <Label htmlFor="owner-email">Owner Email</Label>
                                     <Input id="owner-email" type="email" value={product.owner_email} disabled />
                                 </div>
                                 <div className="space-y-2">
@@ -224,32 +217,32 @@ export default function ViewProductPage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {workflows.map(item => (
-                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                                                <SelectItem key={item._id} value={item.id}>{item.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div>
                                     <Label>Custom Approval Workflow</Label>
-                                    {renderMultiSelect('custom_workflows', workflows)}
+                                    {renderMultiSelect('custom_workflows')}
                                 </div>
                             </div>
 
                             {/* Part 2 */}
                             <div className="space-y-6">
                                  <div>
-                                    <Label>Select the compliance check</Label>
-                                    {renderMultiSelect('compliance_checks', complianceChecks)}
+                                    <Label>Selected compliance checks</Label>
+                                    {renderMultiSelect('compliance_checks')}
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Deployment Type</Label>
                                     <RadioGroup 
-                                        value={product.deployment_type?.id}
+                                        value={product.deployment_type?._id}
                                         className="flex flex-wrap items-center gap-4"
                                     >
                                         {deploymentTypes.map(type => (
-                                            <div key={type.id} className="flex items-center space-x-2">
-                                                <RadioGroupItem value={type.id} id={`deployment-type-${type.id}`} disabled/>
+                                            <div key={type._id} className="flex items-center space-x-2">
+                                                <RadioGroupItem value={type._id} id={`deployment-type-${type.id}`} disabled/>
                                                 <Label htmlFor={`deployment-type-${type.id}`} className="font-normal">{type.name}</Label>
                                             </div>
                                         ))}
@@ -276,11 +269,11 @@ export default function ViewProductPage() {
                                     </div>
                                 </div>
 
-                                {product.deployment_type?.id === 'Airgapped' && (
+                                {product.deployment_type?.name === 'Airgapped' && (
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
-                                        {renderMultiSelect('specifications', specifications)}
+                                        {renderMultiSelect('specifications')}
                                     </div>
                                 )}
                             </div>
@@ -340,3 +333,5 @@ export default function ViewProductPage() {
         </DashboardLayout>
     );
 }
+
+    

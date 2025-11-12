@@ -260,7 +260,7 @@ export default function EditProductPage() {
                                 <div className="space-y-2">
                                     <Label>Deployment Type</Label>
                                     <RadioGroup 
-                                        value={formState.deployment_type?.id}
+                                        value={formState.deployment_type?._id}
                                         onValueChange={handleRadioChange}
                                         className="flex flex-wrap items-center gap-4"
                                     >
@@ -293,7 +293,7 @@ export default function EditProductPage() {
                                     </div>
                                 </div>
 
-                                {formState.deployment_type?.id === 'Airgapped' && (
+                                {formState.deployment_type?.name === 'Airgapped' && (
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
@@ -326,3 +326,5 @@ export default function EditProductPage() {
         </DashboardLayout>
     );
 }
+
+    

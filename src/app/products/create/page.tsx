@@ -289,7 +289,7 @@ export default function CreateProductPage() {
                                     </div>
                                 </div>
 
-                                {formState.deployment_type?.id === 'Airgapped' && (
+                                {formState.deployment_type?.name === 'Airgapped' && (
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
@@ -328,3 +328,5 @@ export default function CreateProductPage() {
         </DashboardLayout>
     );
 }
+
+    
