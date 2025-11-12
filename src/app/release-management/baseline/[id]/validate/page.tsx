@@ -94,9 +94,57 @@ export default function ValidateBaselinePage() {
         setPopupState(null);
     };
 
-    const handleSavePopup = () => {
+    const handleSavePopup = async () => {
         if (expandedPhase && popupState) {
-            setPhasesState(prev => ({ ...prev, [expandedPhase]: popupState }));
+            setSaving(true);
+            const updatedPhases = baseline!.validation_phases.map(phaseConfig => {
+                if (phaseConfig.id === expandedPhase) {
+                    const phaseData = popupState;
+                     return {
+                        ...phaseConfig,
+                        status: phaseData.status,
+                        fields: phaseConfig.fields.map(fieldConfig => ({
+                            ...fieldConfig,
+                            value: phaseData[`${fieldConfig.name}_value`] || '',
+                            proof: { link: phaseData[`${fieldConfig.name}_proofLink`] || '' }
+                        }))
+                    };
+                }
+                const existingPhaseData = phasesState[phaseConfig.id] || {};
+                 return {
+                    ...phaseConfig,
+                    status: existingPhaseData.status,
+                    fields: phaseConfig.fields.map(fieldConfig => ({
+                        ...fieldConfig,
+                        value: existingPhaseData[`${fieldConfig.name}_value`] || '',
+                        proof: { link: existingPhaseData[`${fieldConfig.name}_proofLink`] || '' }
+                    }))
+                };
+            });
+
+            try {
+                 const response = await fetch(`/api/baselines/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        validation_phases: updatedPhases,
+                        updateComment: `Updated validation phase: ${baseline!.validation_phases.find(p => p.id === expandedPhase)?.name}`
+                    }),
+                });
+                if (!response.ok) throw new Error('Failed to save phase progress.');
+
+                const updatedBaseline = await response.json();
+                setBaseline(updatedBaseline);
+
+                // Update local state after successful save
+                setPhasesState(prev => ({ ...prev, [expandedPhase]: popupState }));
+                toast({ title: "Progress Saved", description: "Your changes to the validation phase have been saved."});
+
+            } catch (error: any) {
+                toast({ variant: 'destructive', title: 'Error', description: error.message });
+            } finally {
+                setSaving(false);
+            }
         }
         handleCancelPopup();
     };
@@ -107,50 +155,6 @@ export default function ValidateBaselinePage() {
     
     const handlePopupStatusChange = (status: string) => {
         setPopupState((prev: any) => ({ ...prev, status }));
-    };
-
-
-    const handleFinish = async () => {
-        setSaving(true);
-        if (!baseline?.validation_phases) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Validation configuration is missing.' });
-            setSaving(false);
-            return;
-        }
-        
-        // Reconstruct the phases object from the flattened state
-        const updatedPhases = baseline.validation_phases.map(phaseConfig => {
-            const phaseData = phasesState[phaseConfig.id] || {};
-            return {
-                ...phaseConfig,
-                status: phaseData.status,
-                fields: phaseConfig.fields.map(fieldConfig => ({
-                    ...fieldConfig,
-                    value: phaseData[`${fieldConfig.name}_value`] || '',
-                    proof: { link: phaseData[`${fieldConfig.name}_proofLink`] || '' }
-                }))
-            };
-        });
-
-        try {
-            const response = await fetch(`/api/baselines/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    status: 'VALIDATED', 
-                    validation_phases: updatedPhases,
-                    updateComment: "Baseline validation phases completed."
-                }),
-            });
-            if (!response.ok) throw new Error('Failed to update baseline status.');
-            
-            toast({ title: "Validation Complete", description: "Baseline has been marked as VALIDATED."});
-            router.push(`/release-management/baseline/${id}/finalize`);
-        } catch (error: any) {
-             toast({ variant: 'destructive', title: 'Error', description: error.message });
-        } finally {
-            setSaving(false);
-        }
     };
 
     if (loading) {
@@ -210,10 +214,12 @@ export default function ValidateBaselinePage() {
                 )}
 
                  <div className="mt-12 flex justify-end">
-                    <Button onClick={handleFinish} size="lg" disabled={saving || isFinalized}>
-                        {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        <ArrowRight className="mr-2 h-5 w-5" />
-                        Next: Finalize Release
+                    <Button asChild size="lg" disabled={saving || isFinalized}>
+                        <Link href={`/release-management/baseline/${id}/finalize`}>
+                            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            <ArrowRight className="mr-2 h-5 w-5" />
+                            Next: Finalize Release
+                        </Link>
                     </Button>
                 </div>
             </main>
