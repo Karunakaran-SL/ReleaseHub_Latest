@@ -13,13 +13,13 @@ import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { MultiSelectListBox, type Option as MultiSelectOption } from '@/components/ui/multi-select-list-box';
 
-interface ServiceContract {
+
+interface Option {
     _id: string;
-    id: string;
     name: string;
 }
-
 interface Specification {
     _id: string;
     id: string;
@@ -41,8 +41,6 @@ interface Specification {
 
 interface FormState extends Partial<Specification> {
     updateComment?: string;
-    network_cards: any;
-    plug_power_cords: any;
 }
 
 
@@ -50,13 +48,20 @@ export default function EditSpecificationPage() {
     const [user, setUser] = useState<User | null>(null);
     const [specification, setSpecification] = useState<Specification | null>(null);
     const [loading, setLoading] = useState(true);
-    const [formState, setFormState] = useState<FormState>({network_cards: '', plug_power_cords: ''});
+    const [formState, setFormState] = useState<FormState>({});
     const router = useRouter();
     const params = useParams();
     const { id } = params;
     const { toast } = useToast();
 
-    const [serviceContracts, setServiceContracts] = useState<ServiceContract[]>([]);
+    const [options, setOptions] = useState({
+        hwTypes: [] as Option[],
+        vendors: [] as Option[],
+        hypervisors: [] as Option[],
+        serviceContracts: [] as Option[],
+        networkCards: [] as Option[],
+        plugPowerCords: [] as Option[],
+    });
     
     useEffect(() => {
         getUser().then(setUser);
@@ -65,25 +70,29 @@ export default function EditSpecificationPage() {
         async function fetchData() {
             setLoading(true);
             try {
-                const [specRes, contractsRes] = await Promise.all([
+                const [specRes, hwTypesRes, vendorsRes, hypervisorsRes, contractsRes, networkCardsRes, plugPowerCordsRes] = await Promise.all([
                     fetch(`/api/specifications/${id}`),
-                    fetch('/api/documents/service-contracts')
+                    fetch('/api/settings/specifications/hw-types'),
+                    fetch('/api/settings/specifications/vendors'),
+                    fetch('/api/settings/specifications/hypervisors'),
+                    fetch('/api/documents/service-contracts'),
+                    fetch('/api/settings/specifications/network-cards'),
+                    fetch('/api/settings/specifications/plug-power-cords'),
                 ]);
 
                 if (!specRes.ok) throw new Error('Failed to fetch specification');
-                
                 const specData = await specRes.json();
                 setSpecification(specData);
-                
-                const networkCards = specData.network_cards?.map((c: any) => c.name).join(', ') || '';
-                const plugPowerCords = specData.plug_power_cords?.map((p: any) => p.name).join(', ') || '';
-                setFormState({...specData, network_cards: networkCards, plug_power_cords: plugPowerCords, custom_fields: specData.custom_fields || []});
+                setFormState(specData);
 
-                if (contractsRes.ok) {
-                    setServiceContracts(await contractsRes.json());
-                } else {
-                    toast({ variant: 'destructive', title: 'Warning', description: 'Could not load service contracts.' });
-                }
+                setOptions({
+                    hwTypes: await hwTypesRes.json(),
+                    vendors: await vendorsRes.json(),
+                    hypervisors: await hypervisorsRes.json(),
+                    serviceContracts: await contractsRes.json(),
+                    networkCards: await networkCardsRes.json(),
+                    plugPowerCords: await plugPowerCordsRes.json(),
+                });
 
             } catch (err: any) {
                 toast({ variant: 'destructive', title: 'Error', description: err.message });
@@ -101,18 +110,20 @@ export default function EditSpecificationPage() {
     };
 
     const handleSelectChange = (field: keyof Specification, value: string) => {
-        const options = field === 'hw_type' ? hwTypes 
-                      : field === 'hypervisor' ? hypervisors 
-                      : field === 'service_contract_type' ? serviceContracts 
-                      : [];
+        const list = field === 'hw_type' ? options.hwTypes 
+                      : field === 'vendor' ? options.vendors
+                      : field === 'hypervisor' ? options.hypervisors 
+                      : options.serviceContracts;
         
-        const selectedOption = options.find(opt => opt.id === value);
+        const selectedOption = list.find(opt => opt._id === value);
         
         if (selectedOption) {
-            setFormState(prev => ({ ...prev, [field]: { id: value, name: selectedOption.name } }));
-        } else if (field === 'vendor') {
-            setFormState(prev => ({ ...prev, vendor: value }));
+            setFormState(prev => ({ ...prev, [field]: { id: selectedOption._id, name: selectedOption.name } }));
         }
+    };
+
+    const handleMultiSelectChange = (field: 'network_cards' | 'plug_power_cords', selectedItems: { id: string; name: string }[]) => {
+        setFormState(prev => ({ ...prev, [field]: selectedItems }));
     };
     
     const handleCustomFieldChange = (index: number, field: 'key' | 'value', value: string) => {
@@ -139,11 +150,8 @@ export default function EditSpecificationPage() {
         }
 
         setLoading(true);
-        // Transform comma-separated strings back to arrays of objects
         const payload = {
             ...formState,
-            network_cards: (formState.network_cards || '').split(',').filter(Boolean).map((name:string) => ({ id: name.trim(), name: name.trim() })),
-            plug_power_cords: (formState.plug_power_cords || '').split(',').filter(Boolean).map((name:string) => ({ id: name.trim(), name: name.trim() })),
             total_cpu: Number(formState.total_cpu),
             memory_gb: Number(formState.memory_gb),
             storage_gb: Number(formState.storage_gb),
@@ -169,10 +177,39 @@ export default function EditSpecificationPage() {
         }
     };
     
-    // Dummy data for dropdowns
-    const hwTypes = [{ id: 'HWType_Rack', name: 'Rack' }, { id: 'HWType_Blade', name: 'Blade' }];
-    const vendors = ['Dell EMC', 'HPE', 'Cisco', 'Lenovo'];
-    const hypervisors = [{ id: 'Hypervisor_VMWare_ESXi', name: 'VMWare ESXi' }, { id: 'Hypervisor_Microsoft_HyperV', name: 'Microsoft Hyper-V' }];
+    const renderMultiSelect = (
+        fieldName: 'network_cards' | 'plug_power_cords',
+        allOptions: Option[]
+    ) => {
+        const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
+        const chosenIds = new Set(chosenItems.map(item => item.id));
+
+        const available: MultiSelectOption[] = allOptions
+            .filter(opt => !chosenIds.has(opt._id))
+            .map(opt => ({ id: opt._id, label: opt.name }));
+
+        const chosen: MultiSelectOption[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
+
+        const moveItems = (ids: string[], source: MultiSelectOption[], dest: MultiSelectOption[]) => {
+            const itemsToMove = source.filter(item => ids.includes(item.id));
+            const newDest = [...dest, ...itemsToMove];
+            handleMultiSelectChange(fieldName, newDest.map(i => ({id: i.id, name: i.label})));
+        };
+
+        return (
+            <MultiSelectListBox
+                available={available}
+                chosen={chosen}
+                onMoveToChosen={(ids) => moveItems(ids, available, chosen)}
+                onMoveToAvailable={(ids) => {
+                    const newChosen = chosen.filter(item => !ids.includes(item.id));
+                    handleMultiSelectChange(fieldName, newChosen.map(i => ({id: i.id, name: i.label})))
+                }}
+                onMoveAllToChosen={() => handleMultiSelectChange(fieldName, available.map(i => ({id: i.id, name: i.label})))}
+                onMoveAllToAvailable={() => handleMultiSelectChange(fieldName, [])}
+            />
+        );
+    };
 
     if (loading && !specification) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
@@ -194,11 +231,11 @@ export default function EditSpecificationPage() {
                                         <Input id="name" value={formState.name || ''} onChange={handleInputChange} required />
                                     </div>
                                     <div>
-                                        <Label htmlFor="hw_type">HW Type (Optional)</Label>
+                                        <Label htmlFor="hw_type">HW Type</Label>
                                         <Select value={formState.hw_type?.id} onValueChange={(value) => handleSelectChange('hw_type', value)}>
                                             <SelectTrigger><SelectValue placeholder="Select HW Type" /></SelectTrigger>
                                             <SelectContent>
-                                                {hwTypes.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                                                {options.hwTypes.map(t => <SelectItem key={t._id} value={t._id}>{t.name}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -207,7 +244,7 @@ export default function EditSpecificationPage() {
                                         <Select value={formState.vendor} onValueChange={(value) => setFormState(prev => ({...prev, vendor: value}))} required>
                                             <SelectTrigger><SelectValue placeholder="Select Vendor" /></SelectTrigger>
                                             <SelectContent>
-                                                {vendors.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                                {options.vendors.map(v => <SelectItem key={v._id} value={v.name}>{v.name}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -220,13 +257,9 @@ export default function EditSpecificationPage() {
                                         <Select value={formState.service_contract_type?.id} onValueChange={(value) => handleSelectChange('service_contract_type', value)}>
                                             <SelectTrigger><SelectValue placeholder="Select Contract Type" /></SelectTrigger>
                                             <SelectContent>
-                                                {serviceContracts.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                                {options.serviceContracts.map(c => <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
-                                    </div>
-                                     <div>
-                                        <Label htmlFor="service-doc">Service Doc</Label>
-                                        <Input id="service-doc" type="file" />
                                     </div>
                                     <div>
                                         <Label htmlFor="contact_point_email">Contact Point Email</Label>
@@ -253,19 +286,19 @@ export default function EditSpecificationPage() {
                                         <Input id="storage_gb" type="number" value={formState.storage_gb || ''} onChange={handleInputChange} required />
                                     </div>
                                     <div>
-                                        <Label htmlFor="network_cards">Network Cards type (comma-separated)</Label>
-                                        <Input id="network_cards" value={formState.network_cards as any || ''} onChange={handleInputChange} />
+                                        <Label>Network Cards type</Label>
+                                        {renderMultiSelect('network_cards', options.networkCards)}
                                     </div>
                                     <div>
-                                        <Label htmlFor="plug_power_cords">Plug/Power Cord Type</Label>
-                                        <Input id="plug_power_cords" value={formState.plug_power_cords as any || ''} onChange={handleInputChange} />
+                                        <Label>Plug/Power Cord Type</Label>
+                                        {renderMultiSelect('plug_power_cords', options.plugPowerCords)}
                                     </div>
                                     <div>
                                         <Label htmlFor="hypervisor">Hypervisor</Label>
                                         <Select value={formState.hypervisor?.id} onValueChange={(value) => handleSelectChange('hypervisor', value)}>
                                             <SelectTrigger><SelectValue placeholder="N/A" /></SelectTrigger>
                                             <SelectContent>
-                                                {hypervisors.map(h => <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>)}
+                                                {options.hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     </div>

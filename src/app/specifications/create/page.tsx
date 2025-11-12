@@ -135,6 +135,7 @@ export default function CreateSpecificationPage() {
 
         const payload = {
             ...formState,
+            vendor: formState.vendor?.name,
             image: imageUrl,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -240,10 +241,6 @@ export default function CreateSpecificationPage() {
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                     <div>
-                                        <Label htmlFor="service-doc">Service Doc</Label>
-                                        <Input id="service-doc" type="file" />
-                                    </div>
                                     <div>
                                         <Label htmlFor="contact_point_email">Contact Point Email</Label>
                                         <Input id="contact_point_email" type="email" onChange={handleInputChange} />
@@ -318,3 +315,5 @@ export default function CreateSpecificationPage() {
         </DashboardLayout>
     );
 }
+
+    
