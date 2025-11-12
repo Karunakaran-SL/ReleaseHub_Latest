@@ -73,7 +73,7 @@ export default function ValidationPhaseComponent({
                 <div className="flex gap-4">
                     {(field.options || []).map(opt => (
                         <div key={opt} className="flex items-center space-x-2">
-                            <RadioGroupItem value={opt} id={`${fieldId}-${opt}`} />
+                            <RadioGroupItem value={opt} id={`${fieldId}-${opt}`} checked={value === opt} />
                             <Label htmlFor={`${fieldId}-${opt}`}>{opt}</Label>
                         </div>
                     ))}
