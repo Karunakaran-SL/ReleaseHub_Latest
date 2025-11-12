@@ -94,8 +94,8 @@ export default function EditProductPage() {
     };
     
     const handleRadioChange = (value: string) => {
-        const selectedType = deploymentTypes.find(item => item.id === value);
-         setFormState(prev => ({ ...prev, deployment_type: selectedType ? { id: selectedType.id, name: selectedType.name } : undefined }));
+        const selectedType = deploymentTypes.find(item => item._id === value);
+         setFormState(prev => ({ ...prev, deployment_type: selectedType ? { id: selectedType._id, name: selectedType.name } : undefined }));
     };
 
     const handleMultiSelectChange = (field: keyof Product, selectedItems: { id: string; name: string; }[]) => {
@@ -161,8 +161,8 @@ export default function EditProductPage() {
         const chosenIds = new Set(chosenItems.map(item => item.id));
 
         const available: Option[] = allOptions
-            .filter(opt => !chosenIds.has(opt.id))
-            .map(opt => ({ id: opt.id, label: opt.name }));
+            .filter(opt => !chosenIds.has(opt._id))
+            .map(opt => ({ id: opt._id, label: opt.name }));
 
         const chosen: Option[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
 
@@ -184,7 +184,10 @@ export default function EditProductPage() {
                 available={available}
                 chosen={chosen}
                 onMoveToChosen={(ids) => moveItems(ids, available, chosen)}
-                onMoveToAvailable={(ids) => moveItems(ids, chosen, [])}
+                onMoveToAvailable={(ids) => {
+                     const newChosen = chosen.filter(item => !ids.includes(item.id));
+                     handleMultiSelectChange(fieldName, newChosen.map(i => ({id: i.id, name: i.label})))
+                }}
                 onMoveAllToChosen={() => moveAll(available, chosen)}
                 onMoveAllToAvailable={() => handleMultiSelectChange(fieldName, [])}
             />
@@ -262,8 +265,8 @@ export default function EditProductPage() {
                                         className="flex flex-wrap items-center gap-4"
                                     >
                                         {deploymentTypes.map(type => (
-                                            <div key={type.id} className="flex items-center space-x-2">
-                                                <RadioGroupItem value={type.id} id={`deployment-type-${type.id}`} />
+                                            <div key={type._id} className="flex items-center space-x-2">
+                                                <RadioGroupItem value={type._id} id={`deployment-type-${type.id}`} />
                                                 <Label htmlFor={`deployment-type-${type.id}`} className="font-normal">{type.name}</Label>
                                             </div>
                                         ))}
