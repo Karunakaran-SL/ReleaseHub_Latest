@@ -126,7 +126,7 @@ function BaselineReviewContent() {
                         tenant.version = selections.tenantVersions[tenant.id];
                     }
                 });
-                tree.product.version = selections.productVersion;
+                tree.version = selections.productVersion;
 
 
                 const validation = validateDependencies(tree, allTenants);
@@ -157,8 +157,15 @@ function BaselineReviewContent() {
     const handleBuildPackage = async () => {
         setLoading(true);
         // We already have the corrected data in `baselineData` state
-        const finalBaselineData = { ...baselineData };
-        delete finalBaselineData.allTenants; 
+        const finalBaselineData = { 
+            product: {
+                id: baselineData.id,
+                name: baselineData.name,
+                version: baselineData.version,
+            },
+            specifications: baselineData.specifications,
+            tenants: baselineData.tenants
+        };
 
         try {
             const response = await fetch('/api/baselines', {
@@ -189,7 +196,7 @@ function BaselineReviewContent() {
         }
     }
     
-    if (loading || !baselineData || !baselineData.product) {
+    if (loading || !baselineData || !baselineData.name) {
         return (
              <DashboardLayout user={user}>
                 <div className="flex justify-center items-center h-64">
@@ -211,7 +218,7 @@ function BaselineReviewContent() {
             <main className="flex-1 p-6 md:p-10 flex justify-center items-start">
                 <Card className="w-full max-w-6xl">
                     <CardHeader>
-                        <CardTitle>Review New Baseline: {baselineData.product.name}</CardTitle>
+                        <CardTitle>Review New Baseline: {baselineData.name}</CardTitle>
                         <CardDescription>Phase 2: Review and confirm the components of the new baseline.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -235,7 +242,7 @@ function BaselineReviewContent() {
 
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Root Product</h3>
-                            <p className="text-muted-foreground">{baselineData.product.name} - v{baselineData.product.version}</p>
+                            <p className="text-muted-foreground">{baselineData.name} - v{baselineData.version}</p>
                         </div>
                         <Separator />
                         <div>
