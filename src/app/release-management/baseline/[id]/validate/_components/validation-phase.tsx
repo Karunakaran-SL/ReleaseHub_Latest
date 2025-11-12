@@ -38,9 +38,9 @@ export default function ValidationPhaseComponent({
 
   const renderField = (field: OnboardingFormField) => {
     const fieldId = `${phase.id}-${field.name}`;
-    const fieldData = phaseState?.[field.name] || { value: '', proofLink: '' };
-    const value = fieldData.value;
-    const proofLink = fieldData.proofLink;
+    
+    // Correctly destructure the state object for each field at the top.
+    const { value, proofLink } = phaseState?.[field.name] || { value: '', proofLink: '' };
 
     const handleValueChange = (newValue: any) => {
         onStateChange(field.name, { value: newValue, proofLink: proofLink });
@@ -87,7 +87,6 @@ export default function ValidationPhaseComponent({
                 <Input id={`${fieldId}-proof`} value={proofLink || ''} onChange={handleProofLinkChange} placeholder="Link to evidence"/>
             </div>
         )}
-
       </div>
     );
   };
