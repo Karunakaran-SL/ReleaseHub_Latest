@@ -38,15 +38,17 @@ export default function ValidationPhaseComponent({
 
   const renderField = (field: OnboardingFormField) => {
     const fieldId = `${phase.id}-${field.name}`;
-    const fieldData = phaseState?.[field.name] || { value: '', proofLink: '' };
-    const { value, proofLink } = fieldData;
+    
+    // Now we get flattened values directly from phaseState
+    const value = phaseState?.[`${field.name}_value`] ?? '';
+    const proofLink = phaseState?.[`${field.name}_proofLink`] ?? '';
 
     const handleValueChange = (newValue: any) => {
-        onStateChange(field.name, { value: newValue, proofLink: proofLink });
+        onStateChange(`${field.name}_value`, newValue);
     };
 
     const handleProofLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onStateChange(field.name, { value: value, proofLink: e.target.value });
+        onStateChange(`${field.name}_proofLink`, e.target.value);
     };
 
     return (
@@ -56,11 +58,11 @@ export default function ValidationPhaseComponent({
            {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
         </div>
         
-        {field.type === 'TextField' && <Input id={fieldId} value={value || ''} onChange={e => handleValueChange(e.target.value)} />}
+        {field.type === 'TextField' && <Input id={fieldId} value={value} onChange={e => handleValueChange(e.target.value)} />}
         {field.type === 'Checkbox' && <Checkbox id={fieldId} checked={!!value} onCheckedChange={checked => handleValueChange(!!checked)} />}
-        {field.type === 'Link' && <Input id={fieldId} value={value || ''} onChange={e => handleValueChange(e.target.value)} placeholder="https://..."/>}
+        {field.type === 'Link' && <Input id={fieldId} value={value} onChange={e => handleValueChange(e.target.value)} placeholder="https://..."/>}
         {field.type === 'DropDown' && (
-             <Select onValueChange={handleValueChange} value={value || ''}>
+             <Select onValueChange={handleValueChange} value={value}>
                 <SelectTrigger id={fieldId}><SelectValue placeholder="Select..."/></SelectTrigger>
                 <SelectContent>
                     {(field.options || []).map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
@@ -68,7 +70,7 @@ export default function ValidationPhaseComponent({
             </Select>
         )}
         {field.type === 'RadioBox' && (
-             <RadioGroup onValueChange={handleValueChange} value={value || ''}>
+             <RadioGroup onValueChange={handleValueChange} value={value}>
                 <div className="flex gap-4">
                     {(field.options || []).map(opt => (
                         <div key={opt} className="flex items-center space-x-2">
@@ -83,7 +85,7 @@ export default function ValidationPhaseComponent({
         {field.proof && (
             <div className="mt-2 space-y-1">
                 <Label htmlFor={`${fieldId}-proof`} className="text-xs">Proof Link</Label>
-                <Input id={`${fieldId}-proof`} value={proofLink || ''} onChange={handleProofLinkChange} placeholder="Link to evidence"/>
+                <Input id={`${fieldId}-proof`} value={proofLink} onChange={handleProofLinkChange} placeholder="Link to evidence"/>
             </div>
         )}
       </div>

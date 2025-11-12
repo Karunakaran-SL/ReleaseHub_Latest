@@ -69,12 +69,13 @@ export default function ValidateBaselinePage() {
                      const latestConfig = configs.reduce((latest: any, current: any) => current.version > latest.version ? current : latest, configs[0]);
                      setValidationConfig(latestConfig);
 
-                      // Initialize phase states
+                      // Initialize phase states with a flattened structure
                     const initialState: Record<string, any> = {};
                     latestConfig.phases.forEach((phase: any) => {
                         initialState[phase.id] = { status: 'Not Started' };
                         phase.fields.forEach((field: any) => {
-                            initialState[phase.id][field.name] = { value: '', proofLink: '' };
+                            initialState[phase.id][`${field.name}_value`] = '';
+                            initialState[phase.id][`${field.name}_proofLink`] = '';
                         });
                     });
                     setPhasesState(initialState);
@@ -93,6 +94,7 @@ export default function ValidateBaselinePage() {
 
     const handleExpandPhase = (phaseId: string) => {
         setExpandedPhase(phaseId);
+        // Popup state will also use the flattened structure
         setPopupState(JSON.parse(JSON.stringify(phasesState[phaseId] || {})));
     };
 
@@ -109,6 +111,7 @@ export default function ValidateBaselinePage() {
     };
     
     const handlePopupStateChange = (fieldName: string, value: any) => {
+         // This now updates a flat property, e.g., 'ciJobUrl_value'
         setPopupState((prev: any) => ({ ...prev, [fieldName]: value }));
     };
     
