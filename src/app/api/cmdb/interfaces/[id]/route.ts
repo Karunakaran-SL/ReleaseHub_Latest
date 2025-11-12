@@ -1,7 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
@@ -46,13 +45,10 @@ const COLLECTION_NAME = 'cmdb_interfaces';
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
-        }
-
+        
         const client = await clientPromise;
         const db = client.db();
-        const item = await db.collection(COLLECTION_NAME).findOne({ _id: new ObjectId(id) });
+        const item = await db.collection(COLLECTION_NAME).findOne({ _id: id });
 
         if (!item) {
             return NextResponse.json({ message: 'Interface not found.' }, { status: 404 });
@@ -75,9 +71,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         }
 
         const { id } = params;
-        if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
-        }
 
         const body = await req.json();
         const validatedData = InterfaceUpdateSchema.safeParse(body);
@@ -92,7 +85,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const { updateComment, ...interfaceData } = validatedData.data;
 
         const result = await db.collection(COLLECTION_NAME).updateOne(
-            { _id: new ObjectId(id) },
+            { _id: id },
             { $set: { ...interfaceData, updated_at: new Date().toISOString() } }
         );
 
@@ -107,7 +100,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             comment: updateComment,
         });
 
-        const updatedItem = await db.collection(COLLECTION_NAME).findOne({ _id: new ObjectId(id) });
+        const updatedItem = await db.collection(COLLECTION_NAME).findOne({ _id: id });
         return NextResponse.json(updatedItem, { status: 200 });
 
     } catch (error) {
@@ -126,9 +119,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         }
 
         const { id } = params;
-         if (!ObjectId.isValid(id)) {
-            return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
-        }
 
         const { comment } = await req.json();
         if (!comment) {
@@ -137,7 +127,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
         const client = await clientPromise;
         const db = client.db();
-        const result = await db.collection(COLLECTION_NAME).deleteOne({ _id: new ObjectId(id) });
+        const result = await db.collection(COLLECTION_NAME).deleteOne({ _id: id });
 
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Interface not found.' }, { status: 404 });
