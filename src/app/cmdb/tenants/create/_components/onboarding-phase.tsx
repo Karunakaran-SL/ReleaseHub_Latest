@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -99,7 +100,7 @@ export default function OnboardingPhaseComponent({
         onClick={onExpand}
         >
         <h4 className="font-bold text-center text-sm">{phase.name}</h4>
-        <p className="text-xs text-center">{phaseState.status || 'Not Started'}</p>
+        <p className="text-xs text-center">{phaseState?.status || 'Not Started'}</p>
       </div>
 
       {isExpanded && (

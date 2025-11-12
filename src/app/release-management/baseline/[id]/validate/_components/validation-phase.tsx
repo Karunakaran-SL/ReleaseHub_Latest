@@ -98,7 +98,7 @@ export default function ValidationPhaseComponent({
         >
         <FileText className="h-6 w-6 mb-1" />
         <h4 className="font-bold text-center text-sm">{phase.name}</h4>
-        <p className="text-xs text-center">{phaseState.status || 'Not Started'}</p>
+        <p className="text-xs text-center">{phaseState?.status || 'Not Started'}</p>
       </div>
 
       {isExpanded && (
