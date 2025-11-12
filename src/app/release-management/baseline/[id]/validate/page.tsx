@@ -35,7 +35,7 @@ export default function ValidateBaselinePage() {
     
     const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
     const [phasesState, setPhasesState] = useState<Record<string, any>>({});
-    const [popupState, setPopupState] = useState<any>(null);
+    const [popupState, setPopupState] = useState<any | null>(null);
 
 
     const params = useParams();
@@ -57,7 +57,7 @@ export default function ValidateBaselinePage() {
                 const baselineRes = await fetch(`/api/baselines/${id}`);
 
                 if (!baselineRes.ok) throw new Error('Failed to fetch baseline.');
-                const currentBaseline = await baselineRes.json();
+                const currentBaseline: Baseline = await baselineRes.json();
                 setBaseline(currentBaseline);
 
                 if (!currentBaseline.validation_phases) {
@@ -67,7 +67,7 @@ export default function ValidateBaselinePage() {
                 const initialState: Record<string, any> = {};
                 currentBaseline.validation_phases.forEach((phase: OnboardingPhase) => {
                     const phaseState: any = { status: phase.status || 'Not Started' };
-                    phase.fields.forEach(field => {
+                     phase.fields.forEach(field => {
                         phaseState[`${field.name}_value`] = field.value || '';
                         phaseState[`${field.name}_proofLink`] = field.proof?.link || '';
                     });
@@ -110,6 +110,7 @@ export default function ValidateBaselinePage() {
                         }))
                     };
                 }
+                // For other phases, construct their state from the main `phasesState`
                 const existingPhaseData = phasesState[phaseConfig.id] || {};
                  return {
                     ...phaseConfig,
@@ -216,7 +217,6 @@ export default function ValidateBaselinePage() {
                  <div className="mt-12 flex justify-end">
                     <Button asChild size="lg" disabled={saving || isFinalized}>
                         <Link href={`/release-management/baseline/${id}/finalize`}>
-                            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             <ArrowRight className="mr-2 h-5 w-5" />
                             Next: Finalize Release
                         </Link>
