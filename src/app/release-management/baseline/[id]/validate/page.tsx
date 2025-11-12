@@ -181,7 +181,7 @@ export default function ValidateBaselinePage() {
                     </Alert>
                 )}
 
-                <div className={cn("relative flex flex-wrap items-center justify-center p-8 gap-y-8 gap-x-4", (expandedPhase || isFinalized) && 'z-30 pointer-events-none opacity-70')}>
+                <div className={cn("relative flex flex-wrap items-center justify-center p-8 gap-y-8 gap-x-4", expandedPhase && 'z-30')}>
                     {baseline.validation_phases.map((phase, index) => (
                         <div key={phase.id} className="flex items-center">
                             <ValidationPhaseComponent
@@ -194,6 +194,7 @@ export default function ValidateBaselinePage() {
                                 statusColor={statusColors[phasesState[phase.id]?.status] || 'bg-gray-200 text-gray-800'}
                                 onSave={handleSavePopup}
                                 onCancel={handleCancelPopup}
+                                isReadOnly={isFinalized}
                             />
                             {index < baseline.validation_phases.length - 1 && (
                                 <ChevronRight className="h-8 w-8 text-muted-foreground mx-4" />

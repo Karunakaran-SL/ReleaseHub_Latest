@@ -22,6 +22,7 @@ interface ValidationPhaseProps {
   statusColor: string;
   onSave: () => void;
   onCancel: () => void;
+  isReadOnly: boolean;
 }
 
 export default function ValidationPhaseComponent({
@@ -34,6 +35,7 @@ export default function ValidationPhaseComponent({
   statusColor,
   onSave,
   onCancel,
+  isReadOnly
 }: ValidationPhaseProps) {
 
   const renderField = (field: OnboardingFormField) => {
@@ -57,11 +59,11 @@ export default function ValidationPhaseComponent({
            {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
         </div>
         
-        {field.type === 'TextField' && <Input id={fieldId} value={value} onChange={e => handleValueChange(e.target.value)} />}
-        {field.type === 'Checkbox' && <Checkbox id={fieldId} checked={!!value} onCheckedChange={checked => handleValueChange(!!checked)} />}
-        {field.type === 'Link' && <Input id={fieldId} value={value} onChange={e => handleValueChange(e.target.value)} placeholder="https://..."/>}
+        {field.type === 'TextField' && <Input id={fieldId} value={value} onChange={e => handleValueChange(e.target.value)} disabled={isReadOnly} />}
+        {field.type === 'Checkbox' && <Checkbox id={fieldId} checked={!!value} onCheckedChange={checked => handleValueChange(!!checked)} disabled={isReadOnly} />}
+        {field.type === 'Link' && <Input id={fieldId} value={value} onChange={e => handleValueChange(e.target.value)} placeholder="https://..." disabled={isReadOnly}/>}
         {field.type === 'DropDown' && (
-             <Select onValueChange={handleValueChange} value={value}>
+             <Select onValueChange={handleValueChange} value={value} disabled={isReadOnly}>
                 <SelectTrigger id={fieldId}><SelectValue placeholder="Select..."/></SelectTrigger>
                 <SelectContent>
                     {(field.options || []).map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
@@ -69,7 +71,7 @@ export default function ValidationPhaseComponent({
             </Select>
         )}
         {field.type === 'RadioBox' && (
-             <RadioGroup onValueChange={handleValueChange} value={value}>
+             <RadioGroup onValueChange={handleValueChange} value={value} disabled={isReadOnly}>
                 <div className="flex gap-4">
                     {(field.options || []).map(opt => (
                         <div key={opt} className="flex items-center space-x-2">
@@ -84,7 +86,7 @@ export default function ValidationPhaseComponent({
         {field.proof && (
             <div className="mt-2 space-y-1">
                 <Label htmlFor={`${fieldId}-proof`} className="text-xs">Proof Link</Label>
-                <Input id={`${fieldId}-proof`} value={proofLink} onChange={handleProofLinkChange} placeholder="Link to evidence"/>
+                <Input id={`${fieldId}-proof`} value={proofLink} onChange={handleProofLinkChange} placeholder="Link to evidence" disabled={isReadOnly}/>
             </div>
         )}
       </div>
@@ -118,7 +120,7 @@ export default function ValidationPhaseComponent({
              </div>
              <div className="space-y-2">
                 <Label htmlFor={`${phase.id}-status`}>Status</Label>
-                <Select value={phaseState?.status || 'Not Started'} onValueChange={onStatusChange}>
+                <Select value={phaseState?.status || 'Not Started'} onValueChange={onStatusChange} disabled={isReadOnly}>
                     <SelectTrigger id={`${phase.id}-status`}><SelectValue /></SelectTrigger>
                     <SelectContent>
                         {phase.statusOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
@@ -129,7 +131,7 @@ export default function ValidationPhaseComponent({
           </CardContent>
           <CardFooter className="flex justify-end gap-2">
             <Button variant="outline" onClick={onCancel}>Cancel</Button>
-            <Button onClick={onSave}>Save</Button>
+            <Button onClick={onSave} disabled={isReadOnly}>Save</Button>
           </CardFooter>
         </Card>
       )}
