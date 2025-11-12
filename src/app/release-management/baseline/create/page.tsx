@@ -121,21 +121,14 @@ export default function CreateBaselinePage() {
             return;
         }
         
-        // Enhance the dependency tree with the selected versions
-        const baselineDataForReview = {
-            ...dependencyTree,
-            tenants: dependencyTree.tenants.map((tenant: any) => ({
-                ...tenant,
-                version: tenantVersionSelections[tenant.id] || tenant.version, // Use selected version
-            })),
-            // Pass all tenant data for version validation on the next page
-            allTenants: allTenants 
+        const selectionsForStorage = {
+            productId: selectedProductId,
+            productVersion: dependencyTree.product.version,
+            tenantVersions: tenantVersionSelections,
         };
 
         try {
-            // Store the large data in sessionStorage
-            sessionStorage.setItem(`baseline-data-${selectedProductId}`, JSON.stringify(baselineDataForReview));
-            // Navigate with only the ID
+            sessionStorage.setItem(`baseline-selections-${selectedProductId}`, JSON.stringify(selectionsForStorage));
             router.push(`/release-management/baseline/review?productId=${selectedProductId}`);
         } catch (error) {
             toast({
@@ -145,13 +138,6 @@ export default function CreateBaselinePage() {
             });
         }
     };
-
-    const getAvailableVersionsForTenant = (tenantId: string): CmdbTenant[] => {
-        // This is a simplification. A real app might have a more direct way to get versions.
-        // For now, we assume all instances of a tenant in the `allTenants` list represent its available versions.
-        // We'll filter by `id` which should be the unique identifier across versions.
-        return allTenants.filter(t => t._id.startsWith(tenantId.split('_')[0] + '_' + tenantId.split('_')[1]));
-    }
 
     return (
         <DashboardLayout user={user}>
@@ -220,7 +206,7 @@ export default function CreateBaselinePage() {
                                                          </SelectTrigger>
                                                          <SelectContent>
                                                              {allTenants.filter(t => t.name === tenant.name).map(t_version => (
-                                                                <SelectItem key={t_version.id} value={t_version.version}>
+                                                                <SelectItem key={t_version.id} value={t_version.version || '1.0.0'}>
                                                                     {t_version.version}
                                                                 </SelectItem>
                                                              ))}

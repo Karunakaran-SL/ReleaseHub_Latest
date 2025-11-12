@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
@@ -26,19 +26,18 @@ interface ValidationResult {
     }[];
 }
 
-function validateDependencies(baselineData: any): ValidationResult {
+function validateDependencies(baselineData: any, allTenants: CmdbTenant[]): ValidationResult {
     const corrections: ValidationResult['corrections'] = [];
     let isValid = true;
     
-    if (!baselineData || !baselineData.allTenants || !baselineData.tenants) {
+    if (!baselineData || !allTenants || !baselineData.tenants) {
         return { isValid: true, corrections: [] };
     }
     
-    const allBaselineTenants = baselineData.allTenants as CmdbTenant[];
-    const selectedTenants = [...baselineData.tenants]; // Create a mutable copy
+    const selectedTenants = [...baselineData.tenants]; 
 
     for (const tenant of selectedTenants) {
-        const fullTenantData = allBaselineTenants.find(t => t.name === tenant.name && t.version === tenant.version);
+        const fullTenantData = allTenants.find(t => t.name === tenant.name && t.version === tenant.version);
         if (!fullTenantData || !fullTenantData.dependent_tenants) continue;
 
         for (const dependency of fullTenantData.dependent_tenants) {
@@ -46,29 +45,22 @@ function validateDependencies(baselineData: any): ValidationResult {
             const requiredTenantVersion = dependency.version; 
 
             const actualTenantInBaseline = selectedTenants.find(t => t.name === requiredTenantName);
-
+            
             if (actualTenantInBaseline && requiredTenantVersion && actualTenantInBaseline.version !== requiredTenantVersion) {
-                isValid = false;
-                const correction = {
-                    tenantId: actualTenantInBaseline.id,
-                    tenantName: actualTenantInBaseline.name,
-                    fromVersion: actualTenantInBaseline.version,
-                    toVersion: requiredTenantVersion,
-                    reason: `Required by ${tenant.name} v${tenant.version}.`,
-                };
-                corrections.push(correction);
-                // Apply correction to our mutable copy for subsequent checks
-                actualTenantInBaseline.version = requiredTenantVersion;
-            }
-        }
-    }
-    
-    // Update baseline data with corrections
-    if (!isValid) {
-        for (const correction of corrections) {
-            const tenantToUpdate = baselineData.tenants.find((t: any) => t.id === correction.tenantId);
-            if (tenantToUpdate) {
-                tenantToUpdate.version = correction.toVersion;
+                const isAlreadyCorrected = corrections.some(c => c.tenantId === actualTenantInBaseline.id && c.toVersion === requiredTenantVersion);
+
+                if (!isAlreadyCorrected) {
+                    isValid = false;
+                    const correction = {
+                        tenantId: actualTenantInBaseline.id,
+                        tenantName: actualTenantInBaseline.name,
+                        fromVersion: actualTenantInBaseline.version,
+                        toVersion: requiredTenantVersion,
+                        reason: `Required by ${tenant.name} v${tenant.version}.`,
+                    };
+                    corrections.push(correction);
+                    actualTenantInBaseline.version = requiredTenantVersion; // Apply correction for subsequent checks
+                }
             }
         }
     }
@@ -83,51 +75,90 @@ function BaselineReviewContent() {
     const [user, setUser] = useState<User | null>(null);
     const [baselineData, setBaselineData] = useState<any | null>(null);
     const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const { toast } = useToast();
+
+    const applyCorrections = useCallback((data: any, corrections: ValidationResult['corrections']) => {
+        if (!corrections || corrections.length === 0) return data;
+        const correctedData = JSON.parse(JSON.stringify(data));
+        corrections.forEach(correction => {
+            const tenantToUpdate = correctedData.tenants.find((t: any) => t.id === correction.tenantId);
+            if (tenantToUpdate) {
+                tenantToUpdate.version = correction.toVersion;
+            }
+        });
+        return correctedData;
+    }, []);
 
     useEffect(() => {
         getUser().then(setUser);
         const productId = searchParams.get('productId');
 
-        if (productId) {
-            try {
-                const data = sessionStorage.getItem(`baseline-data-${productId}`);
-                if (data) {
-                    const parsedData = JSON.parse(data);
-                    const validation = validateDependencies(parsedData);
-                    setValidationResult(validation);
-                    setBaselineData(parsedData);
-                    if (!validation.isValid) {
-                        toast({
-                            variant: "default",
-                            title: "Dependencies Corrected",
-                            description: "Some tenant versions were automatically updated to satisfy dependencies.",
-                        });
-                    }
-                } else {
-                    throw new Error('Baseline data not found in session. Please start over.');
-                }
-            } catch (error: any) {
-                toast({ variant: 'destructive', title: 'Error Loading Data', description: error.message });
-                router.push('/release-management/baseline/create');
-            }
-        } else {
+        if (!productId) {
              toast({ variant: 'destructive', title: 'Missing Information', description: 'No product ID provided. Please start over.' });
              router.push('/release-management/baseline/create');
+             return;
         }
-    }, [searchParams, router, toast]);
 
-    const compatibilityMatrixItems = baselineData ? [
-        ...baselineData.tenants.map((t: any) => ({ type: 'Tenant', ...t})),
-        ...baselineData.tenants.flatMap((t: any) => t.components.map((c: any) => ({ type: 'Component', ...c}))),
-        ...baselineData.tenants.flatMap((t: any) => t.applications.map((a: any) => ({ type: 'Application', ...a}))),
-    ] : [];
+        async function loadAndValidateData() {
+            setLoading(true);
+            try {
+                const selectionsData = sessionStorage.getItem(`baseline-selections-${productId}`);
+                if (!selectionsData) {
+                     throw new Error('Baseline selection data not found in session. Please start over.');
+                }
+                const selections = JSON.parse(selectionsData);
+
+                const [treeRes, allTenantsRes] = await Promise.all([
+                    fetch(`/api/dependency-tree/product/${productId}`),
+                    fetch('/api/cmdb/tenants'),
+                ]);
+
+                if (!treeRes.ok) throw new Error('Failed to fetch dependency tree.');
+                if (!allTenantsRes.ok) throw new Error('Failed to fetch tenant data.');
+
+                const tree = await treeRes.json();
+                const allTenants = await allTenantsRes.json();
+
+                // Apply user's selected versions to the freshly fetched tree
+                tree.tenants.forEach((tenant: any) => {
+                    if (selections.tenantVersions[tenant.id]) {
+                        tenant.version = selections.tenantVersions[tenant.id];
+                    }
+                });
+                tree.product.version = selections.productVersion;
+
+
+                const validation = validateDependencies(tree, allTenants);
+                const finalData = applyCorrections(tree, validation.corrections);
+
+                setValidationResult(validation);
+                setBaselineData(finalData);
+
+                if (!validation.isValid) {
+                    toast({
+                        variant: "default",
+                        title: "Dependencies Corrected",
+                        description: "Some tenant versions were automatically updated to satisfy dependencies.",
+                    });
+                }
+            } catch(error: any) {
+                 toast({ variant: 'destructive', title: 'Error Loading Data', description: error.message });
+                 router.push('/release-management/baseline/create');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadAndValidateData();
+
+    }, [searchParams, router, toast, applyCorrections]);
 
     const handleBuildPackage = async () => {
         setLoading(true);
+        // We already have the corrected data in `baselineData` state
         const finalBaselineData = { ...baselineData };
-        delete finalBaselineData.allTenants; // Clean up data before sending
+        delete finalBaselineData.allTenants; 
 
         try {
             const response = await fetch('/api/baselines', {
@@ -148,10 +179,7 @@ function BaselineReviewContent() {
                 description: `Successfully created baseline for product: ${finalBaselineData.product.name}`,
             });
 
-            // Clean up session storage
-            sessionStorage.removeItem(`baseline-data-${searchParams.get('productId')}`);
-
-            // Navigate to the summary page
+            sessionStorage.removeItem(`baseline-selections-${searchParams.get('productId')}`);
             router.push(`/release-management/baseline/${newBaseline._id}/summary`);
             
         } catch (error: any) {
@@ -161,7 +189,7 @@ function BaselineReviewContent() {
         }
     }
     
-    if (!baselineData || !baselineData.product) {
+    if (loading || !baselineData || !baselineData.product) {
         return (
              <DashboardLayout user={user}>
                 <div className="flex justify-center items-center h-64">
@@ -171,6 +199,12 @@ function BaselineReviewContent() {
             </DashboardLayout>
         );
     }
+
+    const compatibilityMatrixItems = baselineData ? [
+        ...baselineData.tenants.map((t: any) => ({ type: 'Tenant', ...t})),
+        ...baselineData.tenants.flatMap((t: any) => t.components.map((c: any) => ({ type: 'Component', ...c}))),
+        ...baselineData.tenants.flatMap((t: any) => t.applications.map((a: any) => ({ type: 'Application', ...a}))),
+    ] : [];
 
     return (
          <DashboardLayout user={user}>
@@ -201,7 +235,7 @@ function BaselineReviewContent() {
 
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Root Product</h3>
-                            <p className="text-muted-foreground">{baselineData.product.name}</p>
+                            <p className="text-muted-foreground">{baselineData.product.name} - v{baselineData.product.version}</p>
                         </div>
                         <Separator />
                         <div>
