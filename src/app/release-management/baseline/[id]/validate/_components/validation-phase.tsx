@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import type { OnboardingPhase, OnboardingFormField } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
 import { FileText } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface ValidationPhaseProps {
   phase: OnboardingPhase;
@@ -68,14 +69,16 @@ export default function ValidationPhaseComponent({
             </Select>
         )}
         {field.type === 'RadioBox' && (
-            <div className="flex gap-4">
-            {(field.options || []).map(opt => (
-                <div key={opt} className="flex items-center space-x-2">
-                    <input type="radio" id={`${fieldId}-${opt}`} name={fieldId} value={opt} checked={value === opt} onChange={e => handleValueChange(e.target.value)} />
-                    <Label htmlFor={`${fieldId}-${opt}`}>{opt}</Label>
+            <RadioGroup onValueChange={handleValueChange} value={value || ''}>
+                <div className="flex gap-4">
+                    {(field.options || []).map(opt => (
+                        <div key={opt} className="flex items-center space-x-2">
+                            <RadioGroupItem value={opt} id={`${fieldId}-${opt}`} />
+                            <Label htmlFor={`${fieldId}-${opt}`}>{opt}</Label>
+                        </div>
+                    ))}
                 </div>
-            ))}
-            </div>
+            </RadioGroup>
         )}
 
         {field.proof && (
