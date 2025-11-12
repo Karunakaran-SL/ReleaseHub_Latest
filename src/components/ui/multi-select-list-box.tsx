@@ -86,7 +86,7 @@ export function MultiSelectListBox({
         <CardContent className="p-0">
           <ScrollArea className="h-40">
             <div className="p-2 space-y-1">
-              {(available || []).map(option => (
+              {available.map(option => (
                 <div key={option.id} className="flex items-center space-x-2">
                   <Checkbox
                     id={`available-${option.id}`}
@@ -126,7 +126,7 @@ export function MultiSelectListBox({
         <CardContent className="p-0">
           <ScrollArea className="h-40">
             <div className="p-2 space-y-1">
-             {(chosen || []).map(option => (
+             {chosen.map(option => (
                 <div key={option.id} className="flex items-center space-x-2">
                    <Checkbox
                     id={`chosen-${option.id}`}

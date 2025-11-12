@@ -36,7 +36,6 @@ export default function EditProductPage() {
     const { id } = params;
 
     const [workflows, setWorkflows] = useState<SelectOption[]>([]);
-    const [cmdbItems, setCmdbItems] = useState<SelectOption[]>([]);
     const [complianceChecks, setComplianceChecks] = useState<SelectOption[]>([]);
     const [deploymentTypes, setDeploymentTypes] = useState<SelectOption[]>([]);
     const [specifications, setSpecifications] = useState<SelectOption[]>([]);
@@ -47,10 +46,9 @@ export default function EditProductPage() {
         async function fetchData() {
             if (!id) return;
             try {
-                const [productRes, workflowsRes, cmdbRes, complianceRes, deploymentRes, specificationsRes] = await Promise.all([
+                const [productRes, workflowsRes, complianceRes, deploymentRes, specificationsRes] = await Promise.all([
                     fetch(`/api/products/${id}`),
                     fetch('/api/workflows'),
-                    fetch('/api/cmdb'),
                     fetch('/api/compliance-checks'),
                     fetch('/api/deployment-types'),
                     fetch('/api/specifications'),
@@ -63,7 +61,6 @@ export default function EditProductPage() {
                 setFormState(productData);
 
                 setWorkflows(await workflowsRes.json());
-                setCmdbItems(await cmdbRes.json());
                 setComplianceChecks(await complianceRes.json());
                 setDeploymentTypes(await deploymentRes.json());
                 setSpecifications(await specificationsRes.json());
@@ -92,7 +89,7 @@ export default function EditProductPage() {
     };
 
     const handleSelectChange = (id: string, value: string) => {
-        const selectedItem = (id === 'default_workflow' ? workflows : id === 'cmdb' ? cmdbItems : deploymentTypes).find(item => item.id === value);
+        const selectedItem = (id === 'default_workflow' ? workflows : deploymentTypes).find(item => item.id === value);
         setFormState(prev => ({ ...prev, [id]: selectedItem ? { id: selectedItem.id, name: selectedItem.name } : undefined }));
     };
     
