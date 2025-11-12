@@ -8,11 +8,13 @@ import { getUser } from '@/lib/auth';
 import type { User, Baseline } from '@/lib/definitions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowRight, Save, Download, Info, Package, Warehouse, Puzzle, AppWindow, FileText } from 'lucide-react';
+import { Loader2, ArrowRight, Save, Download, Info, Package, Warehouse, Puzzle, AppWindow, FileText, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 function DependencyItem({ item, icon }: { item: { id: string, name: string, version: string }, icon: React.ReactNode }) {
     return (
@@ -69,6 +71,12 @@ export default function BaselineSummaryPage() {
     
     const isFinalized = ['RELEASED', 'REJECTED', 'ARCHIVED'].includes(baseline.status);
 
+    const compatibilityMatrixItems = baseline.tenants ? [
+        ...baseline.tenants.map((t: any) => ({ type: 'Tenant', ...t})),
+        ...baseline.tenants.flatMap((t: any) => (t.components || []).map((c: any) => ({ type: 'Component', ...c}))),
+        ...baseline.tenants.flatMap((t: any) => (t.applications || []).map((a: any) => ({ type: 'Application', ...a}))),
+    ] : [];
+
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10 space-y-6">
@@ -105,21 +113,64 @@ export default function BaselineSummaryPage() {
                                     </CardHeader>
                                     <CardContent className="p-4 pt-0 space-y-2">
                                         <div>
-                                            <h4 className="font-medium text-sm">Components ({tenant.components.length})</h4>
+                                            <h4 className="font-medium text-sm">Components ({tenant.components?.length || 0})</h4>
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1">
-                                            {tenant.components.map((comp: any) => <DependencyItem key={comp.id} item={comp} icon={<Puzzle className="h-4 w-4 text-green-500" />} />)}
+                                            {tenant.components?.map((comp: any) => <DependencyItem key={comp.id} item={comp} icon={<Puzzle className="h-4 w-4 text-green-500" />} />)}
                                             </div>
                                         </div>
                                          <div>
-                                            <h4 className="font-medium text-sm">Applications ({tenant.applications.length})</h4>
+                                            <h4 className="font-medium text-sm">Applications ({tenant.applications?.length || 0})</h4>
                                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1">
-                                            {tenant.applications.map((app: any) => <DependencyItem key={app.id} item={app} icon={<AppWindow className="h-4 w-4 text-blue-500" />} />)}
+                                            {tenant.applications?.map((app: any) => <DependencyItem key={app.id} item={app} icon={<AppWindow className="h-4 w-4 text-blue-500" />} />)}
                                             </div>
                                         </div>
                                     </CardContent>
                                 </Card>
                             ))}
                             </div>
+                        </div>
+                        
+                        <Separator />
+                        <div>
+                             <h3 className="text-lg font-semibold mb-2">Consolidated Release Notes</h3>
+                             <Textarea 
+                                placeholder="Aggregated release notes will be displayed here..." 
+                                rows={8}
+                                readOnly
+                                defaultValue={`- [Tenant] Platform Foundation v1.0.0: Initial release.\n- [Component] Authentication Service v1.3.0: Added multi-factor authentication support.\n- [Application] User Dashboard v2.0.0: Redesigned user interface.`}
+                            />
+                        </div>
+
+                        <Separator />
+
+                        <div>
+                            <h3 className="text-lg font-semibold mb-2">Compatibility Matrix</h3>
+                            <Card>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Type</TableHead>
+                                            <TableHead>Name</TableHead>
+                                            <TableHead>Version</TableHead>
+                                            <TableHead>Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {compatibilityMatrixItems.map((item) => (
+                                            <TableRow key={`${item.type}-${item.name}-${item.version}`}>
+                                                <TableCell>{item.type}</TableCell>
+                                                <TableCell>{item.name}</TableCell>
+                                                <TableCell>{item.version}</TableCell>
+                                                <TableCell>
+                                                    <span className="flex items-center text-green-600">
+                                                        <CheckCircle className="h-4 w-4 mr-1" /> Compatible
+                                                    </span>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </Card>
                         </div>
 
                         <Separator />
