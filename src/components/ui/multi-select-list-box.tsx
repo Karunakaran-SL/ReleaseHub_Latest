@@ -14,8 +14,8 @@ export interface Option {
 }
 
 interface MultiSelectListBoxProps {
-  available: Option[];
-  chosen: Option[];
+  available?: Option[];
+  chosen?: Option[];
   onMoveToChosen: (ids: string[]) => void;
   onMoveToAvailable: (ids: string[]) => void;
   onMoveAllToChosen: () => void;
@@ -24,8 +24,8 @@ interface MultiSelectListBoxProps {
 }
 
 export function MultiSelectListBox({ 
-  available, 
-  chosen, 
+  available = [], 
+  chosen = [], 
   onMoveToChosen,
   onMoveToAvailable,
   onMoveAllToChosen,

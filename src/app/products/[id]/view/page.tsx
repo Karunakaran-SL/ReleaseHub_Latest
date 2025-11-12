@@ -13,7 +13,7 @@ import DashboardLayout from '../../../dashboard-layout';
 import type { User, Product } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Camera, Settings, Loader2 } from 'lucide-react';
-import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
+import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
 import Link from 'next/link';
 import { 
     AlertDialog,
@@ -158,6 +158,24 @@ export default function ViewProductPage() {
 
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
 
+    const renderMultiSelect = (fieldName: 'custom_workflows' | 'compliance_checks' | 'specifications', allOptions: SelectOption[]) => {
+        const chosenItems = (product[fieldName] || []).map(item => ({ id: item.id, label: item.name }));
+        const chosenIds = new Set(chosenItems.map(item => item.id));
+        const availableItems = allOptions.filter(opt => !chosenIds.has(opt.id)).map(opt => ({ id: opt.id, label: opt.name }));
+
+        return (
+            <MultiSelectListBox
+                available={availableItems}
+                chosen={chosenItems}
+                onMoveToChosen={() => {}}
+                onMoveToAvailable={() => {}}
+                onMoveAllToChosen={() => {}}
+                onMoveAllToAvailable={() => {}}
+                disabled
+            />
+        );
+    };
+
 
     return (
         <DashboardLayout user={user}>
@@ -211,12 +229,7 @@ export default function ViewProductPage() {
                                 </div>
                                 <div>
                                     <Label>Custom Approval Workflow</Label>
-                                    <MultiSelectListBox
-                                        options={workflows.map(w => ({ id: w.id, label: w.name }))}
-                                        chosen={product.custom_workflows?.map(w => w.id) || []}
-                                        onChange={() => {}}
-                                        disabled
-                                    />
+                                    {renderMultiSelect('custom_workflows', workflows)}
                                 </div>
                             </div>
 
@@ -237,12 +250,7 @@ export default function ViewProductPage() {
                                 </div>
                                  <div>
                                     <Label>Select the compliance check</Label>
-                                     <MultiSelectListBox
-                                        options={complianceChecks.map(c => ({ id: c.id, label: c.name }))}
-                                        chosen={product.compliance_checks?.map(c => c.id) || []}
-                                        onChange={() => {}}
-                                        disabled
-                                    />
+                                    {renderMultiSelect('compliance_checks', complianceChecks)}
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Deployment Type</Label>
@@ -283,12 +291,7 @@ export default function ViewProductPage() {
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
-                                        <MultiSelectListBox
-                                            options={specifications.map(d => ({ id: d.id, label: d.name }))}
-                                            chosen={product.specifications ? product.specifications.map(s => s.id) : []}
-                                            onChange={() => {}}
-                                            disabled
-                                        />
+                                        {renderMultiSelect('specifications', specifications)}
                                     </div>
                                 )}
                             </div>
