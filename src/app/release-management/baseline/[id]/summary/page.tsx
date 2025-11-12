@@ -8,48 +8,21 @@ import { getUser } from '@/lib/auth';
 import type { User, Baseline } from '@/lib/definitions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowRight, Save, Download, Workflow, Info } from 'lucide-react';
+import { Loader2, ArrowRight, Save, Download, Info, Package, Warehouse, Puzzle, AppWindow, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { Separator } from '@/components/ui/separator';
 
-function CiCdPipeline() {
-    const steps = [
-        { name: 'Build Started', status: 'completed' },
-        { name: 'Unit Tests', status: 'completed' },
-        { name: 'Code Scan', status: 'completed' },
-        { name: 'Package Artifacts', status: 'completed' },
-        { name: 'Push to Registry', status: 'completed' },
-        { name: 'Deployment', status: 'skipped' },
-    ];
-    
+function DependencyItem({ item, icon }: { item: { id: string, name: string, version: string }, icon: React.ReactNode }) {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Workflow className="h-5 w-5"/> CI/CD Build Status</CardTitle>
-                <CardDescription>
-                    This is a simulated pipeline run for the baseline package creation.
-                    <br/>
-                    <span className="text-xs text-amber-600">Note: This is a placeholder. Future work will integrate with a real CI/CD system for live status updates.</span>
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="flex items-center space-x-4">
-                    {steps.map((step, index) => (
-                        <div key={step.name} className="flex items-center">
-                            <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step.status === 'completed' ? 'bg-green-500' : 'bg-gray-300'} text-white`}>
-                                {index + 1}
-                            </div>
-                            <div className="ml-3">
-                                <p className="font-medium">{step.name}</p>
-                                <p className={`text-sm ${step.status === 'completed' ? 'text-green-600' : 'text-gray-500'}`}>{step.status}</p>
-                            </div>
-                            {index < steps.length - 1 && <div className="h-px w-12 bg-gray-300" />}
-                        </div>
-                    ))}
-                </div>
-            </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 p-2 rounded-md bg-background">
+            {icon}
+            <div className="flex-grow">
+                <p className="font-semibold">{item.name}</p>
+                <p className="text-sm text-muted-foreground">Version: {item.version}</p>
+            </div>
+        </div>
     );
 }
 
@@ -99,15 +72,57 @@ export default function BaselineSummaryPage() {
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10 space-y-6">
-                <Card>
+                <Card className="w-full max-w-6xl mx-auto">
                     <CardHeader>
-                        <CardTitle>Baseline Summary</CardTitle>
+                        <CardTitle>Baseline Summary: {baseline.product.name}</CardTitle>
                         <CardDescription>
-                            Baseline for <strong>{baseline.product.name} v{baseline.product.version}</strong> has been created successfully.
+                            Viewing baseline version <strong>{baseline.product.version}</strong>, created on {format(new Date(baseline.created_at), 'PPP')}.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-8">
-                        <CiCdPipeline />
+                     <CardContent className="space-y-6">
+                        <Separator />
+                        <div>
+                            <h3 className="text-lg font-semibold mb-2">Specifications ({baseline.specifications.length})</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                {baseline.specifications.map((spec: any) => (
+                                    <div key={spec.id} className="text-sm p-2 bg-muted rounded-md flex items-center gap-2">
+                                       <FileText className="h-4 w-4 text-indigo-500" /> 
+                                       <span>{spec.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                         <Separator />
+                        <div>
+                            <h3 className="text-lg font-semibold mb-2">Tenants ({baseline.tenants.length})</h3>
+                            <div className="space-y-4">
+                            {baseline.tenants.map((tenant: any) => (
+                                <Card key={tenant.id} className="bg-secondary/50">
+                                    <CardHeader className="p-4">
+                                        <CardTitle className="text-md flex items-center gap-2">
+                                            <Warehouse className="h-5 w-5" /> {tenant.name} - v{tenant.version}
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-4 pt-0 space-y-2">
+                                        <div>
+                                            <h4 className="font-medium text-sm">Components ({tenant.components.length})</h4>
+                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1">
+                                            {tenant.components.map((comp: any) => <DependencyItem key={comp.id} item={comp} icon={<Puzzle className="h-4 w-4 text-green-500" />} />)}
+                                            </div>
+                                        </div>
+                                         <div>
+                                            <h4 className="font-medium text-sm">Applications ({tenant.applications.length})</h4>
+                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1">
+                                            {tenant.applications.map((app: any) => <DependencyItem key={app.id} item={app} icon={<AppWindow className="h-4 w-4 text-blue-500" />} />)}
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                            </div>
+                        </div>
+
+                        <Separator />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                              <Card>
@@ -140,8 +155,7 @@ export default function BaselineSummaryPage() {
                     </CardContent>
                     <CardFooter className="flex justify-end gap-4">
                         <Button variant="outline" onClick={() => router.push('/release-management/baseline')}>
-                            <Save className="mr-2 h-4 w-4" />
-                            Save & Go to List
+                            Back to List
                         </Button>
                          <Button asChild disabled={isFinalized}>
                             <Link href={`/release-management/baseline/${id}/validate`}>
