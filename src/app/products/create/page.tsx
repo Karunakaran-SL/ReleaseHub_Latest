@@ -33,7 +33,6 @@ const initialFormState: Partial<NewProductFormState> = {
     approval_needed: false,
     default_workflow: { id: '', name: '' },
     custom_workflows: [],
-    cmdb: { id: '', name: '' },
     compliance_checks: [],
     deployment_type: { id: 'Cloud', name: 'Cloud' },
     git_repo: '',
@@ -51,7 +50,6 @@ export default function CreateProductPage() {
 
     // Options fetched from API
     const [allWorkflows, setAllWorkflows] = useState<Option[]>([]);
-    const [allCmdbItems, setAllCmdbItems] = useState<Option[]>([]);
     const [allComplianceChecks, setAllComplianceChecks] = useState<Option[]>([]);
     const [allDeploymentTypes, setAllDeploymentTypes] = useState<Option[]>([]);
     const [allSpecifications, setAllSpecifications] = useState<Option[]>([]);
@@ -60,9 +58,8 @@ export default function CreateProductPage() {
         getUser().then(setUser);
         async function fetchData() {
             try {
-                const [workflowsRes, cmdbRes, complianceRes, deploymentRes, specificationsRes] = await Promise.all([
+                const [workflowsRes, complianceRes, deploymentRes, specificationsRes] = await Promise.all([
                     fetch('/api/workflows'),
-                    fetch('/api/cmdb'),
                     fetch('/api/compliance-checks'),
                     fetch('/api/deployment-types'),
                     fetch('/api/specifications'),
@@ -71,7 +68,6 @@ export default function CreateProductPage() {
                 const mapToOptions = (items: any[]): Option[] => items.map(item => ({ id: item._id, label: item.name }));
 
                 setAllWorkflows(mapToOptions(await workflowsRes.json()));
-                setAllCmdbItems(mapToOptions(await cmdbRes.json()));
                 setAllComplianceChecks(mapToOptions(await complianceRes.json()));
                 setAllDeploymentTypes(mapToOptions(await deploymentRes.json()));
                 setAllSpecifications(mapToOptions(await specificationsRes.json()));
@@ -97,8 +93,8 @@ export default function CreateProductPage() {
         setFormState(prev => ({ ...prev, [id]: checked }));
     };
 
-    const handleSelectChange = (field: 'default_workflow' | 'cmdb', value: string) => {
-        const options = field === 'default_workflow' ? allWorkflows : allCmdbItems;
+    const handleSelectChange = (field: 'default_workflow', value: string) => {
+        const options = allWorkflows;
         const selected = options.find(opt => opt.id === value);
         if (selected) {
             setFormState(prev => ({ ...prev, [field]: { id: selected.id, name: selected.label } }));
@@ -168,12 +164,6 @@ export default function CreateProductPage() {
         const available = allOptions.filter(opt => !chosenIds.has(opt.id));
         const chosen = allOptions.filter(opt => chosenIds.has(opt.id));
 
-        const onMove = (ids: string[], source: Option[], dest: Option[]) => {
-            const itemsToMove = source.filter(item => ids.includes(item.id));
-            const newDest = [...dest, ...itemsToMove];
-            handleMultiSelectUpdate(fieldName, newDest.map(i => ({id: i.id, name: i.label})));
-        }
-        
         const onMoveToChosen = (ids: string[]) => {
             const newChosen = [...(formState[fieldName] || []), ...available.filter(i => ids.includes(i.id)).map(i => ({id: i.id, name: i.label}))];
             handleMultiSelectUpdate(fieldName, newChosen);
@@ -299,7 +289,7 @@ export default function CreateProductPage() {
                                     </div>
                                 </div>
 
-                                {formState.deployment_type?.id === 'Airgapped' && (
+                                {formState.deployment_type?.id === 'Deployment_Airgapped' && (
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
