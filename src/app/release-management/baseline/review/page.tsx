@@ -14,6 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 interface ValidationResult {
     isValid: boolean;
@@ -75,6 +77,7 @@ function BaselineReviewContent() {
     const [user, setUser] = useState<User | null>(null);
     const [baselineData, setBaselineData] = useState<any | null>(null);
     const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+    const [versionIncrementType, setVersionIncrementType] = useState<'major' | 'minor' | 'patch'>('patch');
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
 
@@ -161,10 +164,10 @@ function BaselineReviewContent() {
             product: {
                 id: baselineData.id,
                 name: baselineData.name,
-                version: baselineData.version,
             },
             specifications: baselineData.specifications,
-            tenants: baselineData.tenants
+            tenants: baselineData.tenants,
+            versionIncrementType: versionIncrementType
         };
 
         try {
@@ -240,10 +243,30 @@ function BaselineReviewContent() {
                             </Alert>
                         )}
 
-                        <div>
-                            <h3 className="text-lg font-semibold mb-2">Root Product</h3>
-                            <p className="text-muted-foreground">{baselineData.name} - v{baselineData.version}</p>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h3 className="text-lg font-semibold">Root Product</h3>
+                                <p className="text-muted-foreground">{baselineData.name}</p>
+                            </div>
+                            <div>
+                                <Label>New Version Increment</Label>
+                                <RadioGroup defaultValue="patch" value={versionIncrementType} onValueChange={(value: 'major' | 'minor' | 'patch') => setVersionIncrementType(value)} className="flex items-center gap-4 mt-2">
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="major" id="major" />
+                                        <Label htmlFor="major">Major</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="minor" id="minor" />
+                                        <Label htmlFor="minor">Minor</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="patch" id="patch" />
+                                        <Label htmlFor="patch">Patch</Label>
+                                    </div>
+                                </RadioGroup>
+                            </div>
                         </div>
+
                         <Separator />
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Specifications ({baselineData.specifications.length})</h3>

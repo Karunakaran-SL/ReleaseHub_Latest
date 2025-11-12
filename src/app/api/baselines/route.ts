@@ -15,6 +15,7 @@ const BaselineCreateSchema = z.object({
     }),
     specifications: z.any(),
     tenants: z.any(),
+    versionIncrementType: z.enum(['major', 'minor', 'patch']),
 });
 
 // List all baselines
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'Invalid baseline data. Product information is missing.' }, { status: 400 });
         }
         
-        const { product, specifications, tenants } = validatedData.data;
+        const { product, specifications, tenants, versionIncrementType } = validatedData.data;
 
         const client = await clientPromise;
         const db = client.db();
@@ -71,7 +72,21 @@ export async function POST(req: NextRequest) {
             });
             const latestVersion = latestBaselines[0].product.version;
             const versionParts = latestVersion.split('.').map(Number);
-            versionParts[2] += 1; // Increment patch version
+            
+            switch (versionIncrementType) {
+                case 'major':
+                    versionParts[0] += 1;
+                    versionParts[1] = 0;
+                    versionParts[2] = 0;
+                    break;
+                case 'minor':
+                    versionParts[1] += 1;
+                    versionParts[2] = 0;
+                    break;
+                case 'patch':
+                    versionParts[2] += 1;
+                    break;
+            }
             newVersion = versionParts.join('.');
         }
 
