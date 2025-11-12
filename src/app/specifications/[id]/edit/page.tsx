@@ -14,6 +14,12 @@ import { getUser } from '@/lib/auth';
 import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 
+interface ServiceContract {
+    _id: string;
+    id: string;
+    name: string;
+}
+
 interface Specification {
     _id: string;
     id: string;
@@ -49,27 +55,44 @@ export default function EditSpecificationPage() {
     const params = useParams();
     const { id } = params;
     const { toast } = useToast();
+
+    const [serviceContracts, setServiceContracts] = useState<ServiceContract[]>([]);
     
     useEffect(() => {
         getUser().then(setUser);
         if (!id) return;
-        setLoading(true);
-        fetch(`/api/specifications/${id}`)
-            .then(res => {
-                if (!res.ok) throw new Error('Failed to fetch specification');
-                return res.json();
-            })
-            .then(data => {
-                setSpecification(data);
-                const networkCards = data.network_cards?.map((c: any) => c.name).join(', ') || '';
-                const plugPowerCords = data.plug_power_cords?.map((p: any) => p.name).join(', ') || '';
-                setFormState({...data, network_cards: networkCards, plug_power_cords: plugPowerCords, custom_fields: data.custom_fields || []});
-            })
-            .catch(err => {
+        
+        async function fetchData() {
+            setLoading(true);
+            try {
+                const [specRes, contractsRes] = await Promise.all([
+                    fetch(`/api/specifications/${id}`),
+                    fetch('/api/documents/service-contracts')
+                ]);
+
+                if (!specRes.ok) throw new Error('Failed to fetch specification');
+                
+                const specData = await specRes.json();
+                setSpecification(specData);
+                
+                const networkCards = specData.network_cards?.map((c: any) => c.name).join(', ') || '';
+                const plugPowerCords = specData.plug_power_cords?.map((p: any) => p.name).join(', ') || '';
+                setFormState({...specData, network_cards: networkCards, plug_power_cords: plugPowerCords, custom_fields: specData.custom_fields || []});
+
+                if (contractsRes.ok) {
+                    setServiceContracts(await contractsRes.json());
+                } else {
+                    toast({ variant: 'destructive', title: 'Warning', description: 'Could not load service contracts.' });
+                }
+
+            } catch (err: any) {
                 toast({ variant: 'destructive', title: 'Error', description: err.message });
                 router.push('/specifications');
-            })
-            .finally(() => setLoading(false));
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
     }, [id, router, toast]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -78,10 +101,18 @@ export default function EditSpecificationPage() {
     };
 
     const handleSelectChange = (field: keyof Specification, value: string) => {
-        // This is simplified. In a real app, you'd fetch the object or have it available.
-        const name = (field === 'hw_type' ? hwTypes : field === 'vendor' ? vendors : field === 'service_contract_type' ? contractTypes : hypervisors).find(v => (typeof v === 'object' ? v.id : v) === value);
-        const nameVal = typeof name === 'object' ? name.name : name;
-        setFormState(prev => ({ ...prev, [field]: { id: value, name: nameVal } }));
+        const options = field === 'hw_type' ? hwTypes 
+                      : field === 'hypervisor' ? hypervisors 
+                      : field === 'service_contract_type' ? serviceContracts 
+                      : [];
+        
+        const selectedOption = options.find(opt => opt.id === value);
+        
+        if (selectedOption) {
+            setFormState(prev => ({ ...prev, [field]: { id: value, name: selectedOption.name } }));
+        } else if (field === 'vendor') {
+            setFormState(prev => ({ ...prev, vendor: value }));
+        }
     };
     
     const handleCustomFieldChange = (index: number, field: 'key' | 'value', value: string) => {
@@ -138,7 +169,6 @@ export default function EditSpecificationPage() {
     // Dummy data for dropdowns
     const hwTypes = [{ id: 'HWType_Rack', name: 'Rack' }, { id: 'HWType_Blade', name: 'Blade' }];
     const vendors = ['Dell EMC', 'HPE', 'Cisco', 'Lenovo'];
-    const contractTypes = [{ id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus' }, { id: 'ServiceContract_Foundation_Care', name: 'Foundation Care' }];
     const hypervisors = [{ id: 'Hypervisor_VMWare_ESXi', name: 'VMWare ESXi' }, { id: 'Hypervisor_Microsoft_HyperV', name: 'Microsoft Hyper-V' }];
 
     if (loading && !specification) {
@@ -187,7 +217,7 @@ export default function EditSpecificationPage() {
                                         <Select value={formState.service_contract_type?.id} onValueChange={(value) => handleSelectChange('service_contract_type', value)}>
                                             <SelectTrigger><SelectValue placeholder="Select Contract Type" /></SelectTrigger>
                                             <SelectContent>
-                                                {contractTypes.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                                {serviceContracts.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     </div>

@@ -39,6 +39,7 @@ import {
   Workflow as WorkflowIcon,
   GitGraph,
   DatabaseZap,
+  BookCopy,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -155,6 +156,8 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isCmdbPage = pathname.startsWith('/cmdb');
     const isDependencyMetricsPage = pathname.startsWith('/dependency-metrics');
     const isReleaseManagementPage = pathname.startsWith('/release-management');
+    const isDocumentsPage = pathname.startsWith('/documents');
+
 
   return (
     <SidebarProvider>
@@ -164,7 +167,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage && !isReleaseManagementPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
@@ -256,6 +259,31 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         </CollapsibleTrigger>
                     </SidebarMenuItem>
                 </Collapsible>
+                 <Collapsible asChild defaultOpen={isDocumentsPage}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton 
+                        isActive={isDocumentsPage}
+                        tooltip={{ children: 'Documents' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <BookCopy />
+                        Documents
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                     <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/documents/service-contracts" isActive={pathname.startsWith('/documents/service-contracts')}>
+                                Service Contracts
+                            </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+
 
                 <Collapsible asChild defaultOpen={isCmdbPage || isDependencyMetricsPage}>
                   <SidebarMenuItem>

@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -17,6 +16,12 @@ import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
 interface CustomField {
     key: string;
     value: string;
+}
+
+interface ServiceContract {
+    _id: string;
+    id: string;
+    name: string;
 }
 
 interface SpecificationFormData {
@@ -47,9 +52,21 @@ export default function CreateSpecificationPage() {
         custom_fields: [{ key: '', value: '' }]
     });
 
+    const [serviceContracts, setServiceContracts] = useState<ServiceContract[]>([]);
+
     useEffect(() => {
         getUser().then(setUser);
-    }, []);
+        async function fetchServiceContracts() {
+            try {
+                const res = await fetch('/api/documents/service-contracts');
+                if (!res.ok) throw new Error("Failed to fetch service contracts");
+                setServiceContracts(await res.json());
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not load service contracts.' });
+            }
+        }
+        fetchServiceContracts();
+    }, [toast]);
 
      const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
@@ -57,12 +74,12 @@ export default function CreateSpecificationPage() {
     };
 
     const handleSelectChange = (field: keyof SpecificationFormData, value: string) => {
-        const selectedOption = (
-            field === 'hw_type' ? hwTypes :
-            field === 'hypervisor' ? hypervisors :
-            field === 'service_contract_type' ? contractTypes :
-            []
-        ).find(opt => opt.id === value);
+        const options = field === 'hw_type' ? hwTypes 
+                      : field === 'hypervisor' ? hypervisors 
+                      : field === 'service_contract_type' ? serviceContracts 
+                      : [];
+
+        const selectedOption = options.find(opt => opt.id === value);
 
         if (selectedOption) {
              setFormState(prev => ({ ...prev, [field]: { id: value, name: selectedOption.name } }));
@@ -128,7 +145,6 @@ export default function CreateSpecificationPage() {
     // Dummy data for dropdowns
     const hwTypes = [{ id: 'Rack', name: 'Rack' }, { id: 'Blade', name: 'Blade' }];
     const vendors = ['Dell EMC', 'HPE', 'Cisco', 'Lenovo'];
-    const contractTypes = [{ id: 'ProSupportPlus', name: 'ProSupport Plus' }, { id: 'FoundationCare', name: 'Foundation Care' }];
     const hypervisors = [{ id: 'VMWareESXi', name: 'VMWare ESXi' }, { id: 'MicrosoftHyper-V', name: 'Microsoft Hyper-V' }];
 
     return (
@@ -173,7 +189,7 @@ export default function CreateSpecificationPage() {
                                         <Select onValueChange={(value) => handleSelectChange('service_contract_type', value)}>
                                             <SelectTrigger><SelectValue placeholder="Select Contract Type" /></SelectTrigger>
                                             <SelectContent>
-                                                {contractTypes.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                                {serviceContracts.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     </div>

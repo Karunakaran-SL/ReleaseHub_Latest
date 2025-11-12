@@ -555,7 +555,6 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
     "approval_needed": true,
     "default_workflow": { "id": "StandardApproval", "name": "Standard Approval" },
     "custom_workflows": [],
-    "cmdb": { "id": "GlobalCMDB", "name": "Global CMDB" },
     "compliance_checks": [{ "id": "SOC2", "name": "SOC2" }, { "id": "GDPR", "name": "GDPR" }],
     "deployment_type": { "id": "Cloud", "name": "Cloud" },
     "git_repo": "http://git.example.com/platform/oss-portal",
@@ -571,7 +570,6 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
     "approval_needed": true,
     "default_workflow": { "id": "DataGovernanceReview", "name": "Data Governance Review" },
     "custom_workflows": [],
-    "cmdb": { "id": "GlobalCMDB", "name": "Global CMDB" },
     "compliance_checks": [{ "id": "HIPAA", "name": "HIPAA" }],
     "deployment_type": { "id": "Cloud", "name": "Cloud" },
     "git_repo": "http://git.example.com/platform/data-fabric",
@@ -582,17 +580,23 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   }
 ];
 
+const initialServiceContracts = [
+    { id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus', description: '24/7 premium hardware and software support.'},
+    { id: 'ServiceContract_Foundation_Care', name: 'Foundation Care', description: 'Basic hardware support.'},
+    { id: 'CommunitySupport', name: 'Community Support', description: 'Community-based support for open-source software.'}
+];
+
 const initialSpecifications = [
-  { "name": "ArgoCD Sync Spec", "vendor": "CNCF" },
-  { "name": "Single Sign-On Spec", "vendor": "OpenID" },
-  { "name": "Spark Processing", "vendor": "Apache" },
-  { "name": "Kafka Streaming", "vendor": "Apache" },
-  { "name": "Kubeflow Pipelines", "vendor": "Google" },
-  { "name": "PyTorch Distribution", "vendor": "Facebook" },
-  { "name": "KubeEdge Node Spec", "vendor": "CNCF" },
-  { "name": "MQTT Broker Spec", "vendor": "OASIS" },
-  { "name": "Istio Service Mesh", "vendor": "CNCF" },
-  { "name": "SPIFFE Identity", "vendor": "CNCF" }
+  { "name": "ArgoCD Sync Spec", "vendor": "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+  { "name": "Single Sign-On Spec", "vendor": "OpenID", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+  { "name": "Spark Processing", "vendor": "Apache", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+  { "name": "Kafka Streaming", "vendor": "Apache", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+  { "name": "Kubeflow Pipelines", "vendor": "Google", service_contract_type: { id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus' } },
+  { "name": "PyTorch Distribution", "vendor": "Facebook", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+  { "name": "KubeEdge Node Spec", "vendor": "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+  { "name": "MQTT Broker Spec", "vendor": "OASIS", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+  { "name": "Istio Service Mesh", "vendor": "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+  { "name": "SPIFFE Identity", "vendor": "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } }
 ];
 
 const fullSpecifications = initialSpecifications.map(spec => ({
@@ -605,7 +609,6 @@ const fullSpecifications = initialSpecifications.map(spec => ({
     storage_gb: 1024,
     hypervisor: { "id": "KVM", "name": "KVM" },
     image: `https://picsum.photos/seed/${spec.name.replace(/[^a-zA-Z0-9]/g, '')}/40/40`,
-    service_contract_type: { "id": "CommunitySupport", "name": "Community Support" },
     contact_point_email: "community@cncf.io",
     contact_point_phone: "N/A",
     network_cards: [{ "id": "VirtualNIC10Gbps", "name": "Virtual NIC 10Gbps" }],
@@ -756,7 +759,7 @@ export async function seedDatabase() {
     const collectionsToSeed = [
         { name: 'products', data: initialProducts.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString()})) },
         { name: 'specifications', data: fullSpecifications },
-        { name: 'deployment_types', data: initialDeploymentTypes.map(d => ({ ...d, _id: d.name })) },
+        { name: 'deployment_types', data: initialDeploymentTypes.map(d => ({ ...d, _id: d.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'compliance_checks', data: initialComplianceChecks.map(c => ({...c, _id: c.name.replace(/[^a-zA-Z0-9]/g, '')})) },
         { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
@@ -768,6 +771,7 @@ export async function seedDatabase() {
         { name: 'settings_component_onboarding', data: [initialComponentOnboarding] },
         { name: 'settings_tenant_onboarding', data: [initialTenantOnboarding] },
         { name: 'settings_baseline_onboarding', data: [initialBaselineConfig] },
+        { name: 'service_contracts', data: initialServiceContracts.map(s => ({...s, _id: s.id})) },
     ];
     
     let seededCount = 0;
