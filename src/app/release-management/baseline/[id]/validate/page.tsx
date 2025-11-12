@@ -93,7 +93,7 @@ export default function ValidateBaselinePage() {
 
     const handleExpandPhase = (phaseId: string) => {
         setExpandedPhase(phaseId);
-        setPopupState(JSON.parse(JSON.stringify(phasesState[phaseId])));
+        setPopupState(JSON.parse(JSON.stringify(phasesState[phaseId] || {})));
     };
 
     const handleCancelPopup = () => {

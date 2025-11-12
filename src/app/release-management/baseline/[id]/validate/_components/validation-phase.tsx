@@ -37,15 +37,15 @@ export default function ValidationPhaseComponent({
 
   const renderField = (field: OnboardingFormField) => {
     const fieldId = `${phase.id}-${field.name}`;
-    const value = phaseState[field.name]?.value || '';
-    const proofLink = phaseState[field.name]?.proofLink || '';
+    const value = phaseState?.[field.name]?.value ?? '';
+    const proofLink = phaseState?.[field.name]?.proofLink ?? '';
 
     const handleValueChange = (newValue: any) => {
-        onStateChange(field.name, { value: newValue, proofLink: proofLink });
+        onStateChange(field.name, { value: newValue, proofLink });
     };
 
     const handleProofLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onStateChange(field.name, { value: value, proofLink: e.target.value });
+        onStateChange(field.name, { value, proofLink: e.target.value });
     };
 
     return (
@@ -62,7 +62,7 @@ export default function ValidationPhaseComponent({
              <Select onValueChange={handleValueChange} value={value}>
                 <SelectTrigger id={fieldId}><SelectValue placeholder="Select..."/></SelectTrigger>
                 <SelectContent>
-                    {field.options?.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                    {(field.options || []).map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
                 </SelectContent>
             </Select>
         )}
@@ -115,7 +115,7 @@ export default function ValidationPhaseComponent({
              </div>
              <div className="space-y-2">
                 <Label htmlFor={`${phase.id}-status`}>Status</Label>
-                <Select value={phaseState.status} onValueChange={onStatusChange}>
+                <Select value={phaseState?.status || 'Not Started'} onValueChange={onStatusChange}>
                     <SelectTrigger id={`${phase.id}-status`}><SelectValue /></SelectTrigger>
                     <SelectContent>
                         {phase.statusOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
