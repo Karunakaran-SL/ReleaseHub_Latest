@@ -157,6 +157,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isDependencyMetricsPage = pathname.startsWith('/dependency-metrics');
     const isReleaseManagementPage = pathname.startsWith('/release-management');
     const isDocumentsPage = pathname.startsWith('/documents');
+    const isFleetManagementPage = pathname.startsWith('/fleet-management');
 
 
   return (
@@ -167,11 +168,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage}
+                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage}
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -355,12 +356,31 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </SidebarMenuItem>
                 </Collapsible>
                 
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Fleet Mgmt' }}>
-                    <Users />
-                    Fleet Mgmt
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <Collapsible asChild defaultOpen={isFleetManagementPage}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        isActive={isFleetManagementPage}
+                        tooltip={{ children: 'Fleet Management' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <Users />
+                        Fleet Mgmt
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/fleet-management/deployment" isActive={pathname.startsWith('/fleet-management/deployment')}>
+                            Deployment
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+
                 <SidebarMenuItem>
                   <SidebarMenuButton tooltip={{ children: 'Workflow' }}>
                     <WorkflowIcon />
