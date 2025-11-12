@@ -136,8 +136,8 @@ export default function ValidateBaselinePage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     status: 'VALIDATED', 
-                    updateComment: 'Baseline validation phases completed.',
-                    validation_phases: updatedPhases
+                    validation_phases: updatedPhases,
+                    updateComment: "Baseline validation phases completed."
                 }),
             });
             if (!response.ok) throw new Error('Failed to update baseline status.');
@@ -156,7 +156,7 @@ export default function ValidateBaselinePage() {
     }
 
     if (!baseline || !baseline.validation_phases) {
-        return <DashboardLayout user={user}><div className="flex h-full items-center justify-center">Could not load baseline or validation configuration.</div></DashboardLayout>
+        return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><p>Could not load baseline or validation configuration.</p></div></DashboardLayout>
     }
 
     return (
