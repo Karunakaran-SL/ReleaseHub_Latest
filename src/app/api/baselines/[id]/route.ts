@@ -9,6 +9,7 @@ import { ObjectId } from 'mongodb';
 const BaselineUpdateSchema = z.object({
   status: z.enum(['DRAFT', 'VALIDATING', 'VALIDATED', 'RELEASED', 'ARCHIVED', 'REJECTED']),
   updateComment: z.string().min(1, 'Update comment is required.'),
+  validation_phases: z.any().optional(),
 });
 
 

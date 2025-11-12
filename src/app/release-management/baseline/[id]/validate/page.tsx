@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
-import type { User, Baseline, OnboardingConfiguration } from '@/lib/definitions';
+import type { User, Baseline, OnboardingConfiguration, OnboardingPhase } from '@/lib/definitions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle, ChevronRight, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,6 @@ const statusColors: Record<string, string> = {
 export default function ValidateBaselinePage() {
     const [user, setUser] = useState<User | null>(null);
     const [baseline, setBaseline] = useState<Baseline | null>(null);
-    const [validationConfig, setValidationConfig] = useState<OnboardingConfiguration | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     
@@ -53,35 +52,26 @@ export default function ValidateBaselinePage() {
         async function loadData() {
             setLoading(true);
             try {
-                const [baselineRes, configRes] = await Promise.all([
-                    fetch(`/api/baselines/${id}`),
-                    fetch('/api/settings/baseline-onboarding')
-                ]);
+                const baselineRes = await fetch(`/api/baselines/${id}`);
 
                 if (!baselineRes.ok) throw new Error('Failed to fetch baseline.');
                 const currentBaseline = await baselineRes.json();
                 setBaseline(currentBaseline);
 
-                if (!configRes.ok) throw new Error('Failed to fetch baseline validation configuration.');
-                const configs = await configRes.json();
-                if (configs && configs.length > 0) {
-                     const latestConfig = configs.reduce((latest: any, current: any) => current.version > latest.version ? current : latest, configs[0]);
-                     setValidationConfig(latestConfig);
-
-                      // Initialize phase states with a flattened structure
-                    const initialState: Record<string, any> = {};
-                    latestConfig.phases.forEach((phase: any) => {
-                        initialState[phase.id] = { status: 'Not Started' };
-                        phase.fields.forEach((field: any) => {
-                            initialState[phase.id][field.name + '_value'] = '';
-                            initialState[phase.id][field.name + '_proofLink'] = '';
-                        });
-                    });
-                    setPhasesState(initialState);
-                } else {
-                    throw new Error('No baseline validation configuration found.');
+                if (!currentBaseline.validation_phases) {
+                    throw new Error('No validation phases found in this baseline.');
                 }
-
+                
+                const initialState: Record<string, any> = {};
+                currentBaseline.validation_phases.forEach((phase: OnboardingPhase) => {
+                    initialState[phase.id] = { status: phase.status || 'Not Started' };
+                    phase.fields.forEach(field => {
+                        initialState[phase.id][`${field.name}_value`] = field.value || '';
+                        initialState[phase.id][`${field.name}_proofLink`] = field.proof?.link || '';
+                    });
+                });
+                setPhasesState(initialState);
+                
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
             } finally {
@@ -93,7 +83,6 @@ export default function ValidateBaselinePage() {
 
     const handleExpandPhase = (phaseId: string) => {
         setExpandedPhase(phaseId);
-        // Popup state will also use the flattened structure
         setPopupState(JSON.parse(JSON.stringify(phasesState[phaseId] || {})));
     };
 
@@ -110,7 +99,6 @@ export default function ValidateBaselinePage() {
     };
     
     const handlePopupStateChange = (fieldName: string, value: any) => {
-         // This now updates a flat property, e.g., 'ciJobUrl_value'
         setPopupState((prev: any) => ({ ...prev, [fieldName]: value }));
     };
     
@@ -121,11 +109,35 @@ export default function ValidateBaselinePage() {
 
     const handleFinish = async () => {
         setSaving(true);
+        if (!baseline?.validation_phases) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Validation configuration is missing.' });
+            setSaving(false);
+            return;
+        }
+        
+        // Reconstruct the phases object from the flattened state
+        const updatedPhases = baseline.validation_phases.map(phaseConfig => {
+            const phaseData = phasesState[phaseConfig.id] || {};
+            return {
+                ...phaseConfig,
+                status: phaseData.status,
+                fields: phaseConfig.fields.map(fieldConfig => ({
+                    ...fieldConfig,
+                    value: phaseData[`${fieldConfig.name}_value`] || '',
+                    proof: { link: phaseData[`${fieldConfig.name}_proofLink`] || '' }
+                }))
+            };
+        });
+
         try {
             const response = await fetch(`/api/baselines/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'VALIDATED', updateComment: 'Baseline validation phases completed.' }),
+                body: JSON.stringify({ 
+                    status: 'VALIDATED', 
+                    updateComment: 'Baseline validation phases completed.',
+                    validation_phases: updatedPhases
+                }),
             });
             if (!response.ok) throw new Error('Failed to update baseline status.');
             
@@ -142,7 +154,7 @@ export default function ValidateBaselinePage() {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>
     }
 
-    if (!baseline || !validationConfig) {
+    if (!baseline || !baseline.validation_phases) {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center">Could not load baseline or validation configuration.</div></DashboardLayout>
     }
 
@@ -155,7 +167,7 @@ export default function ValidateBaselinePage() {
                 </div>
 
                 <div className={cn("relative flex flex-wrap items-center justify-center p-8 gap-y-8 gap-x-4", expandedPhase && 'z-30')}>
-                    {validationConfig.phases.map((phase, index) => (
+                    {baseline.validation_phases.map((phase, index) => (
                         <div key={phase.id} className="flex items-center">
                             <ValidationPhaseComponent
                                 phase={phase}
@@ -168,7 +180,7 @@ export default function ValidateBaselinePage() {
                                 onSave={handleSavePopup}
                                 onCancel={handleCancelPopup}
                             />
-                            {index < validationConfig.phases.length - 1 && (
+                            {index < baseline.validation_phases.length - 1 && (
                                 <ChevronRight className="h-8 w-8 text-muted-foreground mx-4" />
                             )}
                         </div>

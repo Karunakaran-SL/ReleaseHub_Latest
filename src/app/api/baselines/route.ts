@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
-import type { Baseline } from '@/lib/definitions';
+import type { Baseline, OnboardingConfiguration } from '@/lib/definitions';
 import { logAuditEvent } from '@/lib/audit';
 
 const COLLECTION_NAME = 'baselines';
@@ -40,12 +40,31 @@ export async function POST(req: NextRequest) {
         
         const client = await clientPromise;
         const db = client.db();
+
+        // Fetch the latest baseline onboarding configuration
+        const onboardingConfigs = await db.collection('settings_baseline_onboarding').find({}).sort({ version: -1 }).limit(1).toArray();
+        if (onboardingConfigs.length === 0) {
+            return NextResponse.json({ message: 'Baseline onboarding configuration not found.' }, { status: 500 });
+        }
+        const validationConfig = onboardingConfigs[0] as OnboardingConfiguration;
+        
+        // Initialize validation phases for the new baseline
+        const validationPhases = validationConfig.phases.map(phase => ({
+            ...phase,
+            status: 'Not Started',
+            fields: phase.fields.map(field => ({
+                ...field,
+                value: '',
+                proof: { link: '' }
+            }))
+        }));
         
         const newBaseline: Omit<Baseline, '_id'> = {
             product: { id: body.product.id, name: body.product.name, version: body.product.version },
             specifications: body.specifications,
             tenants: body.tenants,
             status: 'DRAFT',
+            validation_phases: validationPhases,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             created_by: user.username,

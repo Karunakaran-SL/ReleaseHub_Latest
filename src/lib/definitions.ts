@@ -219,7 +219,8 @@ export type Baseline = {
     };
     specifications: { id: string; name: string; version: string; }[];
     tenants: any[]; // Simplified for now
-    status: 'DRAFT' | 'VALIDATING' | 'VALIDATED' | 'RELEASED' | 'ARCHIVED';
+    status: 'DRAFT' | 'VALIDATING' | 'VALIDATED' | 'RELEASED' | 'ARCHIVED' | 'REJECTED';
+    validation_phases?: OnboardingPhase[];
     created_at: string;
     updated_at: string;
     created_by: string;
