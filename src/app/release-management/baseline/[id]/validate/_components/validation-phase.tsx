@@ -38,9 +38,8 @@ export default function ValidationPhaseComponent({
 
   const renderField = (field: OnboardingFormField) => {
     const fieldId = `${phase.id}-${field.name}`;
-    
-    // Correctly destructure the state object for each field at the top.
-    const { value, proofLink } = phaseState?.[field.name] || { value: '', proofLink: '' };
+    const fieldData = phaseState?.[field.name] || { value: '', proofLink: '' };
+    const { value, proofLink } = fieldData;
 
     const handleValueChange = (newValue: any) => {
         onStateChange(field.name, { value: newValue, proofLink: proofLink });
@@ -69,7 +68,7 @@ export default function ValidationPhaseComponent({
             </Select>
         )}
         {field.type === 'RadioBox' && (
-            <RadioGroup onValueChange={handleValueChange} value={value || ''}>
+             <RadioGroup onValueChange={handleValueChange} value={value || ''}>
                 <div className="flex gap-4">
                     {(field.options || []).map(opt => (
                         <div key={opt} className="flex items-center space-x-2">
