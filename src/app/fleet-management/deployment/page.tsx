@@ -7,6 +7,7 @@ import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { PlusCircle, Upload, GitMerge, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
 
 export default function DeploymentDashboardPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -25,7 +26,11 @@ export default function DeploymentDashboardPage() {
                     </div>
                     <div className="flex gap-2">
                         <Button variant="outline"><Upload className="mr-2 h-4 w-4" /> Upgrade Wizard</Button>
-                        <Button><PlusCircle className="mr-2 h-4 w-4" /> New Deployment Wizard</Button>
+                        <Button asChild>
+                            <Link href="/fleet-management/deployment/new">
+                                <PlusCircle className="mr-2 h-4 w-4" /> New Deployment Wizard
+                            </Link>
+                        </Button>
                         <Button variant="outline"><GitMerge className="mr-2 h-4 w-4" /> Migration Wizard</Button>
                         <Button variant="destructive"><Trash2 className="mr-2 h-4 w-4" /> Decommission Wizard</Button>
                     </div>

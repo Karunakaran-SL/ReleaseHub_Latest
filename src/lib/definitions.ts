@@ -1,6 +1,7 @@
 
 
 
+
 export type User = {
   _id: string;
   username: string;
@@ -51,6 +52,15 @@ export type Product = {
   updated_at: string;
   version: string;
 };
+
+export type Specification = {
+    _id: string;
+    name: string;
+    hw_type: { id: string; name: string; };
+    vendor: string;
+    image: string;
+};
+
 
 export type AuditLog = {
     _id: string;
@@ -199,14 +209,24 @@ export type AnyCmdbEntity = (CmdbTenant | CmdbComponent | CmdbApplication | Cmdb
 export type EntityType = 'tenant' | 'component' | 'application' | 'interface' | 'product';
 
 export type DependencyTree = {
-  _id: string; // Mongo ObjectID
-  product: Product;
+  _id: string;
+  id: string;
+  name: string;
+  version: string;
   specifications: { id: string; name: string; version: string; }[];
-  tenants: CmdbTenant[];
-  // These were removed for the simpler model
-  // components: Partial<CmdbComponent>[];
-  // applications: Partial<CmdbApplication>[];
-  // interfaces: Partial<CmdbInterface>[];
+  tenants: {
+    id: string;
+    name: string;
+    version: string;
+    components: (CmdbComponent & {
+      provides_interfaces: CmdbInterface[];
+      depends_on_interfaces: CmdbInterface[];
+    })[];
+    applications: (CmdbApplication & {
+      provides_interfaces: CmdbInterface[];
+      depends_on_interfaces: CmdbInterface[];
+    })[];
+  }[];
 };
 
 
