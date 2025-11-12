@@ -8,7 +8,14 @@ import { logAuditEvent } from '@/lib/audit';
 
 const COLLECTION_NAME = 'baselines';
 
-const BaselineCreateSchema = z.any(); // We'll accept the dependency tree structure
+const BaselineCreateSchema = z.object({
+    product: z.object({
+        id: z.string(),
+        name: z.string(),
+    }),
+    specifications: z.any(),
+    tenants: z.any(),
+});
 
 // List all baselines
 export async function GET(req: NextRequest) {
@@ -33,13 +40,48 @@ export async function POST(req: NextRequest) {
 
         const body = await req.json();
         
-        // Basic validation, can be improved with a full Zod schema for the tree
-        if (!body.product || !body.product.id) {
-             return NextResponse.json({ message: 'Invalid baseline data. Product information is missing.' }, { status: 400 });
+        const validatedData = BaselineCreateSchema.safeParse(body);
+        if (!validatedData.success) {
+            return NextResponse.json({ message: 'Invalid baseline data. Product information is missing.' }, { status: 400 });
         }
         
+        const { product, specifications, tenants } = validatedData.data;
+
         const client = await clientPromise;
         const db = client.db();
+        const baselinesCollection = db.collection<Baseline>(COLLECTION_NAME);
+
+        // Find the latest baseline for this product to auto-increment version
+        const latestBaselines = await baselinesCollection
+            .find({ 'product.id': product.id })
+            .sort({ 'product.version': -1 }) // Simple sort might not work for semver, fetching all and sorting in code
+            .toArray();
+
+        let newVersion = '1.0.0';
+        if (latestBaselines.length > 0) {
+            // A more robust semver sort
+            latestBaselines.sort((a, b) => {
+                const aParts = a.product.version.split('.').map(Number);
+                const bParts = b.product.version.split('.').map(Number);
+                for(let i = 0; i < 3; i++) {
+                    if (aParts[i] > bParts[i]) return -1;
+                    if (aParts[i] < bParts[i]) return 1;
+                }
+                return 0;
+            });
+            const latestVersion = latestBaselines[0].product.version;
+            const versionParts = latestVersion.split('.').map(Number);
+            versionParts[2] += 1; // Increment patch version
+            newVersion = versionParts.join('.');
+        }
+
+        const newBaselineId = `${product.id}_${newVersion}`;
+
+        // Check if this ID already exists
+        const existingBaseline = await baselinesCollection.findOne({ _id: newBaselineId });
+        if (existingBaseline) {
+            return NextResponse.json({ message: `A baseline with ID ${newBaselineId} already exists.` }, { status: 409 });
+        }
 
         // Fetch the latest baseline onboarding configuration
         const onboardingConfigs = await db.collection('settings_baseline_onboarding').find({}).sort({ version: -1 }).limit(1).toArray();
@@ -59,39 +101,42 @@ export async function POST(req: NextRequest) {
             }))
         }));
         
-        const newBaseline: Omit<Baseline, '_id'> = {
-            product: { id: body.product.id, name: body.product.name, version: body.product.version },
-            specifications: body.specifications,
-            tenants: body.tenants,
+        const newBaseline: Baseline = {
+            _id: newBaselineId,
+            product: { 
+                id: product.id, 
+                name: product.name, 
+                version: newVersion 
+            },
+            specifications: specifications,
+            tenants: tenants,
             status: 'DRAFT',
             validation_phases: validationPhases,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             created_by: user.username,
-            // Dummy data for artifacts and package info
             artifacts: [
-                { name: `${body.product.name}-installer.exe`, url: `/downloads/installer.exe`, size: '150.2 MB' },
-                { name: `${body.product.name}-docs.pdf`, url: `/downloads/docs.pdf`, size: '12.5 MB' },
-                { name: `release-notes.txt`, url: `/downloads/release-notes.txt`, size: '5.1 KB' },
+                { name: `${product.name}-${newVersion}-installer.exe`, url: `/downloads/installer.exe`, size: '150.2 MB' },
+                { name: `${product.name}-${newVersion}-docs.pdf`, url: `/downloads/docs.pdf`, size: '12.5 MB' },
+                { name: `release-notes-v${newVersion}.txt`, url: `/downloads/release-notes.txt`, size: '5.1 KB' },
             ],
             package_properties: {
-                location: `s3://release-artifacts/${body.product.id}/${body.product.version}/`,
+                location: `s3://release-artifacts/${product.id}/${newVersion}/`,
                 checksum_md5: 'd41d8cd98f00b204e9800998ecf8427e',
                 checksum_sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
             }
         };
 
-        const result = await db.collection(COLLECTION_NAME).insertOne(newBaseline as any);
-        const insertedItem = { ...newBaseline, _id: result.insertedId };
-
+        await baselinesCollection.insertOne(newBaseline as any);
+        
         await logAuditEvent({
             action: 'CREATE',
             entity: 'baseline',
-            entityId: result.insertedId.toString(),
-            comment: `Baseline for product "${body.product.name}" created in DRAFT state.`,
+            entityId: newBaselineId,
+            comment: `Baseline for product "${product.name}" v${newVersion} created in DRAFT state.`,
         });
 
-        return NextResponse.json(insertedItem, { status: 201 });
+        return NextResponse.json(newBaseline, { status: 201 });
 
     } catch (error) {
         console.error(error);
