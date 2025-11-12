@@ -8,7 +8,7 @@ import { getUser } from '@/lib/auth';
 import type { User, Baseline } from '@/lib/definitions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, AlertTriangle, FileCheck, XCircle } from 'lucide-react';
+import { Loader2, AlertTriangle, FileCheck, XCircle, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
@@ -107,7 +107,7 @@ export default function FinalizeBaselinePage() {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center">Baseline not found.</div></DashboardLayout>
     }
     
-    const isFinalized = baseline.status === 'RELEASED' || baseline.status === 'REJECTED' || baseline.status === 'ARCHIVED';
+    const isFinalized = ['RELEASED', 'REJECTED', 'ARCHIVED'].includes(baseline.status);
 
     return (
         <DashboardLayout user={user}>
@@ -120,13 +120,24 @@ export default function FinalizeBaselinePage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <Alert variant="destructive">
-                            <AlertTriangle className="h-4 w-4" />
-                            <AlertTitle>Warning</AlertTitle>
-                            <AlertDescription>
-                                Finalizing or rejecting a baseline is an immutable action. Once completed, the status cannot be changed.
-                            </AlertDescription>
-                        </Alert>
+                        {isFinalized ? (
+                             <Alert variant="default" className="bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800">
+                                <Lock className="h-4 w-4" />
+                                <AlertTitle>Baseline Finalized</AlertTitle>
+                                <AlertDescription>
+                                    This baseline has been {baseline.status.toLowerCase()} and is now read-only. No further actions can be taken.
+                                </AlertDescription>
+                            </Alert>
+                        ) : (
+                            <Alert variant="destructive">
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertTitle>Warning</AlertTitle>
+                                <AlertDescription>
+                                    Finalizing or rejecting a baseline is an immutable action. Once completed, the status cannot be changed.
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
 
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm">
                             <div><span className="font-semibold text-muted-foreground">Version Number:</span> {baseline.product.version}</div>
@@ -205,4 +216,3 @@ export default function FinalizeBaselinePage() {
         </DashboardLayout>
     );
 }
-

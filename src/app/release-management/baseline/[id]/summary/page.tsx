@@ -73,11 +73,9 @@ export default function BaselineSummaryPage() {
 
         async function fetchBaseline() {
             try {
-                const res = await fetch('/api/baselines');
-                if (!res.ok) throw new Error('Failed to fetch baselines');
-                const baselines: Baseline[] = await res.json();
-                const foundBaseline = baselines.find(b => b._id === id);
-                if (!foundBaseline) throw new Error('Baseline not found');
+                const res = await fetch(`/api/baselines/${id}`);
+                if (!res.ok) throw new Error('Failed to fetch baseline');
+                const foundBaseline = await res.json();
                 setBaseline(foundBaseline);
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -95,6 +93,8 @@ export default function BaselineSummaryPage() {
     if (!baseline) {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center">Baseline not found.</div></DashboardLayout>
     }
+    
+    const isFinalized = ['RELEASED', 'REJECTED', 'ARCHIVED'].includes(baseline.status);
 
     return (
         <DashboardLayout user={user}>
@@ -143,7 +143,7 @@ export default function BaselineSummaryPage() {
                             <Save className="mr-2 h-4 w-4" />
                             Save & Go to List
                         </Button>
-                         <Button asChild>
+                         <Button asChild disabled={isFinalized}>
                             <Link href={`/release-management/baseline/${id}/validate`}>
                                 <ArrowRight className="mr-2 h-4 w-4" />
                                 Proceed to Validation Pipeline

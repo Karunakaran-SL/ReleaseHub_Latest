@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import ValidationPhaseComponent from './_components/validation-phase';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Lock } from 'lucide-react';
 
 const statusColors: Record<string, string> = {
     'Not Started': 'bg-gray-200 text-gray-800',
@@ -159,6 +161,8 @@ export default function ValidateBaselinePage() {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><p>Could not load baseline or validation configuration.</p></div></DashboardLayout>
     }
 
+    const isFinalized = ['RELEASED', 'REJECTED', 'ARCHIVED'].includes(baseline.status);
+
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10">
@@ -167,7 +171,17 @@ export default function ValidateBaselinePage() {
                     <p className="text-muted-foreground">Execute and track all validation phases for this baseline.</p>
                 </div>
 
-                <div className={cn("relative flex flex-wrap items-center justify-center p-8 gap-y-8 gap-x-4", expandedPhase && 'z-30')}>
+                {isFinalized && (
+                     <Alert variant="default" className="mb-8 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800">
+                        <Lock className="h-4 w-4" />
+                        <AlertTitle>Read-Only</AlertTitle>
+                        <AlertDescription>
+                            This baseline has been finalized and can no longer be modified.
+                        </AlertDescription>
+                    </Alert>
+                )}
+
+                <div className={cn("relative flex flex-wrap items-center justify-center p-8 gap-y-8 gap-x-4", (expandedPhase || isFinalized) && 'z-30 pointer-events-none opacity-70')}>
                     {baseline.validation_phases.map((phase, index) => (
                         <div key={phase.id} className="flex items-center">
                             <ValidationPhaseComponent
@@ -195,7 +209,7 @@ export default function ValidateBaselinePage() {
                 )}
 
                  <div className="mt-12 flex justify-end">
-                    <Button onClick={handleFinish} size="lg" disabled={saving}>
+                    <Button onClick={handleFinish} size="lg" disabled={saving || isFinalized}>
                         {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         <ArrowRight className="mr-2 h-5 w-5" />
                         Next: Finalize Release
