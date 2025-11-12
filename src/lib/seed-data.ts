@@ -1,5 +1,4 @@
 
-
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration } from './definitions';
@@ -546,6 +545,12 @@ const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
   ],
 };
 
+const initialSpecVendors = [{ name: 'Dell EMC' }, { name: 'HPE' }, { name: 'Cisco' }, { name: 'Lenovo' }, { name: 'CNCF' }, { name: 'OpenID' }, { name: 'Apache' }, { name: 'Facebook' }, { name: 'Google' }, { name: 'OASIS' }];
+const initialSpecHwTypes = [{ name: 'Rack' }, { name: 'Blade' }, { name: 'Virtual' }];
+const initialSpecHypervisors = [{ name: 'VMWare ESXi' }, { name: 'Microsoft Hyper-V' }, { name: 'KVM' }];
+const initialSpecNetworkCards = [{ name: 'Virtual NIC 10Gbps' }, { name: 'Intel X710' }, { name: 'Mellanox ConnectX-5' }];
+const initialSpecPlugPowerCords = [{ name: 'Virtual Power' }, { name: 'NEMA 5-15P' }, { name: 'C13/C14' }];
+
 
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
@@ -620,9 +625,9 @@ const fullSpecifications = initialSpecifications.map(spec => ({
 
 
 const initialDeploymentTypes = [
-    { "name": "Airgapped", "description": "Deployment in an isolated, offline environment." },
-    { "name": "Cloud", "description": "Deployment to a public or private cloud." },
-    { "name": "On-Prem", "description": "Deployment to on-premises servers." }
+    { _id: 'Airgapped', "name": "Airgapped", "description": "Deployment in an isolated, offline environment." },
+    { _id: 'Cloud', "name": "Cloud", "description": "Deployment to a public or private cloud." },
+    { _id: 'On-Prem', "name": "On-Prem", "description": "Deployment to on-premises servers." }
 ];
 
 const initialWorkflows = [
@@ -759,7 +764,7 @@ export async function seedDatabase() {
     const collectionsToSeed = [
         { name: 'products', data: initialProducts.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString()})) },
         { name: 'specifications', data: fullSpecifications },
-        { name: 'deployment_types', data: initialDeploymentTypes.map(d => ({ ...d, _id: d.name.replace(/[^a-zA-Z0-9]/g, '') })) },
+        { name: 'deployment_types', data: initialDeploymentTypes },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'compliance_checks', data: initialComplianceChecks.map(c => ({...c, _id: c.name.replace(/[^a-zA-Z0-9]/g, '')})) },
         { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
@@ -772,6 +777,11 @@ export async function seedDatabase() {
         { name: 'settings_tenant_onboarding', data: [initialTenantOnboarding] },
         { name: 'settings_baseline_onboarding', data: [initialBaselineConfig] },
         { name: 'service_contracts', data: initialServiceContracts.map(s => ({...s, _id: s.id})) },
+        { name: 'specification_vendors', data: initialSpecVendors },
+        { name: 'specification_hw_types', data: initialSpecHwTypes },
+        { name: 'specification_hypervisors', data: initialSpecHypervisors },
+        { name: 'specification_network_cards', data: initialSpecNetworkCards },
+        { name: 'specification_plug_power_cords', data: initialSpecPlugPowerCords },
     ];
     
     let seededCount = 0;
@@ -791,5 +801,3 @@ export async function seedDatabase() {
 
     return { seededCount, skippedCount };
 }
-
-    

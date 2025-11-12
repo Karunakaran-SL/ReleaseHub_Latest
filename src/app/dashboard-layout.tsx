@@ -427,6 +427,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/settings/specifications" isActive={pathname.startsWith('/settings/specifications')}>
+                            Specifications
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/cmdb" isActive={pathname.startsWith('/settings/cmdb')}>
                             CMDB
                           </SidebarMenuSubButton>

@@ -6,12 +6,13 @@ import { getUser } from '@/lib/auth';
 import type { User } from '@/lib/definitions';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { SlidersHorizontal, Settings2, GanttChartSquare, DatabaseZap } from 'lucide-react';
+import { SlidersHorizontal, Settings2, GanttChartSquare, DatabaseZap, HardDrive } from 'lucide-react';
 
 const settingsLinks = [
   { name: 'General', href: '/settings/general', icon: Settings2 },
   { name: 'Onboarding', href: '/settings/onboarding', icon: SlidersHorizontal },
-  { name: 'CMDB', href: '/settings/cmdb', icon: Settings2 },
+  { name: 'Specifications', href: '/settings/specifications', icon: HardDrive },
+  { name: 'CMDB', href: '/settings/cmdb', icon: DatabaseZap },
   { name: 'Baseline', href: '/settings/baseline', icon: GanttChartSquare },
 ];
 
