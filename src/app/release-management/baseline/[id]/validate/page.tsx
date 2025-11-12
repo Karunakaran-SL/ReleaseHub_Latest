@@ -6,10 +6,11 @@ import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
 import type { User, Baseline, OnboardingConfiguration } from '@/lib/definitions';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle, ChevronRight } from 'lucide-react';
+import { Loader2, CheckCircle, ChevronRight, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ValidationPhaseComponent from './_components/validation-phase';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const statusColors: Record<string, string> = {
     'Not Started': 'bg-gray-200 text-gray-800',
@@ -53,14 +54,12 @@ export default function ValidateBaselinePage() {
             setLoading(true);
             try {
                 const [baselineRes, configRes] = await Promise.all([
-                    fetch('/api/baselines'), // Fetch all and find, as there is no single GET endpoint
+                    fetch(`/api/baselines/${id}`),
                     fetch('/api/settings/baseline-onboarding')
                 ]);
 
-                if (!baselineRes.ok) throw new Error('Failed to fetch baselines.');
-                const allBaselines = await baselineRes.json();
-                const currentBaseline = allBaselines.find((b: Baseline) => b._id === id);
-                if (!currentBaseline) throw new Error('Baseline not found.');
+                if (!baselineRes.ok) throw new Error('Failed to fetch baseline.');
+                const currentBaseline = await baselineRes.json();
                 setBaseline(currentBaseline);
 
                 if (!configRes.ok) throw new Error('Failed to fetch baseline validation configuration.');
@@ -74,8 +73,8 @@ export default function ValidateBaselinePage() {
                     latestConfig.phases.forEach((phase: any) => {
                         initialState[phase.id] = { status: 'Not Started' };
                         phase.fields.forEach((field: any) => {
-                            initialState[phase.id][`${field.name}_value`] = '';
-                            initialState[phase.id][`${field.name}_proofLink`] = '';
+                            initialState[phase.id][field.name + '_value'] = '';
+                            initialState[phase.id][field.name + '_proofLink'] = '';
                         });
                     });
                     setPhasesState(initialState);
@@ -122,12 +121,21 @@ export default function ValidateBaselinePage() {
 
     const handleFinish = async () => {
         setSaving(true);
-        toast({ title: "Finishing Validation", description: "Saving final validation state... (not implemented)"});
-        // In a real app, this would PATCH the baseline with the validation results
-        // and likely change its status.
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setSaving(false);
-        router.push('/release-management/baseline');
+        try {
+            const response = await fetch(`/api/baselines/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'VALIDATED', updateComment: 'Baseline validation phases completed.' }),
+            });
+            if (!response.ok) throw new Error('Failed to update baseline status.');
+            
+            toast({ title: "Validation Complete", description: "Baseline has been marked as VALIDATED."});
+            router.push(`/release-management/baseline/${id}/finalize`);
+        } catch (error: any) {
+             toast({ variant: 'destructive', title: 'Error', description: error.message });
+        } finally {
+            setSaving(false);
+        }
     };
 
     if (loading) {
@@ -176,8 +184,8 @@ export default function ValidateBaselinePage() {
                  <div className="mt-12 flex justify-end">
                     <Button onClick={handleFinish} size="lg" disabled={saving}>
                         {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        <CheckCircle className="mr-2 h-5 w-5" />
-                        FINISH VALIDATION
+                        <ArrowRight className="mr-2 h-5 w-5" />
+                        Next: Finalize Release
                     </Button>
                 </div>
             </main>
