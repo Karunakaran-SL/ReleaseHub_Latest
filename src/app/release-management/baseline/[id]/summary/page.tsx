@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, ArrowRight, Save, Download, Workflow, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 function CiCdPipeline() {
     const steps = [
@@ -72,7 +73,6 @@ export default function BaselineSummaryPage() {
 
         async function fetchBaseline() {
             try {
-                // In a real app, you would fetch by ID, but since we only have a list endpoint, we'll find it from the list
                 const res = await fetch('/api/baselines');
                 if (!res.ok) throw new Error('Failed to fetch baselines');
                 const baselines: Baseline[] = await res.json();
@@ -143,9 +143,11 @@ export default function BaselineSummaryPage() {
                             <Save className="mr-2 h-4 w-4" />
                             Save & Go to List
                         </Button>
-                         <Button onClick={() => toast({ title: 'Next Step', description: 'Proceeding to validation pipeline (not implemented).'})}>
-                            <ArrowRight className="mr-2 h-4 w-4" />
-                            Proceed to Validation Pipeline
+                         <Button asChild>
+                            <Link href={`/release-management/baseline/${id}/validate`}>
+                                <ArrowRight className="mr-2 h-4 w-4" />
+                                Proceed to Validation Pipeline
+                            </Link>
                         </Button>
                     </CardFooter>
                 </Card>
