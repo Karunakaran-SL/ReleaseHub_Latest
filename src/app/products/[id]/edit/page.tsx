@@ -161,8 +161,8 @@ export default function EditProductPage() {
         const chosenIds = new Set(chosenItems.map(item => item.id));
 
         const available: Option[] = allOptions
-            .filter(opt => !chosenIds.has(opt._id))
-            .map(opt => ({ id: opt._id, label: opt.name }));
+            .filter(opt => !chosenIds.has(opt.id))
+            .map(opt => ({ id: opt.id, label: opt.name }));
 
         const chosen: Option[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
 
@@ -240,7 +240,7 @@ export default function EditProductPage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {workflows.map(item => (
-                                                <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                                                <SelectItem key={item._id} value={item.id}>{item.name}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -266,8 +266,8 @@ export default function EditProductPage() {
                                     >
                                         {deploymentTypes.map(type => (
                                             <div key={type._id} className="flex items-center space-x-2">
-                                                <RadioGroupItem value={type._id} id={`deployment-type-${type.id}`} />
-                                                <Label htmlFor={`deployment-type-${type.id}`} className="font-normal">{type.name}</Label>
+                                                <RadioGroupItem value={type._id} id={type.id} />
+                                                <Label htmlFor={type.id} className="font-normal">{type.name}</Label>
                                             </div>
                                         ))}
                                     </RadioGroup>
@@ -326,7 +326,3 @@ export default function EditProductPage() {
         </DashboardLayout>
     );
 }
-
-    
-
-    

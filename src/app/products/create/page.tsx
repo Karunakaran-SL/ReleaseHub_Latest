@@ -262,8 +262,8 @@ export default function CreateProductPage() {
                                     >
                                         {allDeploymentTypes.map(type => (
                                             <div key={type.id} className="flex items-center space-x-2">
-                                                <RadioGroupItem value={type.id} id={`deployment-type-${type.id}`} />
-                                                <Label htmlFor={`deployment-type-${type.id}`} className="font-normal">{type.label}</Label>
+                                                <RadioGroupItem value={type.id} id={type.id} />
+                                                <Label htmlFor={type.id} className="font-normal">{type.label}</Label>
                                             </div>
                                         ))}
                                     </RadioGroup>
@@ -289,7 +289,7 @@ export default function CreateProductPage() {
                                     </div>
                                 </div>
 
-                                {formState.deployment_type?.id === 'Deployment_Airgapped' && (
+                                {formState.deployment_type?.id === 'Airgapped' && (
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
