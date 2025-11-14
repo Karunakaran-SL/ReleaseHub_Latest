@@ -1,9 +1,4 @@
 
-
-
-
-
-
 export type User = {
   _id: string;
   username: string;
@@ -261,19 +256,19 @@ export type Deployment = {
     hypervisorId: string;
     foundationComponentIds: string[];
     security: {
-        encryptionKey: string;
-        signingCert: string;
-        pkiDetails: string;
-        iamToken: string;
+        encryptionKey?: string;
+        signingCert?: string;
+        pkiDetails?: string;
+        iamToken?: string;
     };
     details: {
         deploymentId: string;
         customer: string;
-        factory: string;
+        factory?: string;
         region?: string;
         country?: string;
         availabilityZone?: string;
-        customerKeyPair: string;
+        customerKeyPair?: string;
     };
     createdBy: string;
     createdAt: string;

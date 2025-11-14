@@ -3,18 +3,56 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User } from '@/lib/definitions';
+import type { User, Deployment, Product } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { PlusCircle, Upload, GitMerge, Trash2 } from 'lucide-react';
+import { PlusCircle, Upload, GitMerge, Trash2, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import Image from 'next/image';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+
+const statusColors: Record<string, string> = {
+    PROVISIONING: 'bg-yellow-200 text-yellow-800',
+    ACTIVE: 'bg-green-200 text-green-800',
+    FAILED: 'bg-red-200 text-red-800',
+    UPGRADING: 'bg-blue-200 text-blue-800',
+    DECOMMISSIONED: 'bg-gray-300 text-gray-900',
+};
 
 export default function DeploymentDashboardPage() {
     const [user, setUser] = useState<User | null>(null);
+    const [deployments, setDeployments] = useState<Deployment[]>([]);
+    const [products, setProducts] = useState<Record<string, Product>>({});
+    const [loading, setLoading] = useState(true);
+    const { toast } = useToast();
 
     useEffect(() => {
         getUser().then(setUser);
-    }, []);
+        async function fetchData() {
+            try {
+                const [deploymentsRes, productsRes] = await Promise.all([
+                    fetch('/api/deployments'),
+                    fetch('/api/products')
+                ]);
+                if (!deploymentsRes.ok || !productsRes.ok) {
+                    throw new Error('Failed to fetch initial data.');
+                }
+                const deploymentsData = await deploymentsRes.json();
+                const productsData = await productsRes.json();
+                setDeployments(deploymentsData);
+                setProducts(productsData.reduce((acc: any, p: Product) => ({ ...acc, [p._id]: p }), {}));
+            } catch (error: any) {
+                toast({ variant: 'destructive', title: 'Error', description: error.message });
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
+    }, [toast]);
 
     return (
         <DashboardLayout user={user}>
@@ -49,48 +87,56 @@ export default function DeploymentDashboardPage() {
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <Card className="col-span-1 lg:col-span-2">
+                    <Card className="col-span-1 lg:col-span-3">
                         <CardHeader>
                             <CardTitle>Global Deployment View</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="h-96 bg-muted rounded-md flex items-center justify-center">
-                                <p className="text-muted-foreground">Map placeholder</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                     <Card>
-                        <CardHeader>
-                            <CardTitle>Deployment by Product</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-96 bg-muted rounded-md flex items-center justify-center">
-                                <p className="text-muted-foreground">Chart placeholder</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Deployment by Specifications</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                             <div className="h-64 bg-muted rounded-md flex items-center justify-center">
-                                <p className="text-muted-foreground">Chart placeholder</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                     <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <CardTitle>User Widget</CardTitle>
-                            <Button variant="ghost" size="sm">Remove</Button>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-64 bg-muted rounded-md flex items-center justify-center">
-                                <p className="text-muted-foreground">User-defined widget</p>
+                                <Image src="https://picsum.photos/seed/map/1200/400" alt="World map of deployments" width={1200} height={400} className="rounded-md object-cover" />
                             </div>
                         </CardContent>
                     </Card>
                 </div>
+                 <Card className="mt-8">
+                    <CardHeader>
+                        <CardTitle>Recent Deployments</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Deployment ID</TableHead>
+                                    <TableHead>Product</TableHead>
+                                    <TableHead>Customer</TableHead>
+                                    <TableHead>Created At</TableHead>
+                                    <TableHead>Status</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {loading ? (
+                                    <TableRow><TableCell colSpan={5} className="text-center h-24"><Loader2 className="animate-spin mx-auto"/></TableCell></TableRow>
+                                ) : deployments.length > 0 ? (
+                                    deployments.map(dep => (
+                                        <TableRow key={dep._id}>
+                                            <TableCell className="font-mono">{dep.details.deploymentId}</TableCell>
+                                            <TableCell>{products[dep.productId]?.name || dep.productId}</TableCell>
+                                            <TableCell>{dep.details.customer}</TableCell>
+                                            <TableCell>{format(new Date(dep.createdAt), 'PPP')}</TableCell>
+                                            <TableCell>
+                                                <Badge className={cn(statusColors[dep.status] || 'bg-gray-200')}>
+                                                    {dep.status}
+                                                </Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow><TableCell colSpan={5} className="text-center">No deployments found.</TableCell></TableRow>
+                                )}
+                            </TableBody>
+                         </Table>
+                    </CardContent>
+                </Card>
 
             </main>
         </DashboardLayout>

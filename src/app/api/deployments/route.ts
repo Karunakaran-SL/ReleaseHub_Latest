@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   try {
     const client = await clientPromise;
     const db = client.db();
-    const items = await db.collection('deployments').find({}).toArray();
+    const items = await db.collection('deployments').find({}).sort({ createdAt: -1 }).toArray();
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
     console.error(error);

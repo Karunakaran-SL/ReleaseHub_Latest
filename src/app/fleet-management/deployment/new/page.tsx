@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle, Package } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 import { Input } from '@/components/ui/input';
@@ -31,6 +31,7 @@ export default function NewDeploymentWizardPage() {
 
     const [step, setStep] = useState(1);
     const [wizardData, setWizardData] = useState<WizardData>({});
+    const [finalDeployment, setFinalDeployment] = useState<Deployment | null>(null);
     
     // Data for dropdowns
     const [products, setProducts] = useState<Product[]>([]);
@@ -126,6 +127,7 @@ export default function NewDeploymentWizardPage() {
             case 5: return "Step 5: Enter Deployment Details";
             case 6: return "Step 6: Review Deployment Summary";
             case 7: return "Step 7: Create Deployment Package";
+            case 8: return "Step 8: Deployment Provisioning";
             default: return "New Deployment";
         }
     };
@@ -145,8 +147,10 @@ export default function NewDeploymentWizardPage() {
                 throw new Error(errorData.message || 'Failed to create deployment.');
             }
 
+            const newDeployment = await response.json();
+            setFinalDeployment(newDeployment);
+            setStep(8); // Move to the final summary step
             toast({ title: 'Success', description: 'New deployment initiated successfully.' });
-            router.push('/fleet-management/deployment');
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error', description: error.message });
         } finally {
@@ -287,10 +291,25 @@ export default function NewDeploymentWizardPage() {
                         <h3 className="text-xl font-bold">Ready to Create Package</h3>
                         <p className="text-muted-foreground">A foundational deployment package will be generated with instructions and release notes based on your configuration.</p>
                         <div className="p-8 bg-muted rounded-lg">
-                             <p className="text-sm">Folder paths for deployment reports will be displayed here after creation.</p>
+                             <p className="text-sm">Press "Finish & Create Package" to start the provisioning process.</p>
                         </div>
                     </div>
                 );
+            case 8:
+                return (
+                    <div className="text-center space-y-4 p-8">
+                        <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
+                        <h3 className="text-2xl font-bold">Deployment Provisioning Started</h3>
+                        <p className="text-muted-foreground max-w-md mx-auto">
+                            The new deployment for <strong>{finalDeployment?.details.customer}</strong> is now being provisioned. You can monitor its status on the main dashboard.
+                        </p>
+                        <div className="p-4 bg-muted rounded-lg text-left space-y-2">
+                             <p className="text-sm font-mono"><strong className="text-muted-foreground">Deployment ID:</strong> {finalDeployment?.details.deploymentId}</p>
+                             <p className="text-sm font-mono"><strong className="text-muted-foreground">Status:</strong> {finalDeployment?.status}</p>
+                             <p className="text-sm font-mono"><strong className="text-muted-foreground">Package Location:</strong> /var/deploy/packages/{finalDeployment?.details.deploymentId}</p>
+                        </div>
+                    </div>
+                )
 
             default:
                 return <p>End of wizard.</p>;
@@ -310,22 +329,27 @@ export default function NewDeploymentWizardPage() {
 
                     <CardFooter className="flex justify-between">
                          <div>
-                            {step > 1 && (
+                            {step > 1 && step < 8 && (
                                 <Button variant="outline" onClick={handleBack} disabled={loading}>
                                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                 </Button>
                             )}
                          </div>
                          <div className="flex gap-2">
-                            <Button variant="outline" onClick={() => router.back()} disabled={loading}>Cancel</Button>
+                            {step < 8 && <Button variant="outline" onClick={() => router.push('/fleet-management/deployment')} disabled={loading}>Cancel</Button>}
+                            
                             {step < 7 ? (
                                 <Button onClick={handleNext} disabled={isNextDisabled()}>
                                     Next <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
-                            ) : (
+                            ) : step === 7 ? (
                                 <Button onClick={handleSubmit} disabled={loading}>
-                                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Package className="mr-2 h-4 w-4" />}
                                     Finish & Create Package
+                                </Button>
+                            ) : (
+                                <Button onClick={() => router.push('/fleet-management/deployment')}>
+                                    Return to Dashboard
                                 </Button>
                             )}
                          </div>
