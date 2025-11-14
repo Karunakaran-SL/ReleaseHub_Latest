@@ -338,7 +338,7 @@ export default function ViewDeploymentPage() {
                                 <Button variant="outline" onClick={handleCancelEdit}>Cancel</Button>
                                 <Button onClick={handleSave} disabled={isSubmitting || !formState.updateComment}>
                                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                    Save Changes
+                                    Re-Generate Package
                                 </Button>
                             </>
                         ) : (
