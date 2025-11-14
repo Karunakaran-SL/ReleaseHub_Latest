@@ -127,7 +127,7 @@ export default function NewDeploymentWizardPage() {
             case 5: return "Step 5: Enter Deployment Details";
             case 6: return "Step 6: Review Deployment Summary";
             case 7: return "Step 7: Create Deployment Package";
-            case 8: return "Step 8: Deployment Provisioning";
+            case 8: return "Step 8: Deployment Provisioning Complete";
             default: return "New Deployment";
         }
     };
@@ -286,12 +286,22 @@ export default function NewDeploymentWizardPage() {
                     </div>
                 );
             case 7:
+                 const finalProduct = products.find(p => p._id === wizardData.productId);
                  return (
                     <div className="text-center space-y-4">
                         <h3 className="text-xl font-bold">Ready to Create Package</h3>
-                        <p className="text-muted-foreground">A foundational deployment package will be generated with instructions and release notes based on your configuration.</p>
-                        <div className="p-8 bg-muted rounded-lg">
-                             <p className="text-sm">Press "Finish & Create Package" to start the provisioning process.</p>
+                        <p className="text-muted-foreground">A foundational deployment package for <strong>{finalProduct?.name}</strong> will be generated with instructions and release notes based on your configuration.</p>
+                        <div className="p-8 bg-muted rounded-lg text-left">
+                            <p className="font-semibold">Package Contents:</p>
+                            <ul className="list-disc pl-5 mt-2 text-sm text-muted-foreground">
+                                <li>Installer binaries for selected components</li>
+                                <li>Site-specific configuration files</li>
+                                <li>Encryption keys and certificates</li>
+                                <li>Deployment runbook and release notes</li>
+                            </ul>
+                            <p className="mt-4 font-mono text-xs bg-background p-2 rounded">
+                                Package Location: /var/deploy/packages/{wizardData.details?.deploymentId || 'deployment-id'}.tar.gz
+                            </p>
                         </div>
                     </div>
                 );
@@ -306,7 +316,7 @@ export default function NewDeploymentWizardPage() {
                         <div className="p-4 bg-muted rounded-lg text-left space-y-2">
                              <p className="text-sm font-mono"><strong className="text-muted-foreground">Deployment ID:</strong> {finalDeployment?.details.deploymentId}</p>
                              <p className="text-sm font-mono"><strong className="text-muted-foreground">Status:</strong> {finalDeployment?.status}</p>
-                             <p className="text-sm font-mono"><strong className="text-muted-foreground">Package Location:</strong> /var/deploy/packages/{finalDeployment?.details.deploymentId}</p>
+                             <p className="text-sm font-mono"><strong className="text-muted-foreground">Package Location:</strong> /var/deploy/packages/{finalDeployment?.details.deploymentId}.tar.gz</p>
                         </div>
                     </div>
                 )
