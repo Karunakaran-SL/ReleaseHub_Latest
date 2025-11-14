@@ -1,10 +1,10 @@
 
 'use client';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Icon, DivIcon } from 'leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Icon, DivIcon, Map } from 'leaflet';
 import type { Deployment } from '@/lib/definitions';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
 
 const statusColors: Record<string, string> = {
   PROVISIONING: '#facc15', // yellow-400
@@ -46,7 +46,9 @@ const createMarkerIcon = (status: string) => {
 };
 
 export default function DeploymentMap({ deployments }: { deployments: Deployment[] }) {
-    
+    const mapRef = useRef<HTMLDivElement>(null);
+    const [mapInstance, setMapInstance] = useState<Map | null>(null);
+
     const markers = useMemo(() => {
         return deployments.map(deployment => {
             const country = deployment.details.country;
@@ -74,19 +76,33 @@ export default function DeploymentMap({ deployments }: { deployments: Deployment
         }).filter(Boolean);
     }, [deployments]);
 
+    useEffect(() => {
+        if (mapRef.current && !mapRef.current.hasAttribute('_leaflet_id')) {
+             const map = new Map(mapRef.current, {
+                center: [20, 0],
+                zoom: 2,
+            });
+            setMapInstance(map);
+        }
+    }, [mapRef]);
+
     return (
-        <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} className="rounded-md">
-            <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-            {markers.map(marker => marker && (
-                <Marker key={marker.id} position={marker.position} icon={marker.icon}>
-                    <Popup>
-                        {marker.popup}
-                    </Popup>
-                </Marker>
-            ))}
-        </MapContainer>
+        <div ref={mapRef} style={{ height: '100%', width: '100%' }} className="rounded-md">
+            {mapInstance && (
+                <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} whenCreated={setMapInstance}>
+                    <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    {markers.map(marker => marker && (
+                        <Marker key={marker.id} position={marker.position} icon={marker.icon}>
+                            <Popup>
+                                {marker.popup}
+                            </Popup>
+                        </Marker>
+                    ))}
+                </MapContainer>
+            )}
+        </div>
     );
 }
