@@ -9,9 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, Deployment, Product, Specification, CmdbComponent } from '@/lib/definitions';
+import type { User, Deployment, Product, Specification, CmdbComponent, UpgradeHistory } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, History } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -29,6 +29,8 @@ import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 import { locations } from '@/lib/locations';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 
 const statusColors: Record<string, string> = {
@@ -59,6 +61,7 @@ export default function ViewDeploymentPage() {
     const [specifications, setSpecifications] = useState<Specification[]>([]);
     const [hypervisors, setHypervisors] = useState<Hypervisor[]>([]);
     const [allComponents, setAllComponents] = useState<CmdbComponent[]>([]);
+    const [upgradeHistory, setUpgradeHistory] = useState<UpgradeHistory[]>([]);
 
     // State for UI control
     const [isEditing, setIsEditing] = useState(false);
@@ -85,12 +88,13 @@ export default function ViewDeploymentPage() {
         async function fetchDetails() {
             setLoading(true);
             try {
-                const [deploymentRes, productsRes, specsRes, hypervisorsRes, componentsRes] = await Promise.all([
+                const [deploymentRes, productsRes, specsRes, hypervisorsRes, componentsRes, historyRes] = await Promise.all([
                     fetch(`/api/deployments/${id}`),
                     fetch('/api/products'),
                     fetch('/api/specifications'),
                     fetch('/api/settings/specifications/hypervisors'),
                     fetch('/api/cmdb/components'),
+                    fetch(`/api/upgrade-history/${id}`),
                 ]);
 
                 if (!deploymentRes.ok) throw new Error('Failed to fetch deployment');
@@ -105,6 +109,10 @@ export default function ViewDeploymentPage() {
                 setSpecifications(await specsRes.json());
                 setHypervisors(await hypervisorsRes.json());
                 setAllComponents(await componentsRes.json());
+                
+                if (historyRes.ok) {
+                    setUpgradeHistory(await historyRes.json());
+                }
 
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -221,7 +229,7 @@ export default function ViewDeploymentPage() {
 
     return (
         <DashboardLayout user={user}>
-            <main className="flex-1 p-6 md:p-10">
+            <main className="flex-1 p-6 md:p-10 space-y-8">
                 <Card>
                     <CardHeader>
                         <div className="flex justify-between items-start">
@@ -392,6 +400,48 @@ export default function ViewDeploymentPage() {
                         )}
                     </CardFooter>
                 </Card>
+                <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger>
+                             <div className="flex items-center gap-2 text-lg font-semibold">
+                                <History className="h-5 w-5" />
+                                Upgrade History
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                           <Card className="mt-4">
+                               <CardContent className="p-0">
+                                   <Table>
+                                       <TableHeader>
+                                           <TableRow>
+                                               <TableHead>Date</TableHead>
+                                               <TableHead>Product</TableHead>
+                                               <TableHead>Target Spec</TableHead>
+                                               <TableHead>Status</TableHead>
+                                               <TableHead>Initiated By</TableHead>
+                                           </TableRow>
+                                       </TableHeader>
+                                       <TableBody>
+                                           {upgradeHistory.length > 0 ? upgradeHistory.map(h => (
+                                               <TableRow key={h._id}>
+                                                   <TableCell>{format(new Date(h.initiatedAt), 'PPp')}</TableCell>
+                                                   <TableCell>{products.find(p => p._id === h.productId)?.name || h.productId}</TableCell>
+                                                   <TableCell>{specifications.find(s => s._id === h.targetSpecificationId)?.name || h.targetSpecificationId}</TableCell>
+                                                   <TableCell>{h.status}</TableCell>
+                                                   <TableCell>{h.initiatedBy}</TableCell>
+                                               </TableRow>
+                                           )) : (
+                                               <TableRow>
+                                                   <TableCell colSpan={5} className="text-center h-24">No upgrade history found for this deployment.</TableCell>
+                                               </TableRow>
+                                           )}
+                                       </TableBody>
+                                   </Table>
+                               </CardContent>
+                           </Card>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
             </main>
         </DashboardLayout>
     );
