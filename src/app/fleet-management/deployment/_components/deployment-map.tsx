@@ -1,7 +1,7 @@
 
 'use client';
 import 'leaflet/dist/leaflet.css';
-import L, { DivIcon } from 'leaflet';
+import L, { DivIcon, Map } from 'leaflet';
 import { useEffect, useRef } from 'react';
 import type { Deployment } from '@/lib/definitions';
 
@@ -44,28 +44,22 @@ const createMarkerIcon = (status: string) => {
 
 export default function DeploymentMap({ deployments }: { deployments: Deployment[] }) {
     const mapContainerRef = useRef<HTMLDivElement>(null);
-    const mapInstanceRef = useRef<L.Map | null>(null);
+    const mapInstanceRef = useRef<Map | null>(null);
+    const markersRef = useRef<L.Marker[]>([]);
 
     useEffect(() => {
         if (mapContainerRef.current && !mapInstanceRef.current) {
-            // Initialize map only if it hasn't been initialized yet
-            const map = L.map(mapContainerRef.current).setView([20, 0], 2);
-            mapInstanceRef.current = map;
-
+            mapInstanceRef.current = L.map(mapContainerRef.current).setView([20, 0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+            }).addTo(mapInstanceRef.current);
         }
 
-        // Add markers
         const map = mapInstanceRef.current;
         if (map) {
-            // Clear existing markers
-            map.eachLayer(layer => {
-                if (layer instanceof L.Marker) {
-                    map.removeLayer(layer);
-                }
-            });
+            // Clear existing markers from the map and the ref array
+            markersRef.current.forEach(marker => marker.remove());
+            markersRef.current = [];
 
             deployments.forEach(deployment => {
                 const country = deployment.details.country;
@@ -79,16 +73,18 @@ export default function DeploymentMap({ deployments }: { deployments: Deployment
                     <strong>ID:</strong> ${deployment.details.deploymentId} <br/>
                     <strong>Customer:</strong> ${deployment.details.customer} <br/>
                     <strong>Country:</strong> ${deployment.details.country} <br/>
-                    <strong>Status:</strong> ${deployment.status}
+                    <strong>Status:</strong> ${deployment.status} <br/>
+                    <a href="/fleet-management/deployment/${deployment._id}/view" style="color: #3b82f6; text-decoration: underline;">View Details</a>
                 `;
                 
-                L.marker(finalPosition, { icon: createMarkerIcon(deployment.status) })
+                const marker = L.marker(finalPosition, { icon: createMarkerIcon(deployment.status) })
                     .addTo(map)
                     .bindPopup(popupContent);
+                
+                markersRef.current.push(marker);
             });
         }
         
-        // Cleanup function to run when the component unmounts
         return () => {
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();
