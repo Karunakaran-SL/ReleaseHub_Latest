@@ -46,13 +46,6 @@ interface Hypervisor {
     name: string;
 }
 
-interface DisplayData {
-    productName: string;
-    specName: string;
-    hypervisorName: string;
-    upgradeHistory: (UpgradeHistory & { productName: string, specName: string })[];
-}
-
 export default function ViewDeploymentPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
@@ -69,9 +62,6 @@ export default function ViewDeploymentPage() {
     const [allComponents, setAllComponents] = useState<CmdbComponent[]>([]);
     const [upgradeHistory, setUpgradeHistory] = useState<UpgradeHistory[]>([]);
     
-    // Derived state for display
-    const [displayData, setDisplayData] = useState<DisplayData | null>(null);
-
     // State for UI control
     const [isEditing, setIsEditing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,12 +79,12 @@ export default function ViewDeploymentPage() {
     const countriesInRegion = locations.find(r => r.name === selectedRegion)?.countries || [];
     const zonesInCountry = countriesInRegion.find(c => c.name === selectedCountry)?.zones || [];
 
-
     useEffect(() => {
         getUser().then(setUser);
         if (!id) return;
 
         async function fetchDetails() {
+            setLoading(true);
             try {
                  const results = await Promise.allSettled([
                     fetch(`/api/deployments/${id}`),
@@ -105,16 +95,10 @@ export default function ViewDeploymentPage() {
                     fetch(`/api/upgrade-history/${id}`),
                 ]);
 
-                // Helper to process settled promises
                 const processResponse = async (promise: PromiseSettledResult<Response>, name: string) => {
-                    if (promise.status === 'rejected') {
-                        throw new Error(`Failed to fetch ${name}: ${promise.reason}`);
-                    }
+                    if (promise.status === 'rejected') throw new Error(`Failed to fetch ${name}: ${promise.reason}`);
                     if (!promise.value.ok) {
-                        // For 404s, we can often return an empty array or null
-                        if (promise.value.status === 404 && name === 'Upgrade History') {
-                            return [];
-                        }
+                        if (promise.value.status === 404 && name === 'Upgrade History') return [];
                         const errorData = await promise.value.json().catch(() => ({ message: `An unknown error occurred while fetching ${name}.` }));
                         throw new Error(errorData.message || `Failed to fetch ${name}.`);
                     }
@@ -143,36 +127,11 @@ export default function ViewDeploymentPage() {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
                 router.push('/fleet-management/deployment');
             } finally {
-                 // The loading state will be turned off in the second useEffect
+                 setLoading(false);
             }
         }
         fetchDetails();
     }, [id, router, toast]);
-
-    // This effect runs after data is fetched to compute display values
-    useEffect(() => {
-        if (deployment && products.length > 0 && specifications.length > 0) {
-            const productName = products.find(p => p._id === deployment.productId)?.name || 'Unknown Product';
-            const specName = specifications.find(s => s._id === deployment.specificationId)?.name || 'Unknown Spec';
-            const hypervisorName = hypervisors.find(h => h._id === deployment.hypervisorId)?.name || 'Unknown Hypervisor';
-            
-            const historyWithNames = upgradeHistory.map(h => ({
-                ...h,
-                productName: products.find(p => p._id === h.productId)?.name || h.productId,
-                specName: specifications.find(s => s._id === h.targetSpecificationId)?.name || h.targetSpecificationId,
-            }));
-
-            setDisplayData({
-                productName,
-                specName,
-                hypervisorName,
-                upgradeHistory: historyWithNames,
-            });
-
-            // Now that all data is processed, we can stop loading
-            setLoading(false);
-        }
-    }, [deployment, products, specifications, hypervisors, upgradeHistory]);
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, group?: 'security' | 'details') => {
         const { id, value } = e.target;
@@ -267,7 +226,7 @@ export default function ViewDeploymentPage() {
         }
     };
 
-    if (loading || !deployment || !displayData) {
+    if (loading || !deployment || !products.length || !specifications.length) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 
@@ -304,19 +263,19 @@ export default function ViewDeploymentPage() {
                             <h3 className="font-semibold text-lg border-b pb-2">Configuration</h3>
                             <div><Label>Product</Label>
                                 <Select value={formState.productId} onValueChange={v => handleSelectChange('productId', v)} disabled={!isEditing}>
-                                    <SelectTrigger><SelectValue placeholder={displayData.productName} /></SelectTrigger>
+                                    <SelectTrigger><SelectValue placeholder={products.find(p => p._id === deployment.productId)?.name || 'Unknown Product'} /></SelectTrigger>
                                     <SelectContent>{products.map(p => <SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>)}</SelectContent>
                                 </Select>
                             </div>
                              <div><Label>Specification</Label>
                                 <Select value={formState.specificationId} onValueChange={v => handleSelectChange('specificationId', v)} disabled={!isEditing}>
-                                    <SelectTrigger><SelectValue placeholder={displayData.specName} /></SelectTrigger>
+                                    <SelectTrigger><SelectValue placeholder={specifications.find(s => s._id === deployment.specificationId)?.name || 'Unknown Spec'} /></SelectTrigger>
                                     <SelectContent>{specifications.map(s => <SelectItem key={s._id} value={s._id}>{s.name}</SelectItem>)}</SelectContent>
                                 </Select>
                             </div>
                              <div><Label>Hypervisor</Label>
                                 <Select value={formState.hypervisorId} onValueChange={v => handleSelectChange('hypervisorId', v)} disabled={!isEditing}>
-                                    <SelectTrigger><SelectValue placeholder={displayData.hypervisorName} /></SelectTrigger>
+                                    <SelectTrigger><SelectValue placeholder={hypervisors.find(h => h._id === deployment.hypervisorId)?.name || 'Unknown Hypervisor'} /></SelectTrigger>
                                     <SelectContent>{hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
                                 </Select>
                             </div>
@@ -468,11 +427,11 @@ export default function ViewDeploymentPage() {
                                            </TableRow>
                                        </TableHeader>
                                        <TableBody>
-                                           {displayData.upgradeHistory.length > 0 ? displayData.upgradeHistory.map(h => (
+                                           {upgradeHistory.length > 0 ? upgradeHistory.map(h => (
                                                <TableRow key={h._id}>
                                                    <TableCell>{format(new Date(h.initiatedAt), 'PPp')}</TableCell>
-                                                   <TableCell>{h.productName}</TableCell>
-                                                   <TableCell>{h.specName}</TableCell>
+                                                   <TableCell>{products.find(p => p._id === h.productId)?.name || h.productId}</TableCell>
+                                                   <TableCell>{specifications.find(s => s._id === h.targetSpecificationId)?.name || h.targetSpecificationId}</TableCell>
                                                    <TableCell>{h.status}</TableCell>
                                                    <TableCell>{h.initiatedBy}</TableCell>
                                                </TableRow>
