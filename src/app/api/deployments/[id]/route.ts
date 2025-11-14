@@ -5,8 +5,27 @@ import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
-// This is a placeholder schema for updates. We can expand it later.
+// Expanded schema to handle full updates from the view/edit page
 const DeploymentUpdateSchema = z.object({
+  productId: z.string().optional(),
+  specificationId: z.string().optional(),
+  hypervisorId: z.string().optional(),
+  foundationComponentIds: z.array(z.string()).optional(),
+  security: z.object({
+    encryptionKey: z.string().optional(),
+    signingCert: z.string().optional(),
+    pkiDetails: z.string().optional(),
+    iamToken: z.string().optional(),
+  }).optional(),
+  details: z.object({
+    deploymentId: z.string().optional(),
+    customer: z.string().optional(),
+    factory: z.string().optional(),
+    region: z.string().optional(),
+    country: z.string().optional(),
+    availabilityZone: z.string().optional(),
+    customerKeyPair: z.string().optional(),
+  }).optional(),
   status: z.enum(['PROVISIONING', 'ACTIVE', 'UPGRADING', 'FAILED', 'DECOMMISSIONED']).optional(),
   updateComment: z.string().min(1, 'Update comment is required.'),
 });
@@ -42,6 +61,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const validatedData = DeploymentUpdateSchema.safeParse(body);
 
         if (!validatedData.success) {
+            console.log(validatedData.error.flatten().fieldErrors);
             return NextResponse.json({ message: 'Invalid data.', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
         }
         
