@@ -48,9 +48,20 @@ export default function UpgradeWizardPage() {
                 if (!productsRes.ok || !specsRes.ok || !deploymentsRes.ok) {
                     throw new Error('Failed to fetch initial data.');
                 }
-                setProducts(await productsRes.json());
-                setSpecifications(await specsRes.json());
+                const productsData = await productsRes.json();
+                const specsData = await specsRes.json();
+                
+                setProducts(productsData);
+                setSpecifications(specsData);
                 setDeployments(await deploymentsRes.json());
+                
+                if (productsData.length > 0) {
+                    setSelectedProductId(productsData[0]._id);
+                }
+                if (specsData.length > 0) {
+                    setSelectedSpecId(specsData[0]._id);
+                }
+
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
             } finally {
@@ -128,7 +139,7 @@ export default function UpgradeWizardPage() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="spec-select">Target Specification Version</Label>
-                            <Select value={selectedSpecId} onValueChange={setSelectedSpecId} disabled={!selectedProductId}>
+                            <Select value={selectedSpecId} onValueChange={setSelectedSpecId}>
                                 <SelectTrigger id="spec-select"><SelectValue placeholder="Select a target specification..." /></SelectTrigger>
                                 <SelectContent>{specifications.map(s => <SelectItem key={s._id} value={s._id}>{s.name}</SelectItem>)}</SelectContent>
                             </Select>
