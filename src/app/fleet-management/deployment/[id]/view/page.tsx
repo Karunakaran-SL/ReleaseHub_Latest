@@ -182,7 +182,21 @@ export default function ViewDeploymentPage() {
                              <div><Label>PKI Details</Label><Textarea value={deployment.security.pkiDetails || 'Not provided'} disabled /></div>
                              <div><Label>IAM Token</Label><Input value={deployment.security.iamToken || 'Not provided'} disabled /></div>
                         </div>
-
+                         <div className="md:col-span-2 space-y-4">
+                             <h3 className="font-semibold text-lg border-b pb-2">Deployment Package</h3>
+                              <div className="p-4 bg-muted rounded-lg text-left">
+                                <p className="font-semibold">Package Contents:</p>
+                                <ul className="list-disc pl-5 mt-2 text-sm text-muted-foreground">
+                                    <li>Installer binaries for selected components</li>
+                                    <li>Site-specific configuration files</li>
+                                    <li>Encryption keys and certificates</li>
+                                    <li>Deployment runbook and release notes</li>
+                                </ul>
+                                <p className="mt-4 font-mono text-xs bg-background p-2 rounded">
+                                    Package Location: /var/deploy/packages/{deployment.details?.deploymentId || 'deployment-id'}.tar.gz
+                                </p>
+                            </div>
+                        </div>
                     </CardContent>
                      <CardFooter className="flex justify-end gap-2">
                         <Button variant="outline" asChild>
