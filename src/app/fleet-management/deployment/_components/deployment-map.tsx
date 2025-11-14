@@ -1,4 +1,3 @@
-
 'use client';
 import 'leaflet/dist/leaflet.css';
 import L, { DivIcon, Map } from 'leaflet';
@@ -48,6 +47,7 @@ export default function DeploymentMap({ deployments }: { deployments: Deployment
     const markersRef = useRef<L.Marker[]>([]);
 
     useEffect(() => {
+        // Initialize map only if the container is available and map instance doesn't exist
         if (mapContainerRef.current && !mapInstanceRef.current) {
             mapInstanceRef.current = L.map(mapContainerRef.current).setView([20, 0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -55,6 +55,16 @@ export default function DeploymentMap({ deployments }: { deployments: Deployment
             }).addTo(mapInstanceRef.current);
         }
 
+        // Cleanup function to run when the component unmounts
+        return () => {
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.remove();
+                mapInstanceRef.current = null;
+            }
+        };
+    }, []); // Empty dependency array ensures this effect runs only once
+
+    useEffect(() => {
         const map = mapInstanceRef.current;
         if (map) {
             // Clear existing markers from the map and the ref array
@@ -84,14 +94,7 @@ export default function DeploymentMap({ deployments }: { deployments: Deployment
                 markersRef.current.push(marker);
             });
         }
-        
-        return () => {
-            if (mapInstanceRef.current) {
-                mapInstanceRef.current.remove();
-                mapInstanceRef.current = null;
-            }
-        };
-    }, [deployments]);
+    }, [deployments]); // This effect re-runs whenever the deployments data changes
 
     return <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} className="rounded-md" />;
 }
