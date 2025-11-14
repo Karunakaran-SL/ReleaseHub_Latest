@@ -120,8 +120,12 @@ export default function ViewDeploymentPage() {
                 if (results[4].status === 'fulfilled' && results[4].value.ok) setAllComponents(await results[4].value.json());
                 else toast({ variant: 'destructive', title: 'Warning', description: 'Could not load components list.' });
                 
-                if (results[5].status === 'fulfilled' && results[5].value.ok) setUpgradeHistory(await results[5].value.json());
-                // Don't toast for history, it's ok if it's empty
+                if (results[5].status === 'fulfilled' && results[5].value.ok) {
+                    setUpgradeHistory(await results[5].value.json());
+                } else if (results[5].status === 'fulfilled' && results[5].value.status !== 404) {
+                    // Don't toast for 404 (no history), but do for other errors
+                    toast({ variant: 'destructive', title: 'Warning', description: 'Could not load upgrade history.' });
+                }
 
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -455,4 +459,3 @@ export default function ViewDeploymentPage() {
         </DashboardLayout>
     );
 }
-

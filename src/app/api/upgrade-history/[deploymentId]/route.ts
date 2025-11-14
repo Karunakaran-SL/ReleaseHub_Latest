@@ -13,6 +13,10 @@ export async function GET(req: NextRequest, { params }: { params: { deploymentId
             .sort({ initiatedAt: -1 })
             .toArray();
 
+        if (!history) {
+            return NextResponse.json({ message: 'No history found for this deployment.' }, { status: 404 });
+        }
+
         return NextResponse.json(history, { status: 200 });
     } catch (error) {
         console.error(error);
