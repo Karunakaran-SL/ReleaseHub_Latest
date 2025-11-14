@@ -49,7 +49,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         const { id } = params;
         const client = await clientPromise;
         const db = client.db();
-        const item = await db.collection(COLLECTION_NAME).findOne({ id: id });
+        const item = await db.collection(COLLECTION_NAME).findOne({ _id: id });
 
         if (!item) {
             return NextResponse.json({ message: 'Tenant not found.' }, { status: 404 });
@@ -91,7 +91,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         };
 
         const result = await db.collection(COLLECTION_NAME).updateOne(
-            { id: id },
+            { _id: id },
             { $set: updatePayload }
         );
 
@@ -109,7 +109,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         // Regenerate dependency trees as tenant dependencies might have changed
         await generateAndStoreAllProductTrees();
 
-        const updatedItem = await db.collection(COLLECTION_NAME).findOne({ id: id });
+        const updatedItem = await db.collection(COLLECTION_NAME).findOne({ _id: id });
         return NextResponse.json(updatedItem, { status: 200 });
 
     } catch (error) {
@@ -135,7 +135,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
         const client = await clientPromise;
         const db = client.db();
-        const result = await db.collection(COLLECTION_NAME).deleteOne({ id: id });
+        const result = await db.collection(COLLECTION_NAME).deleteOne({ _id: id });
 
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Tenant not found.' }, { status: 404 });
