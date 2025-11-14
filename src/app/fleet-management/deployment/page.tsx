@@ -119,7 +119,11 @@ export default function DeploymentDashboardPage() {
                                 ) : deployments.length > 0 ? (
                                     deployments.map(dep => (
                                         <TableRow key={dep._id}>
-                                            <TableCell className="font-mono">{dep.details.deploymentId}</TableCell>
+                                            <TableCell className="font-mono">
+                                                <Link href={`/fleet-management/deployment/${dep._id}/view`} className="hover:underline">
+                                                    {dep.details.deploymentId}
+                                                </Link>
+                                            </TableCell>
                                             <TableCell>{products[dep.productId]?.name || dep.productId}</TableCell>
                                             <TableCell>{dep.details.customer}</TableCell>
                                             <TableCell>{format(new Date(dep.createdAt), 'PPP')}</TableCell>
