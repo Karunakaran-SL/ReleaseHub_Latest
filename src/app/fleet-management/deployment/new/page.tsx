@@ -9,18 +9,19 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowRight, ArrowLeft, Key, Shield, FileText, Anchor } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
+import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { countries } from '@/lib/countries';
 
 interface Hypervisor {
     _id: string;
     name: string;
 }
 
-type WizardData = Partial<Deployment>;
+type WizardData = Partial<Omit<Deployment, '_id' | 'createdBy' | 'createdAt' | 'status'>>;
 
 export default function NewDeploymentWizardPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -78,6 +79,15 @@ export default function NewDeploymentWizardPage() {
             }
         }));
     };
+    
+    const handleSelectChange = (field: 'productId' | 'specificationId' | 'hypervisorId' | 'details.location', value: string) => {
+        if (field.startsWith('details.')) {
+            const detailField = field.split('.')[1];
+            setWizardData(p => ({ ...p, details: { ...p.details, [detailField]: value } as any }));
+        } else {
+            setWizardData(p => ({ ...p, [field]: value }));
+        }
+    };
 
     const isNextDisabled = () => {
         switch (step) {
@@ -128,7 +138,7 @@ export default function NewDeploymentWizardPage() {
     };
 
     const renderStepContent = () => {
-        if (loading) return <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+        if (loading && step === 1) return <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin" /></div>;
 
         switch (step) {
             case 1:
@@ -136,14 +146,14 @@ export default function NewDeploymentWizardPage() {
                     <div className="space-y-6">
                         <div className="space-y-2">
                             <Label htmlFor="product-select">Product</Label>
-                            <Select value={wizardData.productId} onValueChange={(v) => setWizardData(p => ({...p, productId: v}))}>
+                            <Select value={wizardData.productId} onValueChange={(v) => handleSelectChange('productId', v)}>
                                 <SelectTrigger id="product-select"><SelectValue placeholder="Select a product..." /></SelectTrigger>
                                 <SelectContent>{products.map(p => <SelectItem key={p._id} value={p._id}>{p.name} (v{p.version})</SelectItem>)}</SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="spec-select">Specification</Label>
-                            <Select value={wizardData.specificationId} onValueChange={(v) => setWizardData(p => ({...p, specificationId: v}))}>
+                            <Select value={wizardData.specificationId} onValueChange={(v) => handleSelectChange('specificationId', v)}>
                                 <SelectTrigger id="spec-select"><SelectValue placeholder="Select a specification..." /></SelectTrigger>
                                 <SelectContent>{specifications.map(s => <SelectItem key={s._id} value={s._id}>{s.name}</SelectItem>)}</SelectContent>
                             </Select>
@@ -154,7 +164,7 @@ export default function NewDeploymentWizardPage() {
                  return (
                     <div className="space-y-2">
                         <Label htmlFor="hypervisor-select">Hypervisor / Platform Type</Label>
-                        <Select value={wizardData.hypervisorId} onValueChange={(v) => setWizardData(p => ({...p, hypervisorId: v}))}>
+                        <Select value={wizardData.hypervisorId} onValueChange={(v) => handleSelectChange('hypervisorId', v)}>
                             <SelectTrigger id="hypervisor-select"><SelectValue placeholder="Select a hypervisor..." /></SelectTrigger>
                             <SelectContent>{hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
                         </Select>
@@ -216,7 +226,12 @@ export default function NewDeploymentWizardPage() {
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="location">Location</Label>
-                            <Input id="location" value={wizardData.details?.location || ''} onChange={(e) => handleInputChange(e, 'details')} />
+                            <Select value={wizardData.details?.location} onValueChange={(v) => handleSelectChange('details.location', v)}>
+                                <SelectTrigger id="location"><SelectValue placeholder="Select a country..." /></SelectTrigger>
+                                <SelectContent className="max-h-60">
+                                    {countries.map(c => <SelectItem key={c.code} value={c.name}>{c.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="customerKeyPair">Customer Key Pair</Label>
@@ -237,6 +252,7 @@ export default function NewDeploymentWizardPage() {
                         <div><strong className="w-32 inline-block">Hypervisor:</strong> {hypervisor?.name}</div>
                         <div><strong className="w-32 inline-block">Deployment ID:</strong> {wizardData.details?.deploymentId}</div>
                         <div><strong className="w-32 inline-block">Customer:</strong> {wizardData.details?.customer}</div>
+                        <div><strong className="w-32 inline-block">Location:</strong> {wizardData.details?.location}</div>
                         <div><strong className="w-32 inline-block">Foundation:</strong> {components.join(', ')}</div>
                     </div>
                 );
