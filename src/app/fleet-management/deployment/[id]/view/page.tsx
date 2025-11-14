@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -10,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Deployment, Product, Specification, CmdbComponent, UpgradeHistory } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, History } from 'lucide-react';
+import { Loader2, History, Edit } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -22,14 +23,12 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
-import { locations } from '@/lib/locations';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import Link from 'next/link';
 
 const statusColors: Record<string, string> = {
     PROVISIONING: 'bg-yellow-200 text-yellow-800',
@@ -51,8 +50,8 @@ export default function ViewDeploymentPage() {
     const router = useRouter();
     const params = useParams();
     const { id } = params;
-    
-    // State for data
+
+    // Data state
     const [deployment, setDeployment] = useState<Deployment | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [specifications, setSpecifications] = useState<Specification[]>([]);
@@ -60,31 +59,19 @@ export default function ViewDeploymentPage() {
     const [allComponents, setAllComponents] = useState<CmdbComponent[]>([]);
     const [upgradeHistory, setUpgradeHistory] = useState<UpgradeHistory[]>([]);
     
-    // State for UI control
-    const [isEditing, setIsEditing] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formState, setFormState] = useState<Partial<Deployment> & { updateComment?: string }>({});
-
-    // State for location dropdowns
-    const [selectedRegion, setSelectedRegion] = useState('');
-    const [selectedCountry, setSelectedCountry] = useState('');
-    
-    // State for delete dialog
+    // UI state
     const [deleteComment, setDeleteComment] = useState('');
     const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
-
-    const countriesInRegion = locations.find(r => r.name === selectedRegion)?.countries || [];
-    const zonesInCountry = countriesInRegion.find(c => c.name === selectedCountry)?.zones || [];
 
     useEffect(() => {
         getUser().then(setUser);
         if (!id) return;
 
-        async function fetchDetails() {
+        async function fetchAllData() {
             setLoading(true);
             try {
-                 const results = await Promise.allSettled([
+                const results = await Promise.allSettled([
                     fetch(`/api/deployments/${id}`),
                     fetch('/api/products'),
                     fetch('/api/specifications'),
@@ -93,35 +80,54 @@ export default function ViewDeploymentPage() {
                     fetch(`/api/upgrade-history/${id}`),
                 ]);
 
-                const processResponse = async (promise: PromiseSettledResult<Response>, name: string) => {
-                    if (promise.status === 'rejected') throw new Error(`Failed to fetch ${name}: ${promise.reason}`);
-                    if (!promise.value.ok) {
-                        // A 404 for upgrade history is okay, just means there isn't any.
-                        if (promise.value.status === 404 && name === 'Upgrade History') return [];
-                        const errorData = await promise.value.json().catch(() => ({ message: `An unknown error occurred while fetching ${name}.` }));
-                        throw new Error(errorData.message || `Failed to fetch ${name}.`);
-                    }
-                    return promise.value.json();
-                };
+                const [
+                    deploymentResult,
+                    productsResult,
+                    specsResult,
+                    hypervisorsResult,
+                    componentsResult,
+                    historyResult,
+                ] = results;
 
-                const deploymentData = await processResponse(results[0], 'Deployment Details');
-                const productsData = await processResponse(results[1], 'Products');
-                const specsData = await processResponse(results[2], 'Specifications');
-                const hypervisorsData = await processResponse(results[3], 'Hypervisors');
-                const componentsData = await processResponse(results[4], 'Components');
-                const historyData = await processResponse(results[5], 'Upgrade History');
+                // Process deployment
+                if (deploymentResult.status === 'fulfilled' && deploymentResult.value.ok) {
+                    setDeployment(await deploymentResult.value.json());
+                } else {
+                    throw new Error('Failed to fetch deployment details.');
+                }
                 
-                setDeployment(deploymentData);
-                setProducts(productsData);
-                setSpecifications(specsData);
-                setHypervisors(hypervisorsData);
-                setAllComponents(componentsData);
-                setUpgradeHistory(historyData);
+                // Process other data, toast on failure but don't crash
+                if (productsResult.status === 'fulfilled' && productsResult.value.ok) {
+                    setProducts(await productsResult.value.json());
+                } else {
+                    toast({ variant: 'destructive', title: 'Warning', description: 'Could not load product data.' });
+                }
                 
-                setFormState(deploymentData);
-                setSelectedRegion(deploymentData.details.region || '');
-                setSelectedCountry(deploymentData.details.country || '');
-                
+                if (specsResult.status === 'fulfilled' && specsResult.value.ok) {
+                    setSpecifications(await specsResult.value.json());
+                } else {
+                    toast({ variant: 'destructive', title: 'Warning', description: 'Could not load specification data.' });
+                }
+
+                if (hypervisorsResult.status === 'fulfilled' && hypervisorsResult.value.ok) {
+                    setHypervisors(await hypervisorsResult.value.json());
+                } else {
+                     toast({ variant: 'destructive', title: 'Warning', description: 'Could not load hypervisor data.' });
+                }
+
+                if (componentsResult.status === 'fulfilled' && componentsResult.value.ok) {
+                    setAllComponents(await componentsResult.value.json());
+                } else {
+                     toast({ variant: 'destructive', title: 'Warning', description: 'Could not load component data.' });
+                }
+
+                // Upgrade history can fail gracefully (e.g. 404)
+                if (historyResult.status === 'fulfilled' && historyResult.value.ok) {
+                    setUpgradeHistory(await historyResult.value.json());
+                } else {
+                    setUpgradeHistory([]); // Ensure it's an array even on failure
+                }
+
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
                 router.push('/fleet-management/deployment');
@@ -129,79 +135,14 @@ export default function ViewDeploymentPage() {
                  setLoading(false);
             }
         }
-        fetchDetails();
+        fetchAllData();
     }, [id, router, toast]);
     
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, group?: 'security' | 'details') => {
-        const { id, value } = e.target;
-        if (group) {
-            setFormState(prev => ({ ...prev, [group]: { ...prev[group], [id]: value } }));
-        } else {
-            setFormState(prev => ({ ...prev, [id]: value }));
-        }
-    };
-    
-    const handleSelectChange = (field: 'productId' | 'specificationId' | 'hypervisorId' | 'status' | 'details.region' | 'details.country' | 'details.availabilityZone', value: string) => {
-        if (field.startsWith('details.')) {
-            const detailField = field.split('.')[1];
-            setFormState(p => ({ ...p, details: { ...p.details, [detailField]: value } as any }));
-
-            if (detailField === 'region') {
-                setSelectedRegion(value);
-                setSelectedCountry('');
-                 setFormState(p => ({ ...p, details: { ...p.details, country: undefined, availabilityZone: undefined } as any }));
-            }
-            if (detailField === 'country') {
-                setSelectedCountry(value);
-                 setFormState(p => ({ ...p, details: { ...p.details, availabilityZone: undefined } as any }));
-            }
-        } else {
-            setFormState(p => ({ ...p, [field]: value }));
-        }
-    };
-
-    const handleSave = async () => {
-        if (!formState.updateComment) {
-            toast({ variant: 'destructive', title: 'Error', description: 'An update reason is required for auditing.' });
-            return;
-        }
-        setIsSubmitting(true);
-        try {
-            const response = await fetch(`/api/deployments/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formState),
-            });
-
-            if (!response.ok) {
-                 const errorData = await response.json();
-                 console.error("Update error:", errorData);
-                 throw new Error(errorData.message || 'Failed to update deployment.');
-            }
-
-            const updatedDeployment = await response.json();
-            setDeployment(updatedDeployment);
-            setFormState(updatedDeployment);
-            setIsEditing(false);
-            toast({ title: 'Success', description: 'Deployment updated successfully.' });
-        } catch (error: any) {
-             toast({ variant: 'destructive', title: 'Error', description: error.message });
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-    
-    const handleCancelEdit = () => {
-        if (deployment) setFormState(deployment);
-        setIsEditing(false);
-    };
-
     const handleDelete = async () => {
         if (deleteConfirmationText !== 'delete' || !deleteComment) {
             toast({ variant: 'destructive', title: 'Error', description: 'Please type "delete" and provide a comment to confirm deletion.' });
             return;
         }
-
         setIsDeleting(true);
         try {
             const response = await fetch(`/api/deployments/${id}`, {
@@ -209,31 +150,29 @@ export default function ViewDeploymentPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ comment: deleteComment }),
             });
-
-            if (response.ok) {
-                toast({ title: "Success", description: "Deployment deleted successfully." });
-                router.push('/fleet-management/deployment');
-                router.refresh();
-            } else {
+            if (!response.ok) {
                 const errorData = await response.json();
-                toast({ variant: "destructive", title: "Error", description: errorData.message || "Failed to delete deployment." });
+                throw new Error(errorData.message || "Failed to delete deployment.");
             }
-        } catch (error) {
-            toast({ variant: "destructive", title: "Error", description: "An unexpected error occurred." });
+            toast({ title: "Success", description: "Deployment deleted successfully." });
+            router.push('/fleet-management/deployment');
+            router.refresh();
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Error", description: error.message });
         } finally {
             setIsDeleting(false);
         }
     };
 
-    if (loading) {
+    if (loading || !deployment) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
-
-    if (!deployment) {
-        return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><p>Deployment not found.</p></div></DashboardLayout>;
-    }
-
+    
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
+    const productName = products.find(p => p._id === deployment.productId)?.name || 'Unknown Product';
+    const specName = specifications.find(s => s._id === deployment.specificationId)?.name || 'Unknown Spec';
+    const hypervisorName = hypervisors.find(h => h._id === deployment.hypervisorId)?.name || 'Unknown Hypervisor';
+    const foundationComponentNames = deployment.foundationComponentIds.map(id => allComponents.find(c => c._id === id)?.name || id).join(', ');
 
     return (
         <DashboardLayout user={user}>
@@ -245,175 +184,83 @@ export default function ViewDeploymentPage() {
                                 <CardTitle>View Deployment: {deployment.details.deploymentId}</CardTitle>
                                 <CardDescription>For customer: {deployment.details.customer}</CardDescription>
                             </div>
-                            {isEditing ? (
-                                 <Select value={formState.status} onValueChange={(v) => handleSelectChange('status', v)}>
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="Set status..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Object.keys(statusColors).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                            ) : (
-                                <Badge className={cn("text-base", statusColors[deployment.status] || 'bg-gray-200')}>
-                                    {deployment.status}
-                                </Badge>
-                            )}
+                            <Badge className={cn("text-base", statusColors[deployment.status] || 'bg-gray-200')}>
+                                {deployment.status}
+                            </Badge>
                         </div>
                     </CardHeader>
-                    <CardContent className="grid md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                            <h3 className="font-semibold text-lg border-b pb-2">Configuration</h3>
-                            <div><Label>Product</Label>
-                                <Select value={formState.productId} onValueChange={v => handleSelectChange('productId', v)} disabled={!isEditing}>
-                                    <SelectTrigger><SelectValue placeholder={products.find(p => p._id === deployment.productId)?.name || 'Unknown Product'} /></SelectTrigger>
-                                    <SelectContent>{products.map(p => <SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>)}</SelectContent>
-                                </Select>
+                    <CardContent className="space-y-8">
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-1 space-y-4">
+                                <h3 className="font-semibold text-lg border-b pb-2">Configuration</h3>
+                                <div><Label>Product</Label><Input value={productName} disabled /></div>
+                                <div><Label>Specification</Label><Input value={specName} disabled /></div>
+                                <div><Label>Hypervisor</Label><Input value={hypervisorName} disabled /></div>
+                                <div><Label>Foundation Components</Label><Textarea value={foundationComponentNames} disabled rows={4} /></div>
                             </div>
-                             <div><Label>Specification</Label>
-                                <Select value={formState.specificationId} onValueChange={v => handleSelectChange('specificationId', v)} disabled={!isEditing}>
-                                    <SelectTrigger><SelectValue placeholder={specifications.find(s => s._id === deployment.specificationId)?.name || 'Unknown Spec'} /></SelectTrigger>
-                                    <SelectContent>{specifications.map(s => <SelectItem key={s._id} value={s._id}>{s.name}</SelectItem>)}</SelectContent>
-                                </Select>
+                             <div className="lg:col-span-1 space-y-4">
+                                <h3 className="font-semibold text-lg border-b pb-2">Details</h3>
+                                <div><Label>Deployment ID</Label><Input value={deployment.details.deploymentId || ''} disabled /></div>
+                                <div><Label>Customer</Label><Input value={deployment.details.customer || ''} disabled /></div>
+                                <div><Label>Factory</Label><Input value={deployment.details.factory || 'N/A'} disabled /></div>
+                                <div><Label>Location</Label><Input value={`${deployment.details.region || 'N/A'} / ${deployment.details.country || 'N/A'} / ${deployment.details.availabilityZone || 'N/A'}`} disabled /></div>
+                                <div><Label>Created By</Label><Input value={`${deployment.createdBy} on ${format(new Date(deployment.createdAt), 'PPP')}`} disabled /></div>
                             </div>
-                             <div><Label>Hypervisor</Label>
-                                <Select value={formState.hypervisorId} onValueChange={v => handleSelectChange('hypervisorId', v)} disabled={!isEditing}>
-                                    <SelectTrigger><SelectValue placeholder={hypervisors.find(h => h._id === deployment.hypervisorId)?.name || 'Unknown Hypervisor'} /></SelectTrigger>
-                                    <SelectContent>{hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label>Foundation Components</Label>
-                                 <MultiSelectListBox
-                                    available={allComponents.filter(c => !(formState.foundationComponentIds || []).includes(c._id)).map(c => ({ id: c._id, label: c.name }))}
-                                    chosen={(formState.foundationComponentIds || []).map(id => ({ id: id, label: allComponents.find(c=>c._id === id)?.name || 'Unknown' }))}
-                                    onMoveToChosen={(ids) => setFormState(p => ({ ...p, foundationComponentIds: [...(p.foundationComponentIds || []), ...ids] }))}
-                                    onMoveToAvailable={(ids) => setFormState(p => ({...p, foundationComponentIds: (p.foundationComponentIds || []).filter(id => !ids.includes(id)) }))}
-                                    onMoveAllToChosen={() => setFormState(p => ({...p, foundationComponentIds: allComponents.map(c => c._id)}))}
-                                    onMoveAllToAvailable={() => setFormState(p => ({...p, foundationComponentIds: []}))}
-                                    disabled={!isEditing}
-                                />
+                             <div className="lg:col-span-1 space-y-4">
+                                <h3 className="font-semibold text-lg border-b pb-2">Security Details</h3>
+                                <div><Label>Encryption Key</Label><Textarea value={deployment.security?.encryptionKey || 'Not Provided'} disabled rows={2} /></div>
+                                <div><Label>Signing Certificate</Label><Textarea value={deployment.security?.signingCert || 'Not Provided'} disabled rows={2} /></div>
+                                <div><Label>PKI Details</Label><Textarea value={deployment.security?.pkiDetails || 'Not Provided'} disabled rows={2} /></div>
+                                <div><Label>IAM Token</Label><Input value={deployment.security?.iamToken || 'Not Provided'} disabled /></div>
                             </div>
                         </div>
-                        <div className="space-y-4">
-                             <h3 className="font-semibold text-lg border-b pb-2">Details</h3>
-                             <div><Label>Deployment ID</Label><Input value={formState.details?.deploymentId || ''} disabled /></div>
-                             <div><Label>Customer</Label><Input id="customer" value={formState.details?.customer || ''} onChange={(e) => handleInputChange(e, 'details')} disabled={!isEditing} /></div>
-                             <div><Label>Factory</Label><Input id="factory" value={formState.details?.factory || ''} onChange={(e) => handleInputChange(e, 'details')} disabled={!isEditing} /></div>
-                             <div>
-                                <Label>Location</Label>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                     <Select value={formState.details?.region} onValueChange={(v) => handleSelectChange('details.region', v)} disabled={!isEditing}>
-                                         <SelectTrigger><SelectValue placeholder="Select Region..." /></SelectTrigger>
-                                         <SelectContent>{locations.map(r => <SelectItem key={r.name} value={r.name}>{r.name}</SelectItem>)}</SelectContent>
-                                     </Select>
-                                     <Select value={formState.details?.country} onValueChange={(v) => handleSelectChange('details.country', v)} disabled={!isEditing || !selectedRegion}>
-                                         <SelectTrigger><SelectValue placeholder="Select Country..." /></SelectTrigger>
-                                         <SelectContent>{countriesInRegion.map(c => <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
-                                     </Select>
-                                     <Select value={formState.details?.availabilityZone} onValueChange={(v) => handleSelectChange('details.availabilityZone', v)} disabled={!isEditing || !selectedCountry}>
-                                         <SelectTrigger><SelectValue placeholder="Select Zone..." /></SelectTrigger>
-                                         <SelectContent>{zonesInCountry.map(z => <SelectItem key={z} value={z}>{z}</SelectItem>)}</SelectContent>
-                                     </Select>
-                                 </div>
-                             </div>
-                             <div><Label>Created By</Label><Input value={`${deployment.createdBy} on ${format(new Date(deployment.createdAt), 'PPP')}`} disabled /></div>
-                        </div>
-                         <div className="md:col-span-2 space-y-4">
-                             <h3 className="font-semibold text-lg border-b pb-2">Security Details</h3>
-                             <div><Label>Encryption Key</Label><Textarea id="encryptionKey" value={formState.security?.encryptionKey || ''} onChange={(e) => handleInputChange(e, 'security')} disabled={!isEditing} /></div>
-                             <div><Label>Signing Certificate</Label><Textarea id="signingCert" value={formState.security?.signingCert || ''} onChange={(e) => handleInputChange(e, 'security')} disabled={!isEditing} /></div>
-                             <div><Label>PKI Details</Label><Textarea id="pkiDetails" value={formState.security?.pkiDetails || ''} onChange={(e) => handleInputChange(e, 'security')} disabled={!isEditing} /></div>
-                             <div><Label>IAM Token</Label><Input id="iamToken" value={formState.security?.iamToken || ''} onChange={(e) => handleInputChange(e, 'security')} disabled={!isEditing} /></div>
-                        </div>
-                         <div className="md:col-span-2 space-y-4">
-                             <h3 className="font-semibold text-lg border-b pb-2">Deployment Package</h3>
-                              <div className="p-4 bg-muted rounded-lg text-left">
-                                <p className="font-semibold">Package Contents:</p>
-                                <ul className="list-disc pl-5 mt-2 text-sm text-muted-foreground">
-                                    <li>Installer binaries for selected components</li>
-                                    <li>Site-specific configuration files</li>
-                                    <li>Encryption keys and certificates</li>
-                                    <li>Deployment runbook and release notes</li>
-                                </ul>
-                                <p className="mt-4 font-mono text-xs bg-background p-2 rounded">
-                                    Package Location: /var/deploy/packages/{deployment.details?.deploymentId || 'deployment-id'}.tar.gz
-                                </p>
-                            </div>
-                        </div>
-                         {isEditing && (
-                            <div className="md:col-span-2 space-y-2">
-                                <Label htmlFor="updateComment" className="text-base font-semibold">Update Reason *</Label>
-                                <Textarea id="updateComment" value={formState.updateComment || ''} onChange={(e) => handleInputChange(e)} placeholder="Provide a reason for this update for auditing purposes." />
-                            </div>
-                        )}
                     </CardContent>
                      <CardFooter className="flex justify-end gap-2">
-                        {isEditing ? (
-                            <>
-                                <Button variant="outline" onClick={handleCancelEdit}>Cancel</Button>
-                                <Button onClick={handleSave} disabled={isSubmitting || !formState.updateComment}>
-                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                    Re-Generate Package
-                                </Button>
-                            </>
-                        ) : (
-                            <>
-                                <Button variant="outline" onClick={() => setIsEditing(true)}>UPDATE</Button>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="destructive">DELETE</Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete this deployment.
-                                            Please type <strong>delete</strong> to confirm.
-                                        </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <div className="space-y-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="delete-comment">Reason for Deletion *</Label>
-                                                <Textarea 
-                                                    id="delete-comment"
-                                                    placeholder="Provide a comment for auditing purposes."
-                                                    value={deleteComment}
-                                                    onChange={(e) => setDeleteComment(e.target.value)}
-                                                />
-                                            </div>
-                                             <div className="space-y-2">
-                                                <Label htmlFor="delete-confirmation">Type "delete" to confirm *</Label>
-                                                <Input 
-                                                    id="delete-confirmation"
-                                                    value={deleteConfirmationText}
-                                                    onChange={(e) => setDeleteConfirmationText(e.target.value)}
-                                                />
-                                            </div>
-                                        </div>
-                                        <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction 
-                                            onClick={handleDelete}
-                                            disabled={isDeleteButtonDisabled}
-                                            className="bg-destructive hover:bg-destructive/90"
-                                        >
-                                             {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                            Continue
-                                        </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </>
-                        )}
+                        <Button variant="outline" asChild>
+                           <Link href={`/fleet-management/deployment/${id}/edit`}>
+                                <Edit className="mr-2 h-4 w-4" /> Update
+                            </Link>
+                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive">DELETE</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action will permanently delete this deployment. This cannot be undone.
+                                    Please type <strong>delete</strong> to confirm.
+                                </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="delete-comment">Reason for Deletion *</Label>
+                                        <Textarea id="delete-comment" value={deleteComment} onChange={(e) => setDeleteComment(e.target.value)} />
+                                    </div>
+                                     <div className="space-y-2">
+                                        <Label htmlFor="delete-confirmation">Type "delete" to confirm *</Label>
+                                        <Input id="delete-confirmation" value={deleteConfirmationText} onChange={(e) => setDeleteConfirmationText(e.target.value)} />
+                                    </div>
+                                </div>
+                                <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete} disabled={isDeleteButtonDisabled} className="bg-destructive hover:bg-destructive/90">
+                                     {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Delete Deployment
+                                </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </CardFooter>
                 </Card>
+                
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1">
                         <AccordionTrigger>
                              <div className="flex items-center gap-2 text-lg font-semibold">
                                 <History className="h-5 w-5" />
-                                Upgrade History
+                                Upgrade History ({upgradeHistory.length})
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
