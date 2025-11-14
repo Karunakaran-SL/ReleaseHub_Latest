@@ -105,14 +105,12 @@ export default function ViewDeploymentPage() {
                 setSelectedRegion(deploymentData.details.region || '');
                 setSelectedCountry(deploymentData.details.country || '');
 
-                setProducts(await productsRes.json());
-                setSpecifications(await specsRes.json());
-                setHypervisors(await hypervisorsRes.json());
-                setAllComponents(await componentsRes.json());
-                
-                if (historyRes.ok) {
-                    setUpgradeHistory(await historyRes.json());
-                }
+                if(productsRes.ok) setProducts(await productsRes.json());
+                if(specsRes.ok) setSpecifications(await specsRes.json());
+                if(hypervisorsRes.ok) setHypervisors(await hypervisorsRes.json());
+                if(componentsRes.ok) setAllComponents(await componentsRes.json());
+                if(historyRes.ok) setUpgradeHistory(await historyRes.json());
+
 
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
