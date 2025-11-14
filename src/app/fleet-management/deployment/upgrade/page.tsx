@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Clock, Users, ShieldCheck } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter } from 'next/navigation';
@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input';
 export default function UpgradeWizardPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
     const router = useRouter();
 
@@ -147,6 +148,48 @@ export default function UpgradeWizardPage() {
             "Step 13: Completion Summary",
         ];
         return descriptions[currentStep - 1] || "Upgrade Wizard";
+    };
+
+    const handleFinish = async () => {
+        setIsSubmitting(true);
+        try {
+            if (!maintenanceStart || !maintenanceEnd || !upgradeScope) {
+                throw new Error("Missing required information for scheduling.");
+            }
+
+            const payload = {
+                deploymentIds: Array.from(selectedDeploymentIds),
+                productId: selectedProductId,
+                targetSpecificationId: selectedSpecId,
+                upgradeScope: upgradeScope,
+                releaseNotes: releaseNotes,
+                fieldOperations: fieldOperations,
+                maintenanceWindow: {
+                    start: maintenanceStart.toISOString(),
+                    end: maintenanceEnd.toISOString(),
+                },
+                approvers: approvers,
+            };
+
+            const response = await fetch('/api/upgrade-history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to schedule upgrade.');
+            }
+            
+            const result = await response.json();
+            toast({ title: "Upgrade Scheduled", description: result.message });
+            setStep(13); // Move to final summary step
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: error.message });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
     
     const renderStepContent = () => {
@@ -351,16 +394,20 @@ export default function UpgradeWizardPage() {
                  return (
                     <div className="text-center p-8 space-y-4">
                         <h3 className="font-semibold text-lg">Air-Gapped Environment Report Upload</h3>
-                        <p className="text-muted-foreground">Placeholder for uploading deployment status reports from offline systems.</p>
-                         <Button variant="outline"><FileText className="mr-2 h-4 w-4"/> Upload Reports</Button>
+                        <p className="text-muted-foreground">Provide a location for uploading deployment status reports from offline systems, or upload directly.</p>
+                         <div className="flex justify-center items-center gap-4">
+                             <Button variant="outline"><Upload className="mr-2 h-4 w-4"/> Upload Reports</Button>
+                             <span className="text-muted-foreground">or</span>
+                             <Input placeholder="Enter shared folder path..." className="max-w-xs" />
+                         </div>
                     </div>
                  );
              case 13:
                  return (
                      <div className="text-center p-8 space-y-4">
                         <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto"/>
-                        <h3 className="font-semibold text-lg">Upgrade Process Configured</h3>
-                        <p className="text-muted-foreground">The upgrade wizard is complete. The upgrade is now ready to be executed based on your configuration.</p>
+                        <h3 className="font-semibold text-lg">Upgrade Process Scheduled</h3>
+                        <p className="text-muted-foreground">The upgrade for the selected deployments has been scheduled. The status of these deployments has been updated to "UPGRADING".</p>
                     </div>
                  )
             default:
@@ -395,8 +442,9 @@ export default function UpgradeWizardPage() {
                                     Next <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
                             ) : step === 12 ? (
-                                <Button onClick={handleNext}>
-                                   Finish Configuration <CheckCircle2 className="ml-2 h-4 w-4" />
+                                <Button onClick={handleFinish} disabled={isSubmitting}>
+                                   {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                                   Finish & Schedule Upgrade
                                 </Button>
                             ) : (
                                <Button onClick={() => router.push('/fleet-management/deployment')}>Return to Dashboard</Button>

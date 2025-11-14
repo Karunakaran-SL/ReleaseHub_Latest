@@ -274,3 +274,22 @@ export type Deployment = {
     createdAt: string;
     status: 'PROVISIONING' | 'ACTIVE' | 'UPGRADING' | 'FAILED' | 'DECOMMISSIONED';
 };
+
+export type UpgradeHistory = {
+  _id?: string;
+  deploymentId: string;
+  productId: string;
+  targetSpecificationId: string;
+  upgradeScope: 'baseline' | 'individual';
+  releaseNotes: string;
+  fieldOperations?: string;
+  maintenanceWindow: {
+    start: string;
+    end: string;
+  };
+  approvers: string[];
+  status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  initiatedBy: string;
+  initiatedAt: string;
+  reportUploadUrl?: string; // Location for status uploads
+};
