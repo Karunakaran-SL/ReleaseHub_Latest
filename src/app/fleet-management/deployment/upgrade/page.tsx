@@ -60,7 +60,7 @@ export default function UpgradeWizardPage() {
     
     useEffect(() => {
         if (selectedProductId) {
-            const filteredDeployments = deployments.filter(d => d.productId === selectedProductId && d.status === 'ACTIVE');
+            const filteredDeployments = deployments.filter(d => d.productId === selectedProductId && ['ACTIVE', 'PROVISIONING'].includes(d.status));
             setProductDeployments(filteredDeployments);
         } else {
             setProductDeployments([]);
@@ -136,7 +136,7 @@ export default function UpgradeWizardPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Select Deployments</CardTitle>
-                            <CardDescription>Choose one or more active deployments to include in this upgrade.</CardDescription>
+                            <CardDescription>Choose one or more deployments to include in this upgrade.</CardDescription>
                         </CardHeader>
                         <CardContent>
                              <Table>
@@ -168,7 +168,7 @@ export default function UpgradeWizardPage() {
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="text-center h-24">No active deployments found for this product.</TableCell>
+                                            <TableCell colSpan={4} className="text-center h-24">No deployments found for this product.</TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
