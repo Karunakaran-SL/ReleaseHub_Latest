@@ -21,7 +21,9 @@ const DeploymentSchema = z.object({
     deploymentId: z.string().min(1),
     customer: z.string().min(1),
     factory: z.string().optional(),
-    location: z.string().optional(),
+    region: z.string().optional(),
+    country: z.string().optional(),
+    availabilityZone: z.string().optional(),
     customerKeyPair: z.string().optional(),
   })
 });

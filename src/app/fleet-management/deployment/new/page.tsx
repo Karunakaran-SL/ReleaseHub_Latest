@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { countries } from '@/lib/countries';
+import { locations } from '@/lib/locations';
 
 interface Hypervisor {
     _id: string;
@@ -37,6 +37,13 @@ export default function NewDeploymentWizardPage() {
     const [specifications, setSpecifications] = useState<Specification[]>([]);
     const [hypervisors, setHypervisors] = useState<Hypervisor[]>([]);
     const [allComponents, setAllComponents] = useState<CmdbComponent[]>([]);
+
+    // State for cascading location dropdowns
+    const [selectedRegion, setSelectedRegion] = useState('');
+    const [selectedCountry, setSelectedCountry] = useState('');
+
+    const countriesInRegion = locations.find(r => r.name === selectedRegion)?.countries || [];
+    const zonesInCountry = countriesInRegion.find(c => c.name === selectedCountry)?.zones || [];
 
 
     useEffect(() => {
@@ -80,10 +87,20 @@ export default function NewDeploymentWizardPage() {
         }));
     };
     
-    const handleSelectChange = (field: 'productId' | 'specificationId' | 'hypervisorId' | 'details.location', value: string) => {
+    const handleSelectChange = (field: 'productId' | 'specificationId' | 'hypervisorId' | 'details.region' | 'details.country' | 'details.availabilityZone', value: string) => {
         if (field.startsWith('details.')) {
             const detailField = field.split('.')[1];
             setWizardData(p => ({ ...p, details: { ...p.details, [detailField]: value } as any }));
+
+            if (detailField === 'region') {
+                setSelectedRegion(value);
+                setSelectedCountry('');
+                 setWizardData(p => ({ ...p, details: { ...p.details, country: undefined, availabilityZone: undefined } as any }));
+            }
+            if (detailField === 'country') {
+                setSelectedCountry(value);
+                 setWizardData(p => ({ ...p, details: { ...p.details, availabilityZone: undefined } as any }));
+            }
         } else {
             setWizardData(p => ({ ...p, [field]: value }));
         }
@@ -225,13 +242,21 @@ export default function NewDeploymentWizardPage() {
                             <Input id="factory" value={wizardData.details?.factory || ''} onChange={(e) => handleInputChange(e, 'details')} />
                         </div>
                          <div className="space-y-2">
-                            <Label htmlFor="location">Location</Label>
-                            <Select value={wizardData.details?.location} onValueChange={(v) => handleSelectChange('details.location', v)}>
-                                <SelectTrigger id="location"><SelectValue placeholder="Select a country..." /></SelectTrigger>
-                                <SelectContent className="max-h-60">
-                                    {countries.map(c => <SelectItem key={c.code} value={c.name}>{c.name}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
+                            <Label>Location</Label>
+                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                 <Select value={wizardData.details?.region} onValueChange={(v) => handleSelectChange('details.region', v)}>
+                                     <SelectTrigger><SelectValue placeholder="Select Region..." /></SelectTrigger>
+                                     <SelectContent>{locations.map(r => <SelectItem key={r.name} value={r.name}>{r.name}</SelectItem>)}</SelectContent>
+                                 </Select>
+                                 <Select value={wizardData.details?.country} onValueChange={(v) => handleSelectChange('details.country', v)} disabled={!selectedRegion}>
+                                     <SelectTrigger><SelectValue placeholder="Select Country..." /></SelectTrigger>
+                                     <SelectContent>{countriesInRegion.map(c => <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
+                                 </Select>
+                                 <Select value={wizardData.details?.availabilityZone} onValueChange={(v) => handleSelectChange('details.availabilityZone', v)} disabled={!selectedCountry}>
+                                     <SelectTrigger><SelectValue placeholder="Select Zone..." /></SelectTrigger>
+                                     <SelectContent>{zonesInCountry.map(z => <SelectItem key={z} value={z}>{z}</SelectItem>)}</SelectContent>
+                                 </Select>
+                             </div>
                         </div>
                          <div className="space-y-2">
                             <Label htmlFor="customerKeyPair">Customer Key Pair</Label>
@@ -252,7 +277,7 @@ export default function NewDeploymentWizardPage() {
                         <div><strong className="w-32 inline-block">Hypervisor:</strong> {hypervisor?.name}</div>
                         <div><strong className="w-32 inline-block">Deployment ID:</strong> {wizardData.details?.deploymentId}</div>
                         <div><strong className="w-32 inline-block">Customer:</strong> {wizardData.details?.customer}</div>
-                        <div><strong className="w-32 inline-block">Location:</strong> {wizardData.details?.location}</div>
+                        <div><strong className="w-32 inline-block">Location:</strong> {`${wizardData.details?.region || ''} / ${wizardData.details?.country || ''} / ${wizardData.details?.availabilityZone || ''}`}</div>
                         <div><strong className="w-32 inline-block">Foundation:</strong> {components.join(', ')}</div>
                     </div>
                 );

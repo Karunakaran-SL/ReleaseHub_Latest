@@ -3,6 +3,7 @@
 
 
 
+
 export type User = {
   _id: string;
   username: string;
@@ -269,7 +270,9 @@ export type Deployment = {
         deploymentId: string;
         customer: string;
         factory: string;
-        location: string;
+        region?: string;
+        country?: string;
+        availabilityZone?: string;
         customerKeyPair: string;
     };
     createdBy: string;
