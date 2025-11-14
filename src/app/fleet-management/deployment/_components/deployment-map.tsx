@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { DivIcon } from 'leaflet';
 import type { Deployment } from '@/lib/definitions';
-import { useMemo } from 'react';
+import { memo } from 'react';
 
 const statusColors: Record<string, string> = {
   PROVISIONING: '#facc15', // yellow-400
@@ -14,7 +14,6 @@ const statusColors: Record<string, string> = {
   DECOMMISSIONED: '#9ca3af', // gray-400
 };
 
-// Mock geocoding - in a real app, you'd use a geocoding service
 const locationCoordinates: Record<string, [number, number]> = {
     'Germany': [51.1657, 10.4515],
     'United Kingdom': [55.3781, -3.4360],
@@ -44,33 +43,32 @@ const createMarkerIcon = (status: string) => {
   });
 };
 
-export default function DeploymentMap({ deployments }: { deployments: Deployment[] }) {
-    const markers = useMemo(() => {
-        return deployments.map(deployment => {
-            const country = deployment.details.country;
-            if (!country || !locationCoordinates[country]) {
-                return null;
-            }
+const DeploymentMap = memo(function DeploymentMap({ deployments }: { deployments: Deployment[] }) {
+    
+    const markers = deployments.map(deployment => {
+        const country = deployment.details.country;
+        if (!country || !locationCoordinates[country]) {
+            return null;
+        }
 
-            const position = locationCoordinates[country];
-            const randomOffset: [number, number] = [(Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2];
-            const finalPosition: [number, number] = [position[0] + randomOffset[0], position[1] + randomOffset[1]];
-            
-            return {
-                id: deployment._id,
-                position: finalPosition,
-                icon: createMarkerIcon(deployment.status),
-                popup: (
-                    <>
-                        <strong>ID:</strong> {deployment.details.deploymentId} <br/>
-                        <strong>Customer:</strong> {deployment.details.customer} <br/>
-                        <strong>Country:</strong> {deployment.details.country} <br/>
-                        <strong>Status:</strong> {deployment.status}
-                    </>
-                )
-            };
-        }).filter(Boolean);
-    }, [deployments]);
+        const position = locationCoordinates[country];
+        const randomOffset: [number, number] = [(Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2];
+        const finalPosition: [number, number] = [position[0] + randomOffset[0], position[1] + randomOffset[1]];
+        
+        return {
+            id: deployment._id,
+            position: finalPosition,
+            icon: createMarkerIcon(deployment.status),
+            popup: (
+                <>
+                    <strong>ID:</strong> {deployment.details.deploymentId} <br/>
+                    <strong>Customer:</strong> {deployment.details.customer} <br/>
+                    <strong>Country:</strong> {deployment.details.country} <br/>
+                    <strong>Status:</strong> {deployment.status}
+                </>
+            )
+        };
+    }).filter(Boolean);
 
     return (
         <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} className="rounded-md">
@@ -87,4 +85,6 @@ export default function DeploymentMap({ deployments }: { deployments: Deployment
             ))}
         </MapContainer>
     );
-}
+});
+
+export default DeploymentMap;
