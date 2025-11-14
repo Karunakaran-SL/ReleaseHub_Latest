@@ -1,9 +1,10 @@
+
 'use client';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Icon, DivIcon } from 'leaflet';
 import type { Deployment } from '@/lib/definitions';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 const statusColors: Record<string, string> = {
   PROVISIONING: '#facc15', // yellow-400
@@ -46,33 +47,46 @@ const createMarkerIcon = (status: string) => {
 
 export default function DeploymentMap({ deployments }: { deployments: Deployment[] }) {
     
-  return (
-    <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} className="rounded-md">
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      />
-      {deployments.map(deployment => {
-        const country = deployment.details.country;
-        if (!country || !locationCoordinates[country]) {
-            return null;
-        }
+    const markers = useMemo(() => {
+        return deployments.map(deployment => {
+            const country = deployment.details.country;
+            if (!country || !locationCoordinates[country]) {
+                return null;
+            }
 
-        const position = locationCoordinates[country];
-        const randomOffset: [number, number] = [(Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2];
-        const finalPosition: [number, number] = [position[0] + randomOffset[0], position[1] + randomOffset[1]];
-        
-        return (
-          <Marker key={deployment._id} position={finalPosition} icon={createMarkerIcon(deployment.status)}>
-            <Popup>
-              <strong>ID:</strong> {deployment.details.deploymentId} <br/>
-              <strong>Customer:</strong> {deployment.details.customer} <br/>
-              <strong>Country:</strong> {deployment.details.country} <br/>
-              <strong>Status:</strong> {deployment.status}
-            </Popup>
-          </Marker>
-        );
-      })}
-    </MapContainer>
-  );
+            const position = locationCoordinates[country];
+            const randomOffset: [number, number] = [(Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2];
+            const finalPosition: [number, number] = [position[0] + randomOffset[0], position[1] + randomOffset[1]];
+            
+            return {
+                id: deployment._id,
+                position: finalPosition,
+                icon: createMarkerIcon(deployment.status),
+                popup: (
+                    <>
+                        <strong>ID:</strong> {deployment.details.deploymentId} <br/>
+                        <strong>Customer:</strong> {deployment.details.customer} <br/>
+                        <strong>Country:</strong> {deployment.details.country} <br/>
+                        <strong>Status:</strong> {deployment.status}
+                    </>
+                )
+            };
+        }).filter(Boolean);
+    }, [deployments]);
+
+    return (
+        <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} className="rounded-md">
+            <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
+            {markers.map(marker => marker && (
+                <Marker key={marker.id} position={marker.position} icon={marker.icon}>
+                    <Popup>
+                        {marker.popup}
+                    </Popup>
+                </Marker>
+            ))}
+        </MapContainer>
+    );
 }
