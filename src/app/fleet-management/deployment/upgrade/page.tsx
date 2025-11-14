@@ -9,11 +9,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Clock, Users, ShieldCheck } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { Input } from '@/components/ui/input';
 
 export default function UpgradeWizardPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -35,6 +40,11 @@ export default function UpgradeWizardPage() {
     const [productDeployments, setProductDeployments] = useState<Deployment[]>([]);
     const [selectedDeploymentIds, setSelectedDeploymentIds] = useState<Set<string>>(new Set());
     const [upgradeScope, setUpgradeScope] = useState<'baseline' | 'individual' | null>(null);
+    const [releaseNotes, setReleaseNotes] = useState('Default release notes based on version changes.');
+    const [fieldOperations, setFieldOperations] = useState('');
+    const [maintenanceStart, setMaintenanceStart] = useState<Date | undefined>();
+    const [maintenanceEnd, setMaintenanceEnd] = useState<Date | undefined>();
+    const [approvers, setApprovers] = useState(['Release Owner', 'Product Owner', 'Product Manager']);
 
     useEffect(() => {
         getUser().then(setUser);
@@ -54,14 +64,14 @@ export default function UpgradeWizardPage() {
                 setProducts(productsData);
                 setSpecifications(specsData);
                 setDeployments(await deploymentsRes.json());
-                
+
                 if (productsData.length > 0) {
                     setSelectedProductId(productsData[0]._id);
                 }
                 if (specsData.length > 0) {
                     setSelectedSpecId(specsData[0]._id);
                 }
-
+                
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
             } finally {
@@ -109,18 +119,34 @@ export default function UpgradeWizardPage() {
             case 1: return !selectedProductId || !selectedSpecId;
             case 2: return selectedDeploymentIds.size === 0;
             case 3: return !upgradeScope;
+            case 4: return false; // Placeholder
+            case 5: return false; // Placeholder
+            case 6: return releaseNotes.trim() === '';
+            case 7: return false; // Optional
+            case 8: return false; // Optional
+            case 9: return !maintenanceStart || !maintenanceEnd;
+            case 10: return approvers.length === 0;
             default: return false;
         }
     };
     
-    const getStepDescription = () => {
-        switch (step) {
-            case 1: return "Step 1: Select Product and Target Specification";
-            case 2: return "Step 2: List All Deployments";
-            case 3: return "Step 3: Choose Upgrade Scope";
-            case 4: return "Step 4: Dependency and Compliance Analysis";
-            default: return "Upgrade Wizard";
-        }
+    const getStepDescription = (currentStep: number) => {
+        const descriptions = [
+            "Step 1: Select Product and Target Specification",
+            "Step 2: List All Deployments",
+            "Step 3: Choose Upgrade Scope",
+            "Step 4: Dependency and Compliance Analysis",
+            "Step 5: Baseline Compatibility Summary",
+            "Step 6: Upgrade Summary and Release Notes",
+            "Step 7: Field Operations and Additional Procedures",
+            "Step 8: Custom Workflows",
+            "Step 9: Maintenance Window Planning",
+            "Step 10: Approval Process Setup",
+            "Step 11: Package Creation for Deployment",
+            "Step 12: Air-Gapped Environment Report Upload",
+            "Step 13: Completion Summary",
+        ];
+        return descriptions[currentStep - 1] || "Upgrade Wizard";
     };
     
     const renderStepContent = () => {
@@ -222,15 +248,123 @@ export default function UpgradeWizardPage() {
                             </Card>
                         </div>
                     </div>
-                )
+                );
             case 4:
                 return (
-                     <div className="text-center p-8">
-                        <p className="text-muted-foreground">Step 4: Dependency and Compliance Analysis (Under Construction)</p>
+                    <div className="text-center p-8 space-y-4">
+                        <h3 className="font-semibold text-lg">Analyzing Dependencies & Compliance...</h3>
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                        <p className="text-muted-foreground">Comparing current versions with target versions and identifying dependencies. This is a placeholder for the backend analysis.</p>
+                    </div>
+                );
+            case 5:
+                return (
+                    <div className="space-y-4">
+                         <h3 className="font-semibold text-lg">Baseline Compatibility Summary</h3>
+                         <p className="text-muted-foreground">This summary shows which deployments are compatible. This is placeholder data.</p>
+                         <Table>
+                             <TableHeader><TableRow><TableHead>Deployment ID</TableHead><TableHead>Status</TableHead><TableHead>Notes</TableHead></TableRow></TableHeader>
+                             <TableBody>
+                                 <TableRow><TableCell>DEP-001</TableCell><TableCell className="text-green-600">Compatible</TableCell><TableCell>Ready for baseline upgrade.</TableCell></TableRow>
+                                 <TableRow><TableCell>DEP-002</TableCell><TableCell className="text-yellow-600">Requires Updates</TableCell><TableCell>Component `AuthZ` needs update from v2.4 to v2.5.</TableCell></TableRow>
+                                  <TableRow><TableCell>DEP-003</TableCell><TableCell className="text-red-600">Incompatible</TableCell><TableCell>OS version mismatch. Manual intervention required.</TableCell></TableRow>
+                             </TableBody>
+                         </Table>
                     </div>
                 )
+            case 6:
+                return (
+                    <div className="space-y-4">
+                        <Label htmlFor="release-notes" className="text-lg font-semibold">Upgrade Summary and Release Notes</Label>
+                        <Textarea id="release-notes" value={releaseNotes} onChange={(e) => setReleaseNotes(e.target.value)} rows={15} />
+                    </div>
+                )
+            case 7:
+                 return (
+                    <div className="space-y-4">
+                        <Label htmlFor="field-ops" className="text-lg font-semibold">Field Operations and Additional Procedures</Label>
+                        <p className="text-sm text-muted-foreground">Record any physical or manual field operations that must occur before or after the upgrade (optional).</p>
+                        <Textarea id="field-ops" value={fieldOperations} onChange={(e) => setFieldOperations(e.target.value)} rows={8} />
+                    </div>
+                )
+            case 8:
+                 return (
+                    <div className="text-center p-8 space-y-4">
+                        <h3 className="font-semibold text-lg">Custom Workflows (Optional)</h3>
+                        <p className="text-muted-foreground">This step for linking custom automation workflows is under construction.</p>
+                        <Button>Link Default Workflow</Button>
+                    </div>
+                )
+            case 9:
+                 return (
+                     <div className="space-y-4 flex flex-col items-center">
+                        <Label className="text-lg font-semibold">Maintenance Window Planning</Label>
+                        <p className="text-sm text-muted-foreground">Define the maintenance window for the upgrade.</p>
+                        <div className="flex gap-8">
+                             <Popover>
+                                <PopoverTrigger asChild>
+                                <Button variant={"outline"} className={cn("w-[280px] justify-start text-left font-normal", !maintenanceStart && "text-muted-foreground")}>
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {maintenanceStart ? format(maintenanceStart, "PPP") : <span>Pick a start date</span>}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar mode="single" selected={maintenanceStart} onSelect={setMaintenanceStart} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                             <Popover>
+                                <PopoverTrigger asChild>
+                                <Button variant={"outline"} className={cn("w-[280px] justify-start text-left font-normal", !maintenanceEnd && "text-muted-foreground")}>
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {maintenanceEnd ? format(maintenanceEnd, "PPP") : <span>Pick an end date</span>}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar mode="single" selected={maintenanceEnd} onSelect={setMaintenanceEnd} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                     </div>
+                 )
+            case 10:
+                return (
+                     <div className="space-y-4">
+                        <Label className="text-lg font-semibold">Approval Process Setup</Label>
+                        <p className="text-sm text-muted-foreground">Configure the multi-level approval sequence. This is a placeholder.</p>
+                        {approvers.map((approver, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <Users className="h-5 w-5 text-muted-foreground" />
+                                <Input value={approver} readOnly />
+                            </div>
+                        ))}
+                    </div>
+                )
+             case 11:
+                return (
+                    <div className="text-center p-8 space-y-4">
+                        <h3 className="font-semibold text-lg">Package Creation for Deployment</h3>
+                        <p className="text-muted-foreground">A package will be created for each deployment with site-specific configurations.</p>
+                        <Package className="h-16 w-16 text-primary mx-auto" />
+                    </div>
+                );
+            case 12:
+                 return (
+                    <div className="text-center p-8 space-y-4">
+                        <h3 className="font-semibold text-lg">Air-Gapped Environment Report Upload</h3>
+                        <p className="text-muted-foreground">Placeholder for uploading deployment status reports from offline systems.</p>
+                         <Button variant="outline"><FileText className="mr-2 h-4 w-4"/> Upload Reports</Button>
+                    </div>
+                 );
+             case 13:
+                 return (
+                     <div className="text-center p-8 space-y-4">
+                        <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto"/>
+                        <h3 className="font-semibold text-lg">Upgrade Process Configured</h3>
+                        <p className="text-muted-foreground">The upgrade wizard is complete. The upgrade is now ready to be executed based on your configuration.</p>
+                    </div>
+                 )
             default:
-                return <p>Wizard completed.</p>;
+                return <p>End of wizard.</p>;
         }
     };
 
@@ -240,28 +374,32 @@ export default function UpgradeWizardPage() {
                 <Card className="w-full max-w-4xl">
                     <CardHeader>
                         <CardTitle>Upgrade Wizard</CardTitle>
-                        <CardDescription>{getStepDescription()}</CardDescription>
+                        <CardDescription>{getStepDescription(step)}</CardDescription>
                     </CardHeader>
                     
                     <CardContent>{renderStepContent()}</CardContent>
 
                     <CardFooter className="flex justify-between">
                          <div>
-                            {step > 1 && (
+                            {step > 1 && step <= 12 && (
                                 <Button variant="outline" onClick={handleBack} disabled={loading}>
                                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                 </Button>
                             )}
                          </div>
                          <div className="flex gap-2">
-                            <Button variant="outline" onClick={() => router.push('/fleet-management/deployment')} disabled={loading}>Cancel</Button>
+                            {step < 13 && <Button variant="outline" onClick={() => router.push('/fleet-management/deployment')} disabled={loading}>Cancel</Button>}
                             
-                            {step < 4 ? (
+                            {step < 12 ? (
                                 <Button onClick={handleNext} disabled={isNextDisabled()}>
                                     Next <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
+                            ) : step === 12 ? (
+                                <Button onClick={handleNext}>
+                                   Finish Configuration <CheckCircle2 className="ml-2 h-4 w-4" />
+                                </Button>
                             ) : (
-                               <p className="text-sm text-muted-foreground">End of implemented steps.</p>
+                               <Button onClick={() => router.push('/fleet-management/deployment')}>Return to Dashboard</Button>
                             )}
                          </div>
                     </CardFooter>
