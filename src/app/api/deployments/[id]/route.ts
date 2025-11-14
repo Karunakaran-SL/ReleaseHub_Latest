@@ -34,17 +34,21 @@ const DeploymentUpdateSchema = z.object({
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
+        console.log(`[API /api/deployments/{id}] Fetching deployment with ID: ${id}`);
+        
         const client = await clientPromise;
         const db = client.db();
         const item = await db.collection('deployments').findOne({ _id: id });
 
         if (!item) {
+            console.log(`[API /api/deployments/{id}] Deployment not found for ID: ${id}`);
             return NextResponse.json({ message: 'Deployment not found.' }, { status: 404 });
         }
-
+        
+        console.log(`[API /api/deployments/{id}] Found deployment:`, JSON.stringify(item, null, 2));
         return NextResponse.json(item, { status: 200 });
     } catch (error) {
-        console.error(error);
+        console.error(`[API /api/deployments/{id}] Error fetching deployment:`, error);
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
     }
 }
