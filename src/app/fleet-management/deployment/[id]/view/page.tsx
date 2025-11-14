@@ -1,6 +1,5 @@
-
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
@@ -39,7 +38,6 @@ const statusColors: Record<string, string> = {
     UPGRADING: 'bg-blue-200 text-blue-800',
     DECOMMISSIONED: 'bg-gray-300 text-gray-900',
 };
-
 
 interface Hypervisor {
     _id: string;
@@ -98,6 +96,7 @@ export default function ViewDeploymentPage() {
                 const processResponse = async (promise: PromiseSettledResult<Response>, name: string) => {
                     if (promise.status === 'rejected') throw new Error(`Failed to fetch ${name}: ${promise.reason}`);
                     if (!promise.value.ok) {
+                        // A 404 for upgrade history is okay, just means there isn't any.
                         if (promise.value.status === 404 && name === 'Upgrade History') return [];
                         const errorData = await promise.value.json().catch(() => ({ message: `An unknown error occurred while fetching ${name}.` }));
                         throw new Error(errorData.message || `Failed to fetch ${name}.`);
@@ -226,8 +225,12 @@ export default function ViewDeploymentPage() {
         }
     };
 
-    if (loading || !deployment || !products.length || !specifications.length) {
+    if (loading) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
+    }
+
+    if (!deployment) {
+        return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><p>Deployment not found.</p></div></DashboardLayout>;
     }
 
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
