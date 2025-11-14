@@ -88,7 +88,7 @@ export default function ViewDeploymentPage() {
         async function fetchDetails() {
             setLoading(true);
             try {
-                const [deploymentRes, productsRes, specsRes, hypervisorsRes, componentsRes, historyRes] = await Promise.all([
+                const results = await Promise.allSettled([
                     fetch(`/api/deployments/${id}`),
                     fetch('/api/products'),
                     fetch('/api/specifications'),
@@ -97,30 +97,41 @@ export default function ViewDeploymentPage() {
                     fetch(`/api/upgrade-history/${id}`),
                 ]);
 
-                if (!deploymentRes.ok) throw new Error('Failed to fetch deployment');
-                
-                const deploymentData: Deployment = await deploymentRes.json();
+                // Deployment data is critical
+                if (results[0].status === 'rejected' || !results[0].value.ok) {
+                    throw new Error('Failed to fetch deployment details.');
+                }
+                const deploymentData: Deployment = await results[0].value.json();
                 setDeployment(deploymentData);
                 setFormState(deploymentData);
                 setSelectedRegion(deploymentData.details.region || '');
                 setSelectedCountry(deploymentData.details.country || '');
 
-                if(productsRes.ok) setProducts(await productsRes.json());
-                if(specsRes.ok) setSpecifications(await specsRes.json());
-                if(hypervisorsRes.ok) setHypervisors(await hypervisorsRes.json());
-                if(componentsRes.ok) setAllComponents(await componentsRes.json());
-                if(historyRes.ok) setUpgradeHistory(await historyRes.json());
+                // Handle other promises gracefully
+                if (results[1].status === 'fulfilled' && results[1].value.ok) setProducts(await results[1].value.json());
+                else toast({ variant: 'destructive', title: 'Warning', description: 'Could not load products list.' });
+                
+                if (results[2].status === 'fulfilled' && results[2].value.ok) setSpecifications(await results[2].value.json());
+                else toast({ variant: 'destructive', title: 'Warning', description: 'Could not load specifications list.' });
+                
+                if (results[3].status === 'fulfilled' && results[3].value.ok) setHypervisors(await results[3].value.json());
+                else toast({ variant: 'destructive', title: 'Warning', description: 'Could not load hypervisors list.' });
 
+                if (results[4].status === 'fulfilled' && results[4].value.ok) setAllComponents(await results[4].value.json());
+                else toast({ variant: 'destructive', title: 'Warning', description: 'Could not load components list.' });
+                
+                if (results[5].status === 'fulfilled' && results[5].value.ok) setUpgradeHistory(await results[5].value.json());
+                // Don't toast for history, it's ok if it's empty
 
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
+                router.push('/fleet-management/deployment');
             } finally {
                 setLoading(false);
             }
         }
         fetchDetails();
-
-    }, [id, toast]);
+    }, [id, router, toast]);
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, group?: 'security' | 'details') => {
         const { id, value } = e.target;
@@ -443,4 +454,5 @@ export default function ViewDeploymentPage() {
             </main>
         </DashboardLayout>
     );
-}
+
+    
