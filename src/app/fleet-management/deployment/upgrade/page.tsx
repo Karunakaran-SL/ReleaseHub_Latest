@@ -60,7 +60,7 @@ export default function UpgradeWizardPage() {
     
     useEffect(() => {
         if (selectedProductId) {
-            const filteredDeployments = deployments.filter(d => d.productId === selectedProductId && ['ACTIVE', 'PROVISIONING'].includes(d.status));
+            const filteredDeployments = deployments.filter(d => d.productId === selectedProductId);
             setProductDeployments(filteredDeployments);
         } else {
             setProductDeployments([]);
@@ -151,6 +151,7 @@ export default function UpgradeWizardPage() {
                                         <TableHead>Deployment ID</TableHead>
                                         <TableHead>Customer</TableHead>
                                         <TableHead>Location</TableHead>
+                                        <TableHead>Current Status</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -165,10 +166,11 @@ export default function UpgradeWizardPage() {
                                             <TableCell className="font-mono">{dep.details.deploymentId}</TableCell>
                                             <TableCell>{dep.details.customer}</TableCell>
                                             <TableCell>{dep.details.country || 'N/A'}</TableCell>
+                                            <TableCell>{dep.status}</TableCell>
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="text-center h-24">No deployments found for this product.</TableCell>
+                                            <TableCell colSpan={5} className="text-center h-24">No deployments found for this product.</TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
