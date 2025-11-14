@@ -88,7 +88,14 @@ export default function ViewDeploymentPage() {
         async function fetchDetails() {
             setLoading(true);
             try {
-                const results = await Promise.allSettled([
+                const [
+                    deploymentRes,
+                    productsRes,
+                    specsRes,
+                    hypervisorsRes,
+                    componentsRes,
+                    historyRes,
+                ] = await Promise.all([
                     fetch(`/api/deployments/${id}`),
                     fetch('/api/products'),
                     fetch('/api/specifications'),
@@ -97,33 +104,30 @@ export default function ViewDeploymentPage() {
                     fetch(`/api/upgrade-history/${id}`),
                 ]);
 
-                // Deployment data is critical
-                if (results[0].status === 'rejected' || !results[0].value.ok) {
+                if (!deploymentRes.ok) {
                     throw new Error('Failed to fetch deployment details.');
                 }
-                const deploymentData: Deployment = await results[0].value.json();
+                const deploymentData: Deployment = await deploymentRes.json();
                 setDeployment(deploymentData);
                 setFormState(deploymentData);
                 setSelectedRegion(deploymentData.details.region || '');
                 setSelectedCountry(deploymentData.details.country || '');
 
-                // Handle other promises gracefully
-                if (results[1].status === 'fulfilled' && results[1].value.ok) setProducts(await results[1].value.json());
+                if (productsRes.ok) setProducts(await productsRes.json());
                 else toast({ variant: 'destructive', title: 'Warning', description: 'Could not load products list.' });
-                
-                if (results[2].status === 'fulfilled' && results[2].value.ok) setSpecifications(await results[2].value.json());
+
+                if (specsRes.ok) setSpecifications(await specsRes.json());
                 else toast({ variant: 'destructive', title: 'Warning', description: 'Could not load specifications list.' });
-                
-                if (results[3].status === 'fulfilled' && results[3].value.ok) setHypervisors(await results[3].value.json());
+
+                if (hypervisorsRes.ok) setHypervisors(await hypervisorsRes.json());
                 else toast({ variant: 'destructive', title: 'Warning', description: 'Could not load hypervisors list.' });
 
-                if (results[4].status === 'fulfilled' && results[4].value.ok) setAllComponents(await results[4].value.json());
+                if (componentsRes.ok) setAllComponents(await componentsRes.json());
                 else toast({ variant: 'destructive', title: 'Warning', description: 'Could not load components list.' });
                 
-                if (results[5].status === 'fulfilled' && results[5].value.ok) {
-                    setUpgradeHistory(await results[5].value.json());
-                } else if (results[5].status === 'fulfilled' && results[5].value.status !== 404) {
-                    // Don't toast for 404 (no history), but do for other errors
+                if (historyRes.ok) {
+                    setUpgradeHistory(await historyRes.json());
+                } else if (historyRes.status !== 404) {
                     toast({ variant: 'destructive', title: 'Warning', description: 'Could not load upgrade history.' });
                 }
 
@@ -230,12 +234,8 @@ export default function ViewDeploymentPage() {
         }
     };
 
-    if (loading) {
+    if (loading || !deployment) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
-    }
-
-    if (!deployment) {
-        return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><p>Deployment not found.</p></div></DashboardLayout>;
     }
 
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
