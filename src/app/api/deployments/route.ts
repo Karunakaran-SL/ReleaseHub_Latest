@@ -16,7 +16,7 @@ const DeploymentSchema = z.object({
     signingCert: z.string().optional(),
     pkiDetails: z.string().optional(),
     iamToken: z.string().optional(),
-  }),
+  }).optional(),
   details: z.object({
     deploymentId: z.string().min(1),
     customer: z.string().min(1),
@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
         const validatedData = DeploymentSchema.safeParse(body);
 
         if (!validatedData.success) {
+            console.error(validatedData.error.flatten().fieldErrors);
             return NextResponse.json({ message: 'Invalid data.', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
         }
 
