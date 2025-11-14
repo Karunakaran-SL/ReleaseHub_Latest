@@ -9,14 +9,16 @@ export async function GET(req: NextRequest, { params }: { params: { deploymentId
 
         const client = await clientPromise;
         const db = client.db();
+        
+        // Corrected Query: Find documents where the 'deploymentId' field matches the ID from the URL.
         const history = await db.collection('upgrade_history')
             .find({ deploymentId: deploymentId })
             .sort({ initiatedAt: -1 })
             .toArray();
 
-        if (!history || history.length === 0) {
+        if (!history) { // This case may not be hit if find returns an empty cursor, but good practice.
             console.log(`[API /api/upgrade-history/{id}] No history found for deploymentId: ${deploymentId}`);
-            return NextResponse.json([], { status: 200 }); // Return empty array instead of 404
+            return NextResponse.json([], { status: 200 });
         }
         
         console.log(`[API /api/upgrade-history/{id}] Found ${history.length} history records for deploymentId: ${deploymentId}`);
