@@ -1,10 +1,9 @@
 
 'use client';
 import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { DivIcon } from 'leaflet';
+import L, { DivIcon } from 'leaflet';
+import { useEffect, useRef } from 'react';
 import type { Deployment } from '@/lib/definitions';
-import { memo } from 'react';
 
 const statusColors: Record<string, string> = {
   PROVISIONING: '#facc15', // yellow-400
@@ -43,52 +42,60 @@ const createMarkerIcon = (status: string) => {
   });
 };
 
-const DeploymentMap = memo(function DeploymentMap({ deployments }: { deployments: Deployment[] }) {
-    
-    const markers = deployments.map(deployment => {
-        const country = deployment.details.country;
-        if (!country || !locationCoordinates[country]) {
-            return null;
+export default function DeploymentMap({ deployments }: { deployments: Deployment[] }) {
+    const mapContainerRef = useRef<HTMLDivElement>(null);
+    const mapInstanceRef = useRef<L.Map | null>(null);
+
+    useEffect(() => {
+        if (mapContainerRef.current && !mapInstanceRef.current) {
+            // Initialize map only if it hasn't been initialized yet
+            const map = L.map(mapContainerRef.current).setView([20, 0], 2);
+            mapInstanceRef.current = map;
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
         }
 
-        const position = locationCoordinates[country];
-        const randomOffset: [number, number] = [(Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2];
-        const finalPosition: [number, number] = [position[0] + randomOffset[0], position[1] + randomOffset[1]];
+        // Add markers
+        const map = mapInstanceRef.current;
+        if (map) {
+            // Clear existing markers
+            map.eachLayer(layer => {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            deployments.forEach(deployment => {
+                const country = deployment.details.country;
+                if (!country || !locationCoordinates[country]) return;
+
+                const position = locationCoordinates[country];
+                const randomOffset: [number, number] = [(Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2];
+                const finalPosition: [number, number] = [position[0] + randomOffset[0], position[1] + randomOffset[1]];
+
+                const popupContent = `
+                    <strong>ID:</strong> ${deployment.details.deploymentId} <br/>
+                    <strong>Customer:</strong> ${deployment.details.customer} <br/>
+                    <strong>Country:</strong> ${deployment.details.country} <br/>
+                    <strong>Status:</strong> ${deployment.status}
+                `;
+                
+                L.marker(finalPosition, { icon: createMarkerIcon(deployment.status) })
+                    .addTo(map)
+                    .bindPopup(popupContent);
+            });
+        }
         
-        return {
-            id: deployment._id,
-            position: finalPosition,
-            icon: createMarkerIcon(deployment.status),
-            popup: (
-                <>
-                    <strong>ID:</strong> {deployment.details.deploymentId} <br/>
-                    <strong>Customer:</strong> {deployment.details.customer} <br/>
-                    <strong>Country:</strong> {deployment.details.country} <br/>
-                    <strong>Status:</strong> {deployment.status}
-                </>
-            )
+        // Cleanup function to run when the component unmounts
+        return () => {
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.remove();
+                mapInstanceRef.current = null;
+            }
         };
-    }).filter(Boolean);
+    }, [deployments]);
 
-    // Using a key on the MapContainer forces React to unmount and remount the component when the key changes,
-    // which effectively cleans up the old Leaflet instance and prevents the "container already initialized" error.
-    const mapKey = `${deployments.length}-${Math.random()}`;
-
-    return (
-        <MapContainer key={mapKey} center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} className="rounded-md">
-            <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-            {markers.map(marker => marker && (
-                <Marker key={marker.id} position={marker.position} icon={marker.icon}>
-                    <Popup>
-                        {marker.popup}
-                    </Popup>
-                </Marker>
-            ))}
-        </MapContainer>
-    );
-});
-
-export default DeploymentMap;
+    return <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} className="rounded-md" />;
+}
