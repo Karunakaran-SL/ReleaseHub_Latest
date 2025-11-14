@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -8,12 +7,18 @@ import { getUser } from '@/lib/auth';
 import { PlusCircle, Upload, GitMerge, Trash2, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
+
+const DeploymentMap = dynamic(() => import('./_components/deployment-map'), {
+    ssr: false,
+    loading: () => <div className="h-96 bg-muted rounded-md flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+});
+
 
 const statusColors: Record<string, string> = {
     PROVISIONING: 'bg-yellow-200 text-yellow-800',
@@ -92,8 +97,8 @@ export default function DeploymentDashboardPage() {
                             <CardTitle>Global Deployment View</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="h-96 bg-muted rounded-md flex items-center justify-center">
-                                <Image src="https://picsum.photos/seed/map/1200/400" alt="World map of deployments" width={1200} height={400} className="rounded-md object-cover" />
+                            <div className="h-[60vh] bg-muted rounded-md flex items-center justify-center">
+                                <DeploymentMap deployments={deployments} />
                             </div>
                         </CardContent>
                     </Card>
@@ -109,13 +114,14 @@ export default function DeploymentDashboardPage() {
                                     <TableHead>Deployment ID</TableHead>
                                     <TableHead>Product</TableHead>
                                     <TableHead>Customer</TableHead>
+                                    <TableHead>Location</TableHead>
                                     <TableHead>Created At</TableHead>
                                     <TableHead>Status</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {loading ? (
-                                    <TableRow><TableCell colSpan={5} className="text-center h-24"><Loader2 className="animate-spin mx-auto"/></TableCell></TableRow>
+                                    <TableRow><TableCell colSpan={6} className="text-center h-24"><Loader2 className="animate-spin mx-auto"/></TableCell></TableRow>
                                 ) : deployments.length > 0 ? (
                                     deployments.map(dep => (
                                         <TableRow key={dep._id}>
@@ -126,6 +132,7 @@ export default function DeploymentDashboardPage() {
                                             </TableCell>
                                             <TableCell>{products[dep.productId]?.name || dep.productId}</TableCell>
                                             <TableCell>{dep.details.customer}</TableCell>
+                                            <TableCell>{dep.details.country || 'N/A'}</TableCell>
                                             <TableCell>{format(new Date(dep.createdAt), 'PPP')}</TableCell>
                                             <TableCell>
                                                 <Badge className={cn(statusColors[dep.status] || 'bg-gray-200')}>
@@ -135,7 +142,7 @@ export default function DeploymentDashboardPage() {
                                         </TableRow>
                                     ))
                                 ) : (
-                                    <TableRow><TableCell colSpan={5} className="text-center">No deployments found.</TableCell></TableRow>
+                                    <TableRow><TableCell colSpan={6} className="text-center">No deployments found.</TableCell></TableRow>
                                 )}
                             </TableBody>
                          </Table>

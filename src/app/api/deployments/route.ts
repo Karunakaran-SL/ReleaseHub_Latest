@@ -5,26 +5,25 @@ import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
-// This is a placeholder schema. We will expand it as we build the wizard.
 const DeploymentSchema = z.object({
   productId: z.string().min(1),
   specificationId: z.string().min(1),
   hypervisorId: z.string().min(1),
   foundationComponentIds: z.array(z.string()).min(1),
   security: z.object({
-    encryptionKey: z.string().optional(),
-    signingCert: z.string().optional(),
-    pkiDetails: z.string().optional(),
-    iamToken: z.string().optional(),
+    encryptionKey: z.string().optional().nullable(),
+    signingCert: z.string().optional().nullable(),
+    pkiDetails: z.string().optional().nullable(),
+    iamToken: z.string().optional().nullable(),
   }).optional(),
   details: z.object({
     deploymentId: z.string().min(1),
     customer: z.string().min(1),
-    factory: z.string().optional(),
-    region: z.string().optional(),
-    country: z.string().optional(),
-    availabilityZone: z.string().optional(),
-    customerKeyPair: z.string().optional(),
+    factory: z.string().optional().nullable(),
+    region: z.string().optional().nullable(),
+    country: z.string().optional().nullable(),
+    availabilityZone: z.string().optional().nullable(),
+    customerKeyPair: z.string().optional().nullable(),
   })
 });
 
