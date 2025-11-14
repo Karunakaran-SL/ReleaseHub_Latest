@@ -70,8 +70,12 @@ const DeploymentMap = memo(function DeploymentMap({ deployments }: { deployments
         };
     }).filter(Boolean);
 
+    // Using a key on the MapContainer forces React to unmount and remount the component when the key changes,
+    // which effectively cleans up the old Leaflet instance and prevents the "container already initialized" error.
+    const mapKey = `${deployments.length}-${Math.random()}`;
+
     return (
-        <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} className="rounded-md">
+        <MapContainer key={mapKey} center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} className="rounded-md">
             <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
