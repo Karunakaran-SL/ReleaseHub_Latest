@@ -9,10 +9,11 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export default function UpgradeWizardPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -33,6 +34,7 @@ export default function UpgradeWizardPage() {
     const [selectedSpecId, setSelectedSpecId] = useState('');
     const [productDeployments, setProductDeployments] = useState<Deployment[]>([]);
     const [selectedDeploymentIds, setSelectedDeploymentIds] = useState<Set<string>>(new Set());
+    const [upgradeScope, setUpgradeScope] = useState<'baseline' | 'individual' | null>(null);
 
     useEffect(() => {
         getUser().then(setUser);
@@ -95,6 +97,7 @@ export default function UpgradeWizardPage() {
         switch (step) {
             case 1: return !selectedProductId || !selectedSpecId;
             case 2: return selectedDeploymentIds.size === 0;
+            case 3: return !upgradeScope;
             default: return false;
         }
     };
@@ -104,6 +107,7 @@ export default function UpgradeWizardPage() {
             case 1: return "Step 1: Select Product and Target Specification";
             case 2: return "Step 2: List All Deployments";
             case 3: return "Step 3: Choose Upgrade Scope";
+            case 4: return "Step 4: Dependency and Compliance Analysis";
             default: return "Upgrade Wizard";
         }
     };
@@ -180,8 +184,38 @@ export default function UpgradeWizardPage() {
                 );
             case 3:
                 return (
+                     <div className="space-y-4">
+                        <p className="text-muted-foreground">Decide how you want to perform the upgrade. You can use a consistent baseline for all selected deployments or customize the upgrade for individual entities.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Card 
+                                className={cn("cursor-pointer hover:shadow-lg transition-shadow", upgradeScope === 'baseline' && "ring-2 ring-primary")}
+                                onClick={() => setUpgradeScope('baseline')}
+                            >
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2"><CheckCircle2/> Baseline Upgrade</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-sm text-muted-foreground">Apply a global, consistent upgrade using a pre-defined baseline. This is the recommended path for most upgrades.</p>
+                                </CardContent>
+                            </Card>
+                            <Card 
+                                className={cn("cursor-pointer hover:shadow-lg transition-shadow", upgradeScope === 'individual' && "ring-2 ring-primary")}
+                                onClick={() => setUpgradeScope('individual')}
+                            >
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2"><SlidersHorizontal /> Individual Upgrade</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-sm text-muted-foreground">Manually select specific tenants, components, or applications to upgrade. This offers more granular control.</p>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                )
+            case 4:
+                return (
                      <div className="text-center p-8">
-                        <p className="text-muted-foreground">Step 3: Choose Upgrade Scope (Under Construction)</p>
+                        <p className="text-muted-foreground">Step 4: Dependency and Compliance Analysis (Under Construction)</p>
                     </div>
                 )
             default:
@@ -192,7 +226,7 @@ export default function UpgradeWizardPage() {
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10 flex justify-center">
-                <Card className="w-full max-w-3xl">
+                <Card className="w-full max-w-4xl">
                     <CardHeader>
                         <CardTitle>Upgrade Wizard</CardTitle>
                         <CardDescription>{getStepDescription()}</CardDescription>
@@ -211,7 +245,7 @@ export default function UpgradeWizardPage() {
                          <div className="flex gap-2">
                             <Button variant="outline" onClick={() => router.push('/fleet-management/deployment')} disabled={loading}>Cancel</Button>
                             
-                            {step < 3 ? (
+                            {step < 4 ? (
                                 <Button onClick={handleNext} disabled={isNextDisabled()}>
                                     Next <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
