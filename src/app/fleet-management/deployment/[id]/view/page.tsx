@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Deployment, Product, Specification, CmdbComponent, UpgradeHistory } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, History, Edit } from 'lucide-react';
+import { Loader2, History, Edit, ImageOff } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -214,6 +214,32 @@ export default function ViewDeploymentPage() {
                                 <div><Label>IAM Token</Label><Input value={deployment.security?.iamToken || 'Not Provided'} disabled /></div>
                             </div>
                         </div>
+                        
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Foundation Upgrade Summary</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex items-center justify-center text-muted-foreground h-48 bg-muted/50 rounded-b-lg">
+                                    <div className="text-center">
+                                        <ImageOff className="mx-auto h-8 w-8"/>
+                                        <p>No Image Available</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Individual Upgrade Summary</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex items-center justify-center text-muted-foreground h-48 bg-muted/50 rounded-b-lg">
+                                    <div className="text-center">
+                                        <ImageOff className="mx-auto h-8 w-8"/>
+                                        <p>No Image Available</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
                     </CardContent>
                      <CardFooter className="flex justify-end gap-2">
                         <Button variant="outline" asChild>
