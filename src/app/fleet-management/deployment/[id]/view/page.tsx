@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -89,7 +88,7 @@ export default function ViewDeploymentPage() {
                     historyResult,
                 ] = results;
 
-                // Process deployment
+                // Process deployment - this is critical, fail hard if it doesn't load.
                 if (deploymentResult.status === 'fulfilled' && deploymentResult.value.ok) {
                     setDeployment(await deploymentResult.value.json());
                 } else {
@@ -121,7 +120,7 @@ export default function ViewDeploymentPage() {
                      toast({ variant: 'destructive', title: 'Warning', description: 'Could not load component data.' });
                 }
 
-                // Upgrade history can fail gracefully (e.g. 404)
+                // Upgrade history can fail gracefully (e.g. 404 for new deployments)
                 if (historyResult.status === 'fulfilled' && historyResult.value.ok) {
                     setUpgradeHistory(await historyResult.value.json());
                 } else {
@@ -172,7 +171,7 @@ export default function ViewDeploymentPage() {
     const productName = products.find(p => p._id === deployment.productId)?.name || 'Unknown Product';
     const specName = specifications.find(s => s._id === deployment.specificationId)?.name || 'Unknown Spec';
     const hypervisorName = hypervisors.find(h => h._id === deployment.hypervisorId)?.name || 'Unknown Hypervisor';
-    const foundationComponentNames = deployment.foundationComponentIds.map(id => allComponents.find(c => c._id === id)?.name || id).join(', ');
+    const foundationComponentNames = deployment.foundationComponentIds?.map(id => allComponents.find(c => c._id === id)?.name || id).join(', ') || 'N/A';
 
     return (
         <DashboardLayout user={user}>
@@ -305,7 +304,7 @@ export default function ViewDeploymentPage() {
                                        <TableBody>
                                            {upgradeHistory.length > 0 ? upgradeHistory.map(h => (
                                                <TableRow key={h._id}>
-                                                   <TableCell>{format(new Date(h.initiatedAt), 'PPp')}</TableCell>
+                                                   <TableCell>{format(parseISO(h.initiatedAt), 'PPp')}</TableCell>
                                                    <TableCell>{products.find(p => p._id === h.productId)?.name || h.productId}</TableCell>
                                                    <TableCell>{specifications.find(s => s._id === h.targetSpecificationId)?.name || h.targetSpecificationId}</TableCell>
                                                    <TableCell>{h.status}</TableCell>
