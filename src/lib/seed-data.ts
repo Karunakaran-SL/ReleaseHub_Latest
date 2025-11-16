@@ -545,6 +545,43 @@ const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
   ],
 };
 
+const initialDefaultApprovalPhases: OnboardingPhase[] = [
+    { id: 'product-owner', name: 'Product Owner', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'product-manager', name: 'Product Manager', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'quality-assurance', name: 'Quality Assurance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'release-owner', name: 'Release Owner', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'export-control-board', name: 'Export Control Board', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'license-compliance-board', name: 'License Compliance Board', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'security-compliance', name: 'Security Compliance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'data-compliance', name: 'Data Compliance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'customer', name: 'Customer', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'field-engineer', name: 'Field Engineer', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+];
+
+const initialApprovalConfigs = [
+    { name: 'Product Onboarding Approval', key: 'product-onboarding' },
+    { name: 'Tenant Approval', key: 'tenant-approval' },
+    { name: 'Components Approval', key: 'components-approval' },
+    { name: 'Application Approval', key: 'application-approval' },
+    { name: 'Interface Approval', key: 'interface-approval' },
+    { name: 'Baseline approval', key: 'baseline-approval' },
+    { name: 'Deployment Approval', key: 'deployment-approval' },
+    { name: 'Upgrade Approval', key: 'upgrade-approval' },
+    { name: 'Migration Approval', key: 'migration-approval' },
+    { name: 'Decommission Approval', key: 'decommission-approval' },
+    { name: 'License Approval', key: 'license-approval' },
+    { name: 'Export Control Approval', key: 'export-control-approval' },
+    { name: 'Security Approval', key: 'security-approval' },
+].map(config => ({
+    name: config.name,
+    collectionName: `settings_approval_${config.key.replace(/-/g, '_')}`,
+    data: [{
+        name: config.name,
+        version: 1,
+        phases: initialDefaultApprovalPhases,
+    }]
+}));
+
 const initialSpecVendors = [{ name: 'Dell EMC' }, { name: 'HPE' }, { name: 'Cisco' }, { name: 'Lenovo' }, { name: 'CNCF' }, { name: 'OpenID' }, { name: 'Apache' }, { name: 'Facebook' }, { name: 'Google' }, { name: 'OASIS' }];
 const initialSpecHwTypes = [{ name: 'Rack' }, { name: 'Blade' }, { name: 'Virtual' }];
 const initialSpecHypervisors = [{ name: 'VMWare ESXi' }, { name: 'Microsoft Hyper-V' }, { name: 'KVM' }];
@@ -782,6 +819,7 @@ export async function seedDatabase() {
         { name: 'specification_hypervisors', data: initialSpecHypervisors },
         { name: 'specification_network_cards', data: initialSpecNetworkCards },
         { name: 'specification_plug_power_cords', data: initialSpecPlugPowerCords },
+        ...initialApprovalConfigs,
     ];
     
     let seededCount = 0;

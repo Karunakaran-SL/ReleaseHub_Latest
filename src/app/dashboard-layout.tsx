@@ -40,6 +40,7 @@ import {
   GitGraph,
   DatabaseZap,
   BookCopy,
+  CheckSquare,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -444,6 +445,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/onboarding" isActive={pathname.startsWith('/settings/onboarding')}>
                             Onboarding
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/settings/approval" isActive={pathname.startsWith('/settings/approval')}>
+                            <CheckSquare className="mr-2"/> Approval
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
