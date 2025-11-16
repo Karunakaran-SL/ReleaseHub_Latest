@@ -24,14 +24,11 @@ export function ApprovalForm({ initialData, onSave, isLoading, name }: ApprovalF
     const [config, setConfig] = useState<OnboardingConfiguration | null>(null);
 
     useEffect(() => {
-      // This condition ensures we only set the state from initialData when it exists,
-      // and we don't reset to a blank state on re-renders if config is already populated.
-      if (initialData && !config) {
-          setConfig(JSON.parse(JSON.stringify(initialData))); // Deep copy
-      } else if (!initialData && !config) {
-          // Only set to a new blank config if both initialData and current config are null.
-          setConfig({ _id: '', name, version: 1, phases: [] });
-      }
+        if (initialData) {
+            setConfig(JSON.parse(JSON.stringify(initialData)));
+        } else if (!config) { 
+            setConfig({ _id: '', name, version: 1, phases: [] });
+        }
     }, [initialData, name, config]);
     
     if (!config) return <Loader2 className="h-8 w-8 animate-spin" />;

@@ -108,11 +108,14 @@ export default function ApprovalSettingsPage() {
     fetchConfigs();
   }, [fetchConfigs]);
 
-  const getLatestConfig = (type: string) => {
+  const getLatestConfig = (type: string): OnboardingConfiguration | null => {
     const history = configs[type];
-    if (!history || history.length === 0) return null;
-    return history.reduce((latest, current) =>
-      current.version > latest.version ? current : latest
+    if (!history || history.length === 0) {
+        return null;
+    }
+    // Find the config with the highest version number
+    return history.reduce((latest, current) => 
+        (current.version > latest.version) ? current : latest
     );
   };
   
