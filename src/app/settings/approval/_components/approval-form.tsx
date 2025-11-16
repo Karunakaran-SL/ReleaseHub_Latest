@@ -21,15 +21,20 @@ interface ApprovalFormProps {
 const defaultStatuses = ['Not Started', 'In Progress', 'Approved', 'Rejected'];
 
 export function ApprovalForm({ initialData, onSave, isLoading, name }: ApprovalFormProps) {
-    const [config, setConfig] = useState<OnboardingConfiguration | null>(null);
+    const [config, setConfig] = useState<OnboardingConfiguration>(() => {
+        if (initialData) {
+            return JSON.parse(JSON.stringify(initialData));
+        }
+        return { _id: '', name, version: 1, phases: [] };
+    });
 
     useEffect(() => {
         if (initialData) {
             setConfig(JSON.parse(JSON.stringify(initialData)));
-        } else if (!config) { 
-            setConfig({ _id: '', name, version: 1, phases: [] });
+        } else {
+             setConfig({ _id: '', name, version: 1, phases: [] });
         }
-    }, [initialData, name, config]);
+    }, [initialData, name]);
     
     if (!config) return <Loader2 className="h-8 w-8 animate-spin" />;
 
