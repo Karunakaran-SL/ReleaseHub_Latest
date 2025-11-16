@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -213,21 +214,30 @@ export default function UpgradeWizardPage() {
                 throw new Error("Missing required information for scheduling.");
             }
 
-             const finalApprovalPhases = approvalConfig.phases.map(phaseConfig => {
+            const finalApprovalPhases = approvalConfig.phases.map(phaseConfig => {
                 const phaseState = phasesState[phaseConfig.id];
                 return {
+                    // From config
                     id: phaseConfig.id,
                     name: phaseConfig.name,
                     ownerName: phaseConfig.ownerName,
                     ownerEmail: phaseConfig.ownerEmail,
-                    sendEmailOnComplete: phaseConfig.sendEmailOnComplete,
+                    sendEmailOnComplete: !!phaseConfig.sendEmailOnComplete,
                     statusOptions: phaseConfig.statusOptions,
-                    status: phaseState.status || "Not Started",
-                    fields: phaseConfig.fields.map(fieldConfig => ({
-                        ...fieldConfig,
-                        value: phaseState[`${fieldConfig.name}_value`] || false,
-                        proof: { link: phaseState[`${fieldConfig.name}_proofLink`] || '' }
-                    }))
+                    // From user state
+                    status: phaseState?.status || "Not Started",
+                    fields: phaseConfig.fields.map(fieldConfig => {
+                        return {
+                            type: fieldConfig.type,
+                            name: fieldConfig.name,
+                            label: fieldConfig.label,
+                            options: fieldConfig.options,
+                            helpText: fieldConfig.helpText,
+                            proof: !!fieldConfig.proof,
+                            value: phaseState[`${fieldConfig.name}_value`] || '',
+                            proofLink: phaseState[`${fieldConfig.name}_proofLink`] || ''
+                        };
+                    })
                 };
             });
 
