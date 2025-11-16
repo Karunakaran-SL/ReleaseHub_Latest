@@ -1,4 +1,3 @@
-
 'use client';
 import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -80,10 +79,6 @@ function Header({ user }: { user: User | null }) {
               className="w-full rounded-full bg-muted pl-10"
             />
           </div>
-          <Button variant="ghost" size="icon">
-            <LayoutGrid />
-            <span className="ml-2 hidden md:inline">Mega Menu</span>
-          </Button>
           <Button variant="ghost" size="icon" asChild>
             <Link href="/settings">
               <Settings />
