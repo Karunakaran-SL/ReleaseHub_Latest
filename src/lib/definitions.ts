@@ -280,7 +280,7 @@ export type Deployment = {
     };
     createdBy: string;
     createdAt: string;
-    status: 'PROVISIONING' | 'ACTIVE' | 'UPGRADING' | 'FAILED' | 'DECOMMISSIONED';
+    status: 'PROVISIONING' | 'ACTIVE' | 'UPGRADING' | 'FAILED' | 'DECOMMISSIONED' | 'UPGRADE_APPROVAL';
     foundationSummary?: DeploymentSummary;
     approval_phases?: OnboardingPhase[];
 };

@@ -84,14 +84,11 @@ export async function POST(req: NextRequest) {
 
     await historyCollection.insertMany(newHistoryEntries as any[]);
 
-    // Only set to UPGRADING if the final status is SCHEDULED
     if (upgradeDetails.status === 'SCHEDULED') {
         await deploymentsCollection.updateMany(
             { _id: { $in: deploymentIds } },
             { $set: { status: 'UPGRADING' } }
         );
-        
-        // Fire off audit events for each deployment
         for (const deploymentId of deploymentIds) {
             await logAuditEvent({
                 action: 'UPDATE',
@@ -100,13 +97,17 @@ export async function POST(req: NextRequest) {
                 comment: `Upgrade to spec ${upgradeDetails.targetSpecificationId} scheduled. Status changed to UPGRADING.`,
             });
         }
-    } else {
+    } else if (upgradeDetails.status === 'APPROVAL_IN_PROGRESS') {
+         await deploymentsCollection.updateMany(
+            { _id: { $in: deploymentIds } },
+            { $set: { status: 'UPGRADE_APPROVAL' } }
+        );
          for (const deploymentId of deploymentIds) {
             await logAuditEvent({
                 action: 'UPDATE',
                 entity: 'deployment',
                 entityId: deploymentId,
-                comment: `Upgrade to spec ${upgradeDetails.targetSpecificationId} saved with status ${upgradeDetails.status}.`,
+                comment: `Upgrade to spec ${upgradeDetails.targetSpecificationId} is pending approval. Status changed to UPGRADE_APPROVAL.`,
             });
         }
     }

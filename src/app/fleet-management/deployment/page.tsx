@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ const statusColors: Record<string, string> = {
     ACTIVE: 'bg-green-200 text-green-800',
     FAILED: 'bg-red-200 text-red-800',
     UPGRADING: 'bg-blue-200 text-blue-800',
+    UPGRADE_APPROVAL: 'bg-orange-200 text-orange-800',
     DECOMMISSIONED: 'bg-gray-300 text-gray-900',
 };
 
@@ -136,7 +138,7 @@ export default function DeploymentDashboardPage() {
                                             <TableCell>{format(new Date(dep.createdAt), 'PPP')}</TableCell>
                                             <TableCell>
                                                 <Badge className={cn(statusColors[dep.status] || 'bg-gray-200')}>
-                                                    {dep.status}
+                                                    {dep.status.replace('_', ' ')}
                                                 </Badge>
                                             </TableCell>
                                         </TableRow>

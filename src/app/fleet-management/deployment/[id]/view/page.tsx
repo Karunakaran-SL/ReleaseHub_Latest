@@ -42,6 +42,7 @@ const statusColors: Record<string, string> = {
     ACTIVE: 'bg-green-200 text-green-800',
     FAILED: 'bg-red-200 text-red-800',
     UPGRADING: 'bg-blue-200 text-blue-800',
+    UPGRADE_APPROVAL: 'bg-orange-200 text-orange-800',
     DECOMMISSIONED: 'bg-gray-300 text-gray-900',
     SCHEDULED: 'bg-blue-200 text-blue-800',
     COMPLETED: 'bg-green-200 text-green-800',
@@ -209,7 +210,7 @@ export default function ViewDeploymentPage() {
                                 <CardDescription>For customer: {deployment.details.customer}</CardDescription>
                             </div>
                             <Badge className={cn("text-base", statusColors[deployment.status] || 'bg-gray-200')}>
-                                {deployment.status}
+                                {deployment.status.replace('_', ' ')}
                             </Badge>
                         </div>
                     </CardHeader>
