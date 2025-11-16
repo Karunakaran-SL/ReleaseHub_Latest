@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, Product, Specification, Deployment, Baseline } from '@/lib/definitions';
+import type { User, Product, Specification, Deployment, Baseline, OnboardingConfiguration, OnboardingPhase } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck, FileCode } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck, FileCode, ChevronRight } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter } from 'next/navigation';
@@ -19,6 +19,21 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
+import ApprovalPhaseComponent from './_components/approval-phase';
+
+
+const statusColors: Record<string, string> = {
+    'Not Started': 'bg-gray-200 text-gray-800',
+    'In Progress': 'bg-blue-200 text-blue-800',
+    'Passed': 'bg-green-200 text-green-800',
+    'Failed': 'bg-red-200 text-red-800',
+    'Pending': 'bg-yellow-200 text-yellow-800',
+    'Completed': 'bg-green-200 text-green-800',
+    'Approved': 'bg-green-200 text-green-800',
+    'Rejected': 'bg-red-200 text-red-800',
+    'Signed-off': 'bg-green-200 text-green-800',
+};
+
 
 export default function UpgradeWizardPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -35,6 +50,7 @@ export default function UpgradeWizardPage() {
     const [specifications, setSpecifications] = useState<Specification[]>([]);
     const [deployments, setDeployments] = useState<Deployment[]>([]);
     const [baselines, setBaselines] = useState<Baseline[]>([]);
+    const [approvalConfig, setApprovalConfig] = useState<OnboardingConfiguration | null>(null);
     
     // User selections
     const [selectedProductId, setSelectedProductId] = useState('');
@@ -48,18 +64,25 @@ export default function UpgradeWizardPage() {
     const [maintenanceStart, setMaintenanceStart] = useState<Date | undefined>();
     const [maintenanceEnd, setMaintenanceEnd] = useState<Date | undefined>();
     const [approvers, setApprovers] = useState(['Release Owner', 'Product Owner', 'Product Manager']);
+    
+    // State for approval phases
+    const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
+    const [phasesState, setPhasesState] = useState<Record<string, any>>({});
+    const [popupState, setPopupState] = useState<any | null>(null);
+
 
     useEffect(() => {
         getUser().then(setUser);
         async function fetchInitialData() {
             try {
-                const [productsRes, specsRes, deploymentsRes, baselinesRes] = await Promise.all([
+                const [productsRes, specsRes, deploymentsRes, baselinesRes, approvalConfigRes] = await Promise.all([
                     fetch('/api/products'),
                     fetch('/api/specifications'),
                     fetch('/api/deployments'),
                     fetch('/api/baselines'),
+                    fetch('/api/settings/approvals/upgrade-approval'),
                 ]);
-                if (!productsRes.ok || !specsRes.ok || !deploymentsRes.ok || !baselinesRes.ok) {
+                if (!productsRes.ok || !specsRes.ok || !deploymentsRes.ok || !baselinesRes.ok || !approvalConfigRes.ok) {
                     throw new Error('Failed to fetch initial data.');
                 }
                 const productsData = await productsRes.json();
@@ -69,6 +92,23 @@ export default function UpgradeWizardPage() {
                 setSpecifications(specsData);
                 setDeployments(await deploymentsRes.json());
                 setBaselines(await baselinesRes.json());
+                
+                const approvalConfigs = await approvalConfigRes.json();
+                if (approvalConfigs && approvalConfigs.length > 0) {
+                    const latestConfig = approvalConfigs.reduce((latest: any, current: any) => current.version > latest.version ? current : latest);
+                    setApprovalConfig(latestConfig);
+                    // Initialize approval phases state
+                    const initialPhaseState: Record<string, any> = {};
+                    latestConfig.phases.forEach((phase: OnboardingPhase) => {
+                        initialPhaseState[phase.id] = { status: 'Not Started' };
+                        phase.fields.forEach(field => {
+                            initialPhaseState[phase.id][`${field.name}_value`] = '';
+                            initialPhaseState[phase.id][`${field.name}_proofLink`] = '';
+                        });
+                    });
+                    setPhasesState(initialPhaseState);
+                }
+
 
                 if (productsData.length > 0) {
                     setSelectedProductId(productsData[0]._id);
@@ -134,7 +174,7 @@ export default function UpgradeWizardPage() {
             case 8: return false; // Field Operations (Optional)
             case 9: return false; // Custom Workflows (Optional)
             case 10: return !maintenanceStart || !maintenanceEnd;
-            case 11: return approvers.length === 0;
+            case 11: return false; // Approval Step
             default: return false;
         }
     };
@@ -162,9 +202,22 @@ export default function UpgradeWizardPage() {
     const handleFinish = async () => {
         setIsSubmitting(true);
         try {
-            if (!maintenanceStart || !maintenanceEnd || !upgradeScope) {
+            if (!maintenanceStart || !maintenanceEnd || !upgradeScope || !approvalConfig) {
                 throw new Error("Missing required information for scheduling.");
             }
+
+             const finalApprovalPhases = approvalConfig.phases.map(phaseConfig => {
+                const phaseState = phasesState[phaseConfig.id];
+                return {
+                    ...phaseConfig,
+                    status: phaseState.status,
+                    fields: phaseConfig.fields.map(fieldConfig => ({
+                        ...fieldConfig,
+                        value: phaseState[`${fieldConfig.name}_value`] || '',
+                        proof: { link: phaseState[`${fieldConfig.name}_proofLink`] || '' }
+                    }))
+                };
+            });
 
             const payload = {
                 deploymentIds: Array.from(selectedDeploymentIds),
@@ -179,6 +232,7 @@ export default function UpgradeWizardPage() {
                     end: maintenanceEnd.toISOString(),
                 },
                 approvers: approvers,
+                approval_phases: finalApprovalPhases,
             };
 
             const response = await fetch('/api/upgrade-history', {
@@ -201,6 +255,29 @@ export default function UpgradeWizardPage() {
             setIsSubmitting(false);
         }
     };
+
+    // Handlers for approval phase interactions
+    const handleExpandPhase = (phaseId: string) => {
+        setExpandedPhase(phaseId);
+        setPopupState({ ...(phasesState[phaseId] || {}) });
+    };
+    const handleCancelPopup = () => {
+        setExpandedPhase(null);
+        setPopupState(null);
+    };
+     const handleSavePopup = () => {
+        if (!expandedPhase || !popupState) return;
+        setPhasesState(prev => ({ ...prev, [expandedPhase]: popupState }));
+        handleCancelPopup();
+        toast({ title: "Saved", description: "Approval state updated locally. It will be finalized when the wizard is completed." });
+    };
+     const handlePopupStateChange = (fieldName: string, value: any) => {
+        setPopupState((prev: any) => ({ ...prev, [fieldName]: value }));
+    };
+    const handlePopupStatusChange = (status: string) => {
+        setPopupState((prev: any) => ({ ...prev, status }));
+    };
+    
     
     const renderStepContent = () => {
         if (loading) return <div className="flex justify-center items-center h-48"><Loader2 className="h-8 w-8 animate-spin" /></div>;
@@ -424,16 +501,40 @@ export default function UpgradeWizardPage() {
             case 11:
                 return (
                      <div className="space-y-4">
-                        <Label className="text-lg font-semibold">Approval Process Setup</Label>
-                        <p className="text-sm text-muted-foreground">Configure the multi-level approval sequence. This is a placeholder.</p>
-                        {approvers.map((approver, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                                <Users className="h-5 w-5 text-muted-foreground" />
-                                <Input value={approver} readOnly />
+                         <div className="flex justify-between items-center">
+                            <h3 className="text-lg font-semibold">Approval Process Setup</h3>
+                            <p className="text-sm text-muted-foreground">Complete each approval phase for this upgrade.</p>
+                         </div>
+                        {approvalConfig ? (
+                             <div className={cn("relative flex flex-wrap items-center justify-center p-8 gap-y-8 gap-x-4", expandedPhase && 'z-30')}>
+                                {approvalConfig.phases.map((phase, index) => (
+                                    <div key={phase.id} className="flex items-center">
+                                        <ApprovalPhaseComponent
+                                            phase={phase}
+                                            phaseState={expandedPhase === phase.id ? popupState : phasesState[phase.id]}
+                                            onStateChange={handlePopupStateChange}
+                                            onStatusChange={handlePopupStatusChange}
+                                            isExpanded={expandedPhase === phase.id}
+                                            onExpand={() => handleExpandPhase(phase.id)}
+                                            statusColor={statusColors[phasesState[phase.id]?.status] || 'bg-gray-200 text-gray-800'}
+                                            onSave={handleSavePopup}
+                                            onCancel={handleCancelPopup}
+                                        />
+                                        {index < approvalConfig.phases.length - 1 && (
+                                            <ChevronRight className="h-8 w-8 text-muted-foreground mx-4" />
+                                        )}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        ) : (
+                            <p className="text-center text-muted-foreground">No approval configuration found for upgrades.</p>
+                        )}
+
+                        {expandedPhase && (
+                            <div className="fixed inset-0 bg-black/30 z-10" onClick={handleCancelPopup} />
+                        )}
                     </div>
-                )
+                );
              case 12:
                 return (
                     <div className="text-center p-8 space-y-4">

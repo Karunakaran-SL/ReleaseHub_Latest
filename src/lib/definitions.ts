@@ -1,4 +1,5 @@
 
+
 export type User = {
   _id: string;
   username: string;
@@ -281,6 +282,7 @@ export type Deployment = {
     createdAt: string;
     status: 'PROVISIONING' | 'ACTIVE' | 'UPGRADING' | 'FAILED' | 'DECOMMISSIONED';
     foundationSummary?: DeploymentSummary;
+    approval_phases?: OnboardingPhase[];
 };
 
 export type UpgradeSummary = {
@@ -309,4 +311,5 @@ export type UpgradeHistory = {
   initiatedAt: string;
   reportUploadUrl?: string; // Location for status uploads
   summary?: UpgradeSummary;
+  approval_phases?: OnboardingPhase[];
 };

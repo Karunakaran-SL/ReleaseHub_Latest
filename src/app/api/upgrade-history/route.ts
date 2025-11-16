@@ -4,6 +4,28 @@ import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
+import type { OnboardingPhase } from '@/lib/definitions';
+
+const OnboardingFieldSchema = z.object({
+  type: z.enum(['Checkbox', 'RadioBox', 'TextField', 'DropDown', 'Link']),
+  name: z.string(),
+  label: z.string(),
+  options: z.array(z.string()).optional(),
+  helpText: z.string().optional(),
+  proof: z.boolean().optional(),
+  proofLink: z.string().optional(),
+});
+
+const OnboardingPhaseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  ownerName: z.string(),
+  ownerEmail: z.string().email(),
+  sendEmailOnComplete: z.boolean(),
+  statusOptions: z.array(z.string()),
+  fields: z.array(OnboardingFieldSchema),
+});
+
 
 const UpgradeHistorySchema = z.object({
   deploymentIds: z.array(z.string()).min(1),
@@ -18,6 +40,7 @@ const UpgradeHistorySchema = z.object({
     end: z.string().datetime(),
   }),
   approvers: z.array(z.string()),
+  approval_phases: z.array(OnboardingPhaseSchema).optional(),
 });
 
 export async function POST(req: NextRequest) {
