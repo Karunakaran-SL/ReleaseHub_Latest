@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck, FileCode, ChevronRight } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck, FileCode, ChevronRight, Save } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter } from 'next/navigation';
@@ -159,6 +160,14 @@ export default function UpgradeWizardPage() {
         }
     };
     
+    const areAllApprovalsComplete = () => {
+        if (!approvalConfig) return false;
+        return approvalConfig.phases.every(phase => {
+            const phaseStatus = phasesState[phase.id]?.status;
+            return phaseStatus === 'Approved' || phaseStatus === 'Signed-off';
+        });
+    };
+
     const isNextDisabled = () => {
         switch (step) {
             case 1: return !selectedProductId || !selectedSpecId;
@@ -166,15 +175,14 @@ export default function UpgradeWizardPage() {
             case 3: return !upgradeScope;
             case 4:
                 if (upgradeScope === 'baseline') return !selectedBaselineId;
-                if (upgradeScope === 'individual') return false; 
-                return true;
+                return false;
             case 5: return false; // Dependency Analysis (Placeholder)
             case 6: return false; // Compatibility Summary (Placeholder)
             case 7: return releaseNotes.trim() === '';
             case 8: return false; // Field Operations (Optional)
             case 9: return false; // Custom Workflows (Optional)
             case 10: return !maintenanceStart || !maintenanceEnd;
-            case 11: return false; // Approval Step
+            case 11: return !areAllApprovalsComplete();
             default: return false;
         }
     };
@@ -199,7 +207,7 @@ export default function UpgradeWizardPage() {
         return descriptions[currentStep - 1] || "Upgrade Wizard";
     };
 
-    const handleFinish = async () => {
+    const submitUpgrade = async (status: 'SCHEDULED' | 'APPROVAL_IN_PROGRESS') => {
         setIsSubmitting(true);
         try {
             if (!maintenanceStart || !maintenanceEnd || !upgradeScope || !approvalConfig) {
@@ -233,6 +241,7 @@ export default function UpgradeWizardPage() {
                 },
                 approvers: approvers,
                 approval_phases: finalApprovalPhases,
+                status,
             };
 
             const response = await fetch('/api/upgrade-history', {
@@ -246,13 +255,28 @@ export default function UpgradeWizardPage() {
                 throw new Error(errorData.message || 'Failed to schedule upgrade.');
             }
             
-            const result = await response.json();
-            toast({ title: "Upgrade Scheduled", description: result.message });
-            setStep(14); // Move to final summary step
+            return await response.json();
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error', description: error.message });
+            return null;
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleFinish = async () => {
+        const result = await submitUpgrade('SCHEDULED');
+        if (result) {
+            toast({ title: "Upgrade Scheduled", description: result.message });
+            setStep(14);
+        }
+    };
+
+    const handleSaveProgress = async () => {
+        const result = await submitUpgrade('APPROVAL_IN_PROGRESS');
+        if (result) {
+            toast({ title: "Progress Saved", description: "Approval progress has been saved." });
+            router.push('/fleet-management/deployment');
         }
     };
 
@@ -582,16 +606,23 @@ export default function UpgradeWizardPage() {
                     <CardFooter className="flex justify-between">
                          <div>
                             {step > 1 && step <= 13 && (
-                                <Button variant="outline" onClick={handleBack} disabled={loading}>
+                                <Button variant="outline" onClick={handleBack} disabled={isSubmitting}>
                                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                 </Button>
                             )}
                          </div>
                          <div className="flex gap-2">
-                            {step < 14 && <Button variant="outline" onClick={() => router.push('/fleet-management/deployment')} disabled={loading}>Cancel</Button>}
+                            {step < 14 && <Button variant="outline" onClick={() => router.push('/fleet-management/deployment')} disabled={isSubmitting}>Cancel</Button>}
                             
+                            {step === 11 && (
+                                <Button variant="secondary" onClick={handleSaveProgress} disabled={isSubmitting}>
+                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                    Save Progress & Exit
+                                </Button>
+                            )}
+
                             {step < 13 ? (
-                                <Button onClick={handleNext} disabled={isNextDisabled()}>
+                                <Button onClick={handleNext} disabled={isNextDisabled() || isSubmitting}>
                                     Next <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
                             ) : step === 13 ? (

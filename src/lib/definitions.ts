@@ -306,7 +306,7 @@ export type UpgradeHistory = {
     end: string;
   };
   approvers: string[];
-  status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'APPROVAL_IN_PROGRESS';
   initiatedBy: string;
   initiatedAt: string;
   reportUploadUrl?: string; // Location for status uploads

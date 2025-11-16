@@ -41,6 +41,7 @@ const UpgradeHistorySchema = z.object({
   }),
   approvers: z.array(z.string()),
   approval_phases: z.array(OnboardingPhaseSchema).optional(),
+  status: z.enum(['SCHEDULED', 'APPROVAL_IN_PROGRESS']).optional().default('SCHEDULED'),
 });
 
 export async function POST(req: NextRequest) {
@@ -68,13 +69,12 @@ export async function POST(req: NextRequest) {
     const newHistoryEntries = deploymentIds.map(deploymentId => ({
       ...upgradeDetails,
       deploymentId,
-      status: 'SCHEDULED',
       initiatedBy: user.username,
       initiatedAt: new Date().toISOString(),
       reportUploadUrl: `/var/deploy/reports/upgrades/${deploymentId}-${upgradeDetails.targetSpecificationId}.json`,
       summary: {
           deploymentId: deploymentId,
-          status: 'SCHEDULED',
+          status: upgradeDetails.status,
           packageLocation: `/var/deploy/upgrades/${deploymentId}-${upgradeDetails.targetSpecificationId}.tar.gz`,
           targetSpecificationId: upgradeDetails.targetSpecificationId
       }
@@ -82,24 +82,36 @@ export async function POST(req: NextRequest) {
 
     await historyCollection.insertMany(newHistoryEntries as any[]);
 
-    const updateResult = await deploymentsCollection.updateMany(
-      { _id: { $in: deploymentIds } },
-      { $set: { status: 'UPGRADING' } }
-    );
-    
-    // Fire off audit events for each deployment
-    for (const deploymentId of deploymentIds) {
-        await logAuditEvent({
-            action: 'UPDATE',
-            entity: 'deployment',
-            entityId: deploymentId,
-            comment: `Upgrade to spec ${upgradeDetails.targetSpecificationId} scheduled. Status changed to UPGRADING.`,
-        });
+    // Only set to UPGRADING if the final status is SCHEDULED
+    if (upgradeDetails.status === 'SCHEDULED') {
+        await deploymentsCollection.updateMany(
+            { _id: { $in: deploymentIds } },
+            { $set: { status: 'UPGRADING' } }
+        );
+        
+        // Fire off audit events for each deployment
+        for (const deploymentId of deploymentIds) {
+            await logAuditEvent({
+                action: 'UPDATE',
+                entity: 'deployment',
+                entityId: deploymentId,
+                comment: `Upgrade to spec ${upgradeDetails.targetSpecificationId} scheduled. Status changed to UPGRADING.`,
+            });
+        }
+    } else {
+         for (const deploymentId of deploymentIds) {
+            await logAuditEvent({
+                action: 'UPDATE',
+                entity: 'deployment',
+                entityId: deploymentId,
+                comment: `Upgrade to spec ${upgradeDetails.targetSpecificationId} saved with status ${upgradeDetails.status}.`,
+            });
+        }
     }
 
+
     return NextResponse.json({ 
-        message: `Successfully scheduled upgrade for ${deploymentIds.length} deployments.`,
-        updatedCount: updateResult.modifiedCount,
+        message: `Successfully processed upgrade for ${deploymentIds.length} deployments.`,
     }, { status: 201 });
 
   } catch (error) {
