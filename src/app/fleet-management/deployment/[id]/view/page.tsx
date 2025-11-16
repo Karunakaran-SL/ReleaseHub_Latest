@@ -23,7 +23,14 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { format, parseISO } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -37,6 +44,7 @@ const statusColors: Record<string, string> = {
     UPGRADING: 'bg-blue-200 text-blue-800',
     DECOMMISSIONED: 'bg-gray-300 text-gray-900',
     SCHEDULED: 'bg-blue-200 text-blue-800',
+    COMPLETED: 'bg-green-200 text-green-800',
 };
 
 interface Hypervisor {
@@ -85,6 +93,8 @@ export default function ViewDeploymentPage() {
     const [deleteComment, setDeleteComment] = useState('');
     const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
+    
+    const [selectedHistory, setSelectedHistory] = useState<UpgradeHistory | null>(null);
 
     useEffect(() => {
         getUser().then(setUser);
@@ -268,54 +278,91 @@ export default function ViewDeploymentPage() {
                     </CardFooter>
                 </Card>
                 
-                <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1">
-                        <AccordionTrigger>
-                             <div className="flex items-center gap-2 text-lg font-semibold">
-                                <History className="h-5 w-5" />
-                                Upgrade History ({upgradeHistory.length})
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                           <Card className="mt-4">
-                               <CardContent className="p-0">
-                                   <Table>
-                                       <TableHeader>
-                                           <TableRow>
-                                               <TableHead>Date</TableHead>
-                                               <TableHead>Target Spec</TableHead>
-                                               <TableHead>Scope</TableHead>
-                                               <TableHead>Status</TableHead>
-                                               <TableHead>Initiated By</TableHead>
-                                           </TableRow>
-                                       </TableHeader>
-                                       <TableBody>
-                                           {upgradeHistory.length > 0 ? upgradeHistory.map(h => (
-                                               <TableRow key={h._id}>
-                                                   <TableCell>{format(parseISO(h.initiatedAt), 'PPp')}</TableCell>
-                                                   <TableCell>{specifications.find(s => s._id === h.targetSpecificationId)?.name || h.targetSpecificationId}</TableCell>
-                                                   <TableCell>
-                                                        <Badge variant="outline" className="capitalize">
-                                                            {h.upgradeScope}
-                                                            {h.upgradeScope === 'baseline' && h.baselineId && ` (${baselines.find(b => b._id === h.baselineId)?.product.version || 'unknown'})`}
-                                                        </Badge>
-                                                   </TableCell>
-                                                   <TableCell>{h.status}</TableCell>
-                                                   <TableCell>{h.initiatedBy}</TableCell>
-                                               </TableRow>
-                                           )) : (
-                                               <TableRow>
-                                                   <TableCell colSpan={5} className="text-center h-24">No upgrade history found for this deployment.</TableCell>
-                                               </TableRow>
-                                           )}
-                                       </TableBody>
-                                   </Table>
-                               </CardContent>
-                           </Card>
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
+                <Dialog>
+                    <Accordion type="single" collapsible className="w-full" defaultValue="item-1">
+                        <AccordionItem value="item-1">
+                            <AccordionTrigger>
+                                <div className="flex items-center gap-2 text-lg font-semibold">
+                                    <History className="h-5 w-5" />
+                                    Upgrade History ({upgradeHistory.length})
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                            <Card className="mt-4">
+                                <CardContent className="p-0">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Date</TableHead>
+                                                <TableHead>Target Spec</TableHead>
+                                                <TableHead>Scope</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Initiated By</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {upgradeHistory.length > 0 ? upgradeHistory.map(h => (
+                                                <DialogTrigger asChild key={h._id}>
+                                                    <TableRow onClick={() => setSelectedHistory(h)} className="cursor-pointer">
+                                                        <TableCell>{format(parseISO(h.initiatedAt), 'PPp')}</TableCell>
+                                                        <TableCell>{specifications.find(s => s._id === h.targetSpecificationId)?.name || h.targetSpecificationId}</TableCell>
+                                                        <TableCell>
+                                                            <Badge variant="outline" className="capitalize">
+                                                                {h.upgradeScope}
+                                                                {h.upgradeScope === 'baseline' && h.baselineId && ` (${baselines.find(b => b._id === h.baselineId)?.product.version || 'unknown'})`}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>{h.status}</TableCell>
+                                                        <TableCell>{h.initiatedBy}</TableCell>
+                                                    </TableRow>
+                                                </DialogTrigger>
+                                            )) : (
+                                                <TableRow>
+                                                    <TableCell colSpan={5} className="text-center h-24">No upgrade history found for this deployment.</TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                     <DialogContent className="max-w-3xl">
+                        {selectedHistory && (
+                            <>
+                                <DialogHeader>
+                                <DialogTitle>Upgrade Details</DialogTitle>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div><Label>Initiated At</Label><Input value={format(parseISO(selectedHistory.initiatedAt), 'PPpp')} disabled /></div>
+                                        <div><Label>Initiated By</Label><Input value={selectedHistory.initiatedBy} disabled /></div>
+                                        <div><Label>Status</Label><Input value={selectedHistory.status} disabled /></div>
+                                        <div><Label>Product</Label><Input value={products.find(p => p._id === selectedHistory.productId)?.name || 'N/A'} disabled /></div>
+                                        <div><Label>Target Specification</Label><Input value={specifications.find(s => s._id === selectedHistory.targetSpecificationId)?.name || 'N/A'} disabled /></div>
+                                        <div><Label>Scope</Label><Input value={selectedHistory.upgradeScope} disabled /></div>
+                                    </div>
+                                    {selectedHistory.upgradeScope === 'baseline' && (
+                                        <div><Label>Baseline</Label><Input value={baselines.find(b => b._id === selectedHistory.baselineId)?.product.version || 'N/A'} disabled /></div>
+                                    )}
+                                    <div>
+                                        <Label>Maintenance Window</Label>
+                                        <div className="grid grid-cols-2 gap-4">
+                                             <Input value={`Start: ${format(parseISO(selectedHistory.maintenanceWindow.start), 'PPp')}`} disabled />
+                                             <Input value={`End: ${format(parseISO(selectedHistory.maintenanceWindow.end), 'PPp')}`} disabled />
+                                        </div>
+                                    </div>
+                                    <div><Label>Approvers</Label><Input value={selectedHistory.approvers.join(', ')} disabled /></div>
+                                    <div><Label>Release Notes</Label><Textarea value={selectedHistory.releaseNotes} readOnly rows={5} /></div>
+                                    <div><Label>Field Operations</Label><Textarea value={selectedHistory.fieldOperations || 'N/A'} readOnly rows={3} /></div>
+                                </div>
+                            </>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </main>
         </DashboardLayout>
     );
 }
+
