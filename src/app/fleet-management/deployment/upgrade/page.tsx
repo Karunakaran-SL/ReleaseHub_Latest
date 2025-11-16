@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, Product, Specification, Deployment } from '@/lib/definitions';
+import type { User, Product, Specification, Deployment, Baseline } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck, FileCode } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter } from 'next/navigation';
@@ -34,6 +34,7 @@ export default function UpgradeWizardPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [specifications, setSpecifications] = useState<Specification[]>([]);
     const [deployments, setDeployments] = useState<Deployment[]>([]);
+    const [baselines, setBaselines] = useState<Baseline[]>([]);
     
     // User selections
     const [selectedProductId, setSelectedProductId] = useState('');
@@ -41,6 +42,7 @@ export default function UpgradeWizardPage() {
     const [productDeployments, setProductDeployments] = useState<Deployment[]>([]);
     const [selectedDeploymentIds, setSelectedDeploymentIds] = useState<Set<string>>(new Set());
     const [upgradeScope, setUpgradeScope] = useState<'baseline' | 'individual' | null>(null);
+    const [selectedBaselineId, setSelectedBaselineId] = useState<string>('');
     const [releaseNotes, setReleaseNotes] = useState('Default release notes based on version changes.');
     const [fieldOperations, setFieldOperations] = useState('');
     const [maintenanceStart, setMaintenanceStart] = useState<Date | undefined>();
@@ -51,12 +53,13 @@ export default function UpgradeWizardPage() {
         getUser().then(setUser);
         async function fetchInitialData() {
             try {
-                const [productsRes, specsRes, deploymentsRes] = await Promise.all([
+                const [productsRes, specsRes, deploymentsRes, baselinesRes] = await Promise.all([
                     fetch('/api/products'),
                     fetch('/api/specifications'),
                     fetch('/api/deployments'),
+                    fetch('/api/baselines'),
                 ]);
-                if (!productsRes.ok || !specsRes.ok || !deploymentsRes.ok) {
+                if (!productsRes.ok || !specsRes.ok || !deploymentsRes.ok || !baselinesRes.ok) {
                     throw new Error('Failed to fetch initial data.');
                 }
                 const productsData = await productsRes.json();
@@ -65,6 +68,7 @@ export default function UpgradeWizardPage() {
                 setProducts(productsData);
                 setSpecifications(specsData);
                 setDeployments(await deploymentsRes.json());
+                setBaselines(await baselinesRes.json());
 
                 if (productsData.length > 0) {
                     setSelectedProductId(productsData[0]._id);
@@ -120,7 +124,10 @@ export default function UpgradeWizardPage() {
             case 1: return !selectedProductId || !selectedSpecId;
             case 2: return selectedDeploymentIds.size === 0;
             case 3: return !upgradeScope;
-            case 4: return false; // Placeholder
+            case 4:
+                if (upgradeScope === 'baseline') return !selectedBaselineId;
+                if (upgradeScope === 'individual') return false; // No selection needed for individual yet
+                return true;
             case 5: return false; // Placeholder
             case 6: return releaseNotes.trim() === '';
             case 7: return false; // Optional
@@ -136,16 +143,17 @@ export default function UpgradeWizardPage() {
             "Step 1: Select Product and Target Specification",
             "Step 2: List All Deployments",
             "Step 3: Choose Upgrade Scope",
-            "Step 4: Dependency and Compliance Analysis",
-            "Step 5: Baseline Compatibility Summary",
-            "Step 6: Upgrade Summary and Release Notes",
-            "Step 7: Field Operations and Additional Procedures",
-            "Step 8: Custom Workflows",
-            "Step 9: Maintenance Window Planning",
-            "Step 10: Approval Process Setup",
-            "Step 11: Package Creation for Deployment",
-            "Step 12: Air-Gapped Environment Report Upload",
-            "Step 13: Completion Summary",
+            "Step 4: Configure Upgrade Scope",
+            "Step 5: Dependency and Compliance Analysis",
+            "Step 6: Baseline Compatibility Summary",
+            "Step 7: Upgrade Summary and Release Notes",
+            "Step 8: Field Operations and Additional Procedures",
+            "Step 9: Custom Workflows",
+            "Step 10: Maintenance Window Planning",
+            "Step 11: Approval Process Setup",
+            "Step 12: Package Creation for Deployment",
+            "Step 13: Air-Gapped Environment Report Upload",
+            "Step 14: Completion Summary",
         ];
         return descriptions[currentStep - 1] || "Upgrade Wizard";
     };
@@ -184,7 +192,7 @@ export default function UpgradeWizardPage() {
             
             const result = await response.json();
             toast({ title: "Upgrade Scheduled", description: result.message });
-            setStep(13); // Move to final summary step
+            setStep(14); // Move to final summary step
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error', description: error.message });
         } finally {
@@ -272,7 +280,7 @@ export default function UpgradeWizardPage() {
                                 onClick={() => setUpgradeScope('baseline')}
                             >
                                 <CardHeader>
-                                    <CardTitle className="flex items-center gap-2"><CheckCircle2/> Baseline Upgrade</CardTitle>
+                                    <CardTitle className="flex items-center gap-2"><FileCode/> Baseline Upgrade</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-sm text-muted-foreground">Apply a global, consistent upgrade using a pre-defined baseline. This is the recommended path for most upgrades.</p>
@@ -293,6 +301,48 @@ export default function UpgradeWizardPage() {
                     </div>
                 );
             case 4:
+                if (upgradeScope === 'baseline') {
+                    const productBaselines = baselines.filter(b => b.product.id === selectedProductId && b.status === 'RELEASED');
+                    return (
+                        <div className="space-y-4">
+                            <Label htmlFor="baseline-select" className="text-lg font-semibold">Choose Baseline</Label>
+                            <Select value={selectedBaselineId} onValueChange={setSelectedBaselineId}>
+                                <SelectTrigger id="baseline-select">
+                                    <SelectValue placeholder="Select a baseline..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {productBaselines.length > 0 ? (
+                                        productBaselines.map(b => <SelectItem key={b._id} value={b._id}>{b.product.name} - v{b.product.version}</SelectItem>)
+                                    ) : (
+                                        <div className="p-4 text-center text-sm text-muted-foreground">No released baselines for this product.</div>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-sm text-muted-foreground">Select a released baseline to apply to the selected deployments.</p>
+                        </div>
+                    );
+                }
+                if (upgradeScope === 'individual') {
+                    const selectedDeployments = deployments.filter(d => selectedDeploymentIds.has(d._id));
+                    return (
+                        <div className="space-y-4">
+                             <h3 className="text-lg font-semibold">Individual Package Upgrade</h3>
+                             <p className="text-sm text-muted-foreground">The following deployments will be targeted for an individual upgrade. You can further customize components in subsequent steps (placeholder).</p>
+                             <Card>
+                                 <Table>
+                                     <TableHeader><TableRow><TableHead>Deployment ID</TableHead><TableHead>Customer</TableHead></TableRow></TableHeader>
+                                     <TableBody>
+                                         {selectedDeployments.map(d => (
+                                             <TableRow key={d._id}><TableCell>{d.details.deploymentId}</TableCell><TableCell>{d.details.customer}</TableCell></TableRow>
+                                         ))}
+                                     </TableBody>
+                                 </Table>
+                             </Card>
+                        </div>
+                    )
+                }
+                return null;
+            case 5:
                 return (
                     <div className="text-center p-8 space-y-4">
                         <h3 className="font-semibold text-lg">Analyzing Dependencies & Compliance...</h3>
@@ -300,7 +350,7 @@ export default function UpgradeWizardPage() {
                         <p className="text-muted-foreground">Comparing current versions with target versions and identifying dependencies. This is a placeholder for the backend analysis.</p>
                     </div>
                 );
-            case 5:
+            case 6:
                 return (
                     <div className="space-y-4">
                          <h3 className="font-semibold text-lg">Baseline Compatibility Summary</h3>
@@ -315,14 +365,14 @@ export default function UpgradeWizardPage() {
                          </Table>
                     </div>
                 )
-            case 6:
+            case 7:
                 return (
                     <div className="space-y-4">
                         <Label htmlFor="release-notes" className="text-lg font-semibold">Upgrade Summary and Release Notes</Label>
                         <Textarea id="release-notes" value={releaseNotes} onChange={(e) => setReleaseNotes(e.target.value)} rows={15} />
                     </div>
                 )
-            case 7:
+            case 8:
                  return (
                     <div className="space-y-4">
                         <Label htmlFor="field-ops" className="text-lg font-semibold">Field Operations and Additional Procedures</Label>
@@ -330,7 +380,7 @@ export default function UpgradeWizardPage() {
                         <Textarea id="field-ops" value={fieldOperations} onChange={(e) => setFieldOperations(e.target.value)} rows={8} />
                     </div>
                 )
-            case 8:
+            case 9:
                  return (
                     <div className="text-center p-8 space-y-4">
                         <h3 className="font-semibold text-lg">Custom Workflows (Optional)</h3>
@@ -338,7 +388,7 @@ export default function UpgradeWizardPage() {
                         <Button>Link Default Workflow</Button>
                     </div>
                 )
-            case 9:
+            case 10:
                  return (
                      <div className="space-y-4 flex flex-col items-center">
                         <Label className="text-lg font-semibold">Maintenance Window Planning</Label>
@@ -369,7 +419,7 @@ export default function UpgradeWizardPage() {
                         </div>
                      </div>
                  )
-            case 10:
+            case 11:
                 return (
                      <div className="space-y-4">
                         <Label className="text-lg font-semibold">Approval Process Setup</Label>
@@ -382,7 +432,7 @@ export default function UpgradeWizardPage() {
                         ))}
                     </div>
                 )
-             case 11:
+             case 12:
                 return (
                     <div className="text-center p-8 space-y-4">
                         <h3 className="font-semibold text-lg">Package Creation for Deployment</h3>
@@ -390,7 +440,7 @@ export default function UpgradeWizardPage() {
                         <Package className="h-16 w-16 text-primary mx-auto" />
                     </div>
                 );
-            case 12:
+            case 13:
                  return (
                     <div className="text-center p-8 space-y-4">
                         <h3 className="font-semibold text-lg">Air-Gapped Environment Report Upload</h3>
@@ -402,7 +452,7 @@ export default function UpgradeWizardPage() {
                          </div>
                     </div>
                  );
-             case 13:
+             case 14:
                  return (
                      <div className="text-center p-8 space-y-4">
                         <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto"/>
@@ -428,20 +478,20 @@ export default function UpgradeWizardPage() {
 
                     <CardFooter className="flex justify-between">
                          <div>
-                            {step > 1 && step <= 12 && (
+                            {step > 1 && step <= 13 && (
                                 <Button variant="outline" onClick={handleBack} disabled={loading}>
                                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                 </Button>
                             )}
                          </div>
                          <div className="flex gap-2">
-                            {step < 13 && <Button variant="outline" onClick={() => router.push('/fleet-management/deployment')} disabled={loading}>Cancel</Button>}
+                            {step < 14 && <Button variant="outline" onClick={() => router.push('/fleet-management/deployment')} disabled={loading}>Cancel</Button>}
                             
-                            {step < 12 ? (
+                            {step < 13 ? (
                                 <Button onClick={handleNext} disabled={isNextDisabled()}>
                                     Next <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
-                            ) : step === 12 ? (
+                            ) : step === 13 ? (
                                 <Button onClick={handleFinish} disabled={isSubmitting}>
                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
                                    Finish & Schedule Upgrade
