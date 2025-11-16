@@ -41,6 +41,8 @@ import {
   DatabaseZap,
   BookCopy,
   CheckSquare,
+  SlidersHorizontal,
+  Database,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -444,7 +446,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/onboarding" isActive={pathname.startsWith('/settings/onboarding')}>
-                            Onboarding
+                            <SlidersHorizontal className="mr-2"/> Onboarding
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
@@ -454,17 +456,17 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/specifications" isActive={pathname.startsWith('/settings/specifications')}>
-                            Specifications
+                            <HardDrive className="mr-2"/> Specifications
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/cmdb" isActive={pathname.startsWith('/settings/cmdb')}>
-                            CMDB
+                            <Database className="mr-2"/> CMDB
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/baseline" isActive={pathname.startsWith('/settings/baseline')}>
-                            Baseline
+                            <GanttChartSquare className="mr-2"/> Baseline
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
