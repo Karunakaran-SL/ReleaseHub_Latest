@@ -143,7 +143,7 @@ export function ApprovalForm({ initialData, onSave, isLoading, name }: ApprovalF
                 <h3 className="text-xl font-bold">Current Configuration - v{config.version}</h3>
             </div>
             
-            <Accordion type="multiple" className="space-y-4">
+            <Accordion type="multiple" className="space-y-4" defaultValue={config.phases.map(p => p.id)}>
                 {config.phases.map((phase, phaseIndex) => (
                     <AccordionItem value={phase.id} key={phase.id} className="border rounded-md">
                         <AccordionTrigger className="p-4 hover:no-underline">
