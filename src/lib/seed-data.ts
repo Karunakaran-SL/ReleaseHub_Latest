@@ -798,7 +798,7 @@ export async function seedDatabase() {
     const client = await clientPromise;
     const db = client.db();
 
-    const collectionsToSeed = [
+    const collectionsToSeed: ({ name: string; data: any[] } | { collectionName: string; data: any[] })[] = [
         { name: 'products', data: initialProducts.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString()})) },
         { name: 'specifications', data: fullSpecifications },
         { name: 'deployment_types', data: initialDeploymentTypes },
@@ -826,9 +826,10 @@ export async function seedDatabase() {
     let skippedCount = 0;
 
     for (const collection of collectionsToSeed) {
-        const count = await db.collection(collection.name).countDocuments();
+        const collectionName = 'collectionName' in collection ? collection.collectionName : collection.name;
+        const count = await db.collection(collectionName).countDocuments();
         if (count === 0) {
-            await db.collection(collection.name).insertMany(collection.data as any[]);
+            await db.collection(collectionName).insertMany(collection.data as any[]);
             seededCount++;
         } else {
             skippedCount++;
