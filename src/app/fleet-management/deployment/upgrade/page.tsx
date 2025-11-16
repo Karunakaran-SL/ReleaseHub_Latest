@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -217,11 +216,16 @@ export default function UpgradeWizardPage() {
              const finalApprovalPhases = approvalConfig.phases.map(phaseConfig => {
                 const phaseState = phasesState[phaseConfig.id];
                 return {
-                    ...phaseConfig,
-                    status: phaseState.status,
+                    id: phaseConfig.id,
+                    name: phaseConfig.name,
+                    ownerName: phaseConfig.ownerName,
+                    ownerEmail: phaseConfig.ownerEmail,
+                    sendEmailOnComplete: phaseConfig.sendEmailOnComplete,
+                    statusOptions: phaseConfig.statusOptions,
+                    status: phaseState.status || "Not Started",
                     fields: phaseConfig.fields.map(fieldConfig => ({
                         ...fieldConfig,
-                        value: phaseState[`${fieldConfig.name}_value`] || '',
+                        value: phaseState[`${fieldConfig.name}_value`] || false,
                         proof: { link: phaseState[`${fieldConfig.name}_proofLink`] || '' }
                     }))
                 };
@@ -252,6 +256,7 @@ export default function UpgradeWizardPage() {
 
             if (!response.ok) {
                 const errorData = await response.json();
+                console.error(errorData.errors);
                 throw new Error(errorData.message || 'Failed to schedule upgrade.');
             }
             
