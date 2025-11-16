@@ -34,8 +34,8 @@ export default function SettingsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {settingsLinks.map((setting) => (
-                        <Link href={setting.href} key={setting.name}>
-                            <Card className="hover:shadow-lg transition-shadow">
+                        <Card key={setting.name} className="hover:shadow-lg transition-shadow">
+                            <Link href={setting.href} className="block h-full">
                                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                                     <CardTitle className="text-lg font-medium">{setting.name}</CardTitle>
                                     <setting.icon className="h-6 w-6 text-muted-foreground" />
@@ -43,8 +43,8 @@ export default function SettingsPage() {
                                 <CardContent>
                                     <p className="text-xs text-muted-foreground">Configure {setting.name.toLowerCase()} settings</p>
                                 </CardContent>
-                            </Card>
-                        </Link>
+                            </Link>
+                        </Card>
                     ))}
                 </div>
             </main>
