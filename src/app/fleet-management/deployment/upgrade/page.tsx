@@ -126,14 +126,15 @@ export default function UpgradeWizardPage() {
             case 3: return !upgradeScope;
             case 4:
                 if (upgradeScope === 'baseline') return !selectedBaselineId;
-                if (upgradeScope === 'individual') return false; // No selection needed for individual yet
+                if (upgradeScope === 'individual') return false; 
                 return true;
-            case 5: return false; // Placeholder
-            case 6: return releaseNotes.trim() === '';
-            case 7: return false; // Optional
-            case 8: return false; // Optional
-            case 9: return !maintenanceStart || !maintenanceEnd;
-            case 10: return approvers.length === 0;
+            case 5: return false; // Dependency Analysis (Placeholder)
+            case 6: return false; // Compatibility Summary (Placeholder)
+            case 7: return releaseNotes.trim() === '';
+            case 8: return false; // Field Operations (Optional)
+            case 9: return false; // Custom Workflows (Optional)
+            case 10: return !maintenanceStart || !maintenanceEnd;
+            case 11: return approvers.length === 0;
             default: return false;
         }
     };
