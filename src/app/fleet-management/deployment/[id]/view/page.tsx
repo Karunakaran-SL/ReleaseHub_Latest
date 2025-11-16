@@ -9,9 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, Deployment, Product, Specification, CmdbComponent, UpgradeHistory, Baseline } from '@/lib/definitions';
+import type { User, Deployment, Product, Specification, CmdbComponent, UpgradeHistory, Baseline, DeploymentSummary, UpgradeSummary } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, History, Edit } from 'lucide-react';
+import { Loader2, History, Edit, Package, FileUp, Info } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -52,7 +52,7 @@ interface Hypervisor {
     name: string;
 }
 
-function SummaryCard({ title, summary }: { title: string, summary: any }) {
+function SummaryCard({ title, summary, reportUploadPath }: { title: string, summary: any, reportUploadPath?: string }) {
     if (!summary) return null;
 
     const isUpgrade = !!summary.targetSpecificationId;
@@ -60,15 +60,22 @@ function SummaryCard({ title, summary }: { title: string, summary: any }) {
     return (
          <Card>
             <CardHeader>
-                <CardTitle>{title}</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-lg"><Info className="h-5 w-5"/>{title}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm bg-muted/50 p-4 rounded-b-lg">
-                <p><strong className="text-muted-foreground">Deployment ID:</strong> {summary.deploymentId}</p>
-                <p><strong className="text-muted-foreground">Status:</strong> {summary.status}</p>
+            <CardContent className="space-y-3 text-sm bg-muted/50 p-4 rounded-b-lg">
+                <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-mono text-xs break-all">Package: {summary.packageLocation}</p>
+                </div>
+                 <div className="flex items-center gap-2">
+                    <FileUp className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-mono text-xs break-all">Report: {reportUploadPath}</p>
+                </div>
+                <p><strong className="text-muted-foreground w-24 inline-block">ID:</strong> {summary.deploymentId}</p>
+                <p><strong className="text-muted-foreground w-24 inline-block">Status:</strong> {summary.status}</p>
                 {isUpgrade && (
-                    <p><strong className="text-muted-foreground">Target Spec:</strong> {summary.targetSpecificationId}</p>
+                    <p><strong className="text-muted-foreground w-24 inline-block">Target Spec:</strong> {summary.targetSpecificationId}</p>
                 )}
-                <p className="font-mono text-xs"><strong className="text-muted-foreground">Package:</strong> {summary.packageLocation}</p>
             </CardContent>
         </Card>
     )
@@ -189,7 +196,7 @@ export default function ViewDeploymentPage() {
     }
     
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
-    const latestUpgradeSummary = upgradeHistory.length > 0 ? upgradeHistory[0].summary : null;
+    const latestUpgradeHistory = upgradeHistory.length > 0 ? upgradeHistory[0] : null;
 
     return (
         <DashboardLayout user={user}>
@@ -233,8 +240,16 @@ export default function ViewDeploymentPage() {
                         </div>
                         
                         <div className="grid md:grid-cols-2 gap-8">
-                             <SummaryCard title="Foundation Provisioning Summary" summary={deployment.foundationSummary} />
-                             <SummaryCard title="Latest Upgrade Summary" summary={latestUpgradeSummary} />
+                            <SummaryCard 
+                                title="Foundation Provisioning Summary" 
+                                summary={deployment.foundationSummary}
+                                reportUploadPath={deployment.foundationSummary?.reportUploadPath}
+                            />
+                            <SummaryCard 
+                                title="Latest Upgrade Summary" 
+                                summary={latestUpgradeHistory?.summary}
+                                reportUploadPath={latestUpgradeHistory?.reportUploadUrl}
+                            />
                         </div>
 
                     </CardContent>

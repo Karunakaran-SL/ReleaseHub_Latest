@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
                 deploymentId: validatedData.data.details.deploymentId,
                 status: 'PROVISIONING',
                 packageLocation: `/var/deploy/packages/${validatedData.data.details.deploymentId}.tar.gz`,
+                reportUploadPath: `/var/deploy/reports/provisioning/${validatedData.data.details.deploymentId}.json`
             },
         };
         

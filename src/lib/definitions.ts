@@ -253,6 +253,7 @@ export type DeploymentSummary = {
   deploymentId: string;
   status: string;
   packageLocation: string;
+  reportUploadPath: string;
 };
 
 export type Deployment = {

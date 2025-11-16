@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       status: 'SCHEDULED',
       initiatedBy: user.username,
       initiatedAt: new Date().toISOString(),
+      reportUploadUrl: `/var/deploy/reports/upgrades/${deploymentId}-${upgradeDetails.targetSpecificationId}.json`,
       summary: {
           deploymentId: deploymentId,
           status: 'SCHEDULED',
