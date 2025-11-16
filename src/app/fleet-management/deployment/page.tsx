@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Deployment, Product } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { PlusCircle, Upload, GitMerge, Trash2, Loader2 } from 'lucide-react';
+import { PlusCircle, Upload, GitMerge, Trash2, Loader2, List } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -70,6 +70,11 @@ export default function DeploymentDashboardPage() {
                         <p className="text-muted-foreground">Centralized view of all worldwide deployments.</p>
                     </div>
                     <div className="flex gap-2">
+                         <Button variant="secondary" asChild>
+                           <Link href="/fleet-management/deployment/upgrades">
+                                <List className="mr-2 h-4 w-4" /> View Upgrade Status
+                            </Link>
+                        </Button>
                         <Button variant="outline" asChild>
                            <Link href="/fleet-management/deployment/upgrade">
                                 <Upload className="mr-2 h-4 w-4" /> Upgrade Wizard
@@ -138,7 +143,7 @@ export default function DeploymentDashboardPage() {
                                             <TableCell>{format(new Date(dep.createdAt), 'PPP')}</TableCell>
                                             <TableCell>
                                                 <Badge className={cn(statusColors[dep.status] || 'bg-gray-200')}>
-                                                    {dep.status.replace('_', ' ')}
+                                                    {dep.status.replace(/_/g, ' ')}
                                                 </Badge>
                                             </TableCell>
                                         </TableRow>

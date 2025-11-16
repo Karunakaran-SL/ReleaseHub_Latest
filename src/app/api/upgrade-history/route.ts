@@ -20,9 +20,9 @@ const OnboardingFieldSchema = z.object({
 const OnboardingPhaseSchema = z.object({
   id: z.string(),
   name: z.string(),
-  ownerName: z.string(),
-  ownerEmail: z.string(), // Removed .email() validation
-  sendEmailOnComplete: z.boolean(),
+  ownerName: z.string().optional().nullable(),
+  ownerEmail: z.string().optional().nullable(),
+  sendEmailOnComplete: z.boolean().optional(),
   statusOptions: z.array(z.string()),
   fields: z.array(OnboardingFieldSchema),
   status: z.string().optional(),
@@ -121,4 +121,35 @@ export async function POST(req: NextRequest) {
     console.error(error);
     return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
   }
+}
+
+// GET all upgrade histories, grouped by operation
+export async function GET(req: NextRequest) {
+    try {
+        const client = await clientPromise;
+        const db = client.db();
+        const history = await db.collection('upgrade_history').find({}).sort({ initiatedAt: -1 }).toArray();
+
+        // Group by a composite key of initiatedAt and productId to identify a single upgrade operation
+        const groupedByOperation = history.reduce((acc, entry) => {
+            const key = `${entry.initiatedAt}-${entry.productId}-${entry.targetSpecificationId}`;
+            if (!acc[key]) {
+                acc[key] = {
+                    ...entry,
+                    deploymentIds: [entry.deploymentId],
+                };
+                delete acc[key].deploymentId;
+            } else {
+                acc[key].deploymentIds.push(entry.deploymentId);
+            }
+            return acc;
+        }, {} as Record<string, any>);
+
+        const results = Object.values(groupedByOperation);
+
+        return NextResponse.json(results, { status: 200 });
+    } catch (error) {
+        console.error('Error fetching upgrade history:', error);
+        return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
+    }
 }
