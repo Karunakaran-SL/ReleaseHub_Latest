@@ -34,12 +34,14 @@ export function ApprovalForm({ initialData, onSave, isLoading, name }: ApprovalF
     if (!config) return <Loader2 className="h-8 w-8 animate-spin" />;
 
     const updatePhase = (phaseIndex: number, updatedPhase: Partial<OnboardingPhase>) => {
+        if (!config) return;
         const newPhases = [...config.phases];
         newPhases[phaseIndex] = { ...newPhases[phaseIndex], ...updatedPhase };
         setConfig({ ...config, phases: newPhases });
     };
 
     const addPhase = () => {
+        if (!config) return;
         const newPhase: OnboardingPhase = {
             id: `phase-${Date.now()}`,
             name: `New Phase ${config.phases.length + 1}`,
@@ -53,11 +55,13 @@ export function ApprovalForm({ initialData, onSave, isLoading, name }: ApprovalF
     };
 
     const removePhase = (phaseIndex: number) => {
+        if (!config) return;
         const newPhases = config.phases.filter((_, i) => i !== phaseIndex);
         setConfig({ ...config, phases: newPhases });
     };
 
     const addFieldToPhase = (phaseIndex: number) => {
+        if (!config) return;
         const newField: OnboardingFormField = {
             type: 'Checkbox',
             name: `newField${Date.now()}`,
@@ -72,18 +76,21 @@ export function ApprovalForm({ initialData, onSave, isLoading, name }: ApprovalF
     };
 
     const updateField = (phaseIndex: number, fieldIndex: number, updatedField: Partial<OnboardingFormField>) => {
+        if (!config) return;
         const newPhases = [...config.phases];
         newPhases[phaseIndex].fields[fieldIndex] = { ...newPhases[phaseIndex].fields[fieldIndex], ...updatedField };
         setConfig({ ...config, phases: newPhases });
     };
 
     const removeField = (phaseIndex: number, fieldIndex: number) => {
+        if (!config) return;
         const newPhases = [...config.phases];
         newPhases[phaseIndex].fields = newPhases[phaseIndex].fields.filter((_, i) => i !== fieldIndex);
         setConfig({ ...config, phases: newPhases });
     };
     
     const handleSaveClick = () => {
+        if (!config) return;
         const newVersion = (initialData?.version || 0) + 1;
         onSave({ ...config, version: newVersion });
     }
