@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -10,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Deployment, Product, Specification, CmdbComponent, UpgradeHistory } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, History, Edit, ImageOff } from 'lucide-react';
+import { Loader2, History, Edit } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -35,11 +36,34 @@ const statusColors: Record<string, string> = {
     FAILED: 'bg-red-200 text-red-800',
     UPGRADING: 'bg-blue-200 text-blue-800',
     DECOMMISSIONED: 'bg-gray-300 text-gray-900',
+    SCHEDULED: 'bg-blue-200 text-blue-800',
 };
 
 interface Hypervisor {
     _id: string;
     name: string;
+}
+
+function SummaryCard({ title, summary }: { title: string, summary: any }) {
+    if (!summary) return null;
+
+    const isUpgrade = !!summary.targetSpecificationId;
+
+    return (
+         <Card>
+            <CardHeader>
+                <CardTitle>{title}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm bg-muted/50 p-4 rounded-b-lg">
+                <p><strong className="text-muted-foreground">Deployment ID:</strong> {summary.deploymentId}</p>
+                <p><strong className="text-muted-foreground">Status:</strong> {summary.status}</p>
+                {isUpgrade && (
+                    <p><strong className="text-muted-foreground">Target Spec:</strong> {summary.targetSpecificationId}</p>
+                )}
+                <p className="font-mono text-xs"><strong className="text-muted-foreground">Package:</strong> {summary.packageLocation}</p>
+            </CardContent>
+        </Card>
+    )
 }
 
 export default function ViewDeploymentPage() {
@@ -172,6 +196,7 @@ export default function ViewDeploymentPage() {
     const specName = specifications.find(s => s._id === deployment.specificationId)?.name || 'Unknown Spec';
     const hypervisorName = hypervisors.find(h => h._id === deployment.hypervisorId)?.name || 'Unknown Hypervisor';
     const foundationComponentNames = deployment.foundationComponentIds?.map(id => allComponents.find(c => c._id === id)?.name || id).join(', ') || 'N/A';
+    const latestUpgradeSummary = upgradeHistory.length > 0 ? upgradeHistory[0].summary : null;
 
     return (
         <DashboardLayout user={user}>
@@ -215,28 +240,8 @@ export default function ViewDeploymentPage() {
                         </div>
                         
                         <div className="grid md:grid-cols-2 gap-8">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Foundation Upgrade Summary</CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex items-center justify-center text-muted-foreground h-48 bg-muted/50 rounded-b-lg">
-                                    <div className="text-center">
-                                        <ImageOff className="mx-auto h-8 w-8"/>
-                                        <p>No Image Available</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                             <Card>
-                                <CardHeader>
-                                    <CardTitle>Individual Upgrade Summary</CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex items-center justify-center text-muted-foreground h-48 bg-muted/50 rounded-b-lg">
-                                    <div className="text-center">
-                                        <ImageOff className="mx-auto h-8 w-8"/>
-                                        <p>No Image Available</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                             <SummaryCard title="Foundation Provisioning Summary" summary={deployment.foundationSummary} />
+                             <SummaryCard title="Latest Upgrade Summary" summary={latestUpgradeSummary} />
                         </div>
 
                     </CardContent>

@@ -249,6 +249,12 @@ export type Baseline = {
     };
 };
 
+export type DeploymentSummary = {
+  deploymentId: string;
+  status: string;
+  packageLocation: string;
+};
+
 export type Deployment = {
     _id: string;
     productId: string;
@@ -273,6 +279,14 @@ export type Deployment = {
     createdBy: string;
     createdAt: string;
     status: 'PROVISIONING' | 'ACTIVE' | 'UPGRADING' | 'FAILED' | 'DECOMMISSIONED';
+    foundationSummary?: DeploymentSummary;
+};
+
+export type UpgradeSummary = {
+    deploymentId: string;
+    status: string;
+    packageLocation: string;
+    targetSpecificationId: string;
 };
 
 export type UpgradeHistory = {
@@ -292,4 +306,5 @@ export type UpgradeHistory = {
   initiatedBy: string;
   initiatedAt: string;
   reportUploadUrl?: string; // Location for status uploads
+  summary?: UpgradeSummary;
 };

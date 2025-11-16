@@ -47,6 +47,12 @@ export async function POST(req: NextRequest) {
       status: 'SCHEDULED',
       initiatedBy: user.username,
       initiatedAt: new Date().toISOString(),
+      summary: {
+          deploymentId: deploymentId,
+          status: 'SCHEDULED',
+          packageLocation: `/var/deploy/upgrades/${deploymentId}-${upgradeDetails.targetSpecificationId}.tar.gz`,
+          targetSpecificationId: upgradeDetails.targetSpecificationId
+      }
     }));
 
     await historyCollection.insertMany(newHistoryEntries as any[]);

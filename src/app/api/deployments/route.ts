@@ -65,6 +65,11 @@ export async function POST(req: NextRequest) {
             createdBy: user.username,
             createdAt: new Date().toISOString(),
             status: 'PROVISIONING',
+            foundationSummary: {
+                deploymentId: validatedData.data.details.deploymentId,
+                status: 'PROVISIONING',
+                packageLocation: `/var/deploy/packages/${validatedData.data.details.deploymentId}.tar.gz`,
+            },
         };
         
         await db.collection('deployments').insertOne(newItem as any);
