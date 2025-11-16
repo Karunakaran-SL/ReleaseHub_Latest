@@ -1,7 +1,7 @@
 
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Product, Specification, Deployment, Baseline, OnboardingConfiguration, OnboardingPhase } from '@/lib/definitions';
@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck, FileCode, ChevronRight, Save } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
@@ -35,13 +35,15 @@ const statusColors: Record<string, string> = {
     'Signed-off': 'bg-green-200 text-green-800',
 };
 
-
-export default function UpgradeWizardPage() {
+function UpgradeWizardPageComponent() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const resumeDeploymentId = searchParams.get('resume');
+
 
     // Wizard state
     const [step, setStep] = useState(1);
@@ -91,7 +93,8 @@ export default function UpgradeWizardPage() {
                 
                 setProducts(productsData);
                 setSpecifications(specsData);
-                setDeployments(await deploymentsRes.json());
+                const deploymentsData = await deploymentsRes.json();
+                setDeployments(deploymentsData);
                 setBaselines(await baselinesRes.json());
                 
                 const approvalConfigs = await approvalConfigRes.json();
@@ -111,12 +114,44 @@ export default function UpgradeWizardPage() {
                 }
 
 
-                if (productsData.length > 0) {
-                    setSelectedProductId(productsData[0]._id);
+                if (resumeDeploymentId) {
+                    const resumeDeployment = deploymentsData.find((d: Deployment) => d._id === resumeDeploymentId);
+                    if (resumeDeployment && resumeDeployment.status === 'UPGRADE_APPROVAL') {
+                        const historyRes = await fetch(`/api/upgrade-history/${resumeDeploymentId}`);
+                        if (historyRes.ok) {
+                            const historyData = await historyRes.json();
+                            const latestHistory = historyData[0];
+                            if (latestHistory) {
+                                setSelectedProductId(latestHistory.productId);
+                                setSelectedSpecId(latestHistory.targetSpecificationId);
+                                setSelectedDeploymentIds(new Set([resumeDeploymentId]));
+                                setUpgradeScope(latestHistory.upgradeScope);
+                                setSelectedBaselineId(latestHistory.baselineId || '');
+                                setReleaseNotes(latestHistory.releaseNotes);
+                                setFieldOperations(latestHistory.fieldOperations);
+                                setMaintenanceStart(new Date(latestHistory.maintenanceWindow.start));
+                                setMaintenanceEnd(new Date(latestHistory.maintenanceWindow.end));
+                                setApprovers(latestHistory.approvers);
+
+                                const resumedPhaseState: Record<string, any> = {};
+                                (latestHistory.approval_phases || []).forEach((phase: OnboardingPhase) => {
+                                    resumedPhaseState[phase.id] = { status: phase.status || 'Not Started' };
+                                    phase.fields.forEach(field => {
+                                        resumedPhaseState[phase.id][`${field.name}_value`] = (field as any).value || '';
+                                        resumedPhaseState[phase.id][`${field.name}_proofLink`] = (field as any).proofLink || '';
+                                    });
+                                });
+                                setPhasesState(resumedPhaseState);
+                                setStep(11); // Jump to approval step
+                                toast({ title: 'Resuming Upgrade Approval', description: `Loaded saved approval state for deployment ${resumeDeployment.details.deploymentId}.`});
+                            }
+                        }
+                    }
+                } else if (productsData.length > 0) {
+                     setSelectedProductId(productsData[0]._id);
                 }
-                if (specsData.length > 0) {
-                    setSelectedSpecId(specsData[0]._id);
-                }
+
+
                 
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -125,7 +160,7 @@ export default function UpgradeWizardPage() {
             }
         }
         fetchInitialData();
-    }, [toast]);
+    }, [toast, resumeDeploymentId]);
     
     useEffect(() => {
         if (selectedProductId) {
@@ -134,8 +169,10 @@ export default function UpgradeWizardPage() {
         } else {
             setProductDeployments([]);
         }
-        setSelectedDeploymentIds(new Set());
-    }, [selectedProductId, deployments]);
+        if (!resumeDeploymentId) {
+             setSelectedDeploymentIds(new Set());
+        }
+    }, [selectedProductId, deployments, resumeDeploymentId]);
 
     const handleNext = () => setStep(prev => prev + 1);
     const handleBack = () => setStep(prev => prev - 1);
@@ -217,14 +254,12 @@ export default function UpgradeWizardPage() {
             const finalApprovalPhases = approvalConfig.phases.map(phaseConfig => {
                 const phaseState = phasesState[phaseConfig.id];
                 return {
-                    // From config
                     id: phaseConfig.id,
                     name: phaseConfig.name,
                     ownerName: phaseConfig.ownerName,
                     ownerEmail: phaseConfig.ownerEmail,
-                    sendEmailOnComplete: !!phaseConfig.sendEmailOnComplete,
+                    sendEmailOnComplete: phaseConfig.sendEmailOnComplete,
                     statusOptions: phaseConfig.statusOptions,
-                    // From user state
                     status: phaseState?.status || "Not Started",
                     fields: phaseConfig.fields.map(fieldConfig => {
                         return {
@@ -233,7 +268,7 @@ export default function UpgradeWizardPage() {
                             label: fieldConfig.label,
                             options: fieldConfig.options,
                             helpText: fieldConfig.helpText,
-                            proof: !!fieldConfig.proof,
+                            proof: fieldConfig.proof,
                             value: phaseState[`${fieldConfig.name}_value`] || '',
                             proofLink: phaseState[`${fieldConfig.name}_proofLink`] || ''
                         };
@@ -620,7 +655,7 @@ export default function UpgradeWizardPage() {
 
                     <CardFooter className="flex justify-between">
                          <div>
-                            {step > 1 && step <= 13 && (
+                            {step > 1 && step <= 13 && !resumeDeploymentId && (
                                 <Button variant="outline" onClick={handleBack} disabled={isSubmitting}>
                                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                 </Button>
@@ -654,4 +689,12 @@ export default function UpgradeWizardPage() {
             </main>
         </DashboardLayout>
     );
+}
+
+export default function UpgradeWizardPage() {
+    return (
+        <Suspense fallback={<DashboardLayout user={null}><div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>}>
+            <UpgradeWizardPageComponent />
+        </Suspense>
+    )
 }

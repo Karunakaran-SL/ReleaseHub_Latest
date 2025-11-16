@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Deployment, Product, Specification, CmdbComponent, UpgradeHistory, Baseline, DeploymentSummary, UpgradeSummary } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, History, Edit, Package, FileUp, Info } from 'lucide-react';
+import { Loader2, History, Edit, Package, FileUp, Info, PlayCircle } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -199,6 +199,33 @@ export default function ViewDeploymentPage() {
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
     const latestUpgradeHistory = upgradeHistory.length > 0 ? upgradeHistory[0] : null;
 
+    const canUpdate = deployment.status === 'PROVISIONING' || deployment.status === 'UPGRADE_APPROVAL';
+
+    const getUpdateAction = () => {
+        if (deployment.status === 'PROVISIONING') {
+            return {
+                href: `/fleet-management/deployment/${id}/edit`,
+                label: 'Update',
+                icon: <Edit className="mr-2 h-4 w-4" />
+            };
+        }
+        if (deployment.status === 'UPGRADE_APPROVAL') {
+            return {
+                href: `/fleet-management/deployment/upgrade?resume=${id}`,
+                label: 'Resume Approval',
+                icon: <PlayCircle className="mr-2 h-4 w-4" />
+            };
+        }
+        return {
+            href: '',
+            label: 'Update',
+            icon: <Edit className="mr-2 h-4 w-4" />
+        };
+    };
+
+    const updateAction = getUpdateAction();
+
+
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10 space-y-8">
@@ -255,9 +282,9 @@ export default function ViewDeploymentPage() {
 
                     </CardContent>
                      <CardFooter className="flex justify-end gap-2">
-                        <Button variant="outline" asChild>
-                           <Link href={`/fleet-management/deployment/${id}/edit`}>
-                                <Edit className="mr-2 h-4 w-4" /> Update
+                        <Button variant="outline" asChild disabled={!canUpdate}>
+                           <Link href={updateAction.href}>
+                                {updateAction.icon} {updateAction.label}
                             </Link>
                         </Button>
                         <AlertDialog>
