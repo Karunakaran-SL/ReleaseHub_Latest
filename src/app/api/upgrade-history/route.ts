@@ -14,16 +14,18 @@ const OnboardingFieldSchema = z.object({
   helpText: z.string().optional(),
   proof: z.boolean().optional(),
   proofLink: z.string().optional(),
+  value: z.any().optional(),
 });
 
 const OnboardingPhaseSchema = z.object({
   id: z.string(),
   name: z.string(),
   ownerName: z.string(),
-  ownerEmail: z.string().email(),
+  ownerEmail: z.string(), // Removed .email() validation
   sendEmailOnComplete: z.boolean(),
   statusOptions: z.array(z.string()),
   fields: z.array(OnboardingFieldSchema),
+  status: z.string().optional(),
 });
 
 
