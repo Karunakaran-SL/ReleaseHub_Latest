@@ -564,7 +564,7 @@ const initialApprovalConfigs = [
     { name: 'Components Approval', key: 'components-approval' },
     { name: 'Application Approval', key: 'application-approval' },
     { name: 'Interface Approval', key: 'interface-approval' },
-    { name: 'Baseline approval', key: 'baseline-approval' },
+    { name: 'Baseline Approval', key: 'baseline-approval' },
     { name: 'Deployment Approval', key: 'deployment-approval' },
     { name: 'Upgrade Approval', key: 'upgrade-approval' },
     { name: 'Migration Approval', key: 'migration-approval' },
