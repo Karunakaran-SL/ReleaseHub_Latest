@@ -295,6 +295,7 @@ export type UpgradeHistory = {
   productId: string;
   targetSpecificationId: string;
   upgradeScope: 'baseline' | 'individual';
+  baselineId?: string;
   releaseNotes: string;
   fieldOperations?: string;
   maintenanceWindow: {

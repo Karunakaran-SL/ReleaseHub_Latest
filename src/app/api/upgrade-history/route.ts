@@ -10,6 +10,7 @@ const UpgradeHistorySchema = z.object({
   productId: z.string(),
   targetSpecificationId: z.string(),
   upgradeScope: z.enum(['baseline', 'individual']),
+  baselineId: z.string().optional(),
   releaseNotes: z.string(),
   fieldOperations: z.string().optional(),
   maintenanceWindow: z.object({

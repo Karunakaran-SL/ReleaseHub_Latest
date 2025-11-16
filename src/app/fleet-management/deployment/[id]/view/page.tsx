@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, Deployment, Product, Specification, CmdbComponent, UpgradeHistory } from '@/lib/definitions';
+import type { User, Deployment, Product, Specification, CmdbComponent, UpgradeHistory, Baseline } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Loader2, History, Edit } from 'lucide-react';
 import {
@@ -74,15 +74,14 @@ export default function ViewDeploymentPage() {
     const params = useParams();
     const { id } = params;
 
-    // Data state
     const [deployment, setDeployment] = useState<Deployment | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
     const [specifications, setSpecifications] = useState<Specification[]>([]);
     const [hypervisors, setHypervisors] = useState<Hypervisor[]>([]);
     const [allComponents, setAllComponents] = useState<CmdbComponent[]>([]);
     const [upgradeHistory, setUpgradeHistory] = useState<UpgradeHistory[]>([]);
+    const [baselines, setBaselines] = useState<Baseline[]>([]);
     
-    // UI state
     const [deleteComment, setDeleteComment] = useState('');
     const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
@@ -101,6 +100,7 @@ export default function ViewDeploymentPage() {
                     fetch('/api/settings/specifications/hypervisors'),
                     fetch('/api/cmdb/components'),
                     fetch(`/api/upgrade-history/${id}`),
+                    fetch('/api/baselines'),
                 ]);
 
                 const [
@@ -110,46 +110,21 @@ export default function ViewDeploymentPage() {
                     hypervisorsResult,
                     componentsResult,
                     historyResult,
+                    baselinesResult
                 ] = results;
 
-                // Process deployment - this is critical, fail hard if it doesn't load.
                 if (deploymentResult.status === 'fulfilled' && deploymentResult.value.ok) {
                     setDeployment(await deploymentResult.value.json());
                 } else {
                     throw new Error('Failed to fetch deployment details.');
                 }
                 
-                // Process other data, toast on failure but don't crash
-                if (productsResult.status === 'fulfilled' && productsResult.value.ok) {
-                    setProducts(await productsResult.value.json());
-                } else {
-                    toast({ variant: 'destructive', title: 'Warning', description: 'Could not load product data.' });
-                }
-                
-                if (specsResult.status === 'fulfilled' && specsResult.value.ok) {
-                    setSpecifications(await specsResult.value.json());
-                } else {
-                    toast({ variant: 'destructive', title: 'Warning', description: 'Could not load specification data.' });
-                }
-
-                if (hypervisorsResult.status === 'fulfilled' && hypervisorsResult.value.ok) {
-                    setHypervisors(await hypervisorsResult.value.json());
-                } else {
-                     toast({ variant: 'destructive', title: 'Warning', description: 'Could not load hypervisor data.' });
-                }
-
-                if (componentsResult.status === 'fulfilled' && componentsResult.value.ok) {
-                    setAllComponents(await componentsResult.value.json());
-                } else {
-                     toast({ variant: 'destructive', title: 'Warning', description: 'Could not load component data.' });
-                }
-
-                // Upgrade history can fail gracefully (e.g. 404 for new deployments)
-                if (historyResult.status === 'fulfilled' && historyResult.value.ok) {
-                    setUpgradeHistory(await historyResult.value.json());
-                } else {
-                    setUpgradeHistory([]); // Ensure it's an array even on failure
-                }
+                if (productsResult.status === 'fulfilled' && productsResult.value.ok) setProducts(await productsResult.value.json());
+                if (specsResult.status === 'fulfilled' && specsResult.value.ok) setSpecifications(await specsResult.value.json());
+                if (hypervisorsResult.status === 'fulfilled' && hypervisorsResult.value.ok) setHypervisors(await hypervisorsResult.value.json());
+                if (componentsResult.status === 'fulfilled' && componentsResult.value.ok) setAllComponents(await componentsResult.value.json());
+                if (baselinesResult.status === 'fulfilled' && baselinesResult.value.ok) setBaselines(await baselinesResult.value.json());
+                if (historyResult.status === 'fulfilled' && historyResult.value.ok) setUpgradeHistory(await historyResult.value.json());
 
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -186,16 +161,24 @@ export default function ViewDeploymentPage() {
             setIsDeleting(false);
         }
     };
+    
+    const displayData = useMemo(() => {
+        if (!deployment) return null;
 
-    if (loading || !deployment) {
+        return {
+            productName: products.find(p => p._id === deployment.productId)?.name || 'Unknown Product',
+            specName: specifications.find(s => s._id === deployment.specificationId)?.name || 'Unknown Spec',
+            hypervisorName: hypervisors.find(h => h._id === deployment.hypervisorId)?.name || 'Unknown Hypervisor',
+            foundationComponentNames: deployment.foundationComponentIds?.map(id => allComponents.find(c => c._id === id)?.name || id).join(', ') || 'N/A',
+        }
+    }, [deployment, products, specifications, hypervisors, allComponents]);
+
+
+    if (loading || !deployment || !displayData) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
     
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
-    const productName = products.find(p => p._id === deployment.productId)?.name || 'Unknown Product';
-    const specName = specifications.find(s => s._id === deployment.specificationId)?.name || 'Unknown Spec';
-    const hypervisorName = hypervisors.find(h => h._id === deployment.hypervisorId)?.name || 'Unknown Hypervisor';
-    const foundationComponentNames = deployment.foundationComponentIds?.map(id => allComponents.find(c => c._id === id)?.name || id).join(', ') || 'N/A';
     const latestUpgradeSummary = upgradeHistory.length > 0 ? upgradeHistory[0].summary : null;
 
     return (
@@ -217,10 +200,10 @@ export default function ViewDeploymentPage() {
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                             <div className="lg:col-span-1 space-y-4">
                                 <h3 className="font-semibold text-lg border-b pb-2">Configuration</h3>
-                                <div><Label>Product</Label><Input value={productName} disabled /></div>
-                                <div><Label>Specification</Label><Input value={specName} disabled /></div>
-                                <div><Label>Hypervisor</Label><Input value={hypervisorName} disabled /></div>
-                                <div><Label>Foundation Components</Label><Textarea value={foundationComponentNames} disabled rows={4} /></div>
+                                <div><Label>Product</Label><Input value={displayData.productName} disabled /></div>
+                                <div><Label>Specification</Label><Input value={displayData.specName} disabled /></div>
+                                <div><Label>Hypervisor</Label><Input value={displayData.hypervisorName} disabled /></div>
+                                <div><Label>Foundation Components</Label><Textarea value={displayData.foundationComponentNames} disabled rows={4} /></div>
                             </div>
                              <div className="lg:col-span-1 space-y-4">
                                 <h3 className="font-semibold text-lg border-b pb-2">Details</h3>
@@ -300,8 +283,8 @@ export default function ViewDeploymentPage() {
                                        <TableHeader>
                                            <TableRow>
                                                <TableHead>Date</TableHead>
-                                               <TableHead>Product</TableHead>
                                                <TableHead>Target Spec</TableHead>
+                                               <TableHead>Scope</TableHead>
                                                <TableHead>Status</TableHead>
                                                <TableHead>Initiated By</TableHead>
                                            </TableRow>
@@ -310,8 +293,13 @@ export default function ViewDeploymentPage() {
                                            {upgradeHistory.length > 0 ? upgradeHistory.map(h => (
                                                <TableRow key={h._id}>
                                                    <TableCell>{format(parseISO(h.initiatedAt), 'PPp')}</TableCell>
-                                                   <TableCell>{products.find(p => p._id === h.productId)?.name || h.productId}</TableCell>
                                                    <TableCell>{specifications.find(s => s._id === h.targetSpecificationId)?.name || h.targetSpecificationId}</TableCell>
+                                                   <TableCell>
+                                                        <Badge variant="outline" className="capitalize">
+                                                            {h.upgradeScope}
+                                                            {h.upgradeScope === 'baseline' && h.baselineId && ` (${baselines.find(b => b._id === h.baselineId)?.product.version || 'unknown'})`}
+                                                        </Badge>
+                                                   </TableCell>
                                                    <TableCell>{h.status}</TableCell>
                                                    <TableCell>{h.initiatedBy}</TableCell>
                                                </TableRow>

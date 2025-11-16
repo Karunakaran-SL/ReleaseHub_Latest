@@ -170,6 +170,7 @@ export default function UpgradeWizardPage() {
                 productId: selectedProductId,
                 targetSpecificationId: selectedSpecId,
                 upgradeScope: upgradeScope,
+                baselineId: upgradeScope === 'baseline' ? selectedBaselineId : undefined,
                 releaseNotes: releaseNotes,
                 fieldOperations: fieldOperations,
                 maintenanceWindow: {
