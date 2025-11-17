@@ -196,3 +196,4 @@ Used for safely removing or retiring deployments.
 - Every action (upgrade, new deployment, migration, decommission) should generate a summary record stored under Deployment History and Audits.
 - The module is designed for **air-gapped and hardware-based environments**, meaning external automation must rely on manual or offline file uploads.
 - All operations are auditable and traceable, ensuring regulatory and field operation compliance.
+<!-- force restart -->
