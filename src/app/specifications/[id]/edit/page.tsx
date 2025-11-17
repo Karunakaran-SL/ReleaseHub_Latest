@@ -214,13 +214,18 @@ export default function EditSpecificationPage() {
     const handleJsonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newJson = e.target.value;
         try {
+            // Basic validation before updating state to prevent broken JSON
             const parsed = JSON.parse(newJson);
-            setFormState(parsed);
+            // Only update if it's a valid object
+            if (typeof parsed === 'object' && parsed !== null) {
+                setFormState(parsed);
+            }
         } catch (error) {
-            // Can show a small error hint if needed, but for now just don't update state
-            console.error("Invalid JSON", error);
+            console.error("Invalid JSON input", error);
+            // Optionally provide feedback to the user that the JSON is invalid
         }
     }
+
 
     if (loading || !formState.name) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
@@ -406,3 +411,5 @@ export default function EditSpecificationPage() {
         </DashboardLayout>
     );
 }
+
+    
