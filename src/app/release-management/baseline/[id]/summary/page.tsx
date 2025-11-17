@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
-import type { User, Baseline } from '@/lib/definitions';
+import type { User, Baseline, License } from '@/lib/definitions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowRight, Save, Download, Info, Package, Warehouse, Puzzle, AppWindow, FileText, CheckCircle } from 'lucide-react';
+import { Loader2, ArrowRight, Save, Download, Info, Package, Warehouse, Puzzle, AppWindow, FileText, CheckCircle, FileKey2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -35,6 +35,7 @@ export default function BaselineSummaryPage() {
     
     const [user, setUser] = useState<User | null>(null);
     const [baseline, setBaseline] = useState<Baseline | null>(null);
+    const [allLicenses, setAllLicenses] = useState<License[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
 
@@ -48,10 +49,18 @@ export default function BaselineSummaryPage() {
 
         async function fetchBaseline() {
             try {
-                const res = await fetch(`/api/baselines/${id}`);
+                const [res, licensesRes] = await Promise.all([
+                    fetch(`/api/baselines/${id}`),
+                    fetch('/api/licenses/usage')
+                ]);
                 if (!res.ok) throw new Error('Failed to fetch baseline');
                 const foundBaseline = await res.json();
                 setBaseline(foundBaseline);
+
+                if (licensesRes.ok) {
+                    setAllLicenses(await licensesRes.json());
+                }
+
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
             } finally {
@@ -60,6 +69,28 @@ export default function BaselineSummaryPage() {
         }
         fetchBaseline();
     }, [id, router, toast]);
+
+    const consolidatedLicenses = (() => {
+        if (!baseline || !allLicenses.length) return [];
+        const licenseIds = new Set<string>();
+
+        const allComponentsInBaseline = baseline.tenants?.flatMap((t: any) => t.components || []) || [];
+        const allAppsInBaseline = baseline.tenants?.flatMap((t: any) => t.applications || []) || [];
+
+        const componentIds = new Set(allComponentsInBaseline.map((c: any) => c.id));
+        const appIds = new Set(allAppsInBaseline.map((a: any) => a.id));
+
+        allLicenses.forEach(license => {
+            const usedByComponent = license.components?.some(id => componentIds.has(id));
+            const usedByApp = license.apps?.some(id => appIds.has(id));
+            if (usedByComponent || usedByApp) {
+                licenseIds.add(license._id);
+            }
+        });
+
+        return allLicenses.filter(l => licenseIds.has(l._id));
+    })();
+
 
     if (loading) {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>
@@ -168,6 +199,35 @@ export default function BaselineSummaryPage() {
                                                 </TableCell>
                                             </TableRow>
                                         ))}
+                                    </TableBody>
+                                </Table>
+                            </Card>
+                        </div>
+                        
+                        <Separator />
+                        <div>
+                            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2"><FileKey2 /> Consolidated License Manifest ({consolidatedLicenses.length})</h3>
+                            <Card>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>License Name</TableHead>
+                                            <TableHead>Type</TableHead>
+                                            <TableHead>Owner</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {consolidatedLicenses.length > 0 ? (
+                                            consolidatedLicenses.map(license => (
+                                                <TableRow key={license._id}>
+                                                    <TableCell>{license.name}</TableCell>
+                                                    <TableCell>{license.type}</TableCell>
+                                                    <TableCell>{license.owner}</TableCell>
+                                                </TableRow>
+                                            ))
+                                        ) : (
+                                            <TableRow><TableCell colSpan={3} className="text-center">No licenses found for the components in this baseline.</TableCell></TableRow>
+                                        )}
                                     </TableBody>
                                 </Table>
                             </Card>

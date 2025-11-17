@@ -792,13 +792,97 @@ const initialInterfaces: Omit<CmdbInterface, '_id' | 'created_at' | 'updated_at'
     })),
 ];
 
-const initialLicenses: Omit<License, '_id'>[] = [
-    { id: 'apache-2.0', name: 'Apache 2.0', type: 'open-source', owner: 'Apache Foundation', components: ['SparkProcessing', 'KafkaStreaming'], status: 'active' },
-    { id: 'mit', name: 'MIT License', type: 'open-source', owner: 'MIT', components: ['AuthNService'], status: 'active' },
-    { id: 'proprietary-maps', name: 'Advanced Maps SDK', type: 'proprietary', owner: 'GeoMaps Inc.', apps: ['RetailStorefront'], status: 'active' },
-    { id: 'enterprise-support', name: 'Enterprise Support', type: 'subscription', owner: 'Red Hat', tenants: ['CorePlatformServices'], status: 'active' },
-    { id: 'data-analytics-suite', name: 'Data Analytics Suite', type: 'perpetual', owner: 'DataCorp', products: ['UnifiedDataFabric'], status: 'expired' }
-];
+const generateInitialLicenses = (): Omit<License, '_id'>[] => {
+    const licenseTemplates = [
+        { name: 'MIT', type: 'open-source', owner: 'MIT' },
+        { name: 'Apache 2.0', type: 'open-source', owner: 'Apache Foundation' },
+        { name: 'GPLv3', type: 'open-source', owner: 'FSF' },
+        { name: 'BSD-3-Clause', type: 'open-source', owner: 'Various' },
+        { name: 'React', type: 'open-source', owner: 'Facebook' },
+        { name: 'Angular', type: 'open-source', owner: 'Google' },
+        { name: 'Vue', type: 'open-source', owner: 'Evan You' },
+        { name: 'MongoDB SSPL', type: 'proprietary', owner: 'MongoDB Inc.' },
+        { name: 'Elastic License 2.0', type: 'proprietary', owner: 'Elastic' },
+        { name: 'Confluent Community License', type: 'proprietary', owner: 'Confluent' },
+        { name: 'Oracle Java SE', type: 'proprietary', owner: 'Oracle' },
+        { name: 'Microsoft EULA', type: 'proprietary', owner: 'Microsoft' },
+        { name: 'Datadog Subscription', type: 'subscription', owner: 'Datadog' },
+        { name: 'Okta Identity', type: 'subscription', owner: 'Okta' },
+        { name: 'JetBrains All-Products', type: 'subscription', owner: 'JetBrains' },
+        { name: 'Windows Server 2022', type: 'perpetual', owner: 'Microsoft' },
+        { name: 'VMware vSphere', type: 'perpetual', owner: 'VMware' },
+    ];
+
+    const allEntities = [...initialComponents, ...initialApplications];
+    const licenses: Omit<License, '_id'>[] = [];
+    let licenseCount = 0;
+
+    licenseTemplates.forEach(template => {
+        const licenseId = template.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        licenses.push({
+            id: licenseId,
+            name: template.name,
+            type: template.type as any,
+            owner: template.owner,
+            status: 'active'
+        });
+        licenseCount++;
+    });
+
+    allEntities.forEach(entity => {
+        const numLicenses = Math.floor(Math.random() * 3) + 1; // 1 to 3 licenses per entity
+        for (let i = 0; i < numLicenses; i++) {
+            const template = licenseTemplates[Math.floor(Math.random() * licenseTemplates.length)];
+            const status = ['active', 'active', 'active', 'expired', 'deprecated'][Math.floor(Math.random() * 5)];
+            const licenseId = `${template.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${entity.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+            
+            const existing = licenses.find(l => l.id === licenseId);
+            if (existing) continue;
+
+            const newLicense: Omit<License, '_id'> = {
+                id: licenseId,
+                name: `${template.name} for ${entity.name}`,
+                type: template.type as any,
+                owner: template.owner,
+                status: status as any,
+                versions: [entity.version], // Link to a specific version
+            };
+            
+            if ('tenants' in entity && entity.tenants) {
+                newLicense.tenants = entity.tenants.map(t => t.id);
+            }
+
+            if ('dependent_components' in entity) { // It's a component or app
+                 newLicense.components = [entity.id];
+            } else {
+                 newLicense.apps = [entity.id];
+            }
+
+            licenses.push(newLicense);
+            licenseCount++;
+        }
+    });
+
+    // Add some more generic ones to reach 100+
+    while (licenseCount < 100) {
+        const template = licenseTemplates[Math.floor(Math.random() * licenseTemplates.length)];
+        const status = ['active', 'expired', 'deprecated'][Math.floor(Math.random() * 3)];
+        const id = `${template.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-gen-${licenseCount}`;
+         licenses.push({
+            id: id,
+            name: `${template.name} - General Purpose`,
+            type: template.type as any,
+            owner: template.owner,
+            status: status as any
+        });
+        licenseCount++;
+    }
+
+    return licenses;
+}
+
+const initialLicenses = generateInitialLicenses();
+
 
 const initialProductLicensing: Omit<ProductLicensing, '_id'>[] = [
     { id: 'pl-oss-portal', product_id: 'OneStopShopPortal', license_model: 'hybrid', entitlements: ['feature-sso', 'feature-dashboard'], package_included: true, validity: 'perpetual', compliance: 'ISO 27001' },
