@@ -6,7 +6,7 @@ import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Package, Copy, Check, FileJson } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Package, Copy, Check, FileJson, Server, Cpu, MemoryStick, Database } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MultiSelectListBox, type Option as MultiSelectOption } from '@/components/ui/multi-select-list-box';
-import { PlusCircle, Trash2, Server, Cpu, MemoryStick, Database } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { DiagramDisplay } from '../_components/diagram-display';
 
 interface Option {
@@ -107,7 +107,7 @@ export default function SpecificationBuilderPage() {
             }
             
             setJsonSpec(JSON.stringify(fullSpec, null, 2));
-            setStep(3); // Final summary step
+            setStep(2); // Final summary step
         } else {
             setStep(nextStep);
         }
@@ -183,9 +183,8 @@ export default function SpecificationBuilderPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...payload,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
+                    name: payload.name,
+                    json_string: jsonSpec
                 }),
             });
             if (!response.ok) {
@@ -362,7 +361,7 @@ export default function SpecificationBuilderPage() {
         switch (step) {
             case 1:
                 return renderStepOne();
-            case 3:
+            case 2:
                 return renderSummaryAndExport();
             default:
                 router.push('/specifications');
@@ -384,7 +383,7 @@ export default function SpecificationBuilderPage() {
                     <CardHeader>
                         <CardTitle>
                            {step === 1 && 'Step 1: Define Specification Details'}
-                           {step === 3 && 'Step 2: Review and Finalize'}
+                           {step === 2 && 'Step 2: Review and Finalize'}
                         </CardTitle>
                     </CardHeader>
                      <CardContent>
@@ -394,7 +393,7 @@ export default function SpecificationBuilderPage() {
                         <Button variant="outline" onClick={handleBack} disabled={isSubmitting || step === 1}>
                            <ArrowLeft className="mr-2 h-4 w-4" /> Back
                         </Button>
-                        {step < 3 && (
+                        {step < 2 && (
                             <Button onClick={handleNext} disabled={!formData.name}>
                                 Next <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
