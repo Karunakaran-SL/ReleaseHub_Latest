@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User } from '@/lib/definitions';
+import type { User, Specification } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -27,24 +27,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { DiagramDisplay } from '../../_components/diagram-display';
 
-interface Specification {
-    _id: string;
-    name: string;
-    hw_type?: { id: string; name: string; };
-    vendor?: string;
-    total_cpu?: number;
-    memory_gb?: number;
-    storage_gb?: number;
-    hypervisor?: { id: string; name: string; };
-    image?: string;
-    service_contract_type?: { id: string; name: string; };
-    contact_point_email?: string;
-    contact_point_phone?: string;
-    network_cards?: { id: string; name: string; }[];
-    plug_power_cords?: { id: string; name: string; }[];
-    custom_fields?: { key: string; value: string; }[];
-}
-
 export default function ViewSpecificationPage() {
     const [user, setUser] = useState<User | null>(null);
     const [specification, setSpecification] = useState<Specification | null>(null);
@@ -57,6 +39,16 @@ export default function ViewSpecificationPage() {
     
     const [deleteComment, setDeleteComment] = useState('');
     const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+
+    const specObject = useMemo(() => {
+        if (!specification?.json_string) return null;
+        try {
+            return JSON.parse(specification.json_string);
+        } catch (e) {
+            console.error("Failed to parse spec JSON");
+            return null;
+        }
+    }, [specification]);
 
     useEffect(() => {
         getUser().then(setUser);
@@ -125,22 +117,20 @@ export default function ViewSpecificationPage() {
         )
     }
 
-    if (!specification) {
+    if (!specification || !specObject) {
          return (
              <DashboardLayout user={user}>
                 <div className="flex justify-center items-center h-full">
-                    <p>Specification not found.</p>
+                    <p>Specification not found or data is corrupt.</p>
                 </div>
             </DashboardLayout>
         )
     }
     
-    const networkCardsDisplay = specification.network_cards?.map(c => c.name).join(', ') || 'N/A';
-    const plugPowerCordsDisplay = specification.plug_power_cords?.map(p => p.name).join(', ') || 'N/A';
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
-    const specJson = JSON.stringify(specification, null, 2);
-
-
+    const networkCardsDisplay = specObject.network_cards?.map((c: any) => c.name).join(', ') || 'N/A';
+    const plugPowerCordsDisplay = specObject.plug_power_cords?.map((p: any) => p.name).join(', ') || 'N/A';
+    
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10 space-y-6">
@@ -151,75 +141,37 @@ export default function ViewSpecificationPage() {
                     <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                              <div className="space-y-4">
-                                <div>
-                                    <Label htmlFor="hw-name">HW Name</Label>
-                                    <Input id="hw-name" value={specification.name || ''} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="hw-type">HW Type</Label>
-                                    <Input id="hw-type" value={specification.hw_type?.name || ''} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="vendor">Vendor</Label>
-                                    <Input id="vendor" value={specification.vendor || ''} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="image">Image</Label>
-                                    <Input id="image" value={specification.image || ''} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="service-contract-type">Service Contract Type</Label>
-                                    <Input id="service-contract-type" value={specification.service_contract_type?.name || ''} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="contact-email">Contact Point Email</Label>
-                                    <Input id="contact-email" value={specification.contact_point_email || ''} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="contact-phone">Contact Point Phone</Label>
-                                    <Input id="contact-phone" value={specification.contact_point_phone || ''} disabled />
-                                </div>
+                                <h3 className="font-semibold text-lg">Details</h3>
+                                <div><Label>HW Name</Label><Input value={specObject.name || ''} disabled /></div>
+                                <div><Label>HW Type</Label><Input value={specObject.hw_type?.name || ''} disabled /></div>
+                                <div><Label>Vendor</Label><Input value={specObject.vendor || ''} disabled /></div>
+                                <div><Label>Image URL</Label><Input value={specObject.image || ''} disabled /></div>
+                                <div><Label>Service Contract</Label><Input value={specObject.service_contract_type?.name || ''} disabled /></div>
+                                <div><Label>Contact Email</Label><Input value={specObject.contact_point_email || ''} disabled /></div>
+                                <div><Label>Contact Phone</Label><Input value={specObject.contact_point_phone || ''} disabled /></div>
                             </div>
                             <div className="space-y-4">
-                                <h3 className="font-semibold text-lg">HW Resources</h3>
-                                <div>
-                                    <Label htmlFor="total-cpu">Total CPU</Label>
-                                    <Input id="total-cpu" value={specification.total_cpu || ''} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="memory">Memory (GB)</Label>
-                                    <Input id="memory" value={specification.memory_gb || ''} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="storage">Storage (GB)</Label>
-                                    <Input id="storage" value={specification.storage_gb || ''} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="network-cards">Network Cards type</Label>
-                                    <Input id="network-cards" value={networkCardsDisplay} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="plug-power-cord">Plug/Power Cord Type</Label>
-                                    <Input id="plug-power-cord" value={plugPowerCordsDisplay} disabled />
-                                </div>
-                                <div>
-                                    <Label htmlFor="hypervisor">Hypervisor</Label>
-                                    <Input id="hypervisor" value={specification.hypervisor?.name || 'N/A'} disabled />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-lg mt-6">Custom Fields</h3>
-                                    <div className="space-y-2">
-                                        {specification.custom_fields && specification.custom_fields.length > 0 ? (
-                                            specification.custom_fields.map((field, index) => (
-                                                <div key={index} className="flex items-center gap-2">
-                                                    <Input value={field.key} disabled />
-                                                    <Input value={field.value} disabled />
-                                                </div>
-                                            ))
-                                        ) : <p className="text-sm text-muted-foreground">No custom fields.</p>}
-                                    </div>
+                                <h3 className="font-semibold text-lg">HW Resources & Connectivity</h3>
+                                <div><Label>Total CPU</Label><Input value={specObject.total_cpu || ''} disabled /></div>
+                                <div><Label>Memory (GB)</Label><Input value={specObject.memory_gb || ''} disabled /></div>
+                                <div><Label>Storage (GB)</Label><Input value={specObject.storage_gb || ''} disabled /></div>
+                                <div><Label>Network Cards</Label><Input value={networkCardsDisplay} disabled /></div>
+                                <div><Label>Power Cords</Label><Input value={plugPowerCordsDisplay} disabled /></div>
+                                <div><Label>Hypervisor</Label><Input value={specObject.hypervisor?.name || 'N/A'} disabled /></div>
+                            </div>
+                            {(specObject.custom_fields?.length > 0) && (
+                                <div className="md:col-span-2 space-y-2">
+                                <h3 className="font-semibold text-lg">Custom Fields</h3>
+                                <div className="space-y-2">
+                                    {specObject.custom_fields.map((field: any, index: number) => (
+                                        <div key={index} className="flex items-center gap-2">
+                                            <Input value={field.key} disabled className="font-semibold" />
+                                            <Input value={field.value} disabled />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
+                            )}
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">
@@ -241,29 +193,16 @@ export default function ViewSpecificationPage() {
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="delete-comment">Reason for Deletion *</Label>
-                                        <Textarea 
-                                            id="delete-comment"
-                                            placeholder="Provide a comment for auditing purposes."
-                                            value={deleteComment}
-                                            onChange={(e) => setDeleteComment(e.target.value)}
-                                        />
+                                        <Textarea id="delete-comment" value={deleteComment} onChange={(e) => setDeleteComment(e.target.value)} />
                                     </div>
                                      <div className="space-y-2">
                                         <Label htmlFor="delete-confirmation">Type "delete" to confirm *</Label>
-                                        <Input 
-                                            id="delete-confirmation"
-                                            value={deleteConfirmationText}
-                                            onChange={(e) => setDeleteConfirmationText(e.target.value)}
-                                        />
+                                        <Input id="delete-confirmation" value={deleteConfirmationText} onChange={(e) => setDeleteConfirmationText(e.target.value)} />
                                     </div>
                                 </div>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction 
-                                        onClick={handleDelete}
-                                        disabled={isDeleteButtonDisabled}
-                                        className="bg-destructive hover:bg-destructive/90"
-                                    >
+                                    <AlertDialogAction onClick={handleDelete} disabled={isDeleteButtonDisabled} className="bg-destructive hover:bg-destructive/90">
                                         {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                         Continue
                                     </AlertDialogAction>
@@ -273,16 +212,12 @@ export default function ViewSpecificationPage() {
                     </CardFooter>
                 </Card>
                  <Card className="mt-6">
-                    <CardHeader>
-                        <CardTitle>Visualization & Raw JSON</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle>Visualization & Raw JSON</CardTitle></CardHeader>
                     <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="h-[30rem]">
-                            <DiagramDisplay specJson={specJson} />
-                        </div>
+                        <div className="h-[30rem]"><DiagramDisplay specJson={specification.json_string} /></div>
                         <div>
                            <Label htmlFor="json-output">Specification JSON</Label>
-                           <Textarea id="json-output" value={specJson} readOnly rows={24} className="font-mono text-xs"/>
+                           <Textarea id="json-output" value={specification.json_string} readOnly rows={24} className="font-mono text-xs"/>
                         </div>
                     </CardContent>
                 </Card>

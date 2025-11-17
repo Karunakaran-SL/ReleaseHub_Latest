@@ -6,21 +6,8 @@ import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
 const SpecificationUpdateSchema = z.object({
-  id: z.string().optional(),
   name: z.string().optional(),
-  hw_type: z.object({ id: z.string(), name: z.string() }).optional(),
-  vendor: z.string().optional(),
-  total_cpu: z.number().optional(),
-  memory_gb: z.number().optional(),
-  storage_gb: z.number().optional(),
-  hypervisor: z.object({ id: z.string(), name: z.string() }).optional(),
-  image: z.string().url().optional(),
-  service_contract_type: z.object({ id: z.string(), name: z.string() }).optional(),
-  contact_point_email: z.string().email().optional(),
-  contact_point_phone: z.string().optional(),
-  network_cards: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
-  plug_power_cords: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
-  custom_fields: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
+  json_string: z.string().optional(),
   updateComment: z.string().min(1, 'Update comment is required.'),
 });
 

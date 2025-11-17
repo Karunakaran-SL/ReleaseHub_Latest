@@ -224,7 +224,7 @@ export default function SpecificationsPage() {
                     <TableRow key={spec._id}>
                       <TableCell>
                         <Image 
-                            src={spec.image} 
+                            src={spec.image || `https://picsum.photos/seed/${spec._id}/40/40`} 
                             alt={spec.name} 
                             width={40} 
                             height={40} 
@@ -236,8 +236,8 @@ export default function SpecificationsPage() {
                             {spec.name}
                         </Link>
                       </TableCell>
-                      <TableCell>{spec.hw_type.name}</TableCell>
-                      <TableCell>{spec.vendor}</TableCell>
+                      <TableCell>{spec.hw_type?.name || 'N/A'}</TableCell>
+                      <TableCell>{spec.vendor || 'N/A'}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" asChild>
