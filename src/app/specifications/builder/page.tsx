@@ -150,7 +150,7 @@ export default function SpecificationBuilderPage() {
     }, [formData.hw_type, options.hwTypes]);
 
     const handleNext = useCallback(async () => {
-        const maxSteps = isBladeSelected ? 2 : 1; 
+        const maxSteps = 1;
         const nextStep = step + 1;
         
         if (nextStep > maxSteps) {
@@ -193,7 +193,8 @@ export default function SpecificationBuilderPage() {
     }
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { id, value, type, checked } = e.target;
+        const { id, value, type } = e.target as HTMLInputElement;
+        const checked = e.target as HTMLInputElement;
         setFormData((prev: any) => ({ ...prev, [id]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value }));
     };
 
@@ -309,13 +310,6 @@ export default function SpecificationBuilderPage() {
             </div>
             <div className="space-y-4">
                 <h3 className="font-semibold text-lg">HW Resources</h3>
-                {!isBladeSelected && (
-                    <>
-                        <div><Label htmlFor="total_cpu">Total CPU *</Label><Input id="total_cpu" type="number" value={formData.total_cpu || ''} onChange={handleInputChange} required /></div>
-                        <div><Label htmlFor="memory_gb">Memory (GB) *</Label><Input id="memory_gb" type="number" value={formData.memory_gb || ''} onChange={handleInputChange} required /></div>
-                    </>
-                )}
-                <div><Label htmlFor="storage_gb">Total Storage (GB) *</Label><Input id="storage_gb" type="number" value={formData.storage_gb || ''} onChange={handleInputChange} required /></div>
                 <div>
                     <Label>Network Cards type</Label>
                     <MultiSelectListBox
@@ -347,7 +341,45 @@ export default function SpecificationBuilderPage() {
                 </div>
             </div>
              <div className="space-y-4 md:col-span-2">
-                <h3 className="font-semibold text-lg">Custom Fields</h3>
+                 <h3 className="font-semibold text-lg">Hardware Specification</h3>
+                {isBladeSelected ? (
+                     <div className="space-y-4">
+                        <Label className="text-md font-semibold">Blade Configuration</Label>
+                        <RadioGroup onValueChange={(v) => handleRadioChange('symmetric', v)} value={String(formData.symmetric)} className="mt-2 space-y-1">
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="true" id="sym1" /><Label htmlFor="sym1" className="font-normal">Symmetric (all blades identical)</Label></div>
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="false" id="sym2" /><Label htmlFor="sym2" className="font-normal">Asymmetric (define each blade individually)</Label></div>
+                        </RadioGroup>
+                    </div>
+                ): (
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
+                        <div><Label htmlFor="total_cpu">Total CPU *</Label><Input id="total_cpu" type="number" value={formData.total_cpu || ''} onChange={handleInputChange} required /></div>
+                        <div><Label htmlFor="memory_gb">Memory (GB) *</Label><Input id="memory_gb" type="number" value={formData.memory_gb || ''} onChange={handleInputChange} required /></div>
+                        <div><Label htmlFor="storage_gb">Total Storage (GB) *</Label><Input id="storage_gb" type="number" value={formData.storage_gb || ''} onChange={handleInputChange} required /></div>
+                     </div>
+                )}
+                {isBladeSelected && formData.symmetric && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
+                        <div><Label htmlFor="bladeCount">Number of Blades</Label><Input id="bladeCount" type="number" value={formData.bladeCount || 1} onChange={handleBladeCountChange} min={1} /></div>
+                        <div><Label htmlFor="cpuType">CPU Type (per blade)</Label><Input id="cpuType" value={formData.cpuType || ''} onChange={handleInputChange} /></div>
+                        <div><Label htmlFor="memoryPerBlade">Memory (GB per blade)</Label><Input id="memoryPerBlade" type="number" value={formData.memoryPerBlade || ''} onChange={handleInputChange} /></div>
+                    </div>
+                )}
+                 {isBladeSelected && !formData.symmetric && (
+                    <div className="space-y-4 border p-4 rounded-md">
+                        {formData.blades.map((blade: any, index: number) => (
+                            <Card key={index}>
+                                <CardHeader><CardTitle>Blade {index + 1}</CardTitle></CardHeader>
+                                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><Label htmlFor={`blade-name-${index}`}>Blade Name</Label><Input id={`blade-name-${index}`} value={blade.name} onChange={e => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>
+                                    <div><Label htmlFor={`blade-cpu-${index}`}>CPU Type</Label><Input id={`blade-cpu-${index}`} value={blade.cpuType || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuType', e.target.value)} /></div>
+                                    <div><Label htmlFor={`blade-mem-${index}`}>Memory (GB)</Label><Input id={`blade-mem-${index}`} type="number" value={blade.memoryPerBlade || ''} onChange={e => handleAsymmetricBladeChange(index, 'memoryPerBlade', Number(e.target.value))} /></div>
+                                    <div><Label htmlFor={`blade-storage-${index}`}>Storage (GB)</Label><Input id={`blade-storage-${index}`} type="number" value={blade.storageCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'storageCapacity', Number(e.target.value))} /></div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+                <h3 className="font-semibold text-lg mt-6">Custom Fields</h3>
                 <div className="space-y-2">
                     {(formData.custom_fields || []).map((field: any, index: number) => (
                         <div key={index} className="flex items-center gap-2">
@@ -359,40 +391,6 @@ export default function SpecificationBuilderPage() {
                 </div>
                 <Button variant="link" size="sm" onClick={addCustomField} type="button" className="mt-2 px-0"><PlusCircle className="mr-2 h-4 w-4" />ADD CUSTOM FIELD</Button>
             </div>
-        </div>
-    );
-
-    const renderBladeConfigStep = () => (
-        <div className="space-y-6">
-            <div>
-                <Label className="text-lg font-semibold">Blade Configuration</Label>
-                <RadioGroup onValueChange={(v) => handleRadioChange('symmetric', v)} value={String(formData.symmetric)} className="mt-2 space-y-1">
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="true" id="sym1" /><Label htmlFor="sym1" className="font-normal">Symmetric (all blades identical)</Label></div>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="false" id="sym2" /><Label htmlFor="sym2" className="font-normal">Asymmetric (define each blade individually)</Label></div>
-                </RadioGroup>
-            </div>
-
-            {formData.symmetric ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-md">
-                     <div><Label htmlFor="bladeCount">Number of Blades</Label><Input id="bladeCount" type="number" value={formData.bladeCount || 1} onChange={handleBladeCountChange} min={1} /></div>
-                     <div><Label htmlFor="cpuType">CPU Type (per blade)</Label><Input id="cpuType" value={formData.cpuType || ''} onChange={handleInputChange} /></div>
-                     <div><Label htmlFor="memoryPerBlade">Memory (GB per blade)</Label><Input id="memoryPerBlade" type="number" value={formData.memoryPerBlade || ''} onChange={handleInputChange} /></div>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {formData.blades.map((blade: any, index: number) => (
-                        <Card key={index}>
-                            <CardHeader><CardTitle>Blade {index + 1}</CardTitle></CardHeader>
-                            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                 <div><Label htmlFor={`blade-name-${index}`}>Blade Name</Label><Input id={`blade-name-${index}`} value={blade.name} onChange={e => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>
-                                <div><Label htmlFor={`blade-cpu-${index}`}>CPU Type</Label><Input id={`blade-cpu-${index}`} value={blade.cpuType || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuType', e.target.value)} /></div>
-                                <div><Label htmlFor={`blade-mem-${index}`}>Memory (GB)</Label><Input id={`blade-mem-${index}`} type="number" value={blade.memoryPerBlade || ''} onChange={e => handleAsymmetricBladeChange(index, 'memoryPerBlade', Number(e.target.value))} /></div>
-                                <div><Label htmlFor={`blade-storage-${index}`}>Storage (GB)</Label><Input id={`blade-storage-${index}`} type="number" value={blade.storageCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'storageCapacity', Number(e.target.value))} /></div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            )}
         </div>
     );
     
@@ -437,8 +435,6 @@ export default function SpecificationBuilderPage() {
         switch (step) {
             case 1:
                 return renderStepOne();
-            case 2:
-                return renderBladeConfigStep();
             case 3:
                 return renderSummaryAndExport();
             default:
@@ -461,8 +457,7 @@ export default function SpecificationBuilderPage() {
                     <CardHeader>
                         <CardTitle>
                            {step === 1 && 'Step 1: Define Specification Details'}
-                           {step === 2 && 'Step 2: Configure Blade Layout'}
-                           {step === 3 && 'Step 3: Review and Finalize'}
+                           {step === 3 && 'Step 2: Review and Finalize'}
                         </CardTitle>
                     </CardHeader>
                      <CardContent>

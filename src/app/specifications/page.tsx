@@ -40,7 +40,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useEffect, useState } from 'react';
-import type { User } from '@/lib/definitions';
+import type { User, Specification } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import DashboardLayout from '../dashboard-layout';
 import Image from 'next/image';
@@ -50,13 +50,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-interface Specification {
-    _id: string;
-    name: string;
-    hw_type: { name: string };
-    vendor: string;
-    image: string;
-}
 
 function DeleteSpecificationDialog({ specification, onSpecificationDeleted }: { specification: Specification, onSpecificationDeleted: () => void}) {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -205,7 +198,7 @@ export default function SpecificationsPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Specifications</h1>
           <Button asChild>
-            <Link href="/specifications/create">CREATE SPECIFICATION</Link>
+            <Link href="/specifications/builder">CREATE SPECIFICATION</Link>
           </Button>
         </div>
 

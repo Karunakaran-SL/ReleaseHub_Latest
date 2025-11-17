@@ -51,10 +51,31 @@ export type Product = {
 
 export type Specification = {
     _id: string;
+    id: string;
     name: string;
     hw_type: { id: string; name: string; };
     vendor: string;
+    total_cpu?: number;
+    memory_gb?: number;
+    storage_gb?: number;
+    hypervisor?: { id: string; name: string; };
     image: string;
+    service_contract_type?: { id: string; name: string; };
+    contact_point_email?: string;
+    contact_point_phone?: string;
+    network_cards?: { id: string; name: string; }[];
+    plug_power_cords?: { id: string; name: string; }[];
+    custom_fields?: { key: string; value: string; }[];
+    symmetric?: boolean;
+    bladeCount?: number;
+    cpuType?: string;
+    memoryPerBlade?: number;
+    blades?: {
+        name: string;
+        cpuType: string;
+        memoryPerBlade: number;
+        storageCapacity: number;
+    }[];
 };
 
 

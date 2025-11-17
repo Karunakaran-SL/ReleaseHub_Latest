@@ -6,23 +6,38 @@ import { z } from 'zod';
 import { logAuditEvent } from '@/lib/audit';
 import { getUser } from '@/lib/auth';
 
+const RefSchema = z.object({ id: z.string(), name: z.string() }).optional();
+const CustomFieldSchema = z.object({ key: z.string(), value: z.string() }).optional();
+const BladeSchema = z.object({
+  name: z.string(),
+  cpuType: z.string(),
+  memoryPerBlade: z.number(),
+  storageCapacity: z.number(),
+}).optional();
+
 const SpecificationSchema = z.object({
   name: z.string(),
-  hw_type: z.object({ id: z.string(), name: z.string() }),
-  vendor: z.string(),
-  total_cpu: z.number(),
-  memory_gb: z.number(),
-  storage_gb: z.number(),
-  hypervisor: z.object({ id: z.string(), name: z.string() }),
-  image: z.string().url(),
-  service_contract_type: z.object({ id: z.string(), name: z.string() }),
-  contact_point_email: z.string().email(),
-  contact_point_phone: z.string(),
-  network_cards: z.array(z.object({ id: z.string(), name: z.string() })),
-  plug_power_cords: z.array(z.object({ id: z.string(), name: z.string() })),
-  custom_fields: z.array(z.object({ key: z.string(), value: z.string() })),
+  hw_type: RefSchema,
+  vendor: z.string().optional(),
+  total_cpu: z.number().optional(),
+  memory_gb: z.number().optional(),
+  storage_gb: z.number().optional(),
+  hypervisor: RefSchema,
+  image: z.string().url().optional(),
+  service_contract_type: RefSchema,
+  contact_point_email: z.string().email().optional().nullable(),
+  contact_point_phone: z.string().optional().nullable(),
+  network_cards: z.array(RefSchema).optional(),
+  plug_power_cords: z.array(RefSchema).optional(),
+  custom_fields: z.array(CustomFieldSchema).optional(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
+  // For blade servers
+  symmetric: z.boolean().optional(),
+  bladeCount: z.number().optional(),
+  cpuType: z.string().optional(),
+  memoryPerBlade: z.number().optional(),
+  blades: z.array(BladeSchema).optional(),
 });
 
 // List all or search
@@ -51,6 +66,7 @@ export async function POST(req: NextRequest) {
         const validatedData = SpecificationSchema.safeParse(body);
 
         if (!validatedData.success) {
+            console.error(validatedData.error.flatten().fieldErrors);
             return NextResponse.json({ message: 'Invalid data.', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
         }
 

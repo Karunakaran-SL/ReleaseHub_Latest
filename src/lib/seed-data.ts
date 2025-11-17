@@ -1,6 +1,6 @@
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
-import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing } from './definitions';
+import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification } from './definitions';
 
 
 const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
@@ -627,37 +627,37 @@ const initialServiceContracts = [
     { id: 'CommunitySupport', name: 'Community Support', description: 'Community-based support for open-source software.'}
 ];
 
-const initialSpecifications = [
-  { "name": "ArgoCD Sync Spec", "vendor": "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-  { "name": "Single Sign-On Spec", "vendor": "OpenID", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-  { "name": "Spark Processing", "vendor": "Apache", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-  { "name": "Kafka Streaming", "vendor": "Apache", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-  { "name": "Kubeflow Pipelines", "vendor": "Google", service_contract_type: { id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus' } },
-  { "name": "PyTorch Distribution", "vendor": "Facebook", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-  { "name": "KubeEdge Node Spec", "vendor": "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-  { "name": "MQTT Broker Spec", "vendor": "OASIS", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-  { "name": "Istio Service Mesh", "vendor": "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-  { "name": "SPIFFE Identity", "vendor": "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } }
+const initialSpecificationsData: Partial<Specification>[] = [
+    { name: "ArgoCD Sync Spec", vendor: "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+    { name: "Single Sign-On Spec", vendor: "OpenID", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+    { name: "Spark Processing", vendor: "Apache", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+    { name: "Kafka Streaming", vendor: "Apache", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+    { name: "Kubeflow Pipelines", vendor: "Google", service_contract_type: { id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus' } },
+    { name: "PyTorch Distribution", vendor: "Facebook", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+    { name: "KubeEdge Node Spec", vendor: "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+    { name: "MQTT Broker Spec", vendor: "OASIS", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+    { name: "Istio Service Mesh", vendor: "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
+    { name: "SPIFFE Identity", vendor: "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } }
 ];
 
-const fullSpecifications = initialSpecifications.map(spec => ({
-    _id: spec.name.replace(/[^a-zA-Z0-9]/g, ''),
-    id: spec.name.replace(/[^a-zA-Z0-9]/g, ''),
-    ...spec,
-    hw_type: { "id": "Virtual", "name": "Virtual" },
-    total_cpu: 32, 
-    memory_gb: 128, 
-    storage_gb: 1024,
-    hypervisor: { "id": "KVM", "name": "KVM" },
-    image: `https://picsum.photos/seed/${spec.name.replace(/[^a-zA-Z0-9]/g, '')}/40/40`,
-    contact_point_email: "community@cncf.io",
-    contact_point_phone: "N/A",
-    network_cards: [{ "id": "VirtualNIC10Gbps", "name": "Virtual NIC 10Gbps" }],
-    plug_power_cords: [{ "id": "VirtualPower", "name": "Virtual Power" }],
-    custom_fields: [{ "key": "ManagedBy", "value": "Platform Team" }],
-    created_at: new Date().toISOString(), 
-    updated_at: new Date().toISOString()
-}));
+const fullSpecifications: (Omit<Specification, '_id' | 'id'> & { id: string })[] = initialSpecificationsData.map(spec => {
+    const id = spec.name!.replace(/[^a-zA-Z0-9]/g, '');
+    return {
+        id: id,
+        ...spec,
+        hw_type: { id: "Virtual", name: "Virtual" },
+        total_cpu: 32,
+        memory_gb: 128,
+        storage_gb: 1024,
+        hypervisor: { id: "KVM", name: "KVM" },
+        image: `https://picsum.photos/seed/${id}/40/40`,
+        contact_point_email: "community@cncf.io",
+        contact_point_phone: "N/A",
+        network_cards: [{ id: "VirtualNIC10Gbps", name: "Virtual NIC 10Gbps" }],
+        plug_power_cords: [{ id: "VirtualPower", name: "Virtual Power" }],
+        custom_fields: [{ key: "ManagedBy", value: "Platform Team" }],
+    };
+});
 
 
 const initialDeploymentTypes = [
@@ -895,7 +895,7 @@ export async function seedDatabase() {
 
     const collectionsToSeed = [
         { name: 'products', data: initialProducts.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString()})) },
-        { name: 'specifications', data: fullSpecifications },
+        { name: 'specifications', data: fullSpecifications.map(s => ({ ...s, _id: s.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
         { name: 'deployment_types', data: initialDeploymentTypes },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'compliance_checks', data: initialComplianceChecks.map(c => ({...c, _id: c.name.replace(/[^a-zA-Z0-9]/g, '')})) },
