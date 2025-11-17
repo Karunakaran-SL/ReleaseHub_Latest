@@ -65,24 +65,28 @@ import Footer from '@/components/footer';
 function Header({ user }: { user: User | null }) {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="flex h-16 items-center px-4 md:px-6">
+      <div className="flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
           <Logo />
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-4">
-          <div className="relative hidden w-full max-w-sm items-center md:flex">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full rounded-full bg-muted pl-10"
-            />
-          </div>
+
+        <div className="flex flex-1 justify-center">
+            <div className="relative w-full max-w-sm items-center hidden md:flex">
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                type="search"
+                placeholder="Search..."
+                className="w-full rounded-full bg-muted pl-10"
+                />
+            </div>
+        </div>
+
+        <div className="flex items-center justify-end space-x-4">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/settings">
               <Settings />
-              <span className="ml-2 hidden md:inline">Settings</span>
+              <span className="sr-only">Settings</span>
             </Link>
           </Button>
           <Button variant="ghost" size="icon">
