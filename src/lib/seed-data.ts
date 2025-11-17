@@ -627,7 +627,7 @@ const initialServiceContracts = [
     { id: 'CommunitySupport', name: 'Community Support', description: 'Community-based support for open-source software.'}
 ];
 
-const initialSpecificationsData: Partial<Specification>[] = [
+const initialSpecificationsData: Partial<any>[] = [
     { name: "ArgoCD Sync Spec", vendor: "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
     { name: "Single Sign-On Spec", vendor: "OpenID", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
     { name: "Spark Processing", vendor: "Apache", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
@@ -640,10 +640,10 @@ const initialSpecificationsData: Partial<Specification>[] = [
     { name: "SPIFFE Identity", vendor: "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } }
 ];
 
-const fullSpecifications: (Omit<Specification, '_id' | 'id'> & { id: string })[] = initialSpecificationsData.map(spec => {
+const fullSpecifications: Omit<Specification, '_id'>[] = initialSpecificationsData.map(spec => {
     const id = spec.name!.replace(/[^a-zA-Z0-9]/g, '');
-    return {
-        id: id,
+    const specObject = {
+        name: spec.name,
         ...spec,
         hw_type: { id: "Virtual", name: "Virtual" },
         total_cpu: 32,
@@ -656,6 +656,11 @@ const fullSpecifications: (Omit<Specification, '_id' | 'id'> & { id: string })[]
         network_cards: [{ id: "VirtualNIC10Gbps", name: "Virtual NIC 10Gbps" }],
         plug_power_cords: [{ id: "VirtualPower", name: "Virtual Power" }],
         custom_fields: [{ key: "ManagedBy", value: "Platform Team" }],
+    };
+    return {
+        _id: id,
+        name: spec.name!,
+        json_string: JSON.stringify(specObject)
     };
 });
 
@@ -895,7 +900,7 @@ export async function seedDatabase() {
 
     const collectionsToSeed = [
         { name: 'products', data: initialProducts.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString()})) },
-        { name: 'specifications', data: fullSpecifications.map(s => ({ ...s, _id: s.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'specifications', data: fullSpecifications.map(s => ({ _id: s.id, name: s.name, json_string: s.json_string, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
         { name: 'deployment_types', data: initialDeploymentTypes },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'compliance_checks', data: initialComplianceChecks.map(c => ({...c, _id: c.name.replace(/[^a-zA-Z0-9]/g, '')})) },
