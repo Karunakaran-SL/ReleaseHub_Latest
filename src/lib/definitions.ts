@@ -1,5 +1,3 @@
-
-
 export type User = {
   _id: string;
   username: string;
@@ -202,7 +200,7 @@ export type CmdbInterface = {
   updated_at: string;
 };
 
-export type AnyCmdbEntity = (CmdbTenant | CmdbComponent | CmdbApplication | CmdbInterface | Product) & { entityType: EntityType };
+export type AnyCmdbEntity = (CmdbTenant | CmdbComponent | CmdbApplication | Product) & { id: string; name: string; version: string; entityType: EntityType };
 
 export type EntityType = 'tenant' | 'component' | 'application' | 'interface' | 'product';
 
@@ -211,16 +209,20 @@ export type DependencyTree = {
   id: string;
   name: string;
   version: string;
+  entityType: 'product';
   specifications: { id: string; name: string; version: string; }[];
   tenants: {
     id: string;
     name: string;
     version: string;
+    entityType: 'tenant';
     components: (CmdbComponent & {
+      entityType: 'component',
       provides_interfaces: CmdbInterface[];
       depends_on_interfaces: CmdbInterface[];
     })[];
     applications: (CmdbApplication & {
+      entityType: 'application',
       provides_interfaces: CmdbInterface[];
       depends_on_interfaces: CmdbInterface[];
     })[];

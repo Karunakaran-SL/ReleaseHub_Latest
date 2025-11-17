@@ -1,15 +1,15 @@
-
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, Product, DependencyTree } from '@/lib/definitions';
+import type { User, Product, DependencyTree, AnyCmdbEntity } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { DependencyTreeSidebar } from './_components/dependency-tree';
+import { DependencyGraph } from './_components/dependency-graph';
 
 export default function DependencyMetricsPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -18,8 +18,12 @@ export default function DependencyMetricsPage() {
 
     const [products, setProducts] = useState<Product[]>([]);
     const [selectedProductId, setSelectedProductId] = useState<string>('');
-    const [dependencyTree, setDependencyTree] = useState<DependencyTree | null>(null);
+    const [productTree, setProductTree] = useState<DependencyTree | null>(null);
     const [loadingTree, setLoadingTree] = useState(false);
+
+    const [selectedNode, setSelectedNode] = useState<AnyCmdbEntity | null>(null);
+    const [graphData, setGraphData] = useState<any>(null);
+    const [loadingGraph, setLoadingGraph] = useState(false);
 
     useEffect(() => {
         getUser().then(setUser);
@@ -51,14 +55,17 @@ export default function DependencyMetricsPage() {
                 const response = await fetch(`/api/dependency-tree/product/${selectedProductId}`);
                 if (response.ok) {
                     const data = await response.json();
-                    setDependencyTree(data);
+                    setProductTree(data);
+                    setSelectedNode({ ...data, entityType: 'product' });
                 } else {
                     const errorData = await response.json();
-                    setDependencyTree(null); // Clear previous tree on error
+                    setProductTree(null);
+                    setSelectedNode(null);
                     toast({ variant: 'destructive', title: 'Failed to load tree', description: errorData.message || 'Could not fetch dependency data.' });
                 }
             } catch (error: any) {
-                 setDependencyTree(null);
+                 setProductTree(null);
+                 setSelectedNode(null);
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
             } finally {
                 setLoadingTree(false);
@@ -67,6 +74,39 @@ export default function DependencyMetricsPage() {
         fetchTree();
 
     }, [selectedProductId, toast]);
+
+    const fetchGraphData = useCallback(async (node: AnyCmdbEntity | null) => {
+        if (!node) {
+            setGraphData(null);
+            return;
+        };
+
+        setLoadingGraph(true);
+        try {
+             const response = await fetch(`/api/dependency-tree/${node.entityType}/${node.id}`);
+             if(response.ok) {
+                setGraphData(await response.json());
+             } else {
+                const errorData = await response.json();
+                toast({ variant: 'destructive', title: 'Error', description: errorData.message || 'Could not fetch graph data.' });
+                setGraphData(null);
+             }
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: error.message });
+            setGraphData(null);
+        } finally {
+            setLoadingGraph(false);
+        }
+
+    }, [toast]);
+
+    useEffect(() => {
+        fetchGraphData(selectedNode);
+    }, [selectedNode, fetchGraphData]);
+
+    const handleNodeSelect = (node: AnyCmdbEntity) => {
+        setSelectedNode(node);
+    };
 
     const handleUpdateMetrics = async () => {
         setIsUpdatingMetrics(true);
@@ -80,7 +120,9 @@ export default function DependencyMetricsPage() {
                 if(selectedProductId) {
                     const treeResponse = await fetch(`/api/dependency-tree/product/${selectedProductId}`);
                     if (treeResponse.ok) {
-                        setDependencyTree(await treeResponse.json());
+                        const data = await treeResponse.json();
+                        setProductTree(data);
+                        setSelectedNode({ ...data, entityType: 'product' });
                     }
                 }
             } else {
@@ -115,9 +157,13 @@ export default function DependencyMetricsPage() {
                 </header>
 
                 <main className="flex-1 flex overflow-hidden">
-                    <DependencyTreeSidebar tree={dependencyTree} isLoading={loadingTree} />
-                     <div className="flex-1 flex items-center justify-center bg-muted/20">
-                        <p className="text-muted-foreground">Dependency graph will be displayed here.</p>
+                    <DependencyTreeSidebar tree={productTree} isLoading={loadingTree} onNodeSelect={handleNodeSelect} />
+                     <div className="flex-1 flex items-center justify-center bg-muted/20 p-4">
+                        <DependencyGraph 
+                            data={graphData} 
+                            isLoading={loadingGraph} 
+                            onNodeSelect={handleNodeSelect} 
+                        />
                     </div>
                 </main>
             </div>

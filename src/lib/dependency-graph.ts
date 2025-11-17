@@ -1,4 +1,3 @@
-
 import clientPromise from '@/lib/mongodb';
 import type { AnyCmdbEntity, DependencyTree, Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterface, EntityType } from './definitions';
 
@@ -36,7 +35,7 @@ export async function fetchAllData(): Promise<AllData> {
 }
 
 // Generates a dependency tree for a single product based on the new nested schema.
-export async function generateDependencyTree(product: Product, allData: AllData): Promise<any> {
+export async function generateProductDependencyTree(product: Product, allData: AllData): Promise<any> {
     
     // 1. Find specifications for the product
     const productSpecifications = allData.specifications.filter(spec => 
@@ -54,14 +53,14 @@ export async function generateDependencyTree(product: Product, allData: AllData)
             .map(c => {
                 const provides_interfaces = allData.interfaces.filter(i => c.provided_interfaces?.some(pi => pi.id === i.id));
                 const depends_on_interfaces = allData.interfaces.filter(i => c.dependent_interfaces?.some(di => di.id === i.id));
-                return {...c, version: c.version || '1.0.0', provides_interfaces, depends_on_interfaces};
+                return {...c, version: c.version || '1.0.0', provides_interfaces, depends_on_interfaces, entityType: 'component'};
             });
             
         const tenantApplications = allData.applications.filter(app => app.tenants?.some(t => t.id === tenant._id))
             .map(a => {
                 const provides_interfaces = allData.interfaces.filter(i => a.provided_interfaces?.some(pi => pi.id === i.id));
                 const depends_on_interfaces = allData.interfaces.filter(i => a.dependent_interfaces?.some(di => di.id === i.id));
-                return {...a, version: a.version || '1.0.0', provides_interfaces, depends_on_interfaces};
+                return {...a, version: a.version || '1.0.0', provides_interfaces, depends_on_interfaces, entityType: 'application'};
             });
 
         // Get the latest version of the tenant for the default tree
@@ -72,7 +71,8 @@ export async function generateDependencyTree(product: Product, allData: AllData)
             id: tenant.id,
             name: tenant.name,
             version: latestVersion,
-            parents: [{ id: product._id, name: product.name, version: product.version }],
+            entityType: 'tenant',
+            parents: [{ id: product._id, name: product.name, version: product.version, entityType: 'product' }],
             dependent_tenants: tenant.dependent_tenants || [],
             components: tenantComponents,
             applications: tenantApplications
@@ -85,6 +85,7 @@ export async function generateDependencyTree(product: Product, allData: AllData)
         id: product._id,
         name: product.name,
         version: product.version,
+        entityType: 'product',
         specifications: productSpecifications,
         tenants: tenantsTree,
         created_at: new Date().toISOString(),
@@ -106,7 +107,7 @@ export async function generateAndStoreAllProductTrees() {
     
     for (const product of allData.products) {
         try {
-            const tree = await generateDependencyTree(product, allData);
+            const tree = await generateProductDependencyTree(product, allData);
             await dependencyTreesCollection.updateOne(
                 { _id: tree._id },
                 { $set: tree },
@@ -119,4 +120,81 @@ export async function generateAndStoreAllProductTrees() {
         }
     }
     return { successfulUpdates, failedUpdates };
+}
+
+export async function generateDependencyTree(entityType: EntityType, entityId: string): Promise<any> {
+    const allData = await fetchAllData();
+    let centralNode: AnyCmdbEntity | null = null;
+    let parents: AnyCmdbEntity[] = [];
+    let children: AnyCmdbEntity[] = [];
+
+    const findAndAddEntityType = (items: any[], type: EntityType) => items.map(item => ({...item, entityType: type}));
+
+    const allEntities = [
+        ...findAndAddEntityType(allData.products, 'product'),
+        ...findAndAddEntityType(allData.tenants, 'tenant'),
+        ...findAndAddEntityType(allData.components, 'component'),
+        ...findAndAddEntityType(allData.applications, 'application'),
+    ];
+
+    centralNode = allEntities.find(e => e.id === entityId || e._id === entityId) || null;
+
+    if (!centralNode) {
+        throw new Error(`Entity ${entityId} of type ${entityType} not found.`);
+    }
+
+    // Find parents (what this node depends on)
+    if ('dependent_tenants' in centralNode && centralNode.dependent_tenants) {
+        centralNode.dependent_tenants.forEach(dep => {
+            const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'tenant');
+            if (parent) parents.push(parent);
+        });
+    }
+    if ('dependent_components' in centralNode && centralNode.dependent_components) {
+        centralNode.dependent_components.forEach(dep => {
+            const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'component');
+            if (parent) parents.push(parent);
+        });
+    }
+    if ('dependent_applications' in centralNode && centralNode.dependent_applications) {
+        centralNode.dependent_applications.forEach(dep => {
+            const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'application');
+            if (parent) parents.push(parent);
+        });
+    }
+    if ('tenants' in centralNode && centralNode.tenants) { // Component or App -> Tenant
+         centralNode.tenants.forEach(dep => {
+            const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'tenant');
+            if (parent) parents.push(parent);
+        });
+    }
+     if ('products' in centralNode && centralNode.products) { // Tenant -> Product
+         centralNode.products.forEach(dep => {
+            const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'product');
+            if (parent) parents.push(parent);
+        });
+    }
+
+
+    // Find children (what depends on this node)
+    allEntities.forEach(e => {
+        if (e.id === centralNode!.id) return; // Skip self
+
+        const dependsOnCurrent = (deps: {id: string}[]) => deps && deps.some(d => d.id === centralNode!.id);
+
+        if ('dependent_tenants' in e && dependsOnCurrent(e.dependent_tenants!)) children.push(e);
+        if ('dependent_components' in e && dependsOnCurrent(e.dependent_components!)) children.push(e);
+        if ('dependent_applications' in e && dependsOnCurrent(e.dependent_applications!)) children.push(e);
+        if ('tenants' in e && dependsOnCurrent(e.tenants!)) children.push(e);
+        if ('products' in e && dependsOnCurrent(e.products!)) children.push(e);
+    });
+
+    return {
+        id: centralNode.id,
+        name: centralNode.name,
+        version: centralNode.version,
+        entityType: centralNode.entityType,
+        parents: [...new Map(parents.map(item => [item.id, item])).values()],
+        children: [...new Map(children.map(item => [item.id, item])).values()]
+    };
 }

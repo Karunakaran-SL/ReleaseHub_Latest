@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { generateDependencyTree } from '@/lib/dependency-graph';
 import type { EntityType } from '@/lib/definitions';
