@@ -73,7 +73,7 @@ export default function LicenseToolsPage() {
     <DashboardLayout user={user}>
       <main className="flex-1 p-6 md:p-10">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">External LMS Integrations</h1>
+          <h1 className="text-3xl font-bold">LMS Integrations</h1>
           <p className="text-muted-foreground">An overview of popular open-source license compliance and management tools.</p>
         </div>
         <ScrollArea className="h-[calc(100vh-12rem)]">
