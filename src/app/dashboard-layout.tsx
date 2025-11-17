@@ -1,4 +1,3 @@
-
 'use client';
 import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -166,6 +165,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isDocumentsPage = pathname.startsWith('/documents');
     const isFleetManagementPage = pathname.startsWith('/fleet-management');
     const isLicensePage = pathname.startsWith('/license');
+    const isWorkflowPage = pathname.startsWith('/workflows');
 
 
   return (
@@ -176,11 +176,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage}
+                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage}
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -429,12 +429,31 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </SidebarMenuItem>
                 </Collapsible>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Workflow' }}>
-                    <WorkflowIcon />
-                    Workflow
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <Collapsible asChild defaultOpen={isWorkflowPage}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        isActive={isWorkflowPage}
+                        tooltip={{ children: 'Workflow' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <WorkflowIcon />
+                        Workflow
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/workflows/integration" isActive={pathname.startsWith('/workflows/integration')}>
+                            <DatabaseZap className="mr-2"/> Integration
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+
                 <SidebarMenuItem>
                   <SidebarMenuButton tooltip={{ children: 'Jobs' }}>
                     <ClipboardList />
