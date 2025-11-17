@@ -1,3 +1,4 @@
+
 'use client';
 import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,8 @@ import {
   CheckSquare,
   SlidersHorizontal,
   Database,
-  FileKey2
+  FileKey2,
+  Wrench,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -72,7 +74,7 @@ function Header({ user }: { user: User | null }) {
           <Logo />
         </div>
 
-        <div className="flex flex-1 justify-center">
+        <div className="flex flex-1 justify-center px-4">
             <div className="relative w-full max-w-sm items-center hidden md:flex">
                 <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -408,6 +410,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                          <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/license/product-licensing" isActive={pathname.startsWith('/license/product-licensing')}>
                             Product Licensing
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/license/tools" isActive={pathname.startsWith('/license/tools')}>
+                             <Wrench className="mr-2"/> Tools
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
