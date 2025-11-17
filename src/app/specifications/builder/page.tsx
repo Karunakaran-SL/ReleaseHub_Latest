@@ -1,8 +1,9 @@
 
+
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User } from '@/lib/definitions';
+import type { User, Specification } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,10 +25,20 @@ interface Option {
     name: string;
 }
 
+type NewSpecificationState = Partial<Omit<Specification, '_id'>>;
+
+const initialFormState: NewSpecificationState = { 
+    symmetric: true, 
+    custom_fields: [{key: '', value: ''}], 
+    bladeCount: 1, 
+    blades: [{name: 'Blade 1'}] 
+};
+
+
 export default function SpecificationBuilderPage() {
     const [user, setUser] = useState<User | null>(null);
     const [step, setStep] = useState(1);
-    const [formData, setFormData] = useState<any>({ symmetric: true, custom_fields: [{key: '', value: ''}], bladeCount: 1, blades: [{name: 'Blade 1'}] });
+    const [formData, setFormData] = useState<NewSpecificationState>(initialFormState);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [copied, setCopied] = useState(false);
     const { toast } = useToast();
@@ -71,7 +82,7 @@ export default function SpecificationBuilderPage() {
     }, [toast]);
     
     const isBladeSelected = useMemo(() => {
-        return options.hwTypes.find(o => o._id === formData.hw_type)?.name === 'Blade';
+        return options.hwTypes.find(o => o._id === formData.hw_type?.id)?.name === 'Blade';
     }, [formData.hw_type, options.hwTypes]);
 
     const handleNext = useCallback(async () => {
@@ -79,16 +90,7 @@ export default function SpecificationBuilderPage() {
         const nextStep = step + 1;
         
         if (nextStep > maxSteps) {
-            const specName = formData.name || `Spec-${formData.hw_type || 'Custom'}-${Date.now()}`;
-            
-            let fullSpec: any = {
-                name: specName,
-                ...formData,
-            };
-
-            if(formData.hw_type) fullSpec.hw_type = { id: formData.hw_type, name: options.hwTypes.find(o => o._id === formData.hw_type)?.name };
-            if(formData.hypervisor) fullSpec.hypervisor = { id: formData.hypervisor, name: options.hypervisors.find(o => o._id === formData.hypervisor)?.name };
-            if(formData.service_contract_type) fullSpec.service_contract_type = { id: formData.service_contract_type, name: options.serviceContracts.find(o => o._id === formData.service_contract_type)?.name };
+            let fullSpec: any = { ...formData };
             
             if (isBladeSelected) {
                 if (formData.symmetric) {
@@ -107,11 +109,11 @@ export default function SpecificationBuilderPage() {
             }
             
             setJsonSpec(JSON.stringify(fullSpec, null, 2));
-            setStep(2); // Final summary step
+            setStep(2);
         } else {
             setStep(nextStep);
         }
-    }, [step, formData, options, isBladeSelected, setJsonSpec, setStep]);
+    }, [step, formData, isBladeSelected, setJsonSpec, setStep]);
 
     const handleBack = () => {
         setStep(s => s - 1);
@@ -129,7 +131,7 @@ export default function SpecificationBuilderPage() {
     }
     
     const handleAsymmetricBladeChange = (index: number, field: string, value: any) => {
-        const newBlades = [...formData.blades];
+        const newBlades = [...(formData.blades || [])];
         newBlades[index] = {...newBlades[index], [field]: value };
         setFormData((prev: any) => ({...prev, blades: newBlades}));
     }
@@ -139,7 +141,21 @@ export default function SpecificationBuilderPage() {
     };
 
     const handleSelectChange = (field: string, value: string) => {
-        setFormData((prev: any) => ({...prev, [field]: value}));
+        const listMap: Record<string, Option[]> = {
+            'hw_type': options.hwTypes,
+            'hypervisor': options.hypervisors,
+            'service_contract_type': options.serviceContracts
+        }
+        
+        if (field === 'vendor') {
+            setFormData((prev: any) => ({...prev, vendor: value}));
+        } else {
+            const list = listMap[field];
+            const selectedOption = list.find(opt => opt._id === value);
+            if (selectedOption) {
+                setFormData((prev: any) => ({ ...prev, [field]: { id: selectedOption._id, name: selectedOption.name } }));
+            }
+        }
     };
     
     const handleMultiSelectChange = (field: 'network_cards' | 'plug_power_cords', selectedItems: { id: string; name: string }[]) => {
@@ -182,10 +198,7 @@ export default function SpecificationBuilderPage() {
             const response = await fetch('/api/specifications', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: payload.name,
-                    json_string: jsonSpec
-                }),
+                body: JSON.stringify(payload),
             });
             if (!response.ok) {
                  const errorData = await response.json();
@@ -207,14 +220,14 @@ export default function SpecificationBuilderPage() {
                 <div><Label htmlFor="name">HW Name *</Label><Input id="name" value={formData.name || ''} onChange={handleInputChange} required /></div>
                 <div>
                     <Label htmlFor="hw_type">HW Type</Label>
-                    <Select value={formData.hw_type} onValueChange={(value) => handleSelectChange('hw_type', value)}>
+                    <Select value={formData.hw_type?.id} onValueChange={(value) => handleSelectChange('hw_type', value)}>
                         <SelectTrigger><SelectValue placeholder="Select HW Type" /></SelectTrigger>
                         <SelectContent>{options.hwTypes.map(t => <SelectItem key={t._id} value={t._id}>{t.name}</SelectItem>)}</SelectContent>
                     </Select>
                 </div>
                 <div>
                     <Label htmlFor="vendor">Vendor *</Label>
-                    <Select value={formData.vendor} onValueChange={(value) => setFormData((prev: any) => ({...prev, vendor: value}))} required>
+                    <Select value={formData.vendor} onValueChange={(value) => handleSelectChange('vendor', value)} required>
                         <SelectTrigger><SelectValue placeholder="Select Vendor" /></SelectTrigger>
                         <SelectContent>{options.vendors.map(v => <SelectItem key={v._id} value={v.name}>{v.name}</SelectItem>)}</SelectContent>
                     </Select>
@@ -222,7 +235,7 @@ export default function SpecificationBuilderPage() {
                 <div><Label htmlFor="image">Image URL</Label><Input id="image" value={formData.image || ''} onChange={handleInputChange} /></div>
                  <div>
                     <Label htmlFor="service_contract_type">Service Contract Type</Label>
-                    <Select value={formData.service_contract_type} onValueChange={(value) => handleSelectChange('service_contract_type', value)}>
+                    <Select value={formData.service_contract_type?.id} onValueChange={(value) => handleSelectChange('service_contract_type', value)}>
                         <SelectTrigger><SelectValue placeholder="Select Contract Type" /></SelectTrigger>
                         <SelectContent>{options.serviceContracts.map(c => <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>)}</SelectContent>
                     </Select>
@@ -257,7 +270,7 @@ export default function SpecificationBuilderPage() {
                     )}
                     {isBladeSelected && !formData.symmetric && (
                         <div className="space-y-4 border p-4 rounded-md">
-                            {formData.blades.map((blade: any, index: number) => (
+                            {(formData.blades || []).map((blade: any, index: number) => (
                                 <Card key={index}>
                                     <CardHeader><CardTitle>Blade {index + 1}</CardTitle></CardHeader>
                                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -278,7 +291,7 @@ export default function SpecificationBuilderPage() {
                     <Label>Network Cards type</Label>
                     <MultiSelectListBox
                         available={options.networkCards.filter(opt => !(formData.network_cards || []).some((c:any) => c.id === opt._id)).map(o => ({id: o._id, label: o.name}))}
-                        chosen={(formData.network_cards || []).map((c:any) => ({id: c.id, name: c.name})).map((o: any) => ({id: o.id, label: o.name}))}
+                        chosen={(formData.network_cards || []).map((o: any) => ({id: o.id, label: o.name}))}
                         onMoveToChosen={(ids) => handleMultiSelectChange('network_cards', [...(formData.network_cards || []), ...ids.map(id => ({id, name: options.networkCards.find(o => o._id === id)?.name || ''}))] )}
                         onMoveToAvailable={(ids) => handleMultiSelectChange('network_cards', (formData.network_cards || []).filter((c:any) => !ids.includes(c.id)))}
                         onMoveAllToChosen={() => handleMultiSelectChange('network_cards', options.networkCards.map(o => ({id: o._id, name: o.name})))}
@@ -289,7 +302,7 @@ export default function SpecificationBuilderPage() {
                     <Label>Plug/Power Cord Type</Label>
                      <MultiSelectListBox
                         available={options.plugPowerCords.filter(opt => !(formData.plug_power_cords || []).some((c:any) => c.id === opt._id)).map(o => ({id: o._id, label: o.name}))}
-                        chosen={(formData.plug_power_cords || []).map((c:any) => ({id: c.id, name: c.name})).map((o: any) => ({id: o.id, label: o.name}))}
+                        chosen={(formData.plug_power_cords || []).map((o: any) => ({id: o.id, label: o.name}))}
                         onMoveToChosen={(ids) => handleMultiSelectChange('plug_power_cords', [...(formData.plug_power_cords || []), ...ids.map(id => ({id, name: options.plugPowerCords.find(o => o._id === id)?.name || ''}))] )}
                         onMoveToAvailable={(ids) => handleMultiSelectChange('plug_power_cords', (formData.plug_power_cords || []).filter((c:any) => !ids.includes(c.id)))}
                         onMoveAllToChosen={() => handleMultiSelectChange('plug_power_cords', options.plugPowerCords.map(o => ({id: o._id, name: o.name})))}
@@ -298,7 +311,7 @@ export default function SpecificationBuilderPage() {
                 </div>
                  <div>
                     <Label htmlFor="hypervisor">Hypervisor</Label>
-                    <Select value={formData.hypervisor} onValueChange={(value) => handleSelectChange('hypervisor', value)}>
+                    <Select value={formData.hypervisor?.id} onValueChange={(value) => handleSelectChange('hypervisor', value)}>
                         <SelectTrigger><SelectValue placeholder="N/A" /></SelectTrigger>
                         <SelectContent>{options.hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
                     </Select>
@@ -351,7 +364,7 @@ export default function SpecificationBuilderPage() {
                 </Card>
                  <Button className="w-full" size="lg" onClick={handleSubmit} disabled={isSubmitting}>
                     {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Package className="h-5 w-5 mr-2" />}
-                    Create Specification from JSON
+                    Create Specification
                  </Button>
             </div>
         </div>

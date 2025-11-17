@@ -53,10 +53,29 @@ export type Product = {
 export type Specification = {
     _id: string;
     name: string;
-    json_string: string; // The entire spec object stringified
-    // The fields below are for list display and can be parsed from json_string
-    hw_type?: { name: string; };
+    hw_type?: { id: string; name: string };
     vendor?: string;
+    image?: string;
+    service_contract_type?: { id: string; name: string };
+    contact_point_email?: string;
+    contact_point_phone?: string;
+    custom_fields?: { key: string; value: string }[];
+    symmetric?: boolean;
+    total_cpu?: number;
+    memory_gb?: number;
+    storage_gb?: number;
+    bladeCount?: number;
+    cpuType?: string;
+    memoryPerBlade?: number;
+    blades?: {
+        name: string;
+        cpuType?: string;
+        memoryPerBlade?: number;
+        storageCapacity?: number;
+    }[];
+    network_cards?: { id: string; name: string }[];
+    plug_power_cords?: { id: string; name: string }[];
+    hypervisor?: { id: string; name: string };
 };
 
 

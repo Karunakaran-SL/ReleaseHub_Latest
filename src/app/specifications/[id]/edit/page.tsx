@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -61,15 +62,7 @@ export default function EditSpecificationPage() {
                 if (!specRes.ok) throw new Error('Failed to fetch specification');
                 const specData = await specRes.json();
                 
-                let specObject = {};
-                try {
-                    specObject = JSON.parse(specData.json_string);
-                } catch {
-                     throw new Error('Failed to parse specification JSON data.');
-                }
-                
-                setFormState(specObject);
-                setJsonString(specData.json_string);
+                setFormState(specData);
 
                 setOptions({
                     hwTypes: await hwTypesRes.json(),
@@ -176,17 +169,12 @@ export default function EditSpecificationPage() {
         }
 
         setLoading(true);
-        const payload = {
-            name: parsedJson.name,
-            json_string: jsonString,
-            updateComment: formState.updateComment
-        };
         
         try {
             const response = await fetch(`/api/specifications/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
+                body: JSON.stringify(parsedJson),
             });
             if (!response.ok) {
                  const errorData = await response.json();

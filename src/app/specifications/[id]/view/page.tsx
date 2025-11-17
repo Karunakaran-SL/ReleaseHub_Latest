@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -41,13 +42,8 @@ export default function ViewSpecificationPage() {
     const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
 
     const specObject = useMemo(() => {
-        if (!specification?.json_string) return null;
-        try {
-            return JSON.parse(specification.json_string);
-        } catch (e) {
-            console.error("Failed to parse spec JSON");
-            return null;
-        }
+        if (!specification) return null;
+        return specification;
     }, [specification]);
 
     useEffect(() => {
@@ -214,10 +210,10 @@ export default function ViewSpecificationPage() {
                  <Card className="mt-6">
                     <CardHeader><CardTitle>Visualization & Raw JSON</CardTitle></CardHeader>
                     <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="h-[30rem]"><DiagramDisplay specJson={specification.json_string} /></div>
+                        <div className="h-[30rem]"><DiagramDisplay specJson={JSON.stringify(specObject, null, 2)} /></div>
                         <div>
                            <Label htmlFor="json-output">Specification JSON</Label>
-                           <Textarea id="json-output" value={specification.json_string} readOnly rows={24} className="font-mono text-xs"/>
+                           <Textarea id="json-output" value={JSON.stringify(specObject, null, 2)} readOnly rows={24} className="font-mono text-xs"/>
                         </div>
                     </CardContent>
                 </Card>

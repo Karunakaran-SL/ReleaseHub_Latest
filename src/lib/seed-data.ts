@@ -627,43 +627,23 @@ const initialServiceContracts = [
     { id: 'CommunitySupport', name: 'Community Support', description: 'Community-based support for open-source software.'}
 ];
 
-const initialSpecificationsData: Partial<any>[] = [
-    { name: "ArgoCD Sync Spec", vendor: "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-    { name: "Single Sign-On Spec", vendor: "OpenID", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-    { name: "Spark Processing", vendor: "Apache", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-    { name: "Kafka Streaming", vendor: "Apache", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-    { name: "Kubeflow Pipelines", vendor: "Google", service_contract_type: { id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus' } },
-    { name: "PyTorch Distribution", vendor: "Facebook", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-    { name: "KubeEdge Node Spec", vendor: "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-    { name: "MQTT Broker Spec", vendor: "OASIS", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-    { name: "Istio Service Mesh", vendor: "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } },
-    { name: "SPIFFE Identity", vendor: "CNCF", service_contract_type: { id: 'CommunitySupport', name: 'Community Support' } }
+const fullSpecifications: Omit<Specification, '_id'>[] = [
+    {
+        _id: "ArgoCDSyncSpec", name: 'ArgoCD Sync Spec', vendor: 'CNCF', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' }, total_cpu: 16, memory_gb: 64, storage_gb: 512, network_cards: [{id: 'VirtualNIC10Gbps', name: 'Virtual NIC 10Gbps'}], plug_power_cords: [{id: 'VirtualPower', name: 'Virtual Power'}]
+    },
+    {
+        _id: "SingleSignOnSpec", name: 'Single Sign-On Spec', vendor: 'OpenID', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' }, total_cpu: 8, memory_gb: 32, storage_gb: 256
+    },
+    {
+        _id: 'DellPowerEdgeR760', name: 'Dell PowerEdge R760', vendor: 'Dell EMC', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, total_cpu: 64, memory_gb: 256, storage_gb: 4096, network_cards: [{id: 'IntelX710', name: 'Intel X710'}], plug_power_cords: [{id: 'C13C14', name: 'C13/C14'}]
+    },
+    {
+        _id: 'HPEProLiantDL380', name: 'HPE ProLiant DL380 Gen11', vendor: 'HPE', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_Foundation_Care', name: 'Foundation Care'}, total_cpu: 48, memory_gb: 192, storage_gb: 2048
+    },
+    {
+        _id: 'CiscoUCSB200M7', name: 'Cisco UCS B200 M7 Blade', vendor: 'Cisco', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, symmetric: true, bladeCount: 8, cpuType: 'Intel Xeon Platinum', memoryPerBlade: 128
+    },
 ];
-
-const fullSpecifications: Omit<Specification, '_id'>[] = initialSpecificationsData.map(spec => {
-    const id = spec.name!.replace(/[^a-zA-Z0-9]/g, '');
-    const specObject = {
-        name: spec.name,
-        ...spec,
-        hw_type: { id: "Virtual", name: "Virtual" },
-        total_cpu: 32,
-        memory_gb: 128,
-        storage_gb: 1024,
-        hypervisor: { id: "KVM", name: "KVM" },
-        image: `https://picsum.photos/seed/${id}/40/40`,
-        contact_point_email: "community@cncf.io",
-        contact_point_phone: "N/A",
-        network_cards: [{ id: "VirtualNIC10Gbps", name: "Virtual NIC 10Gbps" }],
-        plug_power_cords: [{ id: "VirtualPower", name: "Virtual Power" }],
-        custom_fields: [{ key: "ManagedBy", value: "Platform Team" }],
-    };
-    return {
-        _id: id,
-        name: spec.name!,
-        json_string: JSON.stringify(specObject)
-    };
-});
-
 
 const initialDeploymentTypes = [
     { _id: 'Airgapped', "name": "Airgapped", "description": "Deployment in an isolated, offline environment." },
@@ -900,7 +880,7 @@ export async function seedDatabase() {
 
     const collectionsToSeed = [
         { name: 'products', data: initialProducts.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString()})) },
-        { name: 'specifications', data: fullSpecifications.map(s => ({ _id: s.id, name: s.name, json_string: s.json_string, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'specifications', data: fullSpecifications.map(s => ({...s, _id: s.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'deployment_types', data: initialDeploymentTypes },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'compliance_checks', data: initialComplianceChecks.map(c => ({...c, _id: c.name.replace(/[^a-zA-Z0-9]/g, '')})) },
