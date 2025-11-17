@@ -75,11 +75,12 @@ export default function SpecificationBuilderPage() {
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
+            const payload = JSON.parse(generatedJson);
             const response = await fetch('/api/specifications', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...formState,
+                    ...payload,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 }),
@@ -218,8 +219,6 @@ export default function SpecificationBuilderPage() {
                  return renderSummaryAndExport();
         }
     };
-    
-    const [formState, setFormState] = useState<any>({});
     
      const renderSummaryAndExport = () => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
