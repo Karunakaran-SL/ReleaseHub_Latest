@@ -43,7 +43,12 @@ export default function GlpiSettingsPage() {
                     <Card className="max-w-2xl">
                         <CardHeader>
                             <CardTitle>Connection Settings</CardTitle>
-                            <CardDescription>Enter the URL and API tokens for your GLPI ITSM server.</CardDescription>
+                            <CardDescription>
+                                Enter the URL and API tokens for your GLPI ITSM server.
+                                <a href="https://glpi-project.org/documentation/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-2">
+                                    Integration Docs
+                                </a>
+                            </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">

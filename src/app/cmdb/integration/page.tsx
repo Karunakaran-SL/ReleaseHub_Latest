@@ -10,33 +10,36 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
+import Link from 'next/link';
 
 const openSourceTools = [
-    { name: 'GLPI', features: ['ITIL-compliant service desk with CMDB', 'Hardware & software inventory management', 'License tracking and software auditing'], benefits: ['Cost-effective for enterprises', 'Highly customizable and community-supported', 'Integrates with FusionInventory'] },
-    { name: 'iTop', features: ['Complete ITIL service management suite', 'CMDB with relationship mapping', 'Incident, change, and SLA management'], benefits: ['Ideal for organizations needing ITSM + CMDB', 'Strong plugin ecosystem', 'Supports automation'] },
-    { name: 'Ralph', features: ['Asset management and DCIM', 'CMDB for hardware and software assets', 'Barcode support'], benefits: ['Great for data center environments', 'Simple yet powerful for asset tracking'] },
-    { name: 'CMDBuild', features: ['Customizable CMDB for asset and workflow management', 'Advanced modeling for relationships'], benefits: ['Flexible for complex IT environments', 'Supports workflow automation'] },
-    { name: 'i-doit', features: ['Web-based IT documentation and CMDB', 'Supports ITIL processes', 'Deep customization and add-ons'], benefits: ['Ideal for detailed IT documentation', 'Strong community support'] },
-    { name: 'DATAGERRY', features: ['Enterprise-grade open-source CMDB', 'Dynamic object type configuration'], benefits: ['Highly adaptable for custom environments', 'Scalable for large deployments'] },
+    { id: 'glpi', name: 'GLPI', features: ['ITIL-compliant service desk with CMDB', 'Hardware & software inventory management', 'License tracking and software auditing'], benefits: ['Cost-effective for enterprises', 'Highly customizable and community-supported', 'Integrates with FusionInventory'] },
+    { id: 'itop', name: 'iTop', features: ['Complete ITIL service management suite', 'CMDB with relationship mapping', 'Incident, change, and SLA management'], benefits: ['Ideal for organizations needing ITSM + CMDB', 'Strong plugin ecosystem', 'Supports automation'] },
+    { id: 'ralph', name: 'Ralph', features: ['Asset management and DCIM', 'CMDB for hardware and software assets', 'Barcode support'], benefits: ['Great for data center environments', 'Simple yet powerful for asset tracking'] },
+    { id: 'cmdbuild', name: 'CMDBuild', features: ['Customizable CMDB for asset and workflow management', 'Advanced modeling for relationships'], benefits: ['Flexible for complex IT environments', 'Supports workflow automation'] },
+    { id: 'i-doit', name: 'i-doit', features: ['Web-based IT documentation and CMDB', 'Supports ITIL processes', 'Deep customization and add-ons'], benefits: ['Ideal for detailed IT documentation', 'Strong community support'] },
+    { id: 'datagerry', name: 'DATAGERRY', features: ['Enterprise-grade open-source CMDB', 'Dynamic object type configuration'], benefits: ['Highly adaptable for custom environments', 'Scalable for large deployments'] },
 ];
 
 const commercialTools = [
-    { name: 'ServiceNow CMDB', features: ['Cloud-based CMDB with ITSM', 'Automated discovery and service mapping', 'Visualization dashboards'], benefits: ['Enterprise-grade with strong ITIL alignment', 'AI-ready for predictive insights', 'Seamless ServiceNow ecosystem integration'] },
-    { name: 'BMC Helix CMDB', features: ['Comprehensive IT asset and service mapping', 'Automated discovery and reconciliation', 'Integration with ITIL processes'], benefits: ['Ideal for large, complex IT landscapes', 'Strong compliance and governance features'] },
-    { name: 'Device42', features: ['Agentless auto-discovery for hybrid environments', 'Relationship mapping and visualization', 'RESTful APIs for custom integrations'], benefits: ['Excellent for hybrid cloud and on-prem', 'Reduces manual effort with automation'] },
-    { name: 'Freshservice', features: ['Auto-updating CMDB with real-time connectors', 'SaaS, hardware, and software asset management', 'Integration with orchestration tools'], benefits: ['Great for modern enterprises using SaaS', 'Improves change management'] },
-    { name: 'SolarWinds CMDB', features: ['Network-focused CMDB with asset discovery', 'Integration with monitoring and ITSM tools'], benefits: ['Ideal for network-heavy environments', 'Strong visualization capabilities'] },
-    { name: 'Virima', features: ['Advanced service mapping and visualization', 'Automated maintenance and near real-time insights'], benefits: ['Great for contextual visualization', 'Enhances ITSM processes'] },
+    { id: 'servicenow', name: 'ServiceNow CMDB', features: ['Cloud-based CMDB with ITSM', 'Automated discovery and service mapping', 'Visualization dashboards'], benefits: ['Enterprise-grade with strong ITIL alignment', 'AI-ready for predictive insights', 'Seamless ServiceNow ecosystem integration'] },
+    { id: 'bmc-helix', name: 'BMC Helix CMDB', features: ['Comprehensive IT asset and service mapping', 'Automated discovery and reconciliation', 'Integration with ITIL processes'], benefits: ['Ideal for large, complex IT landscapes', 'Strong compliance and governance features'] },
+    { id: 'device42', name: 'Device42', features: ['Agentless auto-discovery for hybrid environments', 'Relationship mapping and visualization', 'RESTful APIs for custom integrations'], benefits: ['Excellent for hybrid cloud and on-prem', 'Reduces manual effort with automation'] },
+    { id: 'freshservice', name: 'Freshservice', features: ['Auto-updating CMDB with real-time connectors', 'SaaS, hardware, and software asset management', 'Integration with orchestration tools'], benefits: ['Great for modern enterprises using SaaS', 'Improves change management'] },
+    { id: 'solarwinds', name: 'SolarWinds CMDB', features: ['Network-focused CMDB with asset discovery', 'Integration with monitoring and ITSM tools'], benefits: ['Ideal for network-heavy environments', 'Strong visualization capabilities'] },
+    { id: 'virima', name: 'Virima', features: ['Advanced service mapping and visualization', 'Automated maintenance and near real-time insights'], benefits: ['Great for contextual visualization', 'Enhances ITSM processes'] },
 ];
 
-function ToolCard({ tool }: { tool: { name: string; features: string[]; benefits: string[] } }) {
+function ToolCard({ tool }: { tool: { id: string, name: string; features: string[]; benefits: string[] } }) {
     return (
-        <Card>
+        <Card className="flex flex-col">
             <CardHeader>
                 <CardTitle>{tool.name}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 flex-grow">
                 <div>
                     <h4 className="font-semibold text-sm">Features</h4>
                     <ul className="list-disc pl-5 text-sm text-muted-foreground">
@@ -50,6 +53,14 @@ function ToolCard({ tool }: { tool: { name: string; features: string[]; benefits
                     </ul>
                 </div>
             </CardContent>
+            <CardFooter>
+                 <Button variant="outline" asChild>
+                    <Link href={`/license/tools/${tool.id}`}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                    </Link>
+                </Button>
+            </CardFooter>
         </Card>
     );
 }
