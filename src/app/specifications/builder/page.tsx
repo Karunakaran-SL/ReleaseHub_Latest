@@ -34,20 +34,23 @@ function DiagramDisplay({ specJson }: { specJson: string }) {
             </div>
         );
     }
+    
+    const isBlade = spec.hw_type?.name === 'Blade';
 
-    if (spec.hardwareType === 'Blade' || spec.hardwareType === 'Rack' || spec.hardwareType === 'Tower') {
+    if (isBlade) {
         const isSymmetric = spec.symmetric !== false; // Default to symmetric
         const blades = isSymmetric 
             ? Array.from({ length: spec.bladeCount || 1 }).map((_, i) => ({
                 name: `Blade ${i + 1}`,
                 cpuType: spec.cpuType,
                 memoryPerBlade: spec.memoryPerBlade,
+                storageCapacity: spec.storage_gb,
               }))
             : spec.blades || [];
 
         return (
             <div className="h-full bg-muted rounded-md p-4 space-y-4 overflow-auto">
-                <h4 className="font-bold text-center">{spec.name || `${spec.hardwareType} Specification`}</h4>
+                <h4 className="font-bold text-center">{spec.name || `Blade Specification`}</h4>
                 <div className="border-2 border-dashed border-gray-400 rounded-lg p-4 bg-background">
                      <p className="text-sm text-center font-semibold mb-2">{spec.vendor || 'Generic'} Chassis</p>
                      <div className={cn("grid gap-2", {
@@ -61,7 +64,7 @@ function DiagramDisplay({ specJson }: { specJson: string }) {
                                 <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
                                     <div className="flex items-center gap-1"><Cpu className="h-3 w-3"/><span>{blade.cpuType || 'N/A'}</span></div>
                                     <div className="flex items-center gap-1"><MemoryStick className="h-3 w-3"/><span>{blade.memoryPerBlade || 'N/A'} GB</span></div>
-                                    <div className="flex items-center gap-1"><Database className="h-3 w-3"/><span>{blade.storageCapacity || spec.storageCapacity || 'N/A'} {isSymmetric ? 'TB' : 'GB'}</span></div>
+                                    <div className="flex items-center gap-1"><Database className="h-3 w-3"/><span>{blade.storageCapacity || 'N/A'} GB</span></div>
                                 </div>
                             </div>
                         ))}
@@ -69,48 +72,11 @@ function DiagramDisplay({ specJson }: { specJson: string }) {
                     <div className="mt-4 flex justify-around items-center text-center">
                          <div className="flex flex-col items-center gap-1">
                             <Database className="h-6 w-6 text-gray-600"/>
-                            <p className="text-xs">{spec.storageType || 'N/A'} Storage</p>
-                            <p className="text-[10px] text-muted-foreground">{spec.storageCapacity || 'N/A'} TB</p>
+                            <p className="text-xs">{spec.storage_gb || 'N/A'} GB Total</p>
                         </div>
                         <div className="flex flex-col items-center gap-1">
                             <NetworkIcon className="h-6 w-6 text-gray-600"/>
-                            <p className="text-xs">{spec.switchType || 'N/A'}</p>
-                            <p className="text-[10px] text-muted-foreground">{spec.networkRedundancy || 'N/A'} Redundancy</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (spec.vmSize) {
-        const vmCount = spec.vmCount || 1;
-        return (
-             <div className="h-full bg-muted rounded-md p-4 space-y-4 overflow-auto">
-                <h4 className="font-bold text-center">Data Center VM Specification</h4>
-                 <div className="border-2 border-dashed border-gray-400 rounded-lg p-4 bg-background">
-                    <p className="text-sm text-center font-semibold mb-2">Hypervisor Cluster</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                         {Array.from({ length: vmCount }).map((_, i) => (
-                             <div key={i} className="border rounded-md p-2 bg-blue-50 dark:bg-blue-900/30">
-                                <Server className="mx-auto h-6 w-6 text-blue-500"/>
-                                <p className="text-xs font-mono text-center mt-1">VM {i + 1} ({spec.vmSize})</p>
-                                <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
-                                    <div className="flex items-center gap-1"><Cpu className="h-3 w-3"/><span>{spec.cpuPerVm || 'N/A'} cores</span></div>
-                                    <div className="flex items-center gap-1"><MemoryStick className="h-3 w-3"/><span>{spec.memoryPerVm || 'N/A'} GB</span></div>
-                                    <div className="flex items-center gap-1"><Database className="h-3 w-3"/><span>{spec.diskPerVm || 'N/A'} GB</span></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                     <div className="mt-4 flex justify-around items-center text-center">
-                         <div className="flex flex-col items-center gap-1">
-                            <NetworkIcon className="h-6 w-6 text-gray-600"/>
-                            <p className="text-xs">{spec.connectivity || 'N/A'} Connectivity</p>
-                        </div>
-                         <div className="flex flex-col items-center gap-1">
-                            <Server className="h-6 w-6 text-gray-600"/>
-                            <p className="text-xs">{spec.highAvailability || 'N/A'} HA</p>
+                             <p className="text-xs">{spec.network_cards?.map((n: any) => n.name).join(', ') || 'N/A'}</p>
                         </div>
                     </div>
                 </div>
@@ -120,16 +86,23 @@ function DiagramDisplay({ specJson }: { specJson: string }) {
 
     return (
         <div className="h-full bg-muted rounded-md flex items-center justify-center">
-            <p className="text-muted-foreground">Diagram placeholder</p>
+             <div className="border-2 border-dashed border-gray-400 rounded-lg p-8 bg-background text-center">
+                 <h4 className="font-bold">{spec.name || 'Specification'}</h4>
+                 <p className="text-sm text-muted-foreground">{spec.hw_type?.name || 'Generic Hardware'}</p>
+                 <div className="mt-4 flex justify-center gap-4 text-xs">
+                    <span><Cpu className="inline mr-1 h-4 w-4"/> {spec.total_cpu || 'N/A'} Cores</span>
+                    <span><MemoryStick className="inline mr-1 h-4 w-4"/> {spec.memory_gb || 'N/A'} GB RAM</span>
+                    <span><Database className="inline mr-1 h-4 w-4"/> {spec.storage_gb || 'N/A'} GB Storage</span>
+                 </div>
+            </div>
         </div>
     );
 }
 
 export default function SpecificationBuilderPage() {
     const [user, setUser] = useState<User | null>(null);
-    const [builderMode, setBuilderMode] = useState<'hardware' | 'vm' | null>(null);
     const [step, setStep] = useState(1);
-    const [formData, setFormData] = useState<any>({});
+    const [formData, setFormData] = useState<any>({ symmetric: true, custom_fields: [{key: '', value: ''}], bladeCount: 1 });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [copied, setCopied] = useState(false);
     const { toast } = useToast();
@@ -171,76 +144,55 @@ export default function SpecificationBuilderPage() {
         }
         fetchOptions();
     }, [toast]);
-
-    const handleModeSelect = (mode: 'hardware' | 'vm') => {
-        setBuilderMode(mode);
-        setStep(1);
-        setFormData(mode === 'hardware' ? { symmetric: true, custom_fields: [{key: '', value: ''}] } : { custom_fields: [{key: '', value: ''}] });
-    };
-
-    const handleBack = () => {
-        if (step > 1) {
-            setStep(s => s - 1);
-        } else {
-            setBuilderMode(null);
-        }
-    }
     
+    const isBladeSelected = useMemo(() => {
+        return options.hwTypes.find(o => o._id === formData.hw_type)?.name === 'Blade';
+    }, [formData.hw_type, options.hwTypes]);
+
     const handleNext = useCallback(() => {
+        const maxSteps = 2; // Step 1 is the form, Step 2 is the summary
         const nextStep = step + 1;
-        const hardwareMaxSteps = formData.hardwareType === 'Blade' ? 7 : 6;
-        const maxSteps = builderMode === 'hardware' ? hardwareMaxSteps : 5;
         
         if (nextStep >= maxSteps) { // It's time to generate the JSON
-            const specName = formData.name || `Spec-${builderMode}-${formData.hardwareType || formData.vmSize || 'Custom'}-${Date.now()}`;
+            const specName = formData.name || `Spec-${formData.hw_type || 'Custom'}-${Date.now()}`;
             
             let fullSpec: any = {
                 name: specName,
                 ...formData,
             };
 
-             // Transform selections to match schema {id, name}
+            // Transform selections to match schema {id, name}
             if(formData.hw_type) fullSpec.hw_type = { id: formData.hw_type, name: options.hwTypes.find(o => o._id === formData.hw_type)?.name };
             if(formData.hypervisor) fullSpec.hypervisor = { id: formData.hypervisor, name: options.hypervisors.find(o => o._id === formData.hypervisor)?.name };
             if(formData.service_contract_type) fullSpec.service_contract_type = { id: formData.service_contract_type, name: options.serviceContracts.find(o => o._id === formData.service_contract_type)?.name };
             
-            if (builderMode === 'hardware') {
+            if (isBladeSelected) {
                 if (formData.symmetric) {
                     delete fullSpec.blades;
                 } else {
                     delete fullSpec.cpuType;
                     delete fullSpec.memoryPerBlade;
-                    fullSpec.bladeCount = 1;
-                    fullSpec.blades = [{
-                        cpuType: "2x Intel Xeon Gold 6248R",
-                        memoryPerBlade: 64,
-                        storageType: "Local",
-                        storageCapacity: 2,
-                        networkRedundancy: "Active/Passive"
-                    }];
+                    fullSpec.bladeCount = formData.blades?.length || 1;
                 }
             }
-            
-            // Remove helper fields from final JSON
-            if (fullSpec.symmetric !== undefined) delete fullSpec.symmetric;
             
             setJsonSpec(JSON.stringify(fullSpec, null, 2));
         }
 
         setStep(nextStep);
-    }, [step, builderMode, formData, options]);
+    }, [step, formData, options, isBladeSelected]);
 
+    const handleBack = () => {
+        setStep(s => s - 1);
+    }
+    
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value, type, checked } = e.target;
         setFormData((prev: any) => ({ ...prev, [id]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value }));
     };
 
     const handleRadioChange = (id: string, value: string) => {
-        if (id === 'symmetric') {
-            setFormData((prev: any) => ({...prev, [id]: value === 'true'}));
-        } else {
-            setFormData((prev: any) => ({ ...prev, [id]: value }));
-        }
+        setFormData((prev: any) => ({...prev, [id]: value === 'true'}));
     };
 
     const handleSelectChange = (field: string, value: string) => {
@@ -258,8 +210,7 @@ export default function SpecificationBuilderPage() {
     };
 
     const addCustomField = () => {
-        const newFields = [...(formData.custom_fields || []), { key: '', value: '' }];
-        setFormData((prev: any) => ({ ...prev, custom_fields: newFields }));
+        setFormData((prev: any) => ({ ...prev, custom_fields: [...(prev.custom_fields || []), { key: '', value: '' }]}));
     };
 
     const removeCustomField = (index: number) => {
@@ -294,7 +245,10 @@ export default function SpecificationBuilderPage() {
                     updated_at: new Date().toISOString()
                 }),
             });
-            if (!response.ok) throw new Error('Failed to save specification.');
+            if (!response.ok) {
+                 const errorData = await response.json();
+                 throw new Error(errorData.message || 'Failed to save specification.');
+            }
             toast({ title: 'Success', description: 'Specification created successfully.' });
             router.push('/specifications');
         } catch (error: any) {
@@ -303,27 +257,6 @@ export default function SpecificationBuilderPage() {
             setIsSubmitting(false);
         }
     };
-    
-    const renderInitialSelection = () => (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleModeSelect('hardware')}>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><HardDrive /> Hardware Specification</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">Define physical hardware specifications for Rack, Blade, or Tower servers for Air-Gapped and On-Prem environments.</p>
-                </CardContent>
-            </Card>
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleModeSelect('vm')}>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Server /> Data Center VM Specification</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">Define virtual machine specifications including size, resources, and connectivity for data center deployments.</p>
-                </CardContent>
-            </Card>
-        </div>
-    );
     
     const renderFullFormStep = () => (
          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -339,24 +272,22 @@ export default function SpecificationBuilderPage() {
                 </div>
                 <div>
                     <Label htmlFor="vendor">Vendor *</Label>
-                    <Select value={formData.vendor} onValueChange={(value) => handleSelectChange('vendor', value)} required>
+                    <Select value={formData.vendor} onValueChange={(value) => setFormData((prev: any) => ({...prev, vendor: value}))} required>
                         <SelectTrigger><SelectValue placeholder="Select Vendor" /></SelectTrigger>
-                        <SelectContent>{options.vendors.map(v => <SelectItem key={v._id} value={v._id}>{v.name}</SelectItem>)}</SelectContent>
+                        <SelectContent>{options.vendors.map(v => <SelectItem key={v._id} value={v.name}>{v.name}</SelectItem>)}</SelectContent>
                     </Select>
                 </div>
                 <div><Label htmlFor="image">Image URL</Label><Input id="image" value={formData.image || ''} onChange={handleInputChange} /></div>
                 
-                <h3 className="font-semibold text-lg pt-4">Support & Contact</h3>
-                 <div>
-                    <Label htmlFor="service_contract_type">Service Contract Type</Label>
-                    <Select value={formData.service_contract_type} onValueChange={(value) => handleSelectChange('service_contract_type', value)}>
-                        <SelectTrigger><SelectValue placeholder="Select Contract Type" /></SelectTrigger>
-                        <SelectContent>{options.serviceContracts.map(c => <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>)}</SelectContent>
-                    </Select>
-                </div>
-                <div><Label htmlFor="contact_point_email">Contact Point Email</Label><Input id="contact_point_email" type="email" value={formData.contact_point_email || ''} onChange={handleInputChange} /></div>
-                <div><Label htmlFor="contact_point_phone">Contact Point Phone</Label><Input id="contact_point_phone" type="tel" value={formData.contact_point_phone || ''} onChange={handleInputChange} /></div>
-
+                 {isBladeSelected && (
+                    <div className="pt-4">
+                        <Label className="font-semibold">Blade Configuration</Label>
+                        <RadioGroup onValueChange={(v) => handleRadioChange('symmetric', v)} value={String(formData.symmetric)} className="mt-2 space-y-1">
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="true" id="sym1" /><Label htmlFor="sym1" className="font-normal">Symmetric (all blades identical)</Label></div>
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="false" id="sym2" /><Label htmlFor="sym2" className="font-normal">Asymmetric (define each blade)</Label></div>
+                        </RadioGroup>
+                    </div>
+                )}
             </div>
             <div className="space-y-4">
                 <h3 className="font-semibold text-lg">HW Resources</h3>
@@ -392,8 +323,24 @@ export default function SpecificationBuilderPage() {
                         <SelectContent>{options.hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
                     </Select>
                 </div>
-                 <div>
-                    <h3 className="font-semibold text-lg mt-6">Custom Fields</h3>
+            </div>
+             <div className="space-y-4 md:col-span-2">
+                <h3 className="font-semibold text-lg">Support & Customization</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div>
+                        <Label htmlFor="service_contract_type">Service Contract Type</Label>
+                        <Select value={formData.service_contract_type} onValueChange={(value) => handleSelectChange('service_contract_type', value)}>
+                            <SelectTrigger><SelectValue placeholder="Select Contract Type" /></SelectTrigger>
+                            <SelectContent>{options.serviceContracts.map(c => <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><Label htmlFor="contact_point_email">Contact Point Email</Label><Input id="contact_point_email" type="email" value={formData.contact_point_email || ''} onChange={handleInputChange} /></div>
+                        <div><Label htmlFor="contact_point_phone">Contact Point Phone</Label><Input id="contact_point_phone" type="tel" value={formData.contact_point_phone || ''} onChange={handleInputChange} /></div>
+                    </div>
+                </div>
+                <div>
+                    <Label>Custom Fields</Label>
                     <div className="space-y-2">
                         {(formData.custom_fields || []).map((field: any, index: number) => (
                             <div key={index} className="flex items-center gap-2">
@@ -408,34 +355,6 @@ export default function SpecificationBuilderPage() {
             </div>
         </div>
     );
-
-    const renderHardwareSteps = () => {
-        const maxSteps = formData.hardwareType === 'Blade' ? 7 : 6;
-        switch (step) {
-            case 1: return (<div><Label>What type of hardware?</Label><RadioGroup onValueChange={(v) => handleRadioChange('hardwareType', v)} value={formData.hardwareType}><div className="flex items-center space-x-2"><RadioGroupItem value="Rack" id="r1" /><Label htmlFor="r1">Rack</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Blade" id="r2" /><Label htmlFor="r2">Blade</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Tower" id="r3" /><Label htmlFor="r3">Tower</Label></div></RadioGroup></div>);
-            case 2: return (<div><Label>CPU type and count per blade/server</Label><Input id="cpuType" value={formData.cpuType || ''} onChange={handleInputChange} placeholder="e.g., 2x Intel Xeon Gold 6248R"/></div>);
-            case 3: return (<div><Label>Memory per blade/server (GB)</Label><Input id="memoryPerBlade" type="number" value={formData.memoryPerBlade || ''} onChange={handleInputChange} /></div>);
-            case 4: return (<div><Label>Storage capacity (TB)</Label><Input id="storageCapacity" type="number" value={formData.storageCapacity || ''} onChange={handleInputChange} /></div>);
-            case 5: return renderFullFormStep();
-            case 6: 
-                if (formData.hardwareType === 'Blade') {
-                     return (<div><Label>Is the blade configuration symmetric?</Label><RadioGroup onValueChange={(v) => handleRadioChange('symmetric', v)} value={String(formData.symmetric)}><div className="flex items-center space-x-2"><RadioGroupItem value="true" id="sym1" /><Label htmlFor="sym1">Yes, all blades are identical.</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="false" id="sym2" /><Label htmlFor="sym2">No, I want to define each blade individually.</Label></div></RadioGroup></div>);
-                }
-                return renderSummaryAndExport(); // Skip to end for non-blade
-            default: return renderSummaryAndExport();
-        }
-    };
-    
-    const renderVmSteps = () => {
-         const maxSteps = 5;
-         switch (step) {
-            case 1: return (<div><Label>Number of VMs</Label><Input id="vmCount" type="number" value={formData.vmCount || ''} onChange={handleInputChange} /></div>);
-            case 2: return (<div><Label>VM Size</Label><RadioGroup onValueChange={(v) => handleRadioChange('vmSize', v)} value={formData.vmSize}><div className="flex items-center space-x-2"><RadioGroupItem value="Small" id="v1" /><Label htmlFor="v1">Small</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Medium" id="v2" /><Label htmlFor="v2">Medium</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Large" id="v3" /><Label htmlFor="v3">Large</Label></div></RadioGroup></div>);
-            case 3: return (<div><Label>CPU cores per VM</Label><Input id="cpuPerVm" type="number" value={formData.cpuPerVm || ''} onChange={handleInputChange} /></div>);
-            case 4: return renderFullFormStep();
-            default: return renderSummaryAndExport();
-        }
-    };
     
      const renderSummaryAndExport = () => (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -444,7 +363,7 @@ export default function SpecificationBuilderPage() {
                     <CardHeader><CardTitle>Generated JSON Specification</CardTitle></CardHeader>
                     <CardContent>
                         <div className="relative">
-                            <Textarea value={jsonSpec} onChange={(e) => setJsonSpec(e.target.value)} rows={15} className="font-mono text-xs"/>
+                            <Textarea value={jsonSpec} onChange={(e) => setJsonSpec(e.target.value)} rows={20} className="font-mono text-xs"/>
                             <Button size="icon" variant="ghost" className="absolute top-2 right-2 h-7 w-7" onClick={handleCopy}>
                                 {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                             </Button>
@@ -462,7 +381,7 @@ export default function SpecificationBuilderPage() {
              <div className="space-y-4">
                 <Card>
                     <CardHeader><CardTitle>Visualization</CardTitle></CardHeader>
-                    <CardContent className="h-96">
+                    <CardContent className="h-[30rem]">
                         <DiagramDisplay specJson={jsonSpec} />
                     </CardContent>
                 </Card>
@@ -474,52 +393,48 @@ export default function SpecificationBuilderPage() {
         </div>
     );
     
-    const hardwareMaxSteps = formData.hardwareType === 'Blade' ? 7 : 6;
-    const maxSteps = builderMode === 'hardware' ? hardwareMaxSteps : 5;
-    const stepTitles = builderMode === 'hardware' 
-        ? ['Hardware Type', 'CPU', 'Memory', 'Storage', 'Detailed Info', 'Blade Config', 'Summary & Export']
-        : ['VM Count', 'VM Size', 'Resources', 'Detailed Info', 'Summary & Export'];
-
-
-    const renderWizard = () => {
-        return (
-             <Card className="w-full">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        {builderMode === 'hardware' ? <HardDrive/> : <Server/>}
-                        {builderMode === 'hardware' ? 'Hardware' : 'VM'} Specification Builder
-                    </CardTitle>
-                    <CardDescription>Step {step} of {maxSteps - 1}: {stepTitles[step-1]}</CardDescription>
-                </CardHeader>
-                 <CardContent className="min-h-[20rem]">
-                    {builderMode === 'hardware' ? renderHardwareSteps() : renderVmSteps()}
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                    <Button variant="outline" onClick={handleBack} disabled={isSubmitting}>
-                       <ArrowLeft className="mr-2 h-4 w-4" />
-                       {step === 1 ? 'Back to Selection' : 'Back'}
-                    </Button>
-                    {step < maxSteps && (
-                        <Button onClick={handleNext}>
-                            Next <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                    )}
-                </CardFooter>
-            </Card>
-        )
-    }
-
+    const renderStepContent = () => {
+        switch (step) {
+            case 1:
+                return renderFullFormStep();
+            case 2:
+                return renderSummaryAndExport();
+            default:
+                router.push('/specifications');
+                return null;
+        }
+    };
+    
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10">
                  <div className="mb-8">
                     <h1 className="text-3xl font-bold">Specification Builder</h1>
                     <p className="text-muted-foreground">
-                        A guided wizard to define hardware and VM specifications.
+                        Create a detailed hardware specification using the form below.
                     </p>
                 </div>
                 
-                 {builderMode ? renderWizard() : renderInitialSelection()}
+                 <Card className="w-full">
+                    <CardHeader>
+                        <CardTitle>
+                           {step === 1 ? 'Step 1: Define Specification Details' : 'Step 2: Review and Finalize'}
+                        </CardTitle>
+                    </CardHeader>
+                     <CardContent>
+                        {renderStepContent()}
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                        <Button variant="outline" onClick={handleBack} disabled={isSubmitting || step === 1}>
+                           <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                        </Button>
+                        {step < 2 && (
+                            <Button onClick={handleNext} disabled={!formData.name}>
+                                Next <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        )}
+                    </CardFooter>
+                </Card>
             </main>
         </DashboardLayout>
     );
