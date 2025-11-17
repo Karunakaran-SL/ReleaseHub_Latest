@@ -6,7 +6,7 @@ import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { HardDrive, Server, ArrowLeft, ArrowRight, Package, Upload, Copy, Check, FileJson, Cpu, MemoryStick, Database, NetworkIcon } from 'lucide-react';
+import { HardDrive, Server, ArrowLeft, ArrowRight, Package, Upload, Copy, Check, FileJson, Cpu, MemoryStick, Database, NetworkIcon, PlusCircle, Trash2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,13 @@ import { useRouter } from 'next/navigation';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MultiSelectListBox, type Option as MultiSelectOption } from '@/components/ui/multi-select-list-box';
 
+interface Option {
+    _id: string;
+    name: string;
+}
 
 function DiagramDisplay({ specJson }: { specJson: string }) {
     let spec;
@@ -129,16 +135,47 @@ export default function SpecificationBuilderPage() {
     const { toast } = useToast();
     const router = useRouter();
     const [jsonSpec, setJsonSpec] = useState('');
-
+    
+    const [options, setOptions] = useState({
+        hwTypes: [] as Option[],
+        vendors: [] as Option[],
+        hypervisors: [] as Option[],
+        serviceContracts: [] as Option[],
+        networkCards: [] as Option[],
+        plugPowerCords: [] as Option[],
+    });
 
     useEffect(() => {
         getUser().then(setUser);
-    }, []);
+         async function fetchOptions() {
+            try {
+                const [hwTypesRes, vendorsRes, hypervisorsRes, contractsRes, networkCardsRes, plugPowerCordsRes] = await Promise.all([
+                    fetch('/api/settings/specifications/hw-types'),
+                    fetch('/api/settings/specifications/vendors'),
+                    fetch('/api/settings/specifications/hypervisors'),
+                    fetch('/api/documents/service-contracts'),
+                    fetch('/api/settings/specifications/network-cards'),
+                    fetch('/api/settings/specifications/plug-power-cords'),
+                ]);
+                setOptions({
+                    hwTypes: await hwTypesRes.json(),
+                    vendors: await vendorsRes.json(),
+                    hypervisors: await hypervisorsRes.json(),
+                    serviceContracts: await contractsRes.json(),
+                    networkCards: await networkCardsRes.json(),
+                    plugPowerCords: await plugPowerCordsRes.json(),
+                });
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not load options for form.' });
+            }
+        }
+        fetchOptions();
+    }, [toast]);
 
     const handleModeSelect = (mode: 'hardware' | 'vm') => {
         setBuilderMode(mode);
         setStep(1);
-        setFormData(mode === 'hardware' ? { symmetric: true } : {});
+        setFormData(mode === 'hardware' ? { symmetric: true, custom_fields: [{key: '', value: ''}] } : { custom_fields: [{key: '', value: ''}] });
     };
 
     const handleBack = () => {
@@ -151,18 +188,21 @@ export default function SpecificationBuilderPage() {
     
     const handleNext = useCallback(() => {
         const nextStep = step + 1;
-        const maxSteps = builderMode === 'hardware' ? 5 : 4;
+        const hardwareMaxSteps = formData.hardwareType === 'Blade' ? 7 : 6;
+        const maxSteps = builderMode === 'hardware' ? hardwareMaxSteps : 5;
         
         if (nextStep >= maxSteps) { // It's time to generate the JSON
-            const specName = `Spec-${builderMode}-${formData.hardwareType || formData.vmSize || 'Custom'}-${Date.now()}`;
+            const specName = formData.name || `Spec-${builderMode}-${formData.hardwareType || formData.vmSize || 'Custom'}-${Date.now()}`;
+            
             let fullSpec: any = {
                 name: specName,
-                vendor: 'DefaultVendor', // Default value
-                hw_type: { id: builderMode === 'hardware' ? formData.hardwareType : 'Virtual', name: builderMode === 'hardware' ? formData.hardwareType : 'Virtual' },
-                hypervisor: { id: '', name: '' },
-                service_contract_type: { id: '', name: '' },
                 ...formData,
             };
+
+             // Transform selections to match schema {id, name}
+            if(formData.hw_type) fullSpec.hw_type = { id: formData.hw_type, name: options.hwTypes.find(o => o._id === formData.hw_type)?.name };
+            if(formData.hypervisor) fullSpec.hypervisor = { id: formData.hypervisor, name: options.hypervisors.find(o => o._id === formData.hypervisor)?.name };
+            if(formData.service_contract_type) fullSpec.service_contract_type = { id: formData.service_contract_type, name: options.serviceContracts.find(o => o._id === formData.service_contract_type)?.name };
             
             if (builderMode === 'hardware') {
                 if (formData.symmetric) {
@@ -188,9 +228,9 @@ export default function SpecificationBuilderPage() {
         }
 
         setStep(nextStep);
-    }, [step, builderMode, formData]);
+    }, [step, builderMode, formData, options]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value, type, checked } = e.target;
         setFormData((prev: any) => ({ ...prev, [id]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value }));
     };
@@ -202,7 +242,31 @@ export default function SpecificationBuilderPage() {
             setFormData((prev: any) => ({ ...prev, [id]: value }));
         }
     };
+
+    const handleSelectChange = (field: string, value: string) => {
+        setFormData((prev: any) => ({...prev, [field]: value}));
+    };
     
+    const handleMultiSelectChange = (field: 'network_cards' | 'plug_power_cords', selectedItems: { id: string; name: string }[]) => {
+        setFormData((prev: any) => ({ ...prev, [field]: selectedItems }));
+    };
+
+    const handleCustomFieldChange = (index: number, field: 'key' | 'value', value: string) => {
+        const newFields = [...(formData.custom_fields || [])];
+        newFields[index] = { ...newFields[index], [field]: value };
+        setFormData((prev: any) => ({ ...prev, custom_fields: newFields }));
+    };
+
+    const addCustomField = () => {
+        const newFields = [...(formData.custom_fields || []), { key: '', value: '' }];
+        setFormData((prev: any) => ({ ...prev, custom_fields: newFields }));
+    };
+
+    const removeCustomField = (index: number) => {
+        const newFields = (formData.custom_fields || []).filter((_: any, i: number) => i !== index);
+        setFormData((prev: any) => ({ ...prev, custom_fields: newFields }));
+    };
+
     const handleCopy = () => {
         navigator.clipboard.writeText(jsonSpec);
         setCopied(true);
@@ -260,119 +324,116 @@ export default function SpecificationBuilderPage() {
             </Card>
         </div>
     );
+    
+    const renderFullFormStep = () => (
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Basic Information</h3>
+                <div><Label htmlFor="name">HW Name *</Label><Input id="name" value={formData.name || ''} onChange={handleInputChange} required /></div>
+                <div>
+                    <Label htmlFor="hw_type">HW Type</Label>
+                    <Select value={formData.hw_type} onValueChange={(value) => handleSelectChange('hw_type', value)}>
+                        <SelectTrigger><SelectValue placeholder="Select HW Type" /></SelectTrigger>
+                        <SelectContent>{options.hwTypes.map(t => <SelectItem key={t._id} value={t._id}>{t.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                </div>
+                <div>
+                    <Label htmlFor="vendor">Vendor *</Label>
+                    <Select value={formData.vendor} onValueChange={(value) => handleSelectChange('vendor', value)} required>
+                        <SelectTrigger><SelectValue placeholder="Select Vendor" /></SelectTrigger>
+                        <SelectContent>{options.vendors.map(v => <SelectItem key={v._id} value={v._id}>{v.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                </div>
+                <div><Label htmlFor="image">Image URL</Label><Input id="image" value={formData.image || ''} onChange={handleInputChange} /></div>
+                
+                <h3 className="font-semibold text-lg pt-4">Support & Contact</h3>
+                 <div>
+                    <Label htmlFor="service_contract_type">Service Contract Type</Label>
+                    <Select value={formData.service_contract_type} onValueChange={(value) => handleSelectChange('service_contract_type', value)}>
+                        <SelectTrigger><SelectValue placeholder="Select Contract Type" /></SelectTrigger>
+                        <SelectContent>{options.serviceContracts.map(c => <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                </div>
+                <div><Label htmlFor="contact_point_email">Contact Point Email</Label><Input id="contact_point_email" type="email" value={formData.contact_point_email || ''} onChange={handleInputChange} /></div>
+                <div><Label htmlFor="contact_point_phone">Contact Point Phone</Label><Input id="contact_point_phone" type="tel" value={formData.contact_point_phone || ''} onChange={handleInputChange} /></div>
+
+            </div>
+            <div className="space-y-4">
+                <h3 className="font-semibold text-lg">HW Resources</h3>
+                <div><Label htmlFor="total_cpu">Total CPU *</Label><Input id="total_cpu" type="number" value={formData.total_cpu || ''} onChange={handleInputChange} required /></div>
+                <div><Label htmlFor="memory_gb">Memory (GB) *</Label><Input id="memory_gb" type="number" value={formData.memory_gb || ''} onChange={handleInputChange} required /></div>
+                <div><Label htmlFor="storage_gb">Storage (GB) *</Label><Input id="storage_gb" type="number" value={formData.storage_gb || ''} onChange={handleInputChange} required /></div>
+                 <div>
+                    <Label>Network Cards type</Label>
+                    <MultiSelectListBox
+                        available={options.networkCards.filter(opt => !(formData.network_cards || []).some((c:any) => c.id === opt._id)).map(o => ({id: o._id, label: o.name}))}
+                        chosen={(formData.network_cards || []).map((c:any) => ({id: c.id, label: c.name}))}
+                        onMoveToChosen={(ids) => handleMultiSelectChange('network_cards', [...(formData.network_cards || []), ...ids.map(id => ({id, name: options.networkCards.find(o => o._id === id)?.name || ''}))] )}
+                        onMoveToAvailable={(ids) => handleMultiSelectChange('network_cards', (formData.network_cards || []).filter((c:any) => !ids.includes(c.id)))}
+                        onMoveAllToChosen={() => handleMultiSelectChange('network_cards', options.networkCards.map(o => ({id: o._id, name: o.name})))}
+                        onMoveAllToAvailable={() => handleMultiSelectChange('network_cards', [])}
+                    />
+                </div>
+                 <div>
+                    <Label>Plug/Power Cord Type</Label>
+                     <MultiSelectListBox
+                        available={options.plugPowerCords.filter(opt => !(formData.plug_power_cords || []).some((c:any) => c.id === opt._id)).map(o => ({id: o._id, label: o.name}))}
+                        chosen={(formData.plug_power_cords || []).map((c:any) => ({id: c.id, label: c.name}))}
+                        onMoveToChosen={(ids) => handleMultiSelectChange('plug_power_cords', [...(formData.plug_power_cords || []), ...ids.map(id => ({id, name: options.plugPowerCords.find(o => o._id === id)?.name || ''}))] )}
+                        onMoveToAvailable={(ids) => handleMultiSelectChange('plug_power_cords', (formData.plug_power_cords || []).filter((c:any) => !ids.includes(c.id)))}
+                        onMoveAllToChosen={() => handleMultiSelectChange('plug_power_cords', options.plugPowerCords.map(o => ({id: o._id, name: o.name})))}
+                        onMoveAllToAvailable={() => handleMultiSelectChange('plug_power_cords', [])}
+                    />
+                </div>
+                 <div>
+                    <Label htmlFor="hypervisor">Hypervisor</Label>
+                    <Select value={formData.hypervisor} onValueChange={(value) => handleSelectChange('hypervisor', value)}>
+                        <SelectTrigger><SelectValue placeholder="N/A" /></SelectTrigger>
+                        <SelectContent>{options.hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                </div>
+                 <div>
+                    <h3 className="font-semibold text-lg mt-6">Custom Fields</h3>
+                    <div className="space-y-2">
+                        {(formData.custom_fields || []).map((field: any, index: number) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <Input placeholder="Key" value={field.key} onChange={(e) => handleCustomFieldChange(index, 'key', e.target.value)} />
+                                <Input placeholder="Value" value={field.value} onChange={(e) => handleCustomFieldChange(index, 'value', e.target.value)} />
+                                <Button variant="ghost" size="icon" onClick={() => removeCustomField(index)} type="button"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </div>
+                        ))}
+                    </div>
+                    <Button variant="link" size="sm" onClick={addCustomField} type="button" className="mt-2 px-0"><PlusCircle className="mr-2 h-4 w-4" />ADD CUSTOM FIELD</Button>
+                </div>
+            </div>
+        </div>
+    );
 
     const renderHardwareSteps = () => {
-        const maxSteps = 5;
+        const maxSteps = formData.hardwareType === 'Blade' ? 7 : 6;
         switch (step) {
-            case 1:
-                return (
-                     <div className="space-y-6">
-                        <div className="space-y-2">
-                            <Label>What type of hardware?</Label>
-                            <RadioGroup onValueChange={(v) => handleRadioChange('hardwareType', v)} value={formData.hardwareType}>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Rack" id="r1" /><Label htmlFor="r1">Rack</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Blade" id="r2" /><Label htmlFor="r2">Blade</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Tower" id="r3" /><Label htmlFor="r3">Tower</Label></div>
-                            </RadioGroup>
-                        </div>
-                        <div className="space-y-2">
-                             <Label>Is the blade configuration symmetric?</Label>
-                             <RadioGroup onValueChange={(v) => handleRadioChange('symmetric', v)} value={String(formData.symmetric)}>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="true" id="sym1" /><Label htmlFor="sym1">Yes, all blades are identical.</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="false" id="sym2" /><Label htmlFor="sym2">No, I want to define each blade individually.</Label></div>
-                             </RadioGroup>
-                        </div>
-                    </div>
-                );
-            case 2:
-                return (
-                    <div className="space-y-4">
-                        {formData.symmetric && (
-                            <div><Label htmlFor="bladeCount">How many blades?</Label><Input id="bladeCount" type="number" value={formData.bladeCount || ''} onChange={handleInputChange} /></div>
-                        )}
-                        <div><Label htmlFor="cpuType">CPU type and count per blade/server</Label><Input id="cpuType" value={formData.cpuType || ''} onChange={handleInputChange} placeholder="e.g., 2x Intel Xeon Gold 6248R"/></div>
-                        <div><Label htmlFor="memoryPerBlade">Memory per blade/server (GB)</Label><Input id="memoryPerBlade" type="number" value={formData.memoryPerBlade || ''} onChange={handleInputChange} /></div>
-                    </div>
-                );
-            case 3:
-                return (
-                     <div className="space-y-4">
-                        <div>
-                            <Label>Storage type</Label>
-                            <RadioGroup onValueChange={(v) => handleRadioChange('storageType', v)} value={formData.storageType}>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Centralized" id="s1" /><Label htmlFor="s1">Centralized SAN/NAS</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Local" id="s2" /><Label htmlFor="s2">Blade-local Storage</Label></div>
-                            </RadioGroup>
-                        </div>
-                        <div><Label htmlFor="storageCapacity">Storage capacity (TB)</Label><Input id="storageCapacity" type="number" value={formData.storageCapacity || ''} onChange={handleInputChange} /></div>
-                    </div>
-                );
-            case 4:
-                return (
-                    <div className="space-y-4">
-                        <div><Label htmlFor="switchType">Network switch type</Label><Input id="switchType" value={formData.switchType || ''} onChange={handleInputChange} placeholder="e.g., Cisco Nexus 9000"/></div>
-                        <div>
-                             <Label>Network Redundancy</Label>
-                             <RadioGroup onValueChange={(v) => handleRadioChange('networkRedundancy', v)} value={formData.networkRedundancy}>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="None" id="n1" /><Label htmlFor="n1">None</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Active/Passive" id="n2" /><Label htmlFor="n2">Active/Passive</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Active/Active" id="n3" /><Label htmlFor="n3">Active/Active</Label></div>
-                            </RadioGroup>
-                        </div>
-                    </div>
-                );
-            default:
-                 return renderSummaryAndExport();
+            case 1: return (<div><Label>What type of hardware?</Label><RadioGroup onValueChange={(v) => handleRadioChange('hardwareType', v)} value={formData.hardwareType}><div className="flex items-center space-x-2"><RadioGroupItem value="Rack" id="r1" /><Label htmlFor="r1">Rack</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Blade" id="r2" /><Label htmlFor="r2">Blade</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Tower" id="r3" /><Label htmlFor="r3">Tower</Label></div></RadioGroup></div>);
+            case 2: return (<div><Label>CPU type and count per blade/server</Label><Input id="cpuType" value={formData.cpuType || ''} onChange={handleInputChange} placeholder="e.g., 2x Intel Xeon Gold 6248R"/></div>);
+            case 3: return (<div><Label>Memory per blade/server (GB)</Label><Input id="memoryPerBlade" type="number" value={formData.memoryPerBlade || ''} onChange={handleInputChange} /></div>);
+            case 4: return (<div><Label>Storage capacity (TB)</Label><Input id="storageCapacity" type="number" value={formData.storageCapacity || ''} onChange={handleInputChange} /></div>);
+            case 5: return renderFullFormStep();
+            case 6: 
+                if (formData.hardwareType === 'Blade') {
+                     return (<div><Label>Is the blade configuration symmetric?</Label><RadioGroup onValueChange={(v) => handleRadioChange('symmetric', v)} value={String(formData.symmetric)}><div className="flex items-center space-x-2"><RadioGroupItem value="true" id="sym1" /><Label htmlFor="sym1">Yes, all blades are identical.</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="false" id="sym2" /><Label htmlFor="sym2">No, I want to define each blade individually.</Label></div></RadioGroup></div>);
+                }
+                return renderSummaryAndExport(); // Skip to end for non-blade
+            default: return renderSummaryAndExport();
         }
     };
     
     const renderVmSteps = () => {
-         const maxSteps = 4;
+         const maxSteps = 5;
          switch (step) {
-            case 1:
-                return (
-                     <div className="space-y-4">
-                        <div><Label htmlFor="vmCount">Number of VMs</Label><Input id="vmCount" type="number" value={formData.vmCount || ''} onChange={handleInputChange} /></div>
-                        <div>
-                            <Label>VM Size</Label>
-                            <RadioGroup onValueChange={(v) => handleRadioChange('vmSize', v)} value={formData.vmSize}>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Small" id="v1" /><Label htmlFor="v1">Small</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Medium" id="v2" /><Label htmlFor="v2">Medium</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Large" id="v3" /><Label htmlFor="v3">Large</Label></div>
-                            </RadioGroup>
-                        </div>
-                    </div>
-                );
-            case 2:
-                 return (
-                    <div className="space-y-4">
-                        <div><Label htmlFor="cpuPerVm">CPU cores per VM</Label><Input id="cpuPerVm" type="number" value={formData.cpuPerVm || ''} onChange={handleInputChange} /></div>
-                        <div><Label htmlFor="memoryPerVm">Memory per VM (GB)</Label><Input id="memoryPerVm" type="number" value={formData.memoryPerVm || ''} onChange={handleInputChange} /></div>
-                         <div><Label htmlFor="diskPerVm">Disk size per VM (GB)</Label><Input id="diskPerVm" type="number" value={formData.diskPerVm || ''} onChange={handleInputChange} /></div>
-                    </div>
-                );
-            case 3:
-                return (
-                     <div className="space-y-4">
-                        <div>
-                             <Label>Connectivity</Label>
-                             <RadioGroup onValueChange={(v) => handleRadioChange('connectivity', v)} value={formData.connectivity}>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="VLAN" id="c1" /><Label htmlFor="c1">VLAN</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="SDN" id="c2" /><Label htmlFor="c2">SDN</Label></div>
-                            </RadioGroup>
-                        </div>
-                        <div>
-                            <Label>High Availability Requirements</Label>
-                             <RadioGroup onValueChange={(v) => handleRadioChange('highAvailability', v)} value={formData.highAvailability}>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="None" id="h1" /><Label htmlFor="h1">None</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="n+1" id="h2" /><Label htmlFor="h2">n+1</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Full Redundancy" id="h3" /><Label htmlFor="h3">Full Redundancy</Label></div>
-                            </RadioGroup>
-                        </div>
-                    </div>
-                );
-            default:
-                 return renderSummaryAndExport();
+            case 1: return (<div><Label>Number of VMs</Label><Input id="vmCount" type="number" value={formData.vmCount || ''} onChange={handleInputChange} /></div>);
+            case 2: return (<div><Label>VM Size</Label><RadioGroup onValueChange={(v) => handleRadioChange('vmSize', v)} value={formData.vmSize}><div className="flex items-center space-x-2"><RadioGroupItem value="Small" id="v1" /><Label htmlFor="v1">Small</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Medium" id="v2" /><Label htmlFor="v2">Medium</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Large" id="v3" /><Label htmlFor="v3">Large</Label></div></RadioGroup></div>);
+            case 3: return (<div><Label>CPU cores per VM</Label><Input id="cpuPerVm" type="number" value={formData.cpuPerVm || ''} onChange={handleInputChange} /></div>);
+            case 4: return renderFullFormStep();
+            default: return renderSummaryAndExport();
         }
     };
     
@@ -413,7 +474,11 @@ export default function SpecificationBuilderPage() {
         </div>
     );
     
-    const maxSteps = builderMode === 'hardware' ? 5 : 4;
+    const hardwareMaxSteps = formData.hardwareType === 'Blade' ? 7 : 6;
+    const maxSteps = builderMode === 'hardware' ? hardwareMaxSteps : 5;
+    const stepTitles = builderMode === 'hardware' 
+        ? ['Hardware Type', 'CPU', 'Memory', 'Storage', 'Detailed Info', 'Blade Config', 'Summary & Export']
+        : ['VM Count', 'VM Size', 'Resources', 'Detailed Info', 'Summary & Export'];
 
 
     const renderWizard = () => {
@@ -424,11 +489,7 @@ export default function SpecificationBuilderPage() {
                         {builderMode === 'hardware' ? <HardDrive/> : <Server/>}
                         {builderMode === 'hardware' ? 'Hardware' : 'VM'} Specification Builder
                     </CardTitle>
-                    <CardDescription>Step {step} of {maxSteps - 1}: {
-                        builderMode === 'hardware' ? 
-                        ['Hardware Type', 'CPU & Memory', 'Storage', 'Network', 'Summary & Export'][step - 1] :
-                        ['VM Sizing', 'Resources', 'Connectivity', 'Summary & Export'][step - 1]
-                    }</CardDescription>
+                    <CardDescription>Step {step} of {maxSteps - 1}: {stepTitles[step-1]}</CardDescription>
                 </CardHeader>
                  <CardContent className="min-h-[20rem]">
                     {builderMode === 'hardware' ? renderHardwareSteps() : renderVmSteps()}
