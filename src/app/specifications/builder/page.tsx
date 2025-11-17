@@ -6,7 +6,7 @@ import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { HardDrive, Server, ArrowLeft, ArrowRight, Package, Upload, Copy, Check, FileJson } from 'lucide-react';
+import { HardDrive, Server, ArrowLeft, ArrowRight, Package, Upload, Copy, Check, FileJson, Loader2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
@@ -310,3 +310,5 @@ export default function SpecificationBuilderPage() {
         </DashboardLayout>
     );
 }
+
+    
