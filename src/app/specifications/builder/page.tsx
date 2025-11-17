@@ -6,7 +6,7 @@ import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { HardDrive, Server, ArrowLeft, ArrowRight, Package, Upload, Copy, Check, FileJson, Loader2 } from 'lucide-react';
+import { HardDrive, Server, ArrowLeft, ArrowRight, Package, Upload, Copy, Check, FileJson, Loader2, Cpu, MemoryStick, Database, NetworkIcon } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,98 @@ import { useRouter } from 'next/navigation';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
+function DiagramDisplay({ specJson }: { specJson: string }) {
+    let spec;
+    try {
+        spec = JSON.parse(specJson);
+    } catch (e) {
+        return (
+            <div className="h-full bg-muted rounded-md flex items-center justify-center">
+                <p className="text-destructive p-4">Invalid JSON format</p>
+            </div>
+        );
+    }
+
+    if (spec.hardwareType === 'Blade' || spec.hardwareType === 'Rack' || spec.hardwareType === 'Tower') {
+        const bladeCount = spec.bladeCount || (spec.hardwareType === 'Blade' ? 10 : 1);
+        return (
+            <div className="h-full bg-muted rounded-md p-4 space-y-4 overflow-auto">
+                <h4 className="font-bold text-center">{spec.hardwareType} Server Specification</h4>
+                <div className="border-2 border-dashed border-gray-400 rounded-lg p-4 bg-background">
+                     <p className="text-sm text-center font-semibold mb-2">Chassis</p>
+                     <div className={cn("grid gap-2", {
+                         'grid-cols-5': bladeCount > 1,
+                         'grid-cols-1': bladeCount === 1,
+                     })}>
+                        {Array.from({ length: bladeCount }).map((_, i) => (
+                             <div key={i} className="border rounded-md p-2 bg-gray-50 dark:bg-gray-800">
+                                <Server className="mx-auto h-6 w-6 text-gray-500"/>
+                                <p className="text-xs font-mono text-center mt-1">Blade {i + 1}</p>
+                                <div className="text-[10px] text-muted-foreground mt-1">
+                                    <div className="flex items-center gap-1"><Cpu className="h-3 w-3"/><span>{spec.cpuType || 'N/A'}</span></div>
+                                    <div className="flex items-center gap-1"><MemoryStick className="h-3 w-3"/><span>{spec.memoryPerBlade || 'N/A'} GB</span></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-4 flex justify-around items-center text-center">
+                         <div className="flex flex-col items-center gap-1">
+                            <Database className="h-6 w-6 text-gray-600"/>
+                            <p className="text-xs">{spec.storageType || 'N/A'} Storage</p>
+                            <p className="text-[10px] text-muted-foreground">{spec.storageCapacity || 'N/A'} TB</p>
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                            <NetworkIcon className="h-6 w-6 text-gray-600"/>
+                            <p className="text-xs">{spec.switchType || 'N/A'}</p>
+                            <p className="text-[10px] text-muted-foreground">{spec.networkRedundancy || 'N/A'} Redundancy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (spec.vmSize) {
+        const vmCount = spec.vmCount || 1;
+        return (
+             <div className="h-full bg-muted rounded-md p-4 space-y-4 overflow-auto">
+                <h4 className="font-bold text-center">Data Center VM Specification</h4>
+                 <div className="border-2 border-dashed border-gray-400 rounded-lg p-4 bg-background">
+                    <p className="text-sm text-center font-semibold mb-2">Hypervisor Cluster</p>
+                    <div className="grid grid-cols-4 gap-2">
+                         {Array.from({ length: vmCount }).map((_, i) => (
+                             <div key={i} className="border rounded-md p-2 bg-blue-50 dark:bg-blue-900/30">
+                                <Server className="mx-auto h-6 w-6 text-blue-500"/>
+                                <p className="text-xs font-mono text-center mt-1">VM {i + 1} ({spec.vmSize})</p>
+                                <div className="text-[10px] text-muted-foreground mt-1">
+                                    <div className="flex items-center gap-1"><Cpu className="h-3 w-3"/><span>{spec.cpuPerVm || 'N/A'} cores</span></div>
+                                    <div className="flex items-center gap-1"><MemoryStick className="h-3 w-3"/><span>{spec.memoryPerVm || 'N/A'} GB</span></div>
+                                    <div className="flex items-center gap-1"><Database className="h-3 w-3"/><span>{spec.diskPerVm || 'N/A'} GB</span></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                     <div className="mt-4 flex justify-around items-center text-center">
+                         <div className="flex flex-col items-center gap-1">
+                            <NetworkIcon className="h-6 w-6 text-gray-600"/>
+                            <p className="text-xs">{spec.connectivity || 'N/A'} Connectivity</p>
+                        </div>
+                         <div className="flex flex-col items-center gap-1">
+                            <Server className="h-6 w-6 text-gray-600"/>
+                            <p className="text-xs">{spec.highAvailability || 'N/A'} HA</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="h-full bg-muted rounded-md flex items-center justify-center">
+            <p className="text-muted-foreground">Diagram placeholder</p>
+        </div>
+    );
+}
 
 export default function SpecificationBuilderPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -26,6 +118,7 @@ export default function SpecificationBuilderPage() {
     const [copied, setCopied] = useState(false);
     const { toast } = useToast();
     const router = useRouter();
+    const [jsonSpec, setJsonSpec] = useState('');
 
 
     useEffect(() => {
@@ -46,7 +139,16 @@ export default function SpecificationBuilderPage() {
         }
     }
     
-    const handleNext = () => setStep(s => s + 1);
+    const handleNext = () => {
+        if (step === (builderMode === 'hardware' ? 4 : 3)) {
+            const spec = {
+                name: `Spec-${builderMode}-${formData.hardwareType || formData.vmSize || 'Custom'}-${Date.now()}`,
+                ...formData
+            };
+            setJsonSpec(JSON.stringify(spec, null, 2));
+        }
+        setStep(s => s + 1);
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value, type } = e.target;
@@ -60,22 +162,25 @@ export default function SpecificationBuilderPage() {
     const handleSelectChange = (id: string, value: string) => {
         setFormData((prev: any) => ({ ...prev, [id]: value }));
     };
-
-    const generatedJson = JSON.stringify({
-        name: `Spec-${builderMode}-${formData.hardwareType || formData.vmSize || 'Custom'}-${Date.now()}`,
-        ...formData
-    }, null, 2);
     
     const handleCopy = () => {
-        navigator.clipboard.writeText(generatedJson);
+        navigator.clipboard.writeText(jsonSpec);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
+        let payload;
         try {
-            const payload = JSON.parse(generatedJson);
+            payload = JSON.parse(jsonSpec);
+        } catch (e) {
+            toast({ variant: 'destructive', title: 'Invalid JSON', description: 'The JSON in the editor is not valid.' });
+            setIsSubmitting(false);
+            return;
+        }
+
+        try {
             const response = await fetch('/api/specifications', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -227,7 +332,7 @@ export default function SpecificationBuilderPage() {
                     <CardHeader><CardTitle>Generated JSON Specification</CardTitle></CardHeader>
                     <CardContent>
                         <div className="relative">
-                            <Textarea readOnly value={generatedJson} rows={15} className="font-mono text-xs"/>
+                            <Textarea value={jsonSpec} onChange={(e) => setJsonSpec(e.target.value)} rows={15} className="font-mono text-xs"/>
                             <Button size="icon" variant="ghost" className="absolute top-2 right-2 h-7 w-7" onClick={handleCopy}>
                                 {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                             </Button>
@@ -246,10 +351,7 @@ export default function SpecificationBuilderPage() {
                 <Card>
                     <CardHeader><CardTitle>Visualization</CardTitle></CardHeader>
                     <CardContent>
-                        <div className="h-64 bg-muted rounded-md flex items-center justify-center">
-                            <p className="text-muted-foreground">Diagram placeholder</p>
-                        </div>
-                         <Button className="w-full mt-4" variant="outline" disabled>Export Diagram (PDF)</Button>
+                        <DiagramDisplay specJson={jsonSpec} />
                     </CardContent>
                 </Card>
                  <Button className="w-full" size="lg" onClick={handleSubmit} disabled={isSubmitting}>
@@ -310,5 +412,3 @@ export default function SpecificationBuilderPage() {
         </DashboardLayout>
     );
 }
-
-    
