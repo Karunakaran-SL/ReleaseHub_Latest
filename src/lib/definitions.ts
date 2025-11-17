@@ -315,3 +315,29 @@ export type UpgradeHistory = {
   summary?: UpgradeSummary;
   approval_phases?: OnboardingPhase[];
 };
+
+export type License = {
+  _id: string;
+  id: string;
+  name: string;
+  type: 'open-source' | 'proprietary' | 'subscription' | 'perpetual';
+  owner: string;
+  components?: string[];
+  products?: string[];
+  tenants?: string[];
+  apps?: string[];
+  integrations?: string[];
+  versions?: string[];
+  status: 'active' | 'expired' | 'deprecated';
+};
+
+export type ProductLicensing = {
+  _id: string;
+  id: string;
+  product_id: string;
+  license_model: 'online' | 'offline' | 'hybrid';
+  entitlements: string[];
+  package_included: boolean;
+  validity: string;
+  compliance: string;
+};

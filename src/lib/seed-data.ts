@@ -1,7 +1,6 @@
-
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
-import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration } from './definitions';
+import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing } from './definitions';
 
 
 const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
@@ -793,12 +792,24 @@ const initialInterfaces: Omit<CmdbInterface, '_id' | 'created_at' | 'updated_at'
     })),
 ];
 
+const initialLicenses: Omit<License, '_id'>[] = [
+    { id: 'apache-2.0', name: 'Apache 2.0', type: 'open-source', owner: 'Apache Foundation', components: ['SparkProcessing', 'KafkaStreaming'], status: 'active' },
+    { id: 'mit', name: 'MIT License', type: 'open-source', owner: 'MIT', components: ['AuthNService'], status: 'active' },
+    { id: 'proprietary-maps', name: 'Advanced Maps SDK', type: 'proprietary', owner: 'GeoMaps Inc.', apps: ['RetailStorefront'], status: 'active' },
+    { id: 'enterprise-support', name: 'Enterprise Support', type: 'subscription', owner: 'Red Hat', tenants: ['CorePlatformServices'], status: 'active' },
+    { id: 'data-analytics-suite', name: 'Data Analytics Suite', type: 'perpetual', owner: 'DataCorp', products: ['UnifiedDataFabric'], status: 'expired' }
+];
+
+const initialProductLicensing: Omit<ProductLicensing, '_id'>[] = [
+    { id: 'pl-oss-portal', product_id: 'OneStopShopPortal', license_model: 'hybrid', entitlements: ['feature-sso', 'feature-dashboard'], package_included: true, validity: 'perpetual', compliance: 'ISO 27001' },
+    { id: 'pl-data-fabric', product_id: 'UnifiedDataFabric', license_model: 'online', entitlements: ['feature-streaming', 'feature-batch'], package_included: false, validity: '2025-12-31', compliance: 'SOC 2 Type II' }
+];
 
 export async function seedDatabase() {
     const client = await clientPromise;
     const db = client.db();
 
-    const collectionsToSeed: ({ name: string; data: any[] } | { collectionName: string; data: any[] })[] = [
+    const collectionsToSeed = [
         { name: 'products', data: initialProducts.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString()})) },
         { name: 'specifications', data: fullSpecifications },
         { name: 'deployment_types', data: initialDeploymentTypes },
@@ -820,6 +831,8 @@ export async function seedDatabase() {
         { name: 'specification_network_cards', data: initialSpecNetworkCards },
         { name: 'specification_plug_power_cords', data: initialSpecPlugPowerCords },
         ...initialApprovalConfigs,
+        { name: 'licenses', data: initialLicenses.map(l => ({ ...l, _id: l.id })) },
+        { name: 'product_licensing', data: initialProductLicensing.map(pl => ({ ...pl, _id: pl.id })) },
     ];
     
     let seededCount = 0;

@@ -42,6 +42,7 @@ import {
   CheckSquare,
   SlidersHorizontal,
   Database,
+  FileKey2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -160,6 +161,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isReleaseManagementPage = pathname.startsWith('/release-management');
     const isDocumentsPage = pathname.startsWith('/documents');
     const isFleetManagementPage = pathname.startsWith('/fleet-management');
+    const isLicensePage = pathname.startsWith('/license');
 
 
   return (
@@ -170,11 +172,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage}
+                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage}
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -376,6 +378,36 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/fleet-management/deployment" isActive={pathname.startsWith('/fleet-management/deployment')}>
                             Deployment
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+                
+                 <Collapsible asChild defaultOpen={isLicensePage}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        isActive={isLicensePage}
+                        tooltip={{ children: 'License' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                         <FileKey2 />
+                        License
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/license/usage" isActive={pathname.startsWith('/license/usage')}>
+                            License Usage
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/license/product-licensing" isActive={pathname.startsWith('/license/product-licensing')}>
+                            Product Licensing
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
