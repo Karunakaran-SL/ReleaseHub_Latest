@@ -266,6 +266,20 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                         </SidebarMenuButton>
                         </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <SidebarMenuSub>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton href="/specifications" isActive={pathname === '/specifications'}>
+                                        All Specifications
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton href="/specifications/builder" isActive={pathname.startsWith('/specifications/builder')}>
+                                        Builder
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                            </SidebarMenuSub>
+                        </CollapsibleContent>
                     </SidebarMenuItem>
                 </Collapsible>
                  <Collapsible asChild defaultOpen={isDocumentsPage}>
