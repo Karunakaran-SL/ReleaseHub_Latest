@@ -210,21 +210,6 @@ export default function EditSpecificationPage() {
     const specJson = useMemo(() => {
         return JSON.stringify(formState, null, 2);
     }, [formState]);
-    
-    const handleJsonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const newJson = e.target.value;
-        try {
-            // Basic validation before updating state to prevent broken JSON
-            const parsed = JSON.parse(newJson);
-            // Only update if it's a valid object
-            if (typeof parsed === 'object' && parsed !== null) {
-                setFormState(parsed);
-            }
-        } catch (error) {
-            console.error("Invalid JSON input", error);
-            // Optionally provide feedback to the user that the JSON is invalid
-        }
-    }
 
 
     if (loading || !formState.name) {
@@ -384,7 +369,7 @@ export default function EditSpecificationPage() {
                                     </div>
                                     <div>
                                     <Label htmlFor="json-output">Specification JSON</Label>
-                                    <Textarea id="json-output" value={specJson} onChange={handleJsonChange} rows={24} className="font-mono text-xs"/>
+                                    <Textarea id="json-output" value={specJson} readOnly rows={24} className="font-mono text-xs"/>
                                     </div>
                                 </div>
                             </div>
@@ -411,5 +396,3 @@ export default function EditSpecificationPage() {
         </DashboardLayout>
     );
 }
-
-    
