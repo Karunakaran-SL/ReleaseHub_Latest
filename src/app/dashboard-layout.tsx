@@ -332,6 +332,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                                 <GitGraph className="mr-2"/> Dependency Metrics
                             </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/integration" isActive={pathname.startsWith('/cmdb/integration')}>
+                                <DatabaseZap className="mr-2"/> CMDB Integration
+                            </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
