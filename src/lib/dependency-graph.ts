@@ -51,9 +51,18 @@ export async function generateDependencyTree(product: Product, allData: AllData)
     const tenantsTree = productTenants.map(tenant => {
         // For each tenant, find its components and applications
         const tenantComponents = allData.components.filter(comp => comp.tenants?.some(t => t.id === tenant._id))
-            .map(c => ({...c, version: c.version || '1.0.0'}));
+            .map(c => {
+                const provides_interfaces = allData.interfaces.filter(i => c.provided_interfaces?.some(pi => pi.id === i.id));
+                const depends_on_interfaces = allData.interfaces.filter(i => c.dependent_interfaces?.some(di => di.id === i.id));
+                return {...c, version: c.version || '1.0.0', provides_interfaces, depends_on_interfaces};
+            });
+            
         const tenantApplications = allData.applications.filter(app => app.tenants?.some(t => t.id === tenant._id))
-            .map(a => ({...a, version: a.version || '1.0.0'}));
+            .map(a => {
+                const provides_interfaces = allData.interfaces.filter(i => a.provided_interfaces?.some(pi => pi.id === i.id));
+                const depends_on_interfaces = allData.interfaces.filter(i => a.dependent_interfaces?.some(di => di.id === i.id));
+                return {...a, version: a.version || '1.0.0', provides_interfaces, depends_on_interfaces};
+            });
 
         // Get the latest version of the tenant for the default tree
         const allVersionsOfTenant = allData.tenants.filter(t => t.name === tenant.name).sort((a,b) => (b.version || '0').localeCompare(a.version || '0'));
