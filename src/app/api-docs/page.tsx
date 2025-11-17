@@ -107,27 +107,29 @@ export default function ApiDocsPage() {
         { status: 200, description: 'Successfully retrieved items.'},
         { status: 500, description: 'Internal server error.'}
     ];
-    const genericPostResponses = [
-        { status: 201, description: 'Item created successfully.'},
+    const genericPostResponses = (itemName = 'Item') => [
+        { status: 201, description: `${itemName} created successfully.`},
         { status: 400, description: 'Invalid data.' },
+        { status: 401, description: 'Unauthorized.' },
         { status: 500, description: 'Internal server error.'}
     ];
-    const genericGetOneResponses = [
-        { status: 200, description: 'Successfully retrieved item.' },
-        { status: 400, description: 'Invalid ID.' },
-        { status: 404, description: 'Item not found.' },
+    const genericGetOneResponses = (itemName = 'Item') => [
+        { status: 200, description: `Successfully retrieved ${itemName}.` },
+        { status: 404, description: `${itemName} not found.` },
         { status: 500, description: 'Internal server error.'}
     ];
-    const genericPutResponses = [
-        { status: 200, description: 'Item updated successfully.' },
+    const genericPutResponses = (itemName = 'Item') => [
+        { status: 200, description: `${itemName} updated successfully.` },
         { status: 400, description: 'Invalid ID or data.' },
-        { status: 404, description: 'Item not found.' },
+        { status: 404, description: `${itemName} not found.` },
+        { status: 401, description: 'Unauthorized.' },
         { status: 500, description: 'Internal server error.'}
     ];
-    const genericDeleteResponses = [
-        { status: 204, description: 'Item deleted successfully.', body: `{ "message": "Item deleted successfully." }` },
-        { status: 400, description: 'Invalid ID.' },
-        { status: 404, description: 'Item not found.' },
+    const genericDeleteResponses = (itemName = 'Item') => [
+        { status: 200, description: `${itemName} deleted successfully.`, body: `{ "message": "${itemName} deleted successfully." }` },
+        { status: 400, description: 'Invalid ID or missing comment.' },
+        { status: 404, description: `${itemName} not found.` },
+        { status: 401, description: 'Unauthorized.' },
         { status: 500, description: 'Internal server error.'}
     ];
 
@@ -149,7 +151,32 @@ export default function ApiDocsPage() {
                         { status: 200, description: 'Login successful or password updated.', body: `{ "message": "Logged in successfully" }` },
                         { status: 201, description: 'New user created and logged in.', body: `{ "message": "User created and logged in successfully" }` },
                         { status: 400, description: 'Invalid request body.', body: `{ "message": "Invalid username or password format." }` },
+                        { status: 401, description: 'Invalid username or password.' },
                         { status: 500, description: 'Internal server error.', body: `{ "message": "An internal server error occurred." }` }
+                    ]}
+                />
+            </Section>
+
+             <Section title="Data Management" id="data-management">
+                <ApiEndpoint
+                    method="POST"
+                    path="/api/seed"
+                    description="Seeds the database with initial data for all collections. This is a protected endpoint and requires authentication."
+                    responses={[
+                        { status: 200, description: 'Database seeded successfully or partially.' },
+                        { status: 401, description: 'Unauthorized.' },
+                        { status: 500, description: 'Internal server error during seeding.' },
+                    ]}
+                />
+                <Separator className="my-8" />
+                 <ApiEndpoint
+                    method="POST"
+                    path="/api/clear"
+                    description="Clears all data from specified collections in the database. This is a protected, destructive endpoint."
+                    responses={[
+                        { status: 200, description: 'All data cleared successfully.' },
+                        { status: 401, description: 'Unauthorized.' },
+                        { status: 500, description: 'Internal server error.' },
                     ]}
                 />
             </Section>
@@ -169,41 +196,36 @@ export default function ApiDocsPage() {
                 <ApiEndpoint 
                     method="POST"
                     path="/api/products"
-                    description="Creates a new product. The created_at and updated_at fields will be set automatically."
-                    requestBody={`{ "id": "Product_F", "name": "New Awesome Product", ... }`}
-                    responses={[
-                        { status: 201, description: 'Product created successfully.', body: `{ "_id": "...", "name": "New Awesome Product", ... }`},
-                        { status: 400, description: 'Invalid product data.' },
-                        { status: 401, description: 'Unauthorized.' },
-                        { status: 500, description: 'Internal server error.'}
-                    ]}
+                    description="Creates a new product. The `_id`, `created_at`, and `updated_at` fields will be set automatically."
+                    requestBody={`{ "name": "New Awesome Product", "owner": "...", ... }`}
+                    responses={genericPostResponses('Product')}
                 />
                 <Separator className="my-8" />
                 <ApiEndpoint 
                     method="GET"
                     path="/api/products/{id}"
-                    description="Retrieves a single product by its MongoDB ObjectId."
-                    responses={genericGetOneResponses.map(r => ({...r, description: r.description.replace('Item', 'Product')}))}
+                    description="Retrieves a single product by its ID."
+                    responses={genericGetOneResponses('Product')}
                 />
                 <Separator className="my-8" />
                 <ApiEndpoint 
                     method="PUT"
                     path="/api/products/{id}"
-                    description="Updates an existing product by its MongoDB ObjectId. The updated_at field is automatically updated. A mandatory `updateComment` field must be included for auditing."
+                    description="Updates an existing product by its ID. A mandatory `updateComment` field must be included for auditing."
                     requestBody={`{ 
     "name": "Updated Product Name", 
     "owner": "New Owner",
     "updateComment": "Updating the owner for Q3 re-org." 
 }`}
-                    responses={genericPutResponses.map(r => ({...r, description: r.description.replace('Item', 'Product')})).concat({ status: 401, description: 'Unauthorized.' })}
+                    responses={genericPutResponses('Product')}
                 />
                 <Separator className="my-8" />
                 <ApiEndpoint 
                     method="DELETE"
                     path="/api/products/{id}"
-                    description="Deletes a product by its MongoDB ObjectId. A mandatory `comment` field must be included for auditing."
+                    description="Deletes a product by its ID. A mandatory `comment` field must be included for auditing."
                     requestBody={`{ "comment": "Decommissioning old product." }`}
-                    responses={genericDeleteResponses.map(r => ({...r, description: r.description.replace('Item', 'Product')})).concat({ status: 401, description: 'Unauthorized.' })}
+                    responses={genericDeleteResponses('Product')}
                 />
             </Section>
 
@@ -218,80 +240,169 @@ export default function ApiDocsPage() {
                 <ApiEndpoint 
                     method="POST"
                     path="/api/audits"
-                    description="Creates a new audit log entry. This is typically called internally by other API endpoints."
+                    description="Creates a new audit log entry. This is typically called internally by other API endpoints when modifications are made."
                     requestBody={`{ 
     "action": "CREATE" | "UPDATE" | "DELETE",
     "entity": "product",
     "entityId": "...",
     "comment": "User provided comment."
 }`}
-                    responses={genericPostResponses.map(r => ({...r, description: r.description.replace('Item', 'Log')}))}
+                    responses={genericPostResponses('Audit Log')}
                 />
             </Section>
-
-            <Section title="Workflows" id="workflows">
-                <ApiEndpoint method="GET" path="/api/workflows" description="Retrieves a list of all workflows." responses={genericGetListResponses}/>
+            
+            <Section title="Baselines" id="baselines">
+                 <ApiEndpoint 
+                    method="GET"
+                    path="/api/baselines"
+                    description="Retrieves a list of all baselines."
+                    responses={genericGetListResponses}
+                />
+                 <Separator className="my-8" />
+                <ApiEndpoint 
+                    method="POST"
+                    path="/api/baselines"
+                    description="Creates a new baseline. Automatically increments version number based on `versionIncrementType`."
+                    requestBody={`{ 
+    "product": { "id": "...", "name": "..." },
+    "specifications": [ ... ],
+    "tenants": [ ... ],
+    "versionIncrementType": "major" | "minor" | "patch"
+}`}
+                    responses={genericPostResponses('Baseline')}
+                />
+                 <Separator className="my-8" />
+                <ApiEndpoint 
+                    method="GET"
+                    path="/api/baselines/{id}"
+                    description="Retrieves a single baseline by its ID."
+                    responses={genericGetOneResponses('Baseline')}
+                />
                 <Separator className="my-8" />
-                <ApiEndpoint method="POST" path="/api/workflows" description="Creates a new workflow." requestBody={`{ "id": "...", "name": "...", "description": "..." }`} responses={genericPostResponses}/>
-                <Separator className="my-8" />
-                <ApiEndpoint method="GET" path="/api/workflows/{id}" description="Retrieves a single workflow by its MongoDB ObjectId." responses={genericGetOneResponses}/>
-                <Separator className="my-8" />
-                <ApiEndpoint method="PUT" path="/api/workflows/{id}" description="Updates an existing workflow." requestBody={`{ "name": "New Name" }`} responses={genericPutResponses}/>
-                <Separator className="my-8" />
-                <ApiEndpoint method="DELETE" path="/api/workflows/{id}" description="Deletes a workflow." responses={genericDeleteResponses}/>
+                <ApiEndpoint 
+                    method="PUT"
+                    path="/api/baselines/{id}"
+                    description="Updates the status or validation phases of a baseline."
+                     requestBody={`{ 
+    "status": "VALIDATING" | "RELEASED" | "REJECTED",
+    "updateComment": "Moving to validation stage.",
+    "validation_phases": [ ... ] 
+}`}
+                    responses={genericPutResponses('Baseline')}
+                />
             </Section>
 
             <Section title="CMDB" id="cmdb">
                 <p className="text-muted-foreground mb-4">Endpoints for managing the Configuration Management Database.</p>
                 <ApiEndpoint method="GET" path="/api/cmdb/tenants" description="Retrieves a list of all tenants." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
+                 <ApiEndpoint method="POST" path="/api/cmdb/tenants" description="Onboards a new tenant." requestBody={`{ "id": "...", "name": "...", ... }`} responses={genericPostResponses('Tenant')}/>
+                 <Separator className="my-8" />
+                 <ApiEndpoint method="GET" path="/api/cmdb/tenants/{id}" description="Retrieves a single tenant by ID." responses={genericGetOneResponses('Tenant')}/>
+                 <Separator className="my-8" />
+                 <ApiEndpoint method="PUT" path="/api/cmdb/tenants/{id}" description="Updates a tenant. Requires `updateComment`." requestBody={`{ "name": "New Name", "updateComment": "Reason" }`} responses={genericPutResponses('Tenant')}/>
+                <Separator className="my-8" />
+                <ApiEndpoint method="DELETE" path="/api/cmdb/tenants/{id}" description="Deletes a tenant. Requires `comment`." requestBody={`{ "comment": "Reason" }`} responses={genericDeleteResponses('Tenant')}/>
+                <Separator className="my-8" />
+
                 <ApiEndpoint method="GET" path="/api/cmdb/components" description="Retrieves a list of all components." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
+                 <ApiEndpoint method="POST" path="/api/cmdb/components" description="Onboards a new component." requestBody={`{ "id": "...", "name": "...", ... }`} responses={genericPostResponses('Component')}/>
+                 <Separator className="my-8" />
+                <ApiEndpoint method="GET" path="/api/cmdb/components/{id}" description="Retrieves a single component by ID." responses={genericGetOneResponses('Component')}/>
+                 <Separator className="my-8" />
+                <ApiEndpoint method="PUT" path="/api/cmdb/components/{id}" description="Updates a component. Requires `updateComment`." requestBody={`{ "name": "New Name", "updateComment": "Reason" }`} responses={genericPutResponses('Component')}/>
+                <Separator className="my-8" />
+                <ApiEndpoint method="DELETE" path="/api/cmdb/components/{id}" description="Deletes a component. Requires `comment`." requestBody={`{ "comment": "Reason" }`} responses={genericDeleteResponses('Component')}/>
+                <Separator className="my-8" />
+
                 <ApiEndpoint method="GET" path="/api/cmdb/applications" description="Retrieves a list of all applications." responses={genericGetListResponses}/>
-                 <Separator className="my-8" />
+                <Separator className="my-8" />
+                <ApiEndpoint method="POST" path="/api/cmdb/applications" description="Onboards a new application." requestBody={`{ "id": "...", "name": "...", ... }`} responses={genericPostResponses('Application')}/>
+                <Separator className="my-8" />
+                <ApiEndpoint method="GET" path="/api/cmdb/applications/{id}" description="Retrieves a single application by ID." responses={genericGetOneResponses('Application')}/>
+                <Separator className="my-8" />
+                <ApiEndpoint method="PUT" path="/api/cmdb/applications/{id}" description="Updates an application. Requires `updateComment`." requestBody={`{ "name": "New Name", "updateComment": "Reason" }`} responses={genericPutResponses('Application')}/>
+                <Separator className="my-8" />
+                <ApiEndpoint method="DELETE" path="/api/cmdb/applications/{id}" description="Deletes an application. Requires `comment`." requestBody={`{ "comment": "Reason" }`} responses={genericDeleteResponses('Application')}/>
+                <Separator className="my-8" />
+
                 <ApiEndpoint method="GET" path="/api/cmdb/interfaces" description="Retrieves a list of all interfaces." responses={genericGetListResponses}/>
-                 <Separator className="my-8" />
+                <Separator className="my-8" />
+                <ApiEndpoint method="POST" path="/api/cmdb/interfaces" description="Creates a new interface." requestBody={`{ "id": "...", "name": "...", ... }`} responses={genericPostResponses('Interface')}/>
+                <Separator className="my-8" />
+                <ApiEndpoint method="GET" path="/api/cmdb/interfaces/{id}" description="Retrieves a single interface by ID." responses={genericGetOneResponses('Interface')}/>
+                <Separator className="my-8" />
+                <ApiEndpoint method="PUT" path="/api/cmdb/interfaces/{id}" description="Updates an interface. Requires `updateComment`." requestBody={`{ "name": "New Name", "updateComment": "Reason" }`} responses={genericPutResponses('Interface')}/>
+                <Separator className="my-8" />
+                <ApiEndpoint method="DELETE" path="/api/cmdb/interfaces/{id}" description="Deletes an interface. Requires `comment`." requestBody={`{ "comment": "Reason" }`} responses={genericDeleteResponses('Interface')}/>
+                <Separator className="my-8" />
+
                 <ApiEndpoint method="GET" path="/api/cmdb/interface-types" description="Retrieves a list of all interface types." responses={genericGetListResponses}/>
+                <Separator className="my-8" />
+                <ApiEndpoint method="POST" path="/api/cmdb/interface-types" description="Creates a new interface type." requestBody={`{ "id": "...", "name": "..." }`} responses={genericPostResponses('Interface Type')}/>
             </Section>
 
-            <Section title="Compliance Checks" id="compliance-checks">
-                <ApiEndpoint method="GET" path="/api/compliance-checks" description="Retrieves a list of all compliance checks." responses={genericGetListResponses}/>
+             <Section title="Deployments" id="deployments">
+                <ApiEndpoint method="GET" path="/api/deployments" description="Retrieves a list of all deployments." responses={genericGetListResponses} />
                 <Separator className="my-8" />
-                <ApiEndpoint method="POST" path="/api/compliance-checks" description="Creates a new compliance check." requestBody={`{ "id": "...", "name": "...", "description": "..." }`} responses={genericPostResponses}/>
+                <ApiEndpoint method="POST" path="/api/deployments" description="Initiates a new deployment." requestBody={`{ "productId": "...", "details": { "deploymentId": "...", "customer": "..." }, ... }`} responses={genericPostResponses('Deployment')} />
                 <Separator className="my-8" />
-                <ApiEndpoint method="GET" path="/api/compliance-checks/{id}" description="Retrieves a single compliance check by its MongoDB ObjectId." responses={genericGetOneResponses}/>
+                <ApiEndpoint method="GET" path="/api/deployments/{id}" description="Retrieves a single deployment by its ID." responses={genericGetOneResponses('Deployment')} />
                 <Separator className="my-8" />
-                <ApiEndpoint method="PUT" path="/api/compliance-checks/{id}" description="Updates an existing compliance check." requestBody={`{ "name": "New Name" }`} responses={genericPutResponses}/>
+                <ApiEndpoint method="PUT" path="/api/deployments/{id}" description="Updates a deployment. Requires `updateComment`." requestBody={`{ "status": "ACTIVE", "updateComment": "Provisioning complete." }`} responses={genericPutResponses('Deployment')} />
                 <Separator className="my-8" />
-                <ApiEndpoint method="DELETE" path="/api/compliance-checks/{id}" description="Deletes a compliance check." responses={genericDeleteResponses}/>
-            </Section>
+                <ApiEndpoint method="DELETE" path="/api/deployments/{id}" description="Deletes a deployment. Requires `comment`." requestBody={`{ "comment": "Decommissioned." }`} responses={genericDeleteResponses('Deployment')} />
+             </Section>
+             
+             <Section title="Upgrade History" id="upgrade-history">
+                <ApiEndpoint method="GET" path="/api/upgrade-history" description="Retrieves a list of all upgrade operations, grouped by operation." responses={genericGetListResponses} />
+                <Separator className="my-8" />
+                <ApiEndpoint method="POST" path="/api/upgrade-history" description="Schedules a new upgrade operation for one or more deployments." responses={genericPostResponses('Upgrade Operation')} />
+                <Separator className="my-8" />
+                 <ApiEndpoint method="GET" path="/api/upgrade-history/{deploymentId}" description="Retrieves the upgrade history for a specific deployment ID." responses={genericGetListResponses} />
+             </Section>
 
-            <Section title="Deployment Types" id="deployment-types">
-                <ApiEndpoint method="GET" path="/api/deployment-types" description="Retrieves a list of all deployment types." responses={genericGetListResponses}/>
+             <Section title="Dependency Tree" id="dependency-tree">
+                <ApiEndpoint method="GET" path="/api/dependency-tree/product/{productId}" description="Retrieves the pre-generated dependency tree for a given product ID." responses={genericGetOneResponses('Tree')} />
                 <Separator className="my-8" />
-                <ApiEndpoint method="POST" path="/api/deployment-types" description="Creates a new deployment type." requestBody={`{ "id": "...", "name": "...", "description": "..." }`} responses={genericPostResponses}/>
+                 <ApiEndpoint method="GET" path="/api/dependency-tree/{entityType}/{entityId}" description="Generates a dependency graph (parents and children) for any given CMDB entity on-the-fly." responses={genericGetOneResponses('Graph')} />
                 <Separator className="my-8" />
-                <ApiEndpoint method="GET" path="/api/deployment-types/{id}" description="Retrieves a single deployment type by its MongoDB ObjectId." responses={genericGetOneResponses}/>
+                 <ApiEndpoint method="POST" path="/api/dependency-tree/update-all" description="Triggers a regeneration of all stored product dependency trees." responses={[ { status: 200, description: 'Successfully initiated tree generation.' }, { status: 500, description: 'Internal server error.' } ]} />
+             </Section>
+             
+             <Section title="Licenses" id="licenses">
+                <ApiEndpoint method="GET" path="/api/licenses/usage" description="Retrieves a list of all defined licenses." responses={genericGetListResponses} />
                 <Separator className="my-8" />
-                <ApiEndpoint method="PUT" path="/api/deployment-types/{id}" description="Updates an existing deployment type." requestBody={`{ "name": "New Name" }`} responses={genericPutResponses}/>
+                <ApiEndpoint method="POST" path="/api/licenses/usage" description="Creates a new license definition." responses={genericPostResponses('License')} />
                 <Separator className="my-8" />
-                <ApiEndpoint method="DELETE" path="/api/deployment-types/{id}" description="Deletes a deployment type." responses={genericDeleteResponses}/>
-            </Section>
+                <ApiEndpoint method="GET" path="/api/licenses/usage/{id}" description="Retrieves a single license by ID." responses={genericGetOneResponses('License')} />
+                <Separator className="my-8" />
+                <ApiEndpoint method="PUT" path="/api/licenses/usage/{id}" description="Updates a license. Requires `updateComment`." responses={genericPutResponses('License')} />
+                <Separator className="my-8" />
+                <ApiEndpoint method="DELETE" path="/api/licenses/usage/{id}" description="Deletes a license. Requires `comment`." responses={genericDeleteResponses('License')} />
+                <Separator className="my-8" />
+                <ApiEndpoint method="GET" path="/api/product-licensing" description="Retrieves product-specific licensing configurations." responses={genericGetListResponses} />
+                <Separator className="my-8" />
+                <ApiEndpoint method="POST" path="/api/product-licensing" description="Creates a new product-specific license configuration." responses={genericPostResponses('Product License')} />
+                 <Separator className="my-8" />
+                <ApiEndpoint method="PUT" path="/api/product-licensing/{id}" description="Updates a product-specific license configuration." responses={genericPutResponses('Product License')} />
+             </Section>
 
-             <Section title="Specifications" id="specifications">
+            <Section title="Specifications" id="specifications">
                 <ApiEndpoint method="GET" path="/api/specifications" description="Retrieves a list of all specifications." responses={genericGetListResponses}/>
                 <Separator className="my-8" />
-                <ApiEndpoint method="POST" path="/api/specifications" description="Creates a new specification entry." requestBody={`{ "id": "...", "name": "...", ... }`} responses={genericPostResponses}/>
+                <ApiEndpoint method="POST" path="/api/specifications" description="Creates a new specification entry." requestBody={`{ "name": "...", ... }`} responses={genericPostResponses('Specification')}/>
                 <Separator className="my-8" />
-                <ApiEndpoint method="GET" path="/api/specifications/{id}" description="Retrieves a single specification by its MongoDB ObjectId." responses={genericGetOneResponses}/>
+                <ApiEndpoint method="GET" path="/api/specifications/{id}" description="Retrieves a single specification by its ID." responses={genericGetOneResponses('Specification')}/>
                 <Separator className="my-8" />
-                <ApiEndpoint method="PUT" path="/api/specifications/{id}" description="Updates an existing specification." requestBody={`{ "name": "New Name" }`} responses={genericPutResponses}/>
+                <ApiEndpoint method="PUT" path="/api/specifications/{id}" description="Updates an existing specification. Requires `updateComment`." requestBody={`{ "name": "New Name", "updateComment": "Reason" }`} responses={genericPutResponses('Specification')}/>
                 <Separator className="my-8" />
-                <ApiEndpoint method="DELETE" path="/api/specifications/{id}" description="Deletes a specification." responses={genericDeleteResponses}/>
+                <ApiEndpoint method="DELETE" path="/api/specifications/{id}" description="Deletes a specification. Requires `comment`." requestBody={`{ "comment": "Reason" }`} responses={genericDeleteResponses('Specification')}/>
             </Section>
 
-            <Section title="Specification Settings" id="specification-settings">
-                <p className="text-muted-foreground mb-4">Endpoints for managing reference data used in Specifications (e.g., HW Types, Vendors).</p>
+            <Section title="Settings" id="settings">
+                 <p className="text-muted-foreground mb-4">Endpoints for managing lookup data and configurations.</p>
                 <ApiEndpoint 
                     method="GET"
                     path="/api/settings/specifications/{type}"
@@ -299,30 +410,48 @@ export default function ApiDocsPage() {
                     responses={genericGetListResponses}
                 />
                 <Separator className="my-8" />
+                 <ApiEndpoint 
+                    method="GET"
+                    path="/api/settings/onboarding"
+                    description="Retrieves all versions of all onboarding configurations (tenant, component, application)."
+                    responses={genericGetListResponses}
+                />
+                 <Separator className="my-8" />
+                  <ApiEndpoint 
+                    method="POST"
+                    path="/api/settings/onboarding"
+                    description="Saves a new version of an onboarding configuration."
+                    responses={genericPostResponses('Onboarding Configuration')}
+                />
+                 <Separator className="my-8" />
+                 <ApiEndpoint 
+                    method="GET"
+                    path="/api/settings/approvals/{approvalType}"
+                    description="Retrieves all versions of a specific approval configuration."
+                    responses={genericGetListResponses}
+                />
+                 <Separator className="my-8" />
                 <ApiEndpoint 
                     method="POST"
-                    path="/api/settings/specifications/{type}"
-                    description="Creates a new item for a given specification reference type."
-                    requestBody={`{ "name": "New Item Name", "description": "Optional description" }`}
-                    responses={genericPostResponses}
+                    path="/api/settings/approvals/{approvalType}"
+                    description="Saves a new version of an approval configuration."
+                    responses={genericPostResponses('Approval Configuration')}
+                />
+                 <Separator className="my-8" />
+                  <ApiEndpoint 
+                    method="GET"
+                    path="/api/settings/baseline-onboarding"
+                    description="Retrieves all versions of the baseline onboarding configuration."
+                    responses={genericGetListResponses}
                 />
                  <Separator className="my-8" />
                 <ApiEndpoint 
-                    method="PUT"
-                    path="/api/settings/specifications/{type}/{id}"
-                    description="Updates an item by its MongoDB ObjectId."
-                    requestBody={`{ "name": "Updated Item Name" }`}
-                    responses={genericPutResponses}
-                />
-                 <Separator className="my-8" />
-                <ApiEndpoint 
-                    method="DELETE"
-                    path="/api/settings/specifications/{type}/{id}"
-                    description="Deletes an item by its MongoDB ObjectId."
-                    responses={genericDeleteResponses}
+                    method="POST"
+                    path="/api/settings/baseline-onboarding"
+                    description="Saves a new version of the baseline onboarding configuration."
+                    responses={genericPostResponses('Baseline Onboarding Configuration')}
                 />
             </Section>
-
         </main>
     </DashboardLayout>
   );
