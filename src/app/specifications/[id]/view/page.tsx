@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { 
     AlertDialog,
@@ -25,6 +25,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { DiagramDisplay } from '../../_components/diagram-display';
 
 interface Specification {
     _id: string;
@@ -137,11 +138,12 @@ export default function ViewSpecificationPage() {
     const networkCardsDisplay = specification.network_cards?.map(c => c.name).join(', ') || 'N/A';
     const plugPowerCordsDisplay = specification.plug_power_cords?.map(p => p.name).join(', ') || 'N/A';
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
+    const specJson = JSON.stringify(specification, null, 2);
 
 
     return (
         <DashboardLayout user={user}>
-            <main className="flex-1 p-6 md:p-10">
+            <main className="flex-1 p-6 md:p-10 space-y-6">
                 <Card>
                     <CardHeader>
                         <CardTitle>View Specification: {specification.name}</CardTitle>
@@ -269,6 +271,20 @@ export default function ViewSpecificationPage() {
                             </AlertDialogContent>
                         </AlertDialog>
                     </CardFooter>
+                </Card>
+                 <Card className="mt-6">
+                    <CardHeader>
+                        <CardTitle>Visualization & Raw JSON</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="h-[30rem]">
+                            <DiagramDisplay specJson={specJson} />
+                        </div>
+                        <div>
+                           <Label htmlFor="json-output">Specification JSON</Label>
+                           <Textarea id="json-output" value={specJson} readOnly rows={24} className="font-mono text-xs"/>
+                        </div>
+                    </CardContent>
                 </Card>
             </main>
         </DashboardLayout>

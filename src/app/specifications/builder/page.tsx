@@ -6,97 +6,22 @@ import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { HardDrive, Server, ArrowLeft, ArrowRight, Package, Upload, Copy, Check, FileJson, Cpu, MemoryStick, Database, NetworkIcon, PlusCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Package, Copy, Check, FileJson } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MultiSelectListBox, type Option as MultiSelectOption } from '@/components/ui/multi-select-list-box';
+import { PlusCircle, Trash2, Server, Cpu, MemoryStick, Database } from 'lucide-react';
+import { DiagramDisplay } from '../_components/diagram-display';
 
 interface Option {
     _id: string;
     name: string;
-}
-
-function DiagramDisplay({ specJson }: { specJson: string }) {
-    let spec;
-    try {
-        spec = JSON.parse(specJson);
-    } catch (e) {
-        return (
-            <div className="h-full bg-muted rounded-md flex items-center justify-center p-4">
-                <p className="text-destructive">Invalid JSON format</p>
-            </div>
-        );
-    }
-    
-    const isBlade = spec.hw_type?.name === 'Blade';
-
-    if (isBlade) {
-        const isSymmetric = spec.symmetric !== false; 
-        const blades = isSymmetric 
-            ? Array.from({ length: spec.bladeCount || 1 }).map((_, i) => ({
-                name: `Blade ${i + 1}`,
-                cpuType: spec.cpuType,
-                memoryPerBlade: spec.memoryPerBlade,
-                storageCapacity: spec.storageCapacity,
-              }))
-            : spec.blades || [];
-
-        return (
-            <div className="h-full bg-muted rounded-md p-4 space-y-4 overflow-auto">
-                <h4 className="font-bold text-center">{spec.name || `Blade Specification`}</h4>
-                <div className="border-2 border-dashed border-gray-400 rounded-lg p-4 bg-background">
-                     <p className="text-sm text-center font-semibold mb-2">{spec.vendor || 'Generic'} Chassis</p>
-                     <div className={cn("grid gap-2", {
-                         'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5': blades.length > 1,
-                         'grid-cols-1': blades.length === 1,
-                     })}>
-                        {blades.map((blade: any, i: number) => (
-                             <div key={i} className="border rounded-md p-2 bg-gray-50 dark:bg-gray-800">
-                                <Server className="mx-auto h-6 w-6 text-gray-500"/>
-                                <p className="text-xs font-mono text-center mt-1">{blade.name || `Blade ${i + 1}`}</p>
-                                <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
-                                    <div className="flex items-center gap-1"><Cpu className="h-3 w-3"/><span>{blade.cpuType || 'N/A'}</span></div>
-                                    <div className="flex items-center gap-1"><MemoryStick className="h-3 w-3"/><span>{blade.memoryPerBlade || 'N/A'} GB</span></div>
-                                    <div className="flex items-center gap-1"><Database className="h-3 w-3"/><span>{blade.storageCapacity || 'N/A'} GB</span></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="mt-4 flex justify-around items-center text-center">
-                         <div className="flex flex-col items-center gap-1">
-                            <Database className="h-6 w-6 text-gray-600"/>
-                            <p className="text-xs">{spec.storage_gb || 'N/A'} GB Total</p>
-                        </div>
-                        <div className="flex flex-col items-center gap-1">
-                            <NetworkIcon className="h-6 w-6 text-gray-600"/>
-                             <p className="text-xs">{spec.network_cards?.map((n: any) => n.name).join(', ') || 'N/A'}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="h-full bg-muted rounded-md flex items-center justify-center">
-             <div className="border-2 border-dashed border-gray-400 rounded-lg p-8 bg-background text-center">
-                 <h4 className="font-bold">{spec.name || 'Specification'}</h4>
-                 <p className="text-sm text-muted-foreground">{spec.hw_type?.name || 'Generic Hardware'}</p>
-                 <div className="mt-4 flex justify-center gap-4 text-xs">
-                    <span><Cpu className="inline mr-1 h-4 w-4"/> {spec.total_cpu || 'N/A'} Cores</span>
-                    <span><MemoryStick className="inline mr-1 h-4 w-4"/> {spec.memory_gb || 'N/A'} GB RAM</span>
-                    <span><Database className="inline mr-1 h-4 w-4"/> {spec.storage_gb || 'N/A'} GB Storage</span>
-                 </div>
-            </div>
-        </div>
-    );
 }
 
 export default function SpecificationBuilderPage() {
@@ -150,7 +75,7 @@ export default function SpecificationBuilderPage() {
     }, [formData.hw_type, options.hwTypes]);
 
     const handleNext = useCallback(async () => {
-        const maxSteps = 1;
+        const maxSteps = 1; 
         const nextStep = step + 1;
         
         if (nextStep > maxSteps) {
@@ -194,7 +119,7 @@ export default function SpecificationBuilderPage() {
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target as HTMLInputElement;
-        const checked = e.target as HTMLInputElement;
+        const checked = (e.target as HTMLInputElement).checked;
         setFormData((prev: any) => ({ ...prev, [id]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value }));
     };
 
@@ -307,14 +232,54 @@ export default function SpecificationBuilderPage() {
                     <div><Label htmlFor="contact_point_email">Contact Email</Label><Input id="contact_point_email" type="email" value={formData.contact_point_email || ''} onChange={handleInputChange} /></div>
                     <div><Label htmlFor="contact_point_phone">Contact Phone</Label><Input id="contact_point_phone" type="tel" value={formData.contact_point_phone || ''} onChange={handleInputChange} /></div>
                 </div>
+                 <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Hardware Specification</h3>
+                    {isBladeSelected ? (
+                        <div className="space-y-4">
+                            <Label className="text-md font-semibold">Blade Configuration</Label>
+                            <RadioGroup onValueChange={(v) => handleRadioChange('symmetric', v)} value={String(formData.symmetric)} className="mt-2 space-y-1">
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="true" id="sym1" /><Label htmlFor="sym1" className="font-normal">Symmetric (all blades identical)</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="false" id="sym2" /><Label htmlFor="sym2" className="font-normal">Asymmetric (define each blade individually)</Label></div>
+                            </RadioGroup>
+                        </div>
+                    ): (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
+                            <div><Label htmlFor="total_cpu">Total CPU *</Label><Input id="total_cpu" type="number" value={formData.total_cpu || ''} onChange={handleInputChange} required /></div>
+                            <div><Label htmlFor="memory_gb">Memory (GB) *</Label><Input id="memory_gb" type="number" value={formData.memory_gb || ''} onChange={handleInputChange} required /></div>
+                            <div><Label htmlFor="storage_gb">Total Storage (GB) *</Label><Input id="storage_gb" type="number" value={formData.storage_gb || ''} onChange={handleInputChange} required /></div>
+                        </div>
+                    )}
+                    {isBladeSelected && formData.symmetric && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
+                            <div><Label htmlFor="bladeCount">Number of Blades</Label><Input id="bladeCount" type="number" value={formData.bladeCount || 1} onChange={handleBladeCountChange} min={1} /></div>
+                            <div><Label htmlFor="cpuType">CPU Type (per blade)</Label><Input id="cpuType" value={formData.cpuType || ''} onChange={handleInputChange} /></div>
+                            <div><Label htmlFor="memoryPerBlade">Memory (GB per blade)</Label><Input id="memoryPerBlade" type="number" value={formData.memoryPerBlade || ''} onChange={handleInputChange} /></div>
+                        </div>
+                    )}
+                    {isBladeSelected && !formData.symmetric && (
+                        <div className="space-y-4 border p-4 rounded-md">
+                            {formData.blades.map((blade: any, index: number) => (
+                                <Card key={index}>
+                                    <CardHeader><CardTitle>Blade {index + 1}</CardTitle></CardHeader>
+                                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div><Label htmlFor={`blade-name-${index}`}>Blade Name</Label><Input id={`blade-name-${index}`} value={blade.name} onChange={e => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>
+                                        <div><Label htmlFor={`blade-cpu-${index}`}>CPU Type</Label><Input id={`blade-cpu-${index}`} value={blade.cpuType || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuType', e.target.value)} /></div>
+                                        <div><Label htmlFor={`blade-mem-${index}`}>Memory (GB)</Label><Input id={`blade-mem-${index}`} type="number" value={blade.memoryPerBlade || ''} onChange={e => handleAsymmetricBladeChange(index, 'memoryPerBlade', Number(e.target.value))} /></div>
+                                        <div><Label htmlFor={`blade-storage-${index}`}>Storage (GB)</Label><Input id={`blade-storage-${index}`} type="number" value={blade.storageCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'storageCapacity', Number(e.target.value))} /></div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
             <div className="space-y-4">
-                <h3 className="font-semibold text-lg">HW Resources</h3>
+                <h3 className="font-semibold text-lg">Connectivity & Power</h3>
                 <div>
                     <Label>Network Cards type</Label>
                     <MultiSelectListBox
                         available={options.networkCards.filter(opt => !(formData.network_cards || []).some((c:any) => c.id === opt._id)).map(o => ({id: o._id, label: o.name}))}
-                        chosen={(formData.network_cards || []).map((c:any) => ({id: c.id, label: c.name}))}
+                        chosen={(formData.network_cards || []).map((c:any) => ({id: c.id, name: c.name})).map((o: any) => ({id: o.id, label: o.name}))}
                         onMoveToChosen={(ids) => handleMultiSelectChange('network_cards', [...(formData.network_cards || []), ...ids.map(id => ({id, name: options.networkCards.find(o => o._id === id)?.name || ''}))] )}
                         onMoveToAvailable={(ids) => handleMultiSelectChange('network_cards', (formData.network_cards || []).filter((c:any) => !ids.includes(c.id)))}
                         onMoveAllToChosen={() => handleMultiSelectChange('network_cards', options.networkCards.map(o => ({id: o._id, name: o.name})))}
@@ -325,7 +290,7 @@ export default function SpecificationBuilderPage() {
                     <Label>Plug/Power Cord Type</Label>
                      <MultiSelectListBox
                         available={options.plugPowerCords.filter(opt => !(formData.plug_power_cords || []).some((c:any) => c.id === opt._id)).map(o => ({id: o._id, label: o.name}))}
-                        chosen={(formData.plug_power_cords || []).map((c:any) => ({id: c.id, label: c.name}))}
+                        chosen={(formData.plug_power_cords || []).map((c:any) => ({id: c.id, name: c.name})).map((o: any) => ({id: o.id, label: o.name}))}
                         onMoveToChosen={(ids) => handleMultiSelectChange('plug_power_cords', [...(formData.plug_power_cords || []), ...ids.map(id => ({id, name: options.plugPowerCords.find(o => o._id === id)?.name || ''}))] )}
                         onMoveToAvailable={(ids) => handleMultiSelectChange('plug_power_cords', (formData.plug_power_cords || []).filter((c:any) => !ids.includes(c.id)))}
                         onMoveAllToChosen={() => handleMultiSelectChange('plug_power_cords', options.plugPowerCords.map(o => ({id: o._id, name: o.name})))}
@@ -339,57 +304,19 @@ export default function SpecificationBuilderPage() {
                         <SelectContent>{options.hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
                     </Select>
                 </div>
-            </div>
-             <div className="space-y-4 md:col-span-2">
-                 <h3 className="font-semibold text-lg">Hardware Specification</h3>
-                {isBladeSelected ? (
-                     <div className="space-y-4">
-                        <Label className="text-md font-semibold">Blade Configuration</Label>
-                        <RadioGroup onValueChange={(v) => handleRadioChange('symmetric', v)} value={String(formData.symmetric)} className="mt-2 space-y-1">
-                            <div className="flex items-center space-x-2"><RadioGroupItem value="true" id="sym1" /><Label htmlFor="sym1" className="font-normal">Symmetric (all blades identical)</Label></div>
-                            <div className="flex items-center space-x-2"><RadioGroupItem value="false" id="sym2" /><Label htmlFor="sym2" className="font-normal">Asymmetric (define each blade individually)</Label></div>
-                        </RadioGroup>
-                    </div>
-                ): (
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
-                        <div><Label htmlFor="total_cpu">Total CPU *</Label><Input id="total_cpu" type="number" value={formData.total_cpu || ''} onChange={handleInputChange} required /></div>
-                        <div><Label htmlFor="memory_gb">Memory (GB) *</Label><Input id="memory_gb" type="number" value={formData.memory_gb || ''} onChange={handleInputChange} required /></div>
-                        <div><Label htmlFor="storage_gb">Total Storage (GB) *</Label><Input id="storage_gb" type="number" value={formData.storage_gb || ''} onChange={handleInputChange} required /></div>
-                     </div>
-                )}
-                {isBladeSelected && formData.symmetric && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
-                        <div><Label htmlFor="bladeCount">Number of Blades</Label><Input id="bladeCount" type="number" value={formData.bladeCount || 1} onChange={handleBladeCountChange} min={1} /></div>
-                        <div><Label htmlFor="cpuType">CPU Type (per blade)</Label><Input id="cpuType" value={formData.cpuType || ''} onChange={handleInputChange} /></div>
-                        <div><Label htmlFor="memoryPerBlade">Memory (GB per blade)</Label><Input id="memoryPerBlade" type="number" value={formData.memoryPerBlade || ''} onChange={handleInputChange} /></div>
-                    </div>
-                )}
-                 {isBladeSelected && !formData.symmetric && (
-                    <div className="space-y-4 border p-4 rounded-md">
-                        {formData.blades.map((blade: any, index: number) => (
-                            <Card key={index}>
-                                <CardHeader><CardTitle>Blade {index + 1}</CardTitle></CardHeader>
-                                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div><Label htmlFor={`blade-name-${index}`}>Blade Name</Label><Input id={`blade-name-${index}`} value={blade.name} onChange={e => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>
-                                    <div><Label htmlFor={`blade-cpu-${index}`}>CPU Type</Label><Input id={`blade-cpu-${index}`} value={blade.cpuType || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuType', e.target.value)} /></div>
-                                    <div><Label htmlFor={`blade-mem-${index}`}>Memory (GB)</Label><Input id={`blade-mem-${index}`} type="number" value={blade.memoryPerBlade || ''} onChange={e => handleAsymmetricBladeChange(index, 'memoryPerBlade', Number(e.target.value))} /></div>
-                                    <div><Label htmlFor={`blade-storage-${index}`}>Storage (GB)</Label><Input id={`blade-storage-${index}`} type="number" value={blade.storageCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'storageCapacity', Number(e.target.value))} /></div>
-                                </CardContent>
-                            </Card>
+                <div>
+                    <h3 className="font-semibold text-lg mt-6">Custom Fields</h3>
+                    <div className="space-y-2">
+                        {(formData.custom_fields || []).map((field: any, index: number) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <Input placeholder="Key" value={field.key} onChange={(e) => handleCustomFieldChange(index, 'key', e.target.value)} />
+                                <Input placeholder="Value" value={field.value} onChange={(e) => handleCustomFieldChange(index, 'value', e.target.value)} />
+                                <Button variant="ghost" size="icon" onClick={() => removeCustomField(index)} type="button"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </div>
                         ))}
                     </div>
-                )}
-                <h3 className="font-semibold text-lg mt-6">Custom Fields</h3>
-                <div className="space-y-2">
-                    {(formData.custom_fields || []).map((field: any, index: number) => (
-                        <div key={index} className="flex items-center gap-2">
-                            <Input placeholder="Key" value={field.key} onChange={(e) => handleCustomFieldChange(index, 'key', e.target.value)} />
-                            <Input placeholder="Value" value={field.value} onChange={(e) => handleCustomFieldChange(index, 'value', e.target.value)} />
-                            <Button variant="ghost" size="icon" onClick={() => removeCustomField(index)} type="button"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                        </div>
-                    ))}
+                    <Button variant="link" size="sm" onClick={addCustomField} type="button" className="mt-2 px-0"><PlusCircle className="mr-2 h-4 w-4" />ADD CUSTOM FIELD</Button>
                 </div>
-                <Button variant="link" size="sm" onClick={addCustomField} type="button" className="mt-2 px-0"><PlusCircle className="mr-2 h-4 w-4" />ADD CUSTOM FIELD</Button>
             </div>
         </div>
     );
