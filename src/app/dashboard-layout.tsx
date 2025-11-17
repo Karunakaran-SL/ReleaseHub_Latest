@@ -45,6 +45,8 @@ import {
   Database,
   FileKey2,
   Wrench,
+  BarChart,
+  BoxIcon,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -409,12 +411,12 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/license/usage" isActive={pathname.startsWith('/license/usage')}>
-                            License Usage
+                            <BarChart className="mr-2"/> License Usage
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                          <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/license/product-licensing" isActive={pathname.startsWith('/license/product-licensing')}>
-                            Product Licensing
+                            <BoxIcon className="mr-2"/> Product Licensing
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                          <SidebarMenuSubItem>
