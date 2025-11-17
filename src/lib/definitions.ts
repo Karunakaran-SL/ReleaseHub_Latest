@@ -200,7 +200,7 @@ export type CmdbInterface = {
   updated_at: string;
 };
 
-export type AnyCmdbEntity = (CmdbTenant | CmdbComponent | CmdbApplication | Product) & { id: string; name: string; version: string; entityType: EntityType };
+export type AnyCmdbEntity = (CmdbTenant | CmdbComponent | CmdbApplication | Product | CmdbInterface) & { id: string; name: string; version: string; entityType: EntityType };
 
 export type EntityType = 'tenant' | 'component' | 'application' | 'interface' | 'product';
 

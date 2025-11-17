@@ -130,11 +130,12 @@ export async function generateDependencyTree(entityType: EntityType, entityId: s
 
     const findAndAddEntityType = (items: any[], type: EntityType) => items.map(item => ({...item, entityType: type}));
 
-    const allEntities = [
+    const allEntities: AnyCmdbEntity[] = [
         ...findAndAddEntityType(allData.products, 'product'),
         ...findAndAddEntityType(allData.tenants, 'tenant'),
         ...findAndAddEntityType(allData.components, 'component'),
         ...findAndAddEntityType(allData.applications, 'application'),
+        ...findAndAddEntityType(allData.interfaces, 'interface'),
     ];
 
     centralNode = allEntities.find(e => e.id === entityId || e._id === entityId) || null;
@@ -144,35 +145,46 @@ export async function generateDependencyTree(entityType: EntityType, entityId: s
     }
 
     // Find parents (what this node depends on)
-    if ('dependent_tenants' in centralNode && centralNode.dependent_tenants) {
-        centralNode.dependent_tenants.forEach(dep => {
-            const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'tenant');
-            if (parent) parents.push(parent);
-        });
-    }
-    if ('dependent_components' in centralNode && centralNode.dependent_components) {
-        centralNode.dependent_components.forEach(dep => {
-            const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'component');
-            if (parent) parents.push(parent);
-        });
-    }
-    if ('dependent_applications' in centralNode && centralNode.dependent_applications) {
-        centralNode.dependent_applications.forEach(dep => {
-            const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'application');
-            if (parent) parents.push(parent);
-        });
-    }
-    if ('tenants' in centralNode && centralNode.tenants) { // Component or App -> Tenant
-         centralNode.tenants.forEach(dep => {
-            const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'tenant');
-            if (parent) parents.push(parent);
-        });
-    }
-     if ('products' in centralNode && centralNode.products) { // Tenant -> Product
-         centralNode.products.forEach(dep => {
-            const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'product');
-            if (parent) parents.push(parent);
-        });
+    if(centralNode.entityType === 'interface') {
+        const parent = allEntities.find(e => e.id === centralNode!.source.id);
+        if(parent) parents.push(parent);
+    } else {
+        if ('dependent_tenants' in centralNode && centralNode.dependent_tenants) {
+            centralNode.dependent_tenants.forEach(dep => {
+                const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'tenant');
+                if (parent) parents.push(parent);
+            });
+        }
+        if ('dependent_components' in centralNode && centralNode.dependent_components) {
+            centralNode.dependent_components.forEach(dep => {
+                const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'component');
+                if (parent) parents.push(parent);
+            });
+        }
+        if ('dependent_applications' in centralNode && centralNode.dependent_applications) {
+            centralNode.dependent_applications.forEach(dep => {
+                const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'application');
+                if (parent) parents.push(parent);
+            });
+        }
+        if ('dependent_interfaces' in centralNode && centralNode.dependent_interfaces) {
+            centralNode.dependent_interfaces.forEach(dep => {
+                const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'interface');
+                if (parent) parents.push(parent);
+            });
+        }
+        if ('tenants' in centralNode && centralNode.tenants) { // Component or App -> Tenant
+            centralNode.tenants.forEach(dep => {
+                const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'tenant');
+                if (parent) parents.push(parent);
+            });
+        }
+        if ('products' in centralNode && centralNode.products) { // Tenant -> Product
+            centralNode.products.forEach(dep => {
+                const parent = allEntities.find(e => e.id === dep.id && e.entityType === 'product');
+                if (parent) parents.push(parent);
+            });
+        }
     }
 
 
@@ -182,11 +194,18 @@ export async function generateDependencyTree(entityType: EntityType, entityId: s
 
         const dependsOnCurrent = (deps: {id: string}[]) => deps && deps.some(d => d.id === centralNode!.id);
 
-        if ('dependent_tenants' in e && dependsOnCurrent(e.dependent_tenants!)) children.push(e);
-        if ('dependent_components' in e && dependsOnCurrent(e.dependent_components!)) children.push(e);
-        if ('dependent_applications' in e && dependsOnCurrent(e.dependent_applications!)) children.push(e);
-        if ('tenants' in e && dependsOnCurrent(e.tenants!)) children.push(e);
-        if ('products' in e && dependsOnCurrent(e.products!)) children.push(e);
+        if (centralNode!.entityType === 'interface') {
+            if ('dependent_interfaces' in e && dependsOnCurrent(e.dependent_interfaces!)) {
+                children.push(e);
+            }
+        } else {
+            if ('dependent_tenants' in e && dependsOnCurrent(e.dependent_tenants!)) children.push(e);
+            if ('dependent_components' in e && dependsOnCurrent(e.dependent_components!)) children.push(e);
+            if ('dependent_applications' in e && dependsOnCurrent(e.dependent_applications!)) children.push(e);
+            if ('tenants' in e && dependsOnCurrent(e.tenants!)) children.push(e);
+            if ('products' in e && dependsOnCurrent(e.products!)) children.push(e);
+            if ('provided_interfaces' in e && e.provided_interfaces?.some(pi => pi.id === centralNode!.id)) children.push(e);
+        }
     });
 
     return {

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-function InterfaceList({ interfaces, title, icon }: { interfaces: CmdbInterface[], title: string, icon: React.ReactNode }) {
+function InterfaceList({ interfaces, title, icon, onNodeSelect }: { interfaces: CmdbInterface[], title: string, icon: React.ReactNode, onNodeSelect: (entity: AnyCmdbEntity) => void }) {
     if (!interfaces || interfaces.length === 0) return null;
     return (
         <TreeItem 
@@ -18,10 +18,13 @@ function InterfaceList({ interfaces, title, icon }: { interfaces: CmdbInterface[
             icon={icon}
         >
             {interfaces.map(iface => (
-                <div key={iface.id} className="flex items-center gap-2 pl-4 text-xs">
-                   <Network className="h-3 w-3 text-gray-500" />
-                   <span>{iface.name} (v{iface.version})</span>
-                </div>
+                 <TreeItem 
+                    key={iface.id} 
+                    label={iface.name} 
+                    icon={<Network className="h-4 w-4 text-gray-500" />} 
+                    version={iface.version}
+                    onClick={() => onNodeSelect({ ...iface, entityType: 'interface' })}
+                />
             ))}
         </TreeItem>
     );
@@ -44,10 +47,17 @@ function TreeItem({
 }) {
     const [isOpen, setIsOpen] = React.useState(defaultOpen);
 
+    const handleItemClick = (e: React.MouseEvent) => {
+        if (onClick) {
+            e.stopPropagation();
+            onClick();
+        }
+    }
+
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <div className="flex items-center gap-1 w-full">
-                <Button variant="ghost" className="w-full justify-start items-center gap-2 h-auto py-1" onClick={onClick}>
+                <Button variant="ghost" className="w-full justify-start items-center gap-2 h-auto py-1" onClick={handleItemClick}>
                     {icon}
                     <div className="flex flex-col items-start">
                         <span className="font-semibold text-sm">{label}</span>
@@ -119,8 +129,8 @@ export function DependencyTreeSidebar({ tree, isLoading, onNodeSelect }: { tree:
                                         version={component.version}
                                         onClick={() => onNodeSelect({ ...component, entityType: 'component' })}
                                     >
-                                        <InterfaceList interfaces={component.provides_interfaces} title="Provides" icon={<ArrowRight className="h-3 w-3 text-green-600"/>} />
-                                        <InterfaceList interfaces={component.depends_on_interfaces} title="Requires" icon={<ArrowLeft className="h-3 w-3 text-red-600"/>} />
+                                        <InterfaceList interfaces={component.provides_interfaces} title="Provides" icon={<ArrowRight className="h-3 w-3 text-green-600"/>} onNodeSelect={onNodeSelect} />
+                                        <InterfaceList interfaces={component.depends_on_interfaces} title="Requires" icon={<ArrowLeft className="h-3 w-3 text-red-600"/>} onNodeSelect={onNodeSelect} />
                                     </TreeItem>
                                 ))}
                                 {tenant.applications?.map(app => (
@@ -131,8 +141,8 @@ export function DependencyTreeSidebar({ tree, isLoading, onNodeSelect }: { tree:
                                         version={app.version}
                                         onClick={() => onNodeSelect({ ...app, entityType: 'application' })}
                                     >
-                                        <InterfaceList interfaces={app.provides_interfaces} title="Provides" icon={<ArrowRight className="h-3 w-3 text-green-600"/>} />
-                                        <InterfaceList interfaces={app.depends_on_interfaces} title="Requires" icon={<ArrowLeft className="h-3 w-3 text-red-600"/>} />
+                                        <InterfaceList interfaces={app.provides_interfaces} title="Provides" icon={<ArrowRight className="h-3 w-3 text-green-600"/>} onNodeSelect={onNodeSelect} />
+                                        <InterfaceList interfaces={app.depends_on_interfaces} title="Requires" icon={<ArrowLeft className="h-3 w-3 text-red-600"/>} onNodeSelect={onNodeSelect} />
                                     </TreeItem>
                                 ))}
                             </TreeItem>
