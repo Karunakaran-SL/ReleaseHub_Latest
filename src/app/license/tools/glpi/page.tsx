@@ -61,7 +61,7 @@ export default function GlpiSettingsPage() {
                         </CardContent>
                         <CardFooter className="gap-2">
                             <Button type="button" variant="outline" asChild>
-                                <Link href="/license/tools">Back to Tools</Link>
+                                <Link href="/license/tools">Back to Integrations</Link>
                             </Button>
                             <Button type="submit" disabled={loading}>
                                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

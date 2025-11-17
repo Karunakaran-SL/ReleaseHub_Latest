@@ -414,7 +414,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         </SidebarMenuSubItem>
                          <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/license/tools" isActive={pathname.startsWith('/license/tools')}>
-                             <Wrench className="mr-2"/> Tools
+                             <Wrench className="mr-2"/> External LMS Integrations
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>

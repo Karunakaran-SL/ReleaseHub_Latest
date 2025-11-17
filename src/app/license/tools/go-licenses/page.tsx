@@ -48,7 +48,7 @@ export default function GoLicensesSettingsPage() {
                     </CardContent>
                      <CardFooter>
                         <Button type="button" variant="outline" asChild>
-                            <Link href="/license/tools">Back to Tools</Link>
+                            <Link href="/license/tools">Back to Integrations</Link>
                         </Button>
                     </CardFooter>
                 </Card>
