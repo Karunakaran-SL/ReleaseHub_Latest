@@ -50,15 +50,15 @@ function Widget({ title, children, description }: { title: string, children: Rea
 function GlobalViewWidget() {
     const [deployments, setDeployments] = useState<Deployment[]>([]);
     const [selected, setSelected] = useState<Deployment | null>(null);
-    
+    const [isClient, setIsClient] = useState(false);
+
     useEffect(() => {
+        setIsClient(true);
         fetch('/api/deployments')
             .then(res => res.json())
             .then(setDeployments);
     }, []);
 
-    // For now, the map doesn't support a direct click handler, this simulates it.
-    // In a real scenario, the map component would need an onNodeClick prop.
     useEffect(() => {
         if(deployments.length > 0 && !selected) {
             setSelected(deployments[0]);
@@ -69,7 +69,7 @@ function GlobalViewWidget() {
         <Widget title="Global View" description="Worldwide operational status of all deployments.">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[60vh]">
                 <div className="lg:col-span-2 h-full">
-                    <DeploymentMap deployments={deployments} />
+                    {isClient ? <DeploymentMap deployments={deployments} /> : <div className="h-full bg-muted rounded-md flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}
                 </div>
                 <Card className="lg:col-span-1 flex flex-col">
                      <CardHeader>
