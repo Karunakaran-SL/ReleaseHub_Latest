@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
@@ -49,7 +50,6 @@ function Widget({ title, children, description }: { title: string, children: Rea
 
 function GlobalViewWidget() {
     const [deployments, setDeployments] = useState<Deployment[]>([]);
-    const [selected, setSelected] = useState<Deployment | null>(null);
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -59,37 +59,10 @@ function GlobalViewWidget() {
             .then(setDeployments);
     }, []);
 
-    useEffect(() => {
-        if(deployments.length > 0 && !selected) {
-            setSelected(deployments[0]);
-        }
-    }, [deployments, selected]);
-
     return (
         <Widget title="Global View" description="Worldwide operational status of all deployments.">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[60vh]">
-                <div className="lg:col-span-2 h-full">
-                    {isClient ? <DeploymentMap deployments={deployments} /> : <div className="h-full bg-muted rounded-md flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}
-                </div>
-                <Card className="lg:col-span-1 flex flex-col">
-                     <CardHeader>
-                        <CardTitle className="text-lg">Deployment Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm space-y-3 flex-1 overflow-y-auto">
-                        {selected ? (
-                            <>
-                                <div><Label>ID:</Label><p className="font-mono text-xs">{selected.details.deploymentId}</p></div>
-                                <div><Label>Name:</Label><p>{selected.details.deploymentId.split('-').slice(0,-1).join(' ')}</p></div>
-                                <div><Label>Customer:</Label><p>{selected.details.customer}</p></div>
-                                <div><Label>Status:</Label><p>{selected.status}</p></div>
-                                <div><Label>Health:</Label><p className="text-green-500">Healthy</p></div>
-                                <div><Label>Compliance:</Label><p className="text-green-500">Compliant</p></div>
-                            </>
-                        ) : (
-                            <div className="flex items-center justify-center h-full text-muted-foreground">Select a node to see details.</div>
-                        )}
-                    </CardContent>
-                </Card>
+            <div className="h-[60vh]">
+                {isClient ? <DeploymentMap deployments={deployments} /> : <div className="h-full bg-muted rounded-md flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}
             </div>
         </Widget>
     );
