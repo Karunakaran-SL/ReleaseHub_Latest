@@ -46,6 +46,14 @@ import {
   Wrench,
   BarChart,
   BoxIcon,
+  Blocks,
+  BookText,
+  MousePointerClick,
+  TerminalSquare,
+  FlaskConical,
+  BadgeCheck,
+  ScanLine,
+  ScanSearch,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -166,6 +174,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isFleetManagementPage = pathname.startsWith('/fleet-management');
     const isLicensePage = pathname.startsWith('/license');
     const isWorkflowPage = pathname.startsWith('/workflows');
+    const isPlatformEngineeringPage = pathname.startsWith('/platform-engineering');
 
 
   return (
@@ -176,11 +185,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isCmdbPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage}
+                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage}
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -302,6 +311,74 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                                 Service Contracts
                             </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+                 <Collapsible asChild defaultOpen={isPlatformEngineeringPage}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        isActive={isPlatformEngineeringPage}
+                        tooltip={{ children: 'Platform Engineering' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <Wrench />
+                        Platform Engineering
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/platform-engineering/platform-builder" isActive={pathname.startsWith('/platform-engineering/platform-builder')}>
+                             <Blocks className="mr-2"/> Platform Builder
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/platform-engineering/sdk" isActive={pathname.startsWith('/platform-engineering/sdk')}>
+                             <BookText className="mr-2"/> SDK
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/platform-engineering/no-code-platform" isActive={pathname.startsWith('/platform-engineering/no-code-platform')}>
+                             <MousePointerClick className="mr-2"/> No Code Platform
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/platform-engineering/development-environments" isActive={pathname.startsWith('/platform-engineering/development-environments')}>
+                             <TerminalSquare className="mr-2"/> Development Environments
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/platform-engineering/test-environments" isActive={pathname.startsWith('/platform-engineering/test-environments')}>
+                             <FlaskConical className="mr-2"/> Test Environments
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <Collapsible asChild defaultOpen={pathname.startsWith('/platform-engineering/quality')}>
+                            <SidebarMenuItem>
+                                <CollapsibleTrigger asChild>
+                                    <SidebarMenuSubButton>
+                                        <BadgeCheck className="mr-2"/> Quality
+                                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                                    </SidebarMenuSubButton>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent>
+                                     <SidebarMenuSub>
+                                        <SidebarMenuSubItem>
+                                            <SidebarMenuSubButton href="/platform-engineering/quality/static-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/static-analyzer')}>
+                                                <ScanLine className="mr-2"/> Static Analyzer
+                                            </SidebarMenuSubButton>
+                                        </SidebarMenuSubItem>
+                                        <SidebarMenuSubItem>
+                                            <SidebarMenuSubButton href="/platform-engineering/quality/dynamic-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/dynamic-analyzer')}>
+                                                <ScanSearch className="mr-2"/> Dynamic Analyzer
+                                            </SidebarMenuSubButton>
+                                        </SidebarMenuSubItem>
+                                    </SidebarMenuSub>
+                                </CollapsibleContent>
+                            </SidebarMenuItem>
+                        </Collapsible>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
