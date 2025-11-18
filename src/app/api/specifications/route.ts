@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
     
-    const items = await db.collection('specifications').project({ name: 1, _id: 1, hw_type: 1, vendor: 1, image: 1, updated_at: 1 }).toArray();
+    const items = await db.collection('specifications').find({}).toArray();
 
     return NextResponse.json(items, { status: 200 });
   } catch (error) {
