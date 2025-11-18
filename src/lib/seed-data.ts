@@ -643,6 +643,14 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     {
         _id: 'CiscoUCSB200M7', name: 'Cisco UCS B200 M7 Blade', vendor: 'Cisco', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, symmetric: true, bladeCount: 8, cpuType: 'Intel Xeon Platinum', memoryPerBlade: 128
     },
+    {
+        _id: 'AsymmetricBladeServer', name: 'Asymmetric Blade Server', vendor: 'Lenovo', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, symmetric: false, blades: [
+            { name: 'Compute-Blade-1', cpuType: 'Intel Xeon Gold 6442Y', memoryPerBlade: 256, storageCapacity: 2048 },
+            { name: 'Compute-Blade-2', cpuType: 'Intel Xeon Gold 6442Y', memoryPerBlade: 256, storageCapacity: 2048 },
+            { name: 'Storage-Blade-1', cpuType: 'Intel Xeon Silver 4410Y', memoryPerBlade: 128, storageCapacity: 16384 },
+            { name: 'GPU-Blade-1', cpuType: 'Intel Xeon Platinum 8470Q', memoryPerBlade: 512, storageCapacity: 4096 },
+        ]
+    }
 ];
 
 const initialDeploymentTypes = [
