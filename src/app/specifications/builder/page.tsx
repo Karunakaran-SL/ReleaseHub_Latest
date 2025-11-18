@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
@@ -95,7 +94,6 @@ export default function SpecificationBuilderPage() {
             
             if (isBladeSelected) {
                 if (formData.symmetric) {
-                    // For symmetric, we only need the template info, not the full blades array if it's just for template definition
                     const templateBlade = formData.blades?.[0] || {};
                     fullSpec.blades = Array.from({length: formData.bladeCount || 1}).map((_, i) => ({
                         ...templateBlade,
@@ -139,7 +137,7 @@ export default function SpecificationBuilderPage() {
 
     const handleBladeCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const count = parseInt(e.target.value, 10);
-        setFormData((prev: any) => ({ ...prev, bladeCount: count, blades: Array.from({length: count}).map((_, i) => prev.blades?.[i] || {name: `Blade ${i+1}`}) }));
+        setFormData((prev: any) => ({ ...prev, bladeCount: count, blades: Array.from({length: count}).map((_, i) => prev.blades?.[i] || {name: `Blade ${i+1}`, networkInterfaces: []}) }));
     }
     
     const handleAsymmetricBladeChange = (index: number, field: string, value: any) => {
@@ -149,14 +147,16 @@ export default function SpecificationBuilderPage() {
     }
 
     const handleSymmetricBladeChange = (field: string, value: any) => {
-        const newBlades = [{ ...(formData.blades?.[0] || {}), [field]: value }];
+        const newBlades = [{ ...(formData.blades?.[0] || { networkInterfaces: [] }), [field]: value }];
         setFormData((prev: any) => ({ ...prev, blades: newBlades }));
     };
 
     const handleBladeNetworkInterfaceChange = (bladeIndex: number, ifaceIndex: number, field: 'name' | 'type' | 'speed', value: string, isSymmetric: boolean) => {
         const newBlades = [...(formData.blades || [])];
         const targetBladeIndex = isSymmetric ? 0 : bladeIndex;
-        const newInterfaces = [...(newBlades[targetBladeIndex]?.networkInterfaces || [])];
+        if (!newBlades[targetBladeIndex]) newBlades[targetBladeIndex] = { networkInterfaces: [] };
+        if (!newBlades[targetBladeIndex].networkInterfaces) newBlades[targetBladeIndex].networkInterfaces = [];
+        const newInterfaces = [...(newBlades[targetBladeIndex].networkInterfaces)];
         newInterfaces[ifaceIndex] = { ...newInterfaces[ifaceIndex], [field]: value };
         newBlades[targetBladeIndex] = { ...newBlades[targetBladeIndex], networkInterfaces: newInterfaces };
         setFormData((prev: any) => ({ ...prev, blades: newBlades }));
@@ -165,7 +165,9 @@ export default function SpecificationBuilderPage() {
     const addBladeNetworkInterface = (bladeIndex: number, isSymmetric: boolean) => {
         const newBlades = [...(formData.blades || [])];
         const targetBladeIndex = isSymmetric ? 0 : bladeIndex;
-        const newInterfaces = [...(newBlades[targetBladeIndex]?.networkInterfaces || []), { name: '', type: '', speed: '' }];
+        if (!newBlades[targetBladeIndex]) newBlades[targetBladeIndex] = { networkInterfaces: [] };
+        if (!newBlades[targetBladeIndex].networkInterfaces) newBlades[targetBladeIndex].networkInterfaces = [];
+        const newInterfaces = [...(newBlades[targetBladeIndex].networkInterfaces), { name: '', type: '', speed: '' }];
         newBlades[targetBladeIndex] = { ...newBlades[targetBladeIndex], networkInterfaces: newInterfaces };
         setFormData((prev: any) => ({ ...prev, blades: newBlades }));
     };
@@ -173,7 +175,8 @@ export default function SpecificationBuilderPage() {
     const removeBladeNetworkInterface = (bladeIndex: number, ifaceIndex: number, isSymmetric: boolean) => {
         const newBlades = [...(formData.blades || [])];
         const targetBladeIndex = isSymmetric ? 0 : bladeIndex;
-        const newInterfaces = (newBlades[targetBladeIndex]?.networkInterfaces || []).filter((_: any, i: number) => i !== ifaceIndex);
+        if (!newBlades[targetBladeIndex]?.networkInterfaces) return;
+        const newInterfaces = (newBlades[targetBladeIndex].networkInterfaces || []).filter((_: any, i: number) => i !== ifaceIndex);
         newBlades[targetBladeIndex] = { ...newBlades[targetBladeIndex], networkInterfaces: newInterfaces };
         setFormData((prev: any) => ({ ...prev, blades: newBlades }));
     };
