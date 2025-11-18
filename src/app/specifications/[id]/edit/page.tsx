@@ -132,6 +132,36 @@ export default function EditSpecificationPage() {
         newBlades[index] = {...newBlades[index], [field]: value };
         setFormState((prev: any) => ({...prev, blades: newBlades}));
     }
+    
+    const handleSymmetricBladeChange = (field: string, value: any) => {
+        setFormState((prev: any) => {
+            const newBlades = (prev.blades || []).map((blade: any) => ({...blade, [field]: value}));
+            return {...prev, blades: newBlades};
+        });
+    }
+    
+    const handleBladeNetworkInterfaceChange = (bladeIndex: number, ifaceIndex: number, field: 'name' | 'type' | 'speed', value: string) => {
+        const newBlades = [...(formState.blades || [])];
+        const newInterfaces = [...(newBlades[bladeIndex].networkInterfaces || [])];
+        newInterfaces[ifaceIndex] = { ...newInterfaces[ifaceIndex], [field]: value };
+        newBlades[bladeIndex] = { ...newBlades[bladeIndex], networkInterfaces: newInterfaces };
+        setFormState((prev: any) => ({ ...prev, blades: newBlades }));
+    };
+
+    const addBladeNetworkInterface = (bladeIndex: number) => {
+        const newBlades = [...(formState.blades || [])];
+        const newInterfaces = [...(newBlades[bladeIndex].networkInterfaces || []), { name: '', type: '', speed: '' }];
+        newBlades[bladeIndex] = { ...newBlades[bladeIndex], networkInterfaces: newInterfaces };
+        setFormState((prev: any) => ({ ...prev, blades: newBlades }));
+    };
+
+    const removeBladeNetworkInterface = (bladeIndex: number, ifaceIndex: number) => {
+        const newBlades = [...(formState.blades || [])];
+        const newInterfaces = (newBlades[bladeIndex].networkInterfaces || []).filter((_: any, i: number) => i !== ifaceIndex);
+        newBlades[bladeIndex] = { ...newBlades[bladeIndex], networkInterfaces: newInterfaces };
+        setFormState((prev: any) => ({ ...prev, blades: newBlades }));
+    };
+
 
     const handleMultiSelectChange = (field: 'network_cards' | 'plug_power_cords', selectedItems: { id: string; name: string }[]) => {
         setFormState(prev => ({ ...prev, [field]: selectedItems }));
@@ -265,15 +295,20 @@ export default function EditSpecificationPage() {
                                             </div>
                                         ): (
                                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
-                                                <div><Label>Total CPU *</Label><Input id="total_cpu" type="number" value={formState.total_cpu || ''} onChange={handleInputChange} required /></div>
-                                                <div><Label>Memory (GB) *</Label><Input id="memory_gb" type="number" value={formState.memory_gb || ''} onChange={handleInputChange} required /></div>
-                                                <div><Label>Total Storage (GB) *</Label><Input id="storage_gb" type="number" value={formState.storage_gb || ''} onChange={handleInputChange} required /></div>
+                                                <div><Label htmlFor="total_cpu">Total CPU *</Label><Input id="total_cpu" type="number" value={formState.total_cpu || ''} onChange={handleInputChange} required /></div>
+                                                <div><Label htmlFor="memory_gb">Memory (GB) *</Label><Input id="memory_gb" type="number" value={formState.memory_gb || ''} onChange={handleInputChange} required /></div>
+                                                <div><Label htmlFor="storage_gb">Total Storage (GB) *</Label><Input id="storage_gb" type="number" value={formState.storage_gb || ''} onChange={handleInputChange} required /></div>
                                              </div>
                                         )}
                                         {isBladeSelected && formState.symmetric && (
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
-                                                <div><Label>CPU (per blade)</Label><Input id="cpuType" value={formState.cpuType || ''} onChange={handleInputChange} /></div>
-                                                <div><Label>Memory (GB per blade)</Label><Input id="memoryPerBlade" type="number" value={formState.memoryPerBlade || ''} onChange={handleInputChange} /></div>
+                                            <div className="space-y-4 border p-4 rounded-md">
+                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                    <div><Label>CPU Type</Label><Input value={formState.blades?.[0]?.cpuType || ''} onChange={e => handleSymmetricBladeChange('cpuType', e.target.value)} /></div>
+                                                    <div><Label>CPU Cores</Label><Input type="number" value={formState.blades?.[0]?.cpuCores || ''} onChange={e => handleSymmetricBladeChange('cpuCores', Number(e.target.value))} /></div>
+                                                    <div><Label>Memory (GB)</Label><Input type="number" value={formState.blades?.[0]?.memory || ''} onChange={e => handleSymmetricBladeChange('memory', Number(e.target.value))} /></div>
+                                                    <div><Label>Disk Type</Label><Select value={formState.blades?.[0]?.diskType} onValueChange={(v) => handleSymmetricBladeChange('diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
+                                                    <div><Label>Disk Capacity (GB)</Label><Input type="number" value={formState.blades?.[0]?.diskCapacity || ''} onChange={e => handleSymmetricBladeChange('diskCapacity', Number(e.target.value))} /></div>
+                                                </div>
                                             </div>
                                         )}
                                          {isBladeSelected && !formState.symmetric && (
@@ -281,13 +316,29 @@ export default function EditSpecificationPage() {
                                                 {(formState.blades || []).map((blade: any, index: number) => (
                                                     <Card key={index}>
                                                         <CardHeader><CardTitle>Blade {index + 1}</CardTitle></CardHeader>
-                                                        <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                                            <div className="col-span-full"><Label>Blade Name</Label><Input value={blade.name} onChange={e => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>
-                                                            <div><Label>CPU Type</Label><Input value={blade.cpuType || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuType', e.target.value)} /></div>
-                                                            <div><Label>CPU Cores</Label><Input type="number" value={blade.cpuCores || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuCores', Number(e.target.value))} /></div>
-                                                            <div><Label>Memory (GB)</Label><Input type="number" value={blade.memory || ''} onChange={e => handleAsymmetricBladeChange(index, 'memory', Number(e.target.value))} /></div>
-                                                            <div><Label>Disk Type</Label><Select value={blade.diskType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
-                                                            <div><Label>Disk Capacity (GB)</Label><Input type="number" value={blade.diskCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'diskCapacity', Number(e.target.value))} /></div>
+                                                        <CardContent className="space-y-4">
+                                                            <div><Label>Name</Label><Input value={blade.name} onChange={e => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>
+                                                            <div className="grid grid-cols-2 gap-4">
+                                                                <div><Label>CPU Type</Label><Input value={blade.cpuType || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuType', e.target.value)} /></div>
+                                                                <div><Label>CPU Cores</Label><Input type="number" value={blade.cpuCores || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuCores', Number(e.target.value))} /></div>
+                                                                <div><Label>Memory (GB)</Label><Input type="number" value={blade.memory || ''} onChange={e => handleAsymmetricBladeChange(index, 'memory', Number(e.target.value))} /></div>
+                                                                <div><Label>Disk Type</Label><Select value={blade.diskType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
+                                                                <div><Label>Disk Capacity (GB)</Label><Input type="number" value={blade.diskCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'diskCapacity', Number(e.target.value))} /></div>
+                                                            </div>
+                                                            <div>
+                                                                <Label>Network Interfaces</Label>
+                                                                <div className="space-y-2 mt-1">
+                                                                    {(blade.networkInterfaces || []).map((iface: any, ifaceIndex: number) => (
+                                                                        <div key={ifaceIndex} className="grid grid-cols-4 gap-2 items-center">
+                                                                            <Input placeholder="Name" value={iface.name} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'name', e.target.value)} />
+                                                                            <Input placeholder="Type" value={iface.type} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'type', e.target.value)} />
+                                                                            <Input placeholder="Speed" value={iface.speed} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'speed', e.target.value)} />
+                                                                            <Button variant="ghost" size="icon" onClick={() => removeBladeNetworkInterface(index, ifaceIndex)} type="button"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                                                                        </div>
+                                                                    ))}
+                                                                    <Button variant="outline" size="sm" onClick={() => addBladeNetworkInterface(index)} type="button">Add Interface</Button>
+                                                                </div>
+                                                            </div>
                                                         </CardContent>
                                                     </Card>
                                                 ))}
