@@ -4,20 +4,13 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BarChart, List, CheckCircle, Package } from 'lucide-react';
+import { BarChart as BarChartIcon, List, CheckCircle, Package, Move, Trash2 } from 'lucide-react';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
 import type { User, Deployment } from '@/lib/definitions';
-import { Loader2, Move, Trash2 } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Label } from '@/components/ui/label';
+import { Loader2 } from 'lucide-react';
+import { Bar, BarChart, Pie, PieChart, Cell, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 const DeploymentMap = dynamic(() => import('@/app/fleet-management/deployment/_components/deployment-map'), {
     ssr: false,
@@ -68,22 +61,118 @@ function GlobalViewWidget() {
     );
 }
 
-function TableWidget({ title, headers, data }: { title: string, headers: string[], data: string[][] }) {
+const deploymentStatusData = [
+  { name: 'Active', value: 480, fill: 'var(--color-active)' },
+  { name: 'Upgrading', value: 120, fill: 'var(--color-upgrading)' },
+  { name: 'Provisioning', value: 80, fill: 'var(--color-provisioning)' },
+  { name: 'Failed', value: 35, fill: 'var(--color-failed)' },
+];
+
+const baselineComplianceData = [
+  { name: 'Compliant', value: 580, fill: 'var(--color-compliant)' },
+  { name: 'Non-Compliant', value: 110, fill: 'var(--color-noncompliant)' },
+  { name: 'Unknown', value: 25, fill: 'var(--color-unknown)' },
+];
+
+const productDeploymentData = [
+  { name: 'OneStopShop', active: 250, upgrading: 40, failed: 15 },
+  { name: 'Data Fabric', active: 180, upgrading: 60, failed: 10 },
+  { name: 'Retail Suite', active: 50, upgrading: 20, failed: 10 },
+];
+
+const productTenantData = [
+  { name: 'OneStopShop', tenants: 12 },
+  { name: 'Data Fabric', tenants: 8 },
+  { name: 'Retail Suite', tenants: 5 },
+  { name: 'Legacy CRM', tenants: 3 },
+];
+
+const chartConfig = {
+  active: { label: 'Active', color: 'hsl(var(--chart-2))' },
+  upgrading: { label: 'Upgrading', color: 'hsl(var(--chart-3))' },
+  provisioning: { label: 'Provisioning', color: 'hsl(var(--chart-4))' },
+  failed: { label: 'Failed', color: 'hsl(var(--chart-1))' },
+  compliant: { label: 'Compliant', color: 'hsl(var(--chart-2))' },
+  noncompliant: { label: 'Non-Compliant', color: 'hsl(var(--chart-1))' },
+  unknown: { label: 'Unknown', color: 'hsl(var(--chart-5))' },
+  tenants: { label: 'Tenants', color: 'hsl(var(--chart-2))' },
+};
+
+function DeploymentStatusPieChart() {
+  return (
+    <Widget title="Deployments by Status">
+      <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+        <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+                <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+                <Pie data={deploymentStatusData} dataKey="value" nameKey="name" />
+            </PieChart>
+        </ResponsiveContainer>
+      </ChartContainer>
+    </Widget>
+  );
+}
+
+function BaselineComplianceChart() {
     return (
-        <Widget title={title}>
-             <Table>
-                <TableHeader>
-                    <TableRow>{headers.map(h => <TableHead key={h}>{h}</TableHead>)}</TableRow>
-                </TableHeader>
-                <TableBody>
-                    {data.map((row, i) => (
-                        <TableRow key={i}>{row.map((cell, j) => <TableCell key={j}>{cell}</TableCell>)}</TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <Widget title="Baseline Compliance">
+            <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={baselineComplianceData} layout="vertical" margin={{ left: 20 }}>
+                        <XAxis type="number" hide />
+                        <YAxis dataKey="name" type="category" tickLine={false} axisLine={false} />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="value" layout="vertical" radius={5}>
+                             {baselineComplianceData.map((entry) => (
+                                <Cell key={`cell-${entry.name}`} fill={entry.fill} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
+            </ChartContainer>
+        </Widget>
+    );
+}
+
+function ProductDeploymentChart() {
+    return (
+        <Widget title="Deployments by Product">
+             <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={productDeploymentData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="name" tickLine={false} axisLine={false} />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Legend />
+                        <Bar dataKey="active" stackId="a" fill="var(--color-active)" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="upgrading" stackId="a" fill="var(--color-upgrading)" />
+                        <Bar dataKey="failed" stackId="a" fill="var(--color-failed)" />
+                    </BarChart>
+                </ResponsiveContainer>
+            </ChartContainer>
         </Widget>
     )
 }
+
+function ProductTenantChart() {
+    return (
+        <Widget title="Tenants per Product">
+            <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={productTenantData}>
+                         <CartesianGrid vertical={false} />
+                        <XAxis dataKey="name" tickLine={false} axisLine={false} />
+                        <YAxis />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="tenants" fill="var(--color-tenants)" radius={4} />
+                    </BarChart>
+                </ResponsiveContainer>
+            </ChartContainer>
+        </Widget>
+    )
+}
+
 
 export default function DashboardV2Page() {
     const [user, setUser] = useState<User | null>(null);
@@ -102,38 +191,10 @@ export default function DashboardV2Page() {
         <div className="space-y-6">
             <GlobalViewWidget />
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-                 <TableWidget 
-                    title="Products" 
-                    headers={["Name", "Version", "Owner"]}
-                    data={[
-                        ["OneStopShop Portal", "1.0.0", "Platform Engineering"],
-                        ["Unified Data Fabric", "1.0.0", "Data Platform Team"],
-                    ]}
-                 />
-                 <TableWidget 
-                    title="Tenants" 
-                    headers={["Name", "Version", "Products"]}
-                    data={[
-                        ["Core Platform Services", "2.0.0", "2"],
-                        ["Customer Analytics", "1.5.0", "1"],
-                    ]}
-                 />
-                 <TableWidget 
-                    title="Releases" 
-                    headers={["ID", "Product", "Version", "Status"]}
-                    data={[
-                        ["REL-2024-001", "OneStopShop", "1.1.0", "PLANNED"],
-                        ["REL-2024-002", "Data Fabric", "1.0.1", "IN-PROGRESS"],
-                    ]}
-                 />
-                 <TableWidget 
-                    title="Baselines" 
-                    headers={["ID", "Product", "Version", "Status"]}
-                    data={[
-                        ["OneStopShopPortal_1.0.0", "OneStopShop Portal", "1.0.0", "RELEASED"],
-                        ["UnifiedDataFabric_1.0.0", "Unified Data Fabric", "1.0.0", "DRAFT"],
-                    ]}
-                 />
+                <DeploymentStatusPieChart />
+                <BaselineComplianceChart />
+                <ProductDeploymentChart />
+                <ProductTenantChart />
             </div>
         </div>
         </main>
