@@ -5,7 +5,6 @@ import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
-import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 
 const OnboardingFieldProofSchema = z.object({
   link: z.string().optional(),
@@ -106,9 +105,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             comment: updateComment,
         });
 
-        // Regenerate dependency trees as tenant dependencies might have changed
-        await generateAndStoreAllProductTrees();
-
         const updatedItem = await db.collection(COLLECTION_NAME).findOne({ _id: id });
         return NextResponse.json(updatedItem, { status: 200 });
 
@@ -147,8 +143,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
             entityId: id,
             comment: comment,
         });
-        
-        await generateAndStoreAllProductTrees();
 
         return NextResponse.json({ message: 'Tenant deleted successfully.' }, { status: 200 });
 

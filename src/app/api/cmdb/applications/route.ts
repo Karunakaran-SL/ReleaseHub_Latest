@@ -4,7 +4,6 @@ import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
-import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 
 const CmdbPhaseSchema = z.object({
   id: z.string(),
@@ -90,8 +89,6 @@ export async function POST(req: NextRequest) {
             entityId: newItem.id,
             comment: `Application "${newItem.name}" onboarded.`,
         });
-        
-        await generateAndStoreAllProductTrees();
 
         return NextResponse.json(newItem, { status: 201 });
 

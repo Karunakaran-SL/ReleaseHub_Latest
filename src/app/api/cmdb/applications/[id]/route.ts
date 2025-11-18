@@ -4,7 +4,6 @@ import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
-import { revalidateDependencyTree } from '@/lib/dependency-graph';
 
 const CmdbPhaseSchema = z.object({
   id: z.string(),
@@ -96,11 +95,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             entityId: id,
             comment: updateComment,
         });
-        
-        const products = await db.collection('products').find({}).toArray();
-        for (const product of products) {
-            revalidateDependencyTree(product._id.toString());
-        }
 
         const updatedItem = await db.collection(COLLECTION_NAME).findOne({ _id: id });
         return NextResponse.json(updatedItem, { status: 200 });
@@ -140,11 +134,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
             entityId: id,
             comment: comment,
         });
-
-        const products = await db.collection('products').find({}).toArray();
-        for (const product of products) {
-            revalidateDependencyTree(product._id.toString());
-        }
 
         return NextResponse.json({ message: 'Application deleted successfully.' }, { status: 200 });
 

@@ -6,7 +6,6 @@ import type { Product } from '@/lib/definitions';
 import { z } from 'zod';
 import { logAuditEvent } from '@/lib/audit';
 import { getUser } from '@/lib/auth';
-import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 
 // Search and list products
 export async function GET(req: NextRequest) {
@@ -105,10 +104,6 @@ export async function POST(req: NextRequest) {
             entityId: newProduct._id,
             comment: `Product "${newProduct.name}" created.`,
         });
-        
-        // Revalidate dependency tree in the background
-        await generateAndStoreAllProductTrees();
-
 
         return NextResponse.json(newProduct, { status: 201 });
 

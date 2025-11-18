@@ -4,7 +4,6 @@ import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
-import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 
 const ProductUpdateSchema = z.object({
   _id: z.string().optional(),
@@ -106,10 +105,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             entityId: id,
             comment: updateComment,
         });
-        
-        // Revalidate dependency tree in the background
-        await generateAndStoreAllProductTrees();
-
 
         const updatedProduct = await productsCollection.findOne({ _id: id });
 
