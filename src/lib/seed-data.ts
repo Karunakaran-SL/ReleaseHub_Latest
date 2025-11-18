@@ -650,10 +650,10 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     },
     {
         _id: 'AsymmetricBladeServer', name: 'Asymmetric Blade Server', vendor: 'Lenovo', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, symmetric: false, blades: [
-            { name: 'Compute-Blade-1', cpuType: 'Intel Xeon Gold 6442Y', memoryPerBlade: 256, storageCapacity: 2048 },
-            { name: 'Compute-Blade-2', cpuType: 'Intel Xeon Gold 6442Y', memoryPerBlade: 256, storageCapacity: 2048 },
-            { name: 'Storage-Blade-1', cpuType: 'Intel Xeon Silver 4410Y', memoryPerBlade: 128, storageCapacity: 16384 },
-            { name: 'GPU-Blade-1', cpuType: 'Intel Xeon Platinum 8470Q', memoryPerBlade: 512, storageCapacity: 4096 },
+            { name: 'Compute-Blade-1', cpuType: 'Intel Xeon Gold 6442Y', cpuCores: 32, memory: 256, diskType: 'NVMe', diskCapacity: 2048 },
+            { name: 'Compute-Blade-2', cpuType: 'Intel Xeon Gold 6442Y', cpuCores: 32, memory: 256, diskType: 'NVMe', diskCapacity: 2048 },
+            { name: 'Storage-Blade-1', cpuType: 'Intel Xeon Silver 4410Y', cpuCores: 16, memory: 128, diskType: 'SSD', diskCapacity: 16384 },
+            { name: 'GPU-Blade-1', cpuType: 'Intel Xeon Platinum 8470Q', cpuCores: 52, memory: 512, diskType: 'NVMe', diskCapacity: 4096 },
         ]
     },
     {
@@ -665,8 +665,8 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
         {
           "name": "Blade 1",
           "cpuType": "3",
-          "memoryPerBlade": 3,
-          "storageCapacity": 33
+          "memory": 3,
+          "diskCapacity": 33
         }
       ]
     }

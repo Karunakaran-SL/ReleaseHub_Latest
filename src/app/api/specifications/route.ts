@@ -14,8 +14,15 @@ const OptionSchema = z.object({
 const BladeSchema = z.object({
   name: z.string(),
   cpuType: z.string().optional(),
-  memoryPerBlade: z.number().optional(),
-  storageCapacity: z.number().optional(),
+  cpuCores: z.number().optional(),
+  memory: z.number().optional(),
+  diskType: z.enum(['SSD', 'HDD']).optional(),
+  diskCapacity: z.number().optional(),
+  networkInterfaces: z.array(z.object({
+      name: z.string(),
+      type: z.string(),
+      speed: z.string(),
+  })).optional(),
 });
 
 const SpecificationSchema = z.object({
@@ -38,7 +45,6 @@ const SpecificationSchema = z.object({
   network_cards: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   plug_power_cords: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   hypervisor: OptionSchema,
-  // New fields
   cpuArchitecture: z.string().optional(),
   virtualizationSupport: z.boolean().optional(),
   biosVersion: z.string().optional(),
