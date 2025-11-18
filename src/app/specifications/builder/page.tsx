@@ -342,7 +342,7 @@ export default function SpecificationBuilderPage() {
                                     <div>
                                         <Label>Network Interfaces</Label>
                                         <div className="space-y-2 mt-1">
-                                            {(formData.blades?.[0]?.networkInterfaces || []).map((iface: any, ifaceIndex: number) => (
+                                            {Array.isArray(formData.blades?.[0]?.networkInterfaces) && formData.blades[0].networkInterfaces.map((iface: any, ifaceIndex: number) => (
                                                 <div key={ifaceIndex} className="grid grid-cols-4 gap-2 items-center">
                                                     <Input placeholder="Name" value={iface.name} onChange={e => handleBladeNetworkInterfaceChange(0, ifaceIndex, 'name', e.target.value, true)} />
                                                     <Input placeholder="Type" value={iface.type} onChange={e => handleBladeNetworkInterfaceChange(0, ifaceIndex, 'type', e.target.value, true)} />
@@ -512,5 +512,3 @@ export default function SpecificationBuilderPage() {
         </DashboardLayout>
     );
 }
-
-    
