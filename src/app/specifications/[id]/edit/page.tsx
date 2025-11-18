@@ -14,7 +14,7 @@ import type { User, Specification } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { PlusCircle, Trash2, Loader2, Server, Cpu, MemoryStick, Database } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { MultiSelectListBox, type Option as MultiSelectOption } from '@/components/ui/multi-select-list-box';
+import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 import { DiagramDisplay } from '../../_components/diagram-display';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
@@ -260,6 +260,8 @@ export default function EditSpecificationPage() {
                                                     <div className="flex items-center space-x-2"><RadioGroupItem value="true" id="sym1" /><Label htmlFor="sym1" className="font-normal">Symmetric</Label></div>
                                                     <div className="flex items-center space-x-2"><RadioGroupItem value="false" id="sym2" /><Label htmlFor="sym2" className="font-normal">Asymmetric</Label></div>
                                                 </RadioGroup>
+                                                <Label>Number of Blades</Label>
+                                                <Input id="bladeCount" type="number" value={formState.bladeCount || 1} onChange={handleBladeCountChange} min={1} />
                                             </div>
                                         ): (
                                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
@@ -270,21 +272,22 @@ export default function EditSpecificationPage() {
                                         )}
                                         {isBladeSelected && formState.symmetric && (
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
-                                                <div><Label># of Blades</Label><Input id="bladeCount" type="number" value={formState.bladeCount || 1} onChange={handleBladeCountChange} min={1} /></div>
                                                 <div><Label>CPU (per blade)</Label><Input id="cpuType" value={formState.cpuType || ''} onChange={handleInputChange} /></div>
                                                 <div><Label>Memory (GB per blade)</Label><Input id="memoryPerBlade" type="number" value={formState.memoryPerBlade || ''} onChange={handleInputChange} /></div>
                                             </div>
                                         )}
                                          {isBladeSelected && !formState.symmetric && (
                                             <div className="space-y-4 border p-4 rounded-md">
-                                                {formState.blades?.map((blade: any, index: number) => (
+                                                {(formState.blades || []).map((blade: any, index: number) => (
                                                     <Card key={index}>
                                                         <CardHeader><CardTitle>Blade {index + 1}</CardTitle></CardHeader>
-                                                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            <div><Label>Blade Name</Label><Input value={blade.name} onChange={e => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>
+                                                        <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                            <div className="col-span-full"><Label>Blade Name</Label><Input value={blade.name} onChange={e => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>
                                                             <div><Label>CPU Type</Label><Input value={blade.cpuType || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuType', e.target.value)} /></div>
-                                                            <div><Label>Memory (GB)</Label><Input type="number" value={blade.memoryPerBlade || ''} onChange={e => handleAsymmetricBladeChange(index, 'memoryPerBlade', Number(e.target.value))} /></div>
-                                                            <div><Label>Storage (GB)</Label><Input type="number" value={blade.storageCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'storageCapacity', Number(e.target.value))} /></div>
+                                                            <div><Label>CPU Cores</Label><Input type="number" value={blade.cpuCores || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuCores', Number(e.target.value))} /></div>
+                                                            <div><Label>Memory (GB)</Label><Input type="number" value={blade.memory || ''} onChange={e => handleAsymmetricBladeChange(index, 'memory', Number(e.target.value))} /></div>
+                                                            <div><Label>Disk Type</Label><Select value={blade.diskType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
+                                                            <div><Label>Disk Capacity (GB)</Label><Input type="number" value={blade.diskCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'diskCapacity', Number(e.target.value))} /></div>
                                                         </CardContent>
                                                     </Card>
                                                 ))}

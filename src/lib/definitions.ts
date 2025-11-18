@@ -1,4 +1,5 @@
 
+
 export type User = {
   _id: string;
   username: string;
@@ -70,13 +71,19 @@ export type Specification = {
     blades?: {
         name: string;
         cpuType?: string;
-        memoryPerBlade?: number;
-        storageCapacity?: number;
+        cpuCores?: number;
+        memory?: number;
+        diskType?: 'SSD' | 'HDD';
+        diskCapacity?: number;
+        networkInterfaces?: {
+            name: string;
+            type: string;
+            speed: string;
+        }[];
     }[];
     network_cards?: { id: string; name: string }[];
     plug_power_cords?: { id: string; name: string }[];
     hypervisor?: { id: string; name: string };
-    // New fields
     cpuArchitecture?: string;
     virtualizationSupport?: boolean;
     biosVersion?: string;
