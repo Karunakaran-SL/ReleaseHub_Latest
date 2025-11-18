@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Label } from '@/components/ui/label';
 
 const DeploymentMap = dynamic(() => import('@/app/fleet-management/deployment/_components/deployment-map'), {
     ssr: false,
@@ -56,17 +57,13 @@ function GlobalViewWidget() {
             .then(setDeployments);
     }, []);
 
-    const handleNodeClick = (deployment: Deployment) => {
-        setSelected(deployment);
-    }
-    
     // For now, the map doesn't support a direct click handler, this simulates it.
     // In a real scenario, the map component would need an onNodeClick prop.
     useEffect(() => {
-        if(deployments.length > 0) {
+        if(deployments.length > 0 && !selected) {
             setSelected(deployments[0]);
         }
-    }, [deployments]);
+    }, [deployments, selected]);
 
     return (
         <Widget title="Global View" description="Worldwide operational status of all deployments.">
@@ -98,7 +95,7 @@ function GlobalViewWidget() {
     );
 }
 
-function TableWidget({ title, headers, data, icon }: { title: string, headers: string[], data: string[][], icon: React.ReactNode }) {
+function TableWidget({ title, headers, data }: { title: string, headers: string[], data: string[][] }) {
     return (
         <Widget title={title}>
              <Table>
@@ -134,7 +131,6 @@ export default function DashboardV2Page() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                  <TableWidget 
                     title="Products" 
-                    icon={<Package />}
                     headers={["Name", "Version", "Owner"]}
                     data={[
                         ["OneStopShop Portal", "1.0.0", "Platform Engineering"],
@@ -143,7 +139,6 @@ export default function DashboardV2Page() {
                  />
                  <TableWidget 
                     title="Tenants" 
-                    icon={<BarChart />}
                     headers={["Name", "Version", "Products"]}
                     data={[
                         ["Core Platform Services", "2.0.0", "2"],
@@ -152,7 +147,6 @@ export default function DashboardV2Page() {
                  />
                  <TableWidget 
                     title="Releases" 
-                    icon={<List />}
                     headers={["ID", "Product", "Version", "Status"]}
                     data={[
                         ["REL-2024-001", "OneStopShop", "1.1.0", "PLANNED"],
@@ -161,7 +155,6 @@ export default function DashboardV2Page() {
                  />
                  <TableWidget 
                     title="Baselines" 
-                    icon={<CheckCircle />}
                     headers={["ID", "Product", "Version", "Status"]}
                     data={[
                         ["OneStopShopPortal_1.0.0", "OneStopShop Portal", "1.0.0", "RELEASED"],
