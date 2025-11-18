@@ -135,28 +135,39 @@ export default function ViewSpecificationPage() {
                         <CardTitle>View Specification: {specification.name}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                              <div className="space-y-4">
                                 <h3 className="font-semibold text-lg">Details</h3>
                                 <div><Label>HW Name</Label><Input value={specObject.name || ''} disabled /></div>
                                 <div><Label>HW Type</Label><Input value={specObject.hw_type?.name || ''} disabled /></div>
                                 <div><Label>Vendor</Label><Input value={specObject.vendor || ''} disabled /></div>
-                                <div><Label>Image URL</Label><Input value={specObject.image || ''} disabled /></div>
                                 <div><Label>Service Contract</Label><Input value={specObject.service_contract_type?.name || ''} disabled /></div>
+                                <h3 className="font-semibold text-lg pt-4">Contact</h3>
                                 <div><Label>Contact Email</Label><Input value={specObject.contact_point_email || ''} disabled /></div>
                                 <div><Label>Contact Phone</Label><Input value={specObject.contact_point_phone || ''} disabled /></div>
                             </div>
                             <div className="space-y-4">
                                 <h3 className="font-semibold text-lg">HW Resources & Connectivity</h3>
-                                <div><Label>Total CPU</Label><Input value={specObject.total_cpu || ''} disabled /></div>
-                                <div><Label>Memory (GB)</Label><Input value={specObject.memory_gb || ''} disabled /></div>
-                                <div><Label>Storage (GB)</Label><Input value={specObject.storage_gb || ''} disabled /></div>
+                                <div><Label>Total CPU</Label><Input value={specObject.total_cpu || 'N/A'} disabled /></div>
+                                <div><Label>Memory (GB)</Label><Input value={specObject.memory_gb || 'N/A'} disabled /></div>
+                                <div><Label>Storage (GB)</Label><Input value={specObject.storage_gb || 'N/A'} disabled /></div>
                                 <div><Label>Network Cards</Label><Input value={networkCardsDisplay} disabled /></div>
                                 <div><Label>Power Cords</Label><Input value={plugPowerCordsDisplay} disabled /></div>
                                 <div><Label>Hypervisor</Label><Input value={specObject.hypervisor?.name || 'N/A'} disabled /></div>
+                                <div><Label>RAID Config</Label><Input value={specObject.raidConfiguration || 'N/A'} disabled /></div>
+                            </div>
+                            <div className="space-y-4">
+                                <h3 className="font-semibold text-lg">Firmware &amp; OS</h3>
+                                <div><Label>BIOS Version</Label><Input value={specObject.biosVersion || 'N/A'} disabled /></div>
+                                <div><Label>Firmware Version</Label><Input value={specObject.firmwareVersion || 'N/A'} disabled /></div>
+                                <div><Label>CPU Architecture</Label><Input value={specObject.cpuArchitecture || 'N/A'} disabled /></div>
+                                <div><Label>Virtualization Support</Label><Input value={specObject.virtualizationSupport ? 'Enabled' : 'Disabled'} disabled /></div>
+                                <div><Label>Time Sync (NTP)</Label><Input value={specObject.timeSync || 'N/A'} disabled /></div>
+                                <div><Label>OS Disk Layout</Label><Input value={specObject.diskLayout?.osDisk || 'N/A'} disabled /></div>
+                                <div><Label>Data Disk Layout</Label><Input value={specObject.diskLayout?.dataDisk || 'N/A'} disabled /></div>
                             </div>
                             {(specObject.custom_fields?.length > 0) && (
-                                <div className="md:col-span-2 space-y-2">
+                                <div className="md:col-span-3 space-y-2">
                                 <h3 className="font-semibold text-lg">Custom Fields</h3>
                                 <div className="space-y-2">
                                     {specObject.custom_fields.map((field: any, index: number) => (

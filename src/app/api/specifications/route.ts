@@ -38,6 +38,32 @@ const SpecificationSchema = z.object({
   network_cards: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   plug_power_cords: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   hypervisor: OptionSchema,
+  // New fields
+  cpuArchitecture: z.string().optional(),
+  virtualizationSupport: z.boolean().optional(),
+  biosVersion: z.string().optional(),
+  firmwareVersion: z.string().optional(),
+  networkTopology: z.object({
+      managementVLAN: z.string().optional(),
+      storageVLAN: z.string().optional(),
+      workloadVLAN: z.string().optional(),
+  }).optional(),
+  ipAddressPool: z.object({
+      management: z.string().optional(),
+      storage: z.string().optional(),
+      workload: z.string().optional(),
+  }).optional(),
+  iloCredentials: z.object({
+      username: z.string().optional(),
+      password: z.string().optional(),
+  }).optional(),
+  diskLayout: z.object({
+      osDisk: z.string().optional(),
+      dataDisk: z.string().optional(),
+  }).optional(),
+  raidConfiguration: z.string().optional(),
+  timeSync: z.string().optional(),
+  sshKeys: z.string().optional(),
 });
 
 
@@ -47,7 +73,7 @@ export async function GET(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
     
-    const items = await db.collection('specifications').find({}).project({ name: 1, _id: 1, hw_type: 1, vendor: 1, image: 1 }).toArray();
+    const items = await db.collection('specifications').project({ name: 1, _id: 1, hw_type: 1, vendor: 1, image: 1 }).toArray();
 
     return NextResponse.json(items, { status: 200 });
   } catch (error) {

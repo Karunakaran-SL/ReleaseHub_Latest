@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MultiSelectListBox, type Option as MultiSelectOption } from '@/components/ui/multi-select-list-box';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { DiagramDisplay } from '../_components/diagram-display';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Option {
     _id: string;
@@ -122,7 +123,19 @@ export default function SpecificationBuilderPage() {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value, type } = e.target as HTMLInputElement;
         const checked = (e.target as HTMLInputElement).checked;
-        setFormData((prev: any) => ({ ...prev, [id]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value }));
+        const group = e.target.dataset.group as string | undefined;
+
+        if (group) {
+             setFormData((prev: any) => ({ 
+                ...prev, 
+                [group]: {
+                    ...prev[group],
+                    [id]: type === 'checkbox' ? checked : value
+                }
+            }));
+        } else {
+            setFormData((prev: any) => ({ ...prev, [id]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value }));
+        }
     };
 
     const handleBladeCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,7 +238,7 @@ export default function SpecificationBuilderPage() {
                         <SelectContent>{options.hwTypes.map(t => <SelectItem key={t._id} value={t._id}>{t.name}</SelectItem>)}</SelectContent>
                     </Select>
                 </div>
-                <div>
+                 <div>
                     <Label htmlFor="vendor">Vendor *</Label>
                     <Select value={formData.vendor} onValueChange={(value) => handleSelectChange('vendor', value)} required>
                         <SelectTrigger><SelectValue placeholder="Select Vendor" /></SelectTrigger>
@@ -244,6 +257,29 @@ export default function SpecificationBuilderPage() {
                     <div><Label htmlFor="contact_point_email">Contact Email</Label><Input id="contact_point_email" type="email" value={formData.contact_point_email || ''} onChange={handleInputChange} /></div>
                     <div><Label htmlFor="contact_point_phone">Contact Phone</Label><Input id="contact_point_phone" type="tel" value={formData.contact_point_phone || ''} onChange={handleInputChange} /></div>
                 </div>
+
+                <div className="space-y-4 pt-4 border-t">
+                    <h3 className="font-semibold text-lg">Firmware &amp; OS</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><Label htmlFor="biosVersion">BIOS Version</Label><Input id="biosVersion" value={formData.biosVersion || ''} onChange={handleInputChange} /></div>
+                        <div><Label htmlFor="firmwareVersion">Firmware Version</Label><Input id="firmwareVersion" value={formData.firmwareVersion || ''} onChange={handleInputChange} /></div>
+                        <div><Label htmlFor="cpuArchitecture">CPU Architecture</Label><Input id="cpuArchitecture" value={formData.cpuArchitecture || ''} onChange={handleInputChange} /></div>
+                        <div className="flex items-center space-x-2 pt-6">
+                            <Checkbox id="virtualizationSupport" checked={formData.virtualizationSupport} onCheckedChange={(checked) => setFormData(p => ({...p, virtualizationSupport: !!checked}))} />
+                            <Label htmlFor="virtualizationSupport">Virtualization Support</Label>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-4 pt-4 border-t">
+                    <h3 className="font-semibold text-lg">Remote Management</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><Label htmlFor="username" data-group="iloCredentials">iLO Username</Label><Input data-group="iloCredentials" id="username" value={formData.iloCredentials?.username || ''} onChange={handleInputChange} /></div>
+                        <div><Label htmlFor="password" data-group="iloCredentials">iLO Password</Label><Input data-group="iloCredentials" id="password" type="password" value={formData.iloCredentials?.password || ''} onChange={handleInputChange} /></div>
+                    </div>
+                </div>
+            </div>
+            <div className="space-y-4">
                  <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Hardware Specification</h3>
                     {isBladeSelected ? (
@@ -284,50 +320,37 @@ export default function SpecificationBuilderPage() {
                         </div>
                     )}
                 </div>
-            </div>
-            <div className="space-y-4">
-                <h3 className="font-semibold text-lg">Connectivity & Power</h3>
-                <div>
-                    <Label>Network Cards type</Label>
-                    <MultiSelectListBox
-                        available={options.networkCards.filter(opt => !(formData.network_cards || []).some((c:any) => c.id === opt._id)).map(o => ({id: o._id, label: o.name}))}
-                        chosen={(formData.network_cards || []).map((o: any) => ({id: o.id, label: o.name}))}
-                        onMoveToChosen={(ids) => handleMultiSelectChange('network_cards', [...(formData.network_cards || []), ...ids.map(id => ({id, name: options.networkCards.find(o => o._id === id)?.name || ''}))] )}
-                        onMoveToAvailable={(ids) => handleMultiSelectChange('network_cards', (formData.network_cards || []).filter((c:any) => !ids.includes(c.id)))}
-                        onMoveAllToChosen={() => handleMultiSelectChange('network_cards', options.networkCards.map(o => ({id: o._id, name: o.name})))}
-                        onMoveAllToAvailable={() => handleMultiSelectChange('network_cards', [])}
-                    />
-                </div>
-                <div>
-                    <Label>Plug/Power Cord Type</Label>
-                     <MultiSelectListBox
-                        available={options.plugPowerCords.filter(opt => !(formData.plug_power_cords || []).some((c:any) => c.id === opt._id)).map(o => ({id: o._id, label: o.name}))}
-                        chosen={(formData.plug_power_cords || []).map((o: any) => ({id: o.id, label: o.name}))}
-                        onMoveToChosen={(ids) => handleMultiSelectChange('plug_power_cords', [...(formData.plug_power_cords || []), ...ids.map(id => ({id, name: options.plugPowerCords.find(o => o._id === id)?.name || ''}))] )}
-                        onMoveToAvailable={(ids) => handleMultiSelectChange('plug_power_cords', (formData.plug_power_cords || []).filter((c:any) => !ids.includes(c.id)))}
-                        onMoveAllToChosen={() => handleMultiSelectChange('plug_power_cords', options.plugPowerCords.map(o => ({id: o._id, name: o.name})))}
-                        onMoveAllToAvailable={() => handleMultiSelectChange('plug_power_cords', [])}
-                    />
-                </div>
-                 <div>
-                    <Label htmlFor="hypervisor">Hypervisor</Label>
-                    <Select value={formData.hypervisor?.id} onValueChange={(value) => handleSelectChange('hypervisor', value)}>
-                        <SelectTrigger><SelectValue placeholder="N/A" /></SelectTrigger>
-                        <SelectContent>{options.hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
-                    </Select>
-                </div>
-                <div>
-                    <h3 className="font-semibold text-lg mt-6">Custom Fields</h3>
-                    <div className="space-y-2">
-                        {(formData.custom_fields || []).map((field: any, index: number) => (
-                            <div key={index} className="flex items-center gap-2">
-                                <Input placeholder="Key" value={field.key} onChange={(e) => handleCustomFieldChange(index, 'key', e.target.value)} />
-                                <Input placeholder="Value" value={field.value} onChange={(e) => handleCustomFieldChange(index, 'value', e.target.value)} />
-                                <Button variant="ghost" size="icon" onClick={() => removeCustomField(index)} type="button"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                            </div>
-                        ))}
+                 <div className="space-y-4 pt-4 border-t">
+                    <h3 className="font-semibold text-lg">Network &amp; Storage</h3>
+                     <div>
+                        <Label>Network Topology</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                           <Input data-group="networkTopology" id="managementVLAN" placeholder="Mgmt VLAN" value={formData.networkTopology?.managementVLAN || ''} onChange={handleInputChange}/>
+                           <Input data-group="networkTopology" id="storageVLAN" placeholder="Storage VLAN" value={formData.networkTopology?.storageVLAN || ''} onChange={handleInputChange}/>
+                           <Input data-group="networkTopology" id="workloadVLAN" placeholder="Workload VLAN" value={formData.networkTopology?.workloadVLAN || ''} onChange={handleInputChange}/>
+                        </div>
                     </div>
-                    <Button variant="link" size="sm" onClick={addCustomField} type="button" className="mt-2 px-0"><PlusCircle className="mr-2 h-4 w-4" />ADD CUSTOM FIELD</Button>
+                     <div>
+                        <Label>IP Address Pool</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                           <Input data-group="ipAddressPool" id="management" placeholder="Mgmt CIDR" value={formData.ipAddressPool?.management || ''} onChange={handleInputChange}/>
+                           <Input data-group="ipAddressPool" id="storage" placeholder="Storage CIDR" value={formData.ipAddressPool?.storage || ''} onChange={handleInputChange}/>
+                           <Input data-group="ipAddressPool" id="workload" placeholder="Workload CIDR" value={formData.ipAddressPool?.workload || ''} onChange={handleInputChange}/>
+                        </div>
+                    </div>
+                     <div><Label>Time Sync (NTP Server)</Label><Input id="timeSync" value={formData.timeSync || ''} onChange={handleInputChange} /></div>
+                     <div>
+                        <Label>Disk Layout</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                            <Input data-group="diskLayout" id="osDisk" placeholder="OS Disk (e.g., 200GB SSD)" value={formData.diskLayout?.osDisk || ''} onChange={handleInputChange} />
+                            <Input data-group="diskLayout" id="dataDisk" placeholder="Data Disk (e.g., 1TB NVMe)" value={formData.diskLayout?.dataDisk || ''} onChange={handleInputChange} />
+                        </div>
+                    </div>
+                     <div><Label>RAID Configuration</Label><Input id="raidConfiguration" value={formData.raidConfiguration || ''} onChange={handleInputChange} placeholder="e.g., RAID 10"/></div>
+                      <div>
+                        <Label>SSH Keys</Label>
+                        <Textarea id="sshKeys" value={formData.sshKeys || ''} onChange={handleInputChange} placeholder="Paste public SSH keys for access..."/>
+                    </div>
                 </div>
             </div>
         </div>

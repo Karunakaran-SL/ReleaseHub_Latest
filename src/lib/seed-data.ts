@@ -1,3 +1,4 @@
+
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification } from './definitions';
@@ -629,7 +630,11 @@ const initialServiceContracts = [
 
 const fullSpecifications: Omit<Specification, '_id'>[] = [
     {
-        _id: "ArgoCDSyncSpec", name: 'ArgoCD Sync Spec', vendor: 'CNCF', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' }, total_cpu: 16, memory_gb: 64, storage_gb: 512, network_cards: [{id: 'VirtualNIC10Gbps', name: 'Virtual NIC 10Gbps'}], plug_power_cords: [{id: 'VirtualPower', name: 'Virtual Power'}]
+        _id: "ArgoCDSyncSpec", name: 'ArgoCD Sync Spec', vendor: 'CNCF', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' }, total_cpu: 16, memory_gb: 64, storage_gb: 512, network_cards: [{id: 'VirtualNIC10Gbps', name: 'Virtual NIC 10Gbps'}], plug_power_cords: [{id: 'VirtualPower', name: 'Virtual Power'}],
+        cpuArchitecture: "x86_64", virtualizationSupport: true, biosVersion: "2.3a", firmwareVersion: "4.1.0",
+        networkTopology: { managementVLAN: "100", storageVLAN: "200", workloadVLAN: "300" },
+        ipAddressPool: { management: "10.0.1.0/24", storage: "10.0.2.0/24", workload: "10.0.3.0/24" },
+        diskLayout: { osDisk: "100GB SSD", dataDisk: "400GB NVMe" }, timeSync: "ntp.corp.example.com", sshKeys: "ssh-rsa AAAAB3NzaC1yc2EAAA..."
     },
     {
         _id: "SingleSignOnSpec", name: 'Single Sign-On Spec', vendor: 'OpenID', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' }, total_cpu: 8, memory_gb: 32, storage_gb: 256
@@ -650,6 +655,20 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
             { name: 'Storage-Blade-1', cpuType: 'Intel Xeon Silver 4410Y', memoryPerBlade: 128, storageCapacity: 16384 },
             { name: 'GPU-Blade-1', cpuType: 'Intel Xeon Platinum 8470Q', memoryPerBlade: 512, storageCapacity: 4096 },
         ]
+    },
+    {
+      "name": "Spec-hardware-Blade-1763392192219",
+      "hw_type": { "id": "Blade", "name": "Blade"},
+      "symmetric": false,
+      "bladeCount": 1,
+      "blades": [
+        {
+          "name": "Blade 1",
+          "cpuType": "3",
+          "memoryPerBlade": 3,
+          "storageCapacity": 33
+        }
+      ]
     }
 ];
 

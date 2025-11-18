@@ -39,6 +39,32 @@ const SpecificationUpdateSchema = z.object({
   plug_power_cords: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   hypervisor: OptionSchema,
   updateComment: z.string().min(1, 'Update comment is required.'),
+  // New fields
+  cpuArchitecture: z.string().optional(),
+  virtualizationSupport: z.boolean().optional(),
+  biosVersion: z.string().optional(),
+  firmwareVersion: z.string().optional(),
+  networkTopology: z.object({
+      managementVLAN: z.string().optional(),
+      storageVLAN: z.string().optional(),
+      workloadVLAN: z.string().optional(),
+  }).optional(),
+  ipAddressPool: z.object({
+      management: z.string().optional(),
+      storage: z.string().optional(),
+      workload: z.string().optional(),
+  }).optional(),
+  iloCredentials: z.object({
+      username: z.string().optional(),
+      password: z.string().optional(),
+  }).optional(),
+  diskLayout: z.object({
+      osDisk: z.string().optional(),
+      dataDisk: z.string().optional(),
+  }).optional(),
+  raidConfiguration: z.string().optional(),
+  timeSync: z.string().optional(),
+  sshKeys: z.string().optional(),
 });
 
 

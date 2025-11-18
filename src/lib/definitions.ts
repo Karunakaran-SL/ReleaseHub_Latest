@@ -76,6 +76,32 @@ export type Specification = {
     network_cards?: { id: string; name: string }[];
     plug_power_cords?: { id: string; name: string }[];
     hypervisor?: { id: string; name: string };
+    // New fields
+    cpuArchitecture?: string;
+    virtualizationSupport?: boolean;
+    biosVersion?: string;
+    firmwareVersion?: string;
+    networkTopology?: {
+        managementVLAN?: string;
+        storageVLAN?: string;
+        workloadVLAN?: string;
+    };
+    ipAddressPool?: {
+        management?: string;
+        storage?: string;
+        workload?: string;
+    };
+    iloCredentials?: {
+        username?: string;
+        password?: string;
+    };
+    diskLayout?: {
+        osDisk?: string;
+        dataDisk?: string;
+    };
+    raidConfiguration?: string;
+    timeSync?: string;
+    sshKeys?: string;
 };
 
 
