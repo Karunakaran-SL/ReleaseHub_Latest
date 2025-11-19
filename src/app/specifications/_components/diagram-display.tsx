@@ -23,9 +23,9 @@ export function DiagramDisplay({ specJson }: { specJson: string }) {
         const blades = isSymmetric 
             ? Array.from({ length: spec.bladeCount || 1 }).map((_, i) => ({
                 name: `Blade ${i + 1}`,
-                cpuType: spec.cpuType,
-                memoryPerBlade: spec.memoryPerBlade,
-                storageCapacity: spec.storage_gb, // Using total storage for symmetric view
+                cpuType: spec.blades?.[0]?.cpuType,
+                memory: spec.blades?.[0]?.memory,
+                diskCapacity: spec.blades?.[0]?.diskCapacity,
               }))
             : spec.blades || [];
 
@@ -44,8 +44,8 @@ export function DiagramDisplay({ specJson }: { specJson: string }) {
                                 <p className="text-xs font-mono text-center mt-1">{blade.name || `Blade ${i + 1}`}</p>
                                 <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
                                     <div className="flex items-center gap-1"><Cpu className="h-3 w-3"/><span>{blade.cpuType || 'N/A'}</span></div>
-                                    <div className="flex items-center gap-1"><MemoryStick className="h-3 w-3"/><span>{blade.memoryPerBlade || 'N/A'} GB</span></div>
-                                    <div className="flex items-center gap-1"><Database className="h-3 w-3"/><span>{blade.storageCapacity || 'N/A'} GB</span></div>
+                                    <div className="flex items-center gap-1"><MemoryStick className="h-3 w-3"/><span>{blade.memory || 'N/A'} GB</span></div>
+                                    <div className="flex items-center gap-1"><Database className="h-3 w-3"/><span>{blade.diskCapacity || 'N/A'} GB</span></div>
                                 </div>
                             </div>
                         ))}
