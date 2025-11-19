@@ -587,35 +587,35 @@ const initialSpecHwTypes = [{ name: 'Rack' }, { name: 'Blade' }, { name: 'Virtua
 const initialSpecHypervisors = [{ name: 'VMWare ESXi' }, { name: 'Microsoft Hyper-V' }, { name: 'KVM' }];
 
 const initialSpecNetworkCards = [
-    { name: "Ethernet_1G_RJ45", type: "Ethernet", classification: { speed: "1Gbps", connector: "RJ-45" } },
-    { name: "Ethernet_10G_RJ45", type: "Ethernet", classification: { speed: "10Gbps", connector: "RJ-45" } },
-    { name: "Ethernet_10G_SFP+", type: "Ethernet", classification: { speed: "10Gbps", connector: "SFP+" } },
-    { name: "Ethernet_25G_SFP28", type: "Ethernet", classification: { speed: "25Gbps", connector: "SFP28" } },
-    { name: "Ethernet_40G_QSFP+", type: "Ethernet", classification: { speed: "40Gbps", connector: "QSFP+" } },
-    { name: "Ethernet_100G_QSFP28", type: "Ethernet", classification: { speed: "100Gbps", connector: "QSFP28" } },
-    { name: "FibreChannel_8Gb", type: "Fibre Channel", classification: { speed: "8Gbps" } },
-    { name: "FibreChannel_16Gb", type: "Fibre Channel", classification: { speed: "16Gbps" } },
-    { name: "FibreChannel_32Gb", type: "Fibre Channel", classification: { speed: "32Gbps" } },
-    { name: "InfiniBand_SDR_10Gb", type: "InfiniBand", classification: { speed: "10Gbps", mode: "SDR" } },
-    { name: "InfiniBand_DDR_20Gb", type: "InfiniBand", classification: { speed: "20Gbps", mode: "DDR" } },
-    { name: "InfiniBand_QDR_40Gb", type: "InfiniBand", classification: { speed: "40Gbps", mode: "QDR" } },
-    { name: "InfiniBand_FDR_56Gb", type: "InfiniBand", classification: { speed: "56Gbps", mode: "FDR" } },
-    { name: "InfiniBand_EDR_100Gb", type: "InfiniBand", classification: { speed: "100Gbps", mode: "EDR" } },
-    { name: "Wireless_WiFi5_802.11ac", type: "Wireless", classification: { standard: "802.11ac", generation: "Wi-Fi 5" } },
-    { name: "Wireless_WiFi6_802.11ax", type: "Wireless", classification: { standard: "802.11ax", generation: "Wi-Fi 6" } },
-    { name: "Wireless_WiFi7_802.11be", type: "Wireless", classification: { standard: "802.11be", generation: "Wi-Fi 7" } },
-    { name: "Virtual_VLAN_802.1Q", type: "Virtual", classification: { protocol: "802.1Q", description: "VLAN" } },
-    { name: "Virtual_VXLAN", type: "Virtual", classification: { protocol: "VXLAN" } },
-    { name: "Virtual_GRE_Tunnel", type: "Virtual", classification: { protocol: "GRE" } },
-    { name: "Virtual_IPsec_Tunnel", type: "Virtual", classification: { protocol: "IPsec" } },
-    { name: "Virtual_SDN_OpenvSwitch", type: "Virtual", classification: { platform: "Open vSwitch" } },
-    { name: "Virtual_SDN_VMwareNSX", type: "Virtual", classification: { platform: "VMware NSX" } },
-    { name: "Specialized_RoCE", type: "Specialized", classification: { protocol: "RDMA over Converged Ethernet" } },
-    { name: "Specialized_iSCSI", type: "Specialized", classification: { protocol: "iSCSI" } },
-    { name: "Specialized_NVMeoF", type: "Specialized", classification: { protocol: "NVMe over Fabrics" } },
-    { name: "Management_IPMI", type: "Management", classification: { protocol: "IPMI" } },
-    { name: "Management_Redfish", type: "Management", classification: { protocol: "Redfish" } },
-    { name: "Management_SerialConsole", type: "Management", classification: { protocol: "Serial" } }
+    { "name": "Ethernet_1G_RJ45", "type": "Ethernet", "classification": { "speed": "1Gbps", "connector": "RJ-45" } },
+    { "name": "Ethernet_10G_RJ45", "type": "Ethernet", "classification": { "speed": "10Gbps", "connector": "RJ-45" } },
+    { "name": "Ethernet_10G_SFP+", "type": "Ethernet", "classification": { "speed": "10Gbps", "connector": "SFP+" } },
+    { "name": "Ethernet_25G_SFP28", "type": "Ethernet", "classification": { "speed": "25Gbps", "connector": "SFP28" } },
+    { "name": "Ethernet_40G_QSFP+", "type": "Ethernet", "classification": { "speed": "40Gbps", "connector": "QSFP+" } },
+    { "name": "Ethernet_100G_QSFP28", "type": "Ethernet", "classification": { "speed": "100Gbps", "connector": "QSFP28" } },
+    { "name": "FibreChannel_8Gb", "type": "Fibre Channel", "classification": { "speed": "8Gbps" } },
+    { "name": "FibreChannel_16Gb", "type": "Fibre Channel", "classification": { "speed": "16Gbps" } },
+    { "name": "FibreChannel_32Gb", "type": "Fibre Channel", "classification": { "speed": "32Gbps" } },
+    { "name": "InfiniBand_SDR_10Gb", "type": "InfiniBand", "classification": { "speed": "10Gbps", "mode": "SDR" } },
+    { "name": "InfiniBand_DDR_20Gb", "type": "InfiniBand", "classification": { "speed": "20Gbps", "mode": "DDR" } },
+    { "name": "InfiniBand_QDR_40Gb", "type": "InfiniBand", "classification": { "speed": "40Gbps", "mode": "QDR" } },
+    { "name": "InfiniBand_FDR_56Gb", "type": "InfiniBand", "classification": { "speed": "56Gbps", "mode": "FDR" } },
+    { "name": "InfiniBand_EDR_100Gb", "type": "InfiniBand", "classification": { "speed": "100Gbps", "mode": "EDR" } },
+    { "name": "Wireless_WiFi5_802.11ac", "type": "Wireless", "classification": { "standard": "802.11ac", "generation": "Wi-Fi 5" } },
+    { "name": "Wireless_WiFi6_802.11ax", "type": "Wireless", "classification": { "standard": "802.11ax", "generation": "Wi-Fi 6" } },
+    { "name": "Wireless_WiFi7_802.11be", "type": "Wireless", "classification": { "standard": "802.11be", "generation": "Wi-Fi 7" } },
+    { "name": "Virtual_VLAN_802.1Q", "type": "Virtual", "classification": { "protocol": "802.1Q", "description": "VLAN" } },
+    { "name": "Virtual_VXLAN", "type": "Virtual", "classification": { "protocol": "VXLAN" } },
+    { "name": "Virtual_GRE_Tunnel", "type": "Virtual", "classification": { "protocol": "GRE" } },
+    { "name": "Virtual_IPsec_Tunnel", "type": "Virtual", "classification": { "protocol": "IPsec" } },
+    { "name": "Virtual_SDN_OpenvSwitch", "type": "Virtual", "classification": { "platform": "Open vSwitch" } },
+    { "name": "Virtual_SDN_VMwareNSX", "type": "Virtual", "classification": { "platform": "VMware NSX" } },
+    { "name": "Specialized_RoCE", "type": "Specialized", "classification": { "protocol": "RDMA over Converged Ethernet" } },
+    { "name": "Specialized_iSCSI", "type": "Specialized", "classification": { "protocol": "iSCSI" } },
+    { "name": "Specialized_NVMeoF", "type": "Specialized", "classification": { "protocol": "NVMe over Fabrics" } },
+    { "name": "Management_IPMI", "type": "Management", "classification": { "protocol": "IPMI" } },
+    { "name": "Management_Redfish", "type": "Management", "classification": { "protocol": "Redfish" } },
+    { "name": "Management_SerialConsole", "type": "Management", "classification": { "protocol": "Serial" } }
 ];
 
 const initialSpecPlugPowerCords = [{ name: 'Virtual Power' }, { name: 'NEMA 5-15P' }, { name: 'C13/C14' }];
@@ -709,30 +709,74 @@ const initialServiceContracts = [
 
 const fullSpecifications: Omit<Specification, '_id'>[] = [
     {
-        _id: "ArgoCDSyncSpec", name: 'ArgoCD Sync Spec', vendor: 'CNCF', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' }, total_cpu: 16, memory_gb: 64, storage_gb: 512, network_cards: [{id: 'Virtual_VLAN_802.1Q', name: 'Virtual_VLAN_802.1Q'}], plug_power_cords: [{id: 'VirtualPower', name: 'Virtual Power'}],
-        cpuArchitecture: "x86_64", virtualizationSupport: true, biosVersion: "2.3a", firmwareVersion: "4.1.0",
-        networkTopology: { managementVLAN: "100", storageVLAN: "200", workloadVLAN: "300" },
-        ipAddressPool: { management: "10.0.1.0/24", storage: "10.0.2.0/24", workload: "10.0.3.0/24" },
-        diskLayout: { osDisk: "100GB SSD", dataDisk: "400GB NVMe" }, timeSync: "ntp.corp.example.com", sshKeys: "ssh-rsa AAAAB3NzaC1yc2EAAA..."
+        name: 'ArgoCD Sync Spec', vendor: 'CNCF', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' },
+        clusterName: 'ArgoCD Management Cluster',
+        nodeCount: { controlPlane: 3, worker: 5 },
+        nodes: [
+            ...Array.from({ length: 3 }, (_, i) => ({
+                vmName: `argo-cp-${i+1}`,
+                role: 'Control Plane' as const,
+                cpuCores: 8, memory: 32, diskSize: 200, osType: 'Ubuntu 22.04 LTS',
+                networkInterface: 'Virtual_VLAN_802.1Q', connectivity: 'Private' as const, dns: 'internal.corp',
+                ssh: { username: 'admin', sshKey: 'ssh-rsa AAAAB3Nza... controlplane-key' }
+            })),
+            ...Array.from({ length: 5 }, (_, i) => ({
+                vmName: `argo-worker-${i+1}`,
+                role: 'Worker' as const,
+                cpuCores: 16, memory: 64, diskSize: 500, osType: 'Ubuntu 22.04 LTS',
+                networkInterface: 'Virtual_VXLAN', connectivity: 'Private' as const, dns: 'internal.corp',
+                ssh: { username: 'admin', sshKey: 'ssh-rsa AAAAB3NzaC... worker-key' }
+            }))
+        ],
     },
     {
-        _id: "SingleSignOnSpec", name: 'Single Sign-On Spec', vendor: 'OpenID', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' }, total_cpu: 8, memory_gb: 32, storage_gb: 256
+        name: 'Single Sign-On Spec', vendor: 'OpenID', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'VMWare ESXi', name: 'VMWare ESXi' }, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' },
+        clusterName: 'SSO Authentication Service',
+        nodeCount: { controlPlane: 2, worker: 3 },
+        nodes: [
+            ...Array.from({ length: 2 }, (_, i) => ({
+                vmName: `sso-cp-${i+1}`, role: 'Control Plane' as const, cpuCores: 4, memory: 16, diskSize: 100, osType: 'RHEL 9',
+                networkInterface: 'Virtual_VLAN_802.1Q', connectivity: 'Private' as const, dns: 'auth.corp',
+                ssh: { username: 'sso_admin', sshKey: 'ssh-rsa AAAAB3NzaC... sso-cp-key' }
+            })),
+            ...Array.from({ length: 3 }, (_, i) => ({
+                vmName: `sso-worker-${i+1}`, role: 'Worker' as const, cpuCores: 8, memory: 32, diskSize: 250, osType: 'RHEL 9',
+                networkInterface: 'Virtual_VLAN_802.1Q', connectivity: 'Private' as const, dns: 'auth.corp',
+                ssh: { username: 'sso_admin', sshKey: 'ssh-rsa AAAAB3NzaC... sso-worker-key' }
+            }))
+        ],
     },
     {
-        _id: 'DellPowerEdgeR760', name: 'Dell PowerEdge R760', vendor: 'Dell EMC', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, total_cpu: 64, memory_gb: 256, storage_gb: 4096, network_cards: [{id: 'Ethernet_10G_SFP+', name: 'Ethernet_10G_SFP+'}], plug_power_cords: [{id: 'C13/C14', name: 'C13/C14'}]
+        name: 'Dell PowerEdge R760', vendor: 'Dell EMC', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'},
+        total_cpu: 64, memory_gb: 256, storage_gb: 4096,
+        network_cards: [{id: 'Ethernet_10G_SFP+', name: 'Ethernet_10G_SFP+'}], plug_power_cords: [{id: 'C13/C14', name: 'C13/C14'}],
+        hypervisor: { id: 'VMWare ESXi', name: 'VMWare ESXi' }, biosVersion: "2.10.1", firmwareVersion: "7.00.10.00 (iDRAC 9)", cpuArchitecture: "x86_64", virtualizationSupport: true,
+        iloCredentials: { username: 'root', password: 'password123' }, timeSync: 'ntp.dell.com', raidConfiguration: 'RAID 1 (OS), RAID 5 (Data)',
+        diskLayout: { osDisk: '2x 480GB SSD', dataDisk: '8x 2TB SAS HDD' }, sshKeys: 'ssh-rsa AAAAB3NzaC... r760-admin-key'
     },
     {
-        _id: 'HPEProLiantDL380', name: 'HPE ProLiant DL380 Gen11', vendor: 'HPE', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_Foundation_Care', name: 'Foundation Care'}, total_cpu: 48, memory_gb: 192, storage_gb: 2048
+        name: 'HPE ProLiant DL380 Gen11', vendor: 'HPE', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_Foundation_Care', name: 'Foundation Care'},
+        total_cpu: 48, memory_gb: 192, storage_gb: 2048, biosVersion: "U52 v1.50", firmwareVersion: "3.01 (iLO 6)", cpuArchitecture: "x86_64", virtualizationSupport: true,
+        iloCredentials: { username: 'admin', password: 'password' }, timeSync: 'time.nist.gov', raidConfiguration: 'RAID 1 (OS), RAID 6 (Data)',
+        diskLayout: { osDisk: '2x 480GB SSD', dataDisk: '6x 1.2TB SAS HDD' }
     },
     {
-        _id: 'CiscoUCSB200M7', name: 'Cisco UCS B200 M7 Blade', vendor: 'Cisco', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, symmetric: true, bladeCount: 8, blades: [{ name: 'Blade Template', cpuType: 'Intel Xeon Scalable', memory: 128 }]
+        name: 'Cisco UCS B200 M7 Blade', vendor: 'Cisco', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'},
+        symmetric: true, bladeCount: 8,
+        blades: [{
+            name: 'Blade Template', cpuType: 'Intel Xeon Scalable', cpuCores: 24, memory: 128, diskType: 'SSD_NVMe_M2_PCIeGen4', diskCapacity: 1024, hasGpu: true, gpuType: 'NVIDIA A100', gpuCores: 108,
+            networkInterfaces: [{name: 'vic1520', type: 'Ethernet_40G_QSFP+', speed: '40Gbps'}]
+        }],
+        biosVersion: "S52.4.1.0.1", firmwareVersion: "5.0(2)", virtualizationSupport: true
     },
     {
-        _id: 'AsymmetricBladeServer', name: 'Asymmetric Blade Server', vendor: 'Lenovo', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, symmetric: false, blades: [
-            { name: 'Compute-Blade-1', cpuType: 'Intel Xeon Gold 6442Y', cpuCores: 32, memory: 256, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 2048 },
-            { name: 'Compute-Blade-2', cpuType: 'Intel Xeon Gold 6442Y', cpuCores: 32, memory: 256, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 2048 },
-            { name: 'Storage-Blade-1', cpuType: 'Intel Xeon Silver 4410Y', cpuCores: 16, memory: 128, diskType: 'HDD_3.5inch_SAS_15KRPM', diskCapacity: 16384 },
-            { name: 'GPU-Blade-1', cpuType: 'Intel Xeon Platinum 8470Q', cpuCores: 52, memory: 512, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 4096, hasGpu: true, gpuType: 'NVIDIA H100', gpuCores: 80 },
+        name: 'Asymmetric Blade Server', vendor: 'Lenovo', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'},
+        symmetric: false, bladeCount: 4,
+        blades: [
+            { name: 'Compute-Blade-1', cpuType: 'AMD EPYC 7002', cpuCores: 32, memory: 256, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 2048, hasGpu: false },
+            { name: 'Compute-Blade-2', cpuType: 'AMD EPYC 7002', cpuCores: 32, memory: 256, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 2048, hasGpu: false },
+            { name: 'Storage-Blade-1', cpuType: 'Intel Xeon Scalable', cpuCores: 16, memory: 128, diskType: 'HDD_3.5inch_SAS_15KRPM', diskCapacity: 16384, hasGpu: false },
+            { name: 'GPU-Blade-1', cpuType: 'Intel Xeon Scalable', cpuCores: 52, memory: 512, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 4096, hasGpu: true, gpuType: 'NVIDIA H100', gpuCores: 108 }
         ]
     },
     {
@@ -742,12 +786,8 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
       "bladeCount": 1,
       "blades": [
         {
-          "name": "Blade 1",
-          "cpuType": "Intel Xeon E-series",
-          "cpuCores": 3,
-          "memory": 3,
-          "diskType": "SSD_SATA_2.5inch",
-          "diskCapacity": 33
+          "name": "Blade 1", "cpuType": "AMD Ryzen 9", "cpuCores": 12, "memory": 64, "diskType": "SSD_SATA_2.5inch", "diskCapacity": 2048,
+          "hasGpu": true, "gpuType": 'NVIDIA GeForce RTX 4080', "gpuCores": 9728
         }
       ]
     }
