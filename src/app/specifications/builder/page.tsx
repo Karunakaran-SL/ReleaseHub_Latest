@@ -29,13 +29,38 @@ interface Option {
 
 type NewSpecificationState = Partial<Omit<Specification, '_id'>>;
 
-const initialFormState: NewSpecificationState = { 
-    symmetric: true, 
-    custom_fields: [{key: '', value: ''}], 
-    bladeCount: 1, 
-    blades: [{name: 'Blade 1', cpuCores: 0, memory: 0, diskCapacity: 0, networkInterfaces: [], hasGpu: false}],
+const initialFormState: NewSpecificationState = {
+    name: "New Blade Specification",
+    hw_type: { id: 'Blade', name: 'Blade' },
+    vendor: 'HPE',
+    service_contract_type: { id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus' },
+    contact_point_email: 'support@example.com',
+    contact_point_phone: '1-800-555-1234',
+    custom_fields: [{key: 'Asset Tag', value: 'HW-12345'}],
+    symmetric: true,
+    bladeCount: 4,
+    blades: [{
+        name: 'Blade Template',
+        cpuType: 'Intel Xeon Scalable',
+        cpuCores: 24,
+        memory: 128,
+        diskType: 'SSD_NVMe_U2_PCIeGen4',
+        diskCapacity: 2048,
+        hasGpu: true,
+        gpuType: 'NVIDIA A100',
+        gpuCores: 108,
+        networkInterfaces: [{ name: 'eth0', type: 'Ethernet_40G_QSFP+', speed: '40Gbps' }]
+    }],
     nodeCount: { controlPlane: 1, worker: 1 },
     nodes: [],
+    biosVersion: "U52 v1.50",
+    firmwareVersion: "3.01 (iLO 6)",
+    cpuArchitecture: "x86_64",
+    virtualizationSupport: true,
+    iloCredentials: { username: 'admin', password: 'password' },
+    timeSync: 'time.nist.gov',
+    raidConfiguration: 'RAID 1 (OS), RAID 5 (Data)',
+    diskLayout: { osDisk: '2x 480GB SSD', dataDisk: '8x 2TB SAS HDD' },
 };
 
 
@@ -480,7 +505,7 @@ export default function SpecificationBuilderPage() {
                  {!isVirtualSelected && (
                  <div className="space-y-4">
                     <div className="space-y-4 pt-4 border-t">
-                        <h3 className="font-semibold text-lg">Firmware &amp; OS</h3>
+                        <h3 className="font-semibold text-lg">Firmware & OS</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div><Label htmlFor="biosVersion">BIOS Version</Label><Input id="biosVersion" value={formData.biosVersion || ''} onChange={handleInputChange} /></div>
                             <div><Label htmlFor="firmwareVersion">Firmware Version</Label><Input id="firmwareVersion" value={formData.firmwareVersion || ''} onChange={handleInputChange} /></div>
@@ -500,7 +525,7 @@ export default function SpecificationBuilderPage() {
                         </div>
                     </div>
                      <div className="space-y-4 pt-4 border-t">
-                        <h3 className="font-semibold text-lg">Network &amp; Storage</h3>
+                        <h3 className="font-semibold text-lg">Network & Storage</h3>
                         <div>
                             <Label>Network Topology</Label>
                             <div className="grid grid-cols-3 gap-2">
