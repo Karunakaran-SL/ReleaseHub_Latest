@@ -33,6 +33,7 @@ const initialFormState: NewSpecificationState = {
     name: "New Blade Specification",
     hw_type: { id: 'Blade', name: 'Blade' },
     vendor: 'HPE',
+    image: 'https://picsum.photos/seed/hpe-blade/400/400',
     service_contract_type: { id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus' },
     contact_point_email: 'support@example.com',
     contact_point_phone: '1-800-555-1234',
@@ -646,5 +647,3 @@ export default function SpecificationBuilderPage() {
         </DashboardLayout>
     );
 }
-
-    
