@@ -12,11 +12,12 @@ import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Specification } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { PlusCircle, Trash2, Loader2, Server, Cpu, MemoryStick, Database } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, Server, Cpu, MemoryStick, Database, Zap } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 import { DiagramDisplay } from '../../_components/diagram-display';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Option {
     _id: string;
@@ -41,6 +42,7 @@ export default function EditSpecificationPage() {
         networkCards: [] as Option[],
         plugPowerCords: [] as Option[],
         cpuTypes: [] as Option[],
+        gpuTypes: [] as Option[],
     });
 
     useEffect(() => {
@@ -50,7 +52,7 @@ export default function EditSpecificationPage() {
         async function fetchData() {
             setLoading(true);
             try {
-                const [specRes, hwTypesRes, vendorsRes, hypervisorsRes, contractsRes, networkCardsRes, plugPowerCordsRes, cpuTypesRes] = await Promise.all([
+                const [specRes, hwTypesRes, vendorsRes, hypervisorsRes, contractsRes, networkCardsRes, plugPowerCordsRes, cpuTypesRes, gpuTypesRes] = await Promise.all([
                     fetch(`/api/specifications/${id}`),
                     fetch('/api/settings/specifications/hw-types'),
                     fetch('/api/settings/specifications/vendors'),
@@ -59,6 +61,7 @@ export default function EditSpecificationPage() {
                     fetch('/api/settings/specifications/network-cards'),
                     fetch('/api/settings/specifications/plug-power-cords'),
                     fetch('/api/settings/specifications/cpu-types'),
+                    fetch('/api/settings/specifications/gpu-types'),
                 ]);
 
                 if (!specRes.ok) throw new Error('Failed to fetch specification');
@@ -74,6 +77,7 @@ export default function EditSpecificationPage() {
                     networkCards: await networkCardsRes.json(),
                     plugPowerCords: await plugPowerCordsRes.json(),
                     cpuTypes: await cpuTypesRes.json(),
+                    gpuTypes: await gpuTypesRes.json(),
                 });
 
             } catch (err: any) {
@@ -130,7 +134,7 @@ export default function EditSpecificationPage() {
     
     const handleBladeCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const count = parseInt(e.target.value, 10);
-        setFormState((prev: any) => ({ ...prev, bladeCount: count, blades: Array.from({length: count}).map((_, i) => prev.blades?.[i] || {name: `Blade ${i+1}`}) }));
+        setFormState((prev: any) => ({ ...prev, bladeCount: count, blades: Array.from({length: count}).map((_, i) => prev.blades?.[i] || {name: `Blade ${i+1}`, networkInterfaces: []}) }));
     }
 
     const handleAsymmetricBladeChange = (index: number, field: string, value: any) => {
@@ -140,11 +144,10 @@ export default function EditSpecificationPage() {
     }
     
     const handleSymmetricBladeChange = (field: string, value: any) => {
-        setFormState((prev: any) => {
-            const newBlades = (prev.blades || []).map((blade: any) => ({...blade, [field]: value}));
-            return {...prev, blades: newBlades};
-        });
-    }
+        const templateBlade = formData.blades?.[0] || { networkInterfaces: [] };
+        const updatedBlade = { ...templateBlade, [field]: value };
+        setFormData((prev: any) => ({ ...prev, blades: [updatedBlade] }));
+    };
     
     const handleBladeNetworkInterfaceChange = (bladeIndex: number, ifaceIndex: number, field: 'name' | 'type' | 'speed', value: string) => {
         const newBlades = [...(formState.blades || [])];
@@ -321,6 +324,22 @@ export default function EditSpecificationPage() {
                                                     <div><Label>Disk Type</Label><Select value={formState.blades?.[0]?.diskType} onValueChange={(v) => handleSymmetricBladeChange('diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
                                                     <div><Label>Disk Capacity (GB)</Label><Input type="number" value={formState.blades?.[0]?.diskCapacity || ''} onChange={e => handleSymmetricBladeChange('diskCapacity', Number(e.target.value))} /></div>
                                                 </div>
+                                                <div className="flex items-center space-x-2 pt-2">
+                                                    <Checkbox id="symmetric-hasGpu" checked={formState.blades?.[0]?.hasGpu || false} onCheckedChange={(checked) => handleSymmetricBladeChange('hasGpu', !!checked)} />
+                                                    <Label htmlFor="symmetric-hasGpu">Has GPU?</Label>
+                                                </div>
+                                                {formState.blades?.[0]?.hasGpu && (
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <Label>GPU Type</Label>
+                                                            <Select value={formState.blades?.[0]?.gpuType} onValueChange={(v) => handleSymmetricBladeChange('gpuType', v)}>
+                                                                <SelectTrigger><SelectValue placeholder="Select GPU..." /></SelectTrigger>
+                                                                <SelectContent>{options.gpuTypes.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div><Label>GPU Cores</Label><Input type="number" value={formState.blades?.[0]?.gpuCores || ''} onChange={(e) => handleSymmetricBladeChange('gpuCores', Number(e.target.value))} /></div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                          {isBladeSelected && !formState.symmetric && (
@@ -343,6 +362,22 @@ export default function EditSpecificationPage() {
                                                                 <div><Label>Disk Type</Label><Select value={blade.diskType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
                                                                 <div><Label>Disk Capacity (GB)</Label><Input type="number" value={blade.diskCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'diskCapacity', Number(e.target.value))} /></div>
                                                             </div>
+                                                            <div className="flex items-center space-x-2 pt-2">
+                                                                <Checkbox id={`asymmetric-hasGpu-${index}`} checked={blade.hasGpu || false} onCheckedChange={(checked) => handleAsymmetricBladeChange(index, 'hasGpu', !!checked)} />
+                                                                <Label htmlFor={`asymmetric-hasGpu-${index}`}>Has GPU?</Label>
+                                                            </div>
+                                                            {blade.hasGpu && (
+                                                                <div className="grid grid-cols-2 gap-4">
+                                                                    <div>
+                                                                        <Label>GPU Type</Label>
+                                                                        <Select value={blade.gpuType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'gpuType', v)}>
+                                                                            <SelectTrigger><SelectValue placeholder="Select GPU..." /></SelectTrigger>
+                                                                            <SelectContent>{options.gpuTypes.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
+                                                                        </Select>
+                                                                    </div>
+                                                                    <div><Label>GPU Cores</Label><Input type="number" value={blade.gpuCores || ''} onChange={(e) => handleAsymmetricBladeChange(index, 'gpuCores', Number(e.target.value))} /></div>
+                                                                </div>
+                                                            )}
                                                             <div>
                                                                 <Label>Network Interfaces</Label>
                                                                 <div className="space-y-2 mt-1">
