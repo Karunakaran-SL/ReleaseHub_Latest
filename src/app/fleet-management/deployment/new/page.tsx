@@ -11,17 +11,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Loader2, ArrowRight, ArrowLeft, CheckCircle, Package } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { locations } from '@/lib/locations';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { cn } from '@/lib/utils';
 
 interface Hypervisor {
     _id: string;
     name: string;
 }
 
-type WizardData = Partial<Omit<Deployment, '_id' | 'createdBy' | 'createdAt' | 'status'>>;
+interface PlatformFoundation {
+    _id: string;
+    name: string;
+    specification?: {
+        _id: string;
+        id: string;
+        name: string;
+    };
+}
+
+type WizardData = Partial<Omit<Deployment, '_id' | 'createdBy' | 'createdAt' | 'status' | 'foundationComponentIds'>> & {
+    foundationId?: string;
+    foundationComponentIds?: string[];
+};
 
 export default function NewDeploymentWizardPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -37,7 +51,7 @@ export default function NewDeploymentWizardPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [specifications, setSpecifications] = useState<Specification[]>([]);
     const [hypervisors, setHypervisors] = useState<Hypervisor[]>([]);
-    const [allComponents, setAllComponents] = useState<CmdbComponent[]>([]);
+    const [platformFoundations, setPlatformFoundations] = useState<PlatformFoundation[]>([]);
 
     // State for cascading location dropdowns
     const [selectedRegion, setSelectedRegion] = useState('');
@@ -46,24 +60,23 @@ export default function NewDeploymentWizardPage() {
     const countriesInRegion = locations.find(r => r.name === selectedRegion)?.countries || [];
     const zonesInCountry = countriesInRegion.find(c => c.name === selectedCountry)?.zones || [];
 
-
     useEffect(() => {
         getUser().then(setUser);
         async function fetchInitialData() {
             try {
-                const [productsRes, specsRes, hypervisorsRes, componentsRes] = await Promise.all([
+                const [productsRes, specsRes, hypervisorsRes, foundationsRes] = await Promise.all([
                     fetch('/api/products'),
                     fetch('/api/specifications'),
                     fetch('/api/settings/specifications/hypervisors'),
-                    fetch('/api/cmdb/components')
+                    fetch('/api/platform-foundations')
                 ]);
-                if (!productsRes.ok || !specsRes.ok || !hypervisorsRes.ok || !componentsRes.ok) {
+                if (!productsRes.ok || !specsRes.ok || !hypervisorsRes.ok || !foundationsRes.ok) {
                     throw new Error('Failed to fetch initial data.');
                 }
                 setProducts(await productsRes.json());
                 setSpecifications(await specsRes.json());
                 setHypervisors(await hypervisorsRes.json());
-                setAllComponents(await componentsRes.json());
+                setPlatformFoundations(await foundationsRes.json());
 
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -88,7 +101,7 @@ export default function NewDeploymentWizardPage() {
         }));
     };
     
-    const handleSelectChange = (field: 'productId' | 'specificationId' | 'hypervisorId' | 'details.region' | 'details.country' | 'details.availabilityZone', value: string) => {
+    const handleSelectChange = (field: 'productId' | 'specificationId' | 'hypervisorId' | 'details.region' | 'details.country' | 'details.availabilityZone' | 'foundationId', value: string) => {
         if (field.startsWith('details.')) {
             const detailField = field.split('.')[1];
             setWizardData(p => ({ ...p, details: { ...p.details, [detailField]: value } as any }));
@@ -104,6 +117,11 @@ export default function NewDeploymentWizardPage() {
             }
         } else {
             setWizardData(p => ({ ...p, [field]: value }));
+            if (field === 'foundationId') {
+                 const selectedFoundation = platformFoundations.find(f => f._id === value);
+                 const foundationComponents = (selectedFoundation as any)?.kubernetes?.workerNodes?.map((n:any) => n.label) || [];
+                 setWizardData(p => ({ ...p, foundationComponentIds: foundationComponents }));
+            }
         }
     };
 
@@ -111,7 +129,7 @@ export default function NewDeploymentWizardPage() {
         switch (step) {
             case 1: return !wizardData.productId || !wizardData.specificationId;
             case 2: return !wizardData.hypervisorId;
-            case 3: return !wizardData.foundationComponentIds || wizardData.foundationComponentIds.length === 0;
+            case 3: return !wizardData.foundationId;
             case 4: return false; // Optional fields
             case 5: return !wizardData.details?.deploymentId || !wizardData.details?.customer;
             default: return false;
@@ -135,10 +153,13 @@ export default function NewDeploymentWizardPage() {
     const handleSubmit = async () => {
         setLoading(true);
         try {
+            // foundationId is internal to the wizard, we need to extract componentIds from it
+            const { foundationId, ...payload } = wizardData;
+
             const response = await fetch('/api/deployments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(wizardData),
+                body: JSON.stringify(payload),
             });
             
             if (!response.ok) {
@@ -192,21 +213,25 @@ export default function NewDeploymentWizardPage() {
                     </div>
                 );
             case 3:
+                const filteredFoundations = platformFoundations.filter(f => f.specification?.id === wizardData.specificationId || f.specification?._id === wizardData.specificationId);
                 return (
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                         <Label>Select Default Platform Foundation</Label>
-                        <p className="text-sm text-muted-foreground">Select the foundational components for this deployment.</p>
-                        <MultiSelectListBox
-                            available={allComponents.filter(c => !(wizardData.foundationComponentIds || []).includes(c._id)).map(c => ({ id: c._id, label: c.name }))}
-                            chosen={(wizardData.foundationComponentIds || []).map(id => {
-                                const comp = allComponents.find(c => c._id === id);
-                                return { id: id, label: comp?.name || id };
-                            })}
-                            onMoveToChosen={(ids) => setWizardData(p => ({ ...p, foundationComponentIds: [...(p.foundationComponentIds || []), ...ids] }))}
-                            onMoveToAvailable={(ids) => setWizardData(p => ({...p, foundationComponentIds: (p.foundationComponentIds || []).filter(id => !ids.includes(id)) }))}
-                            onMoveAllToChosen={() => setWizardData(p => ({...p, foundationComponentIds: allComponents.map(c => c._id)}))}
-                            onMoveAllToAvailable={() => setWizardData(p => ({...p, foundationComponentIds: []}))}
-                        />
+                        <p className="text-sm text-muted-foreground">Select one foundational configuration for this deployment.</p>
+                        <RadioGroup value={wizardData.foundationId} onValueChange={(v) => handleSelectChange('foundationId', v)} className="space-y-2">
+                            {filteredFoundations.length > 0 ? (
+                                filteredFoundations.map(foundation => (
+                                    <Label key={foundation._id} htmlFor={foundation._id} className={cn("flex items-center gap-4 border rounded-md p-4 cursor-pointer hover:bg-accent", {
+                                        'bg-accent border-primary': wizardData.foundationId === foundation._id
+                                    })}>
+                                        <RadioGroupItem value={foundation._id} id={foundation._id} />
+                                        <span>{foundation.name}</span>
+                                    </Label>
+                                ))
+                            ) : (
+                                <p className="text-center text-muted-foreground p-4">No compatible platform foundations found for the selected specification.</p>
+                            )}
+                        </RadioGroup>
                     </div>
                 );
             case 4:
@@ -272,17 +297,17 @@ export default function NewDeploymentWizardPage() {
                 const product = products.find(p => p._id === wizardData.productId);
                 const spec = specifications.find(s => s._id === wizardData.specificationId);
                 const hypervisor = hypervisors.find(h => h._id === wizardData.hypervisorId);
-                const components = (wizardData.foundationComponentIds || []).map(id => allComponents.find(c => c._id === id)?.name).filter(Boolean);
+                const foundation = platformFoundations.find(f => f._id === wizardData.foundationId);
                 return (
                     <div className="space-y-6 text-sm">
                         <h3 className="text-lg font-semibold">Please review your selections:</h3>
                         <div><strong className="w-32 inline-block">Product:</strong> {product?.name} (v{product?.version})</div>
                         <div><strong className="w-32 inline-block">Specification:</strong> {spec?.name}</div>
                         <div><strong className="w-32 inline-block">Hypervisor:</strong> {hypervisor?.name}</div>
+                        <div><strong className="w-32 inline-block">Foundation:</strong> {foundation?.name}</div>
                         <div><strong className="w-32 inline-block">Deployment ID:</strong> {wizardData.details?.deploymentId}</div>
                         <div><strong className="w-32 inline-block">Customer:</strong> {wizardData.details?.customer}</div>
                         <div><strong className="w-32 inline-block">Location:</strong> {`${wizardData.details?.region || ''} / ${wizardData.details?.country || ''} / ${wizardData.details?.availabilityZone || ''}`}</div>
-                        <div><strong className="w-32 inline-block">Foundation:</strong> {components.join(', ')}</div>
                     </div>
                 );
             case 7:

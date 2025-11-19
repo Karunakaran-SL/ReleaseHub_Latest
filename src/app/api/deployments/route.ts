@@ -9,6 +9,7 @@ const DeploymentSchema = z.object({
   productId: z.string().min(1),
   specificationId: z.string().min(1),
   hypervisorId: z.string().min(1),
+  foundationId: z.string().optional(),
   foundationComponentIds: z.array(z.string()).min(1),
   security: z.object({
     encryptionKey: z.string().optional().nullable(),

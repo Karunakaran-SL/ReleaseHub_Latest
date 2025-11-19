@@ -345,7 +345,8 @@ export type Deployment = {
     productId: string;
     specificationId: string;
     hypervisorId: string;
-    foundationComponentIds: string[];
+    foundationId?: string; // This will hold the ID of the chosen Platform Foundation
+    foundationComponentIds: string[]; // This will be derived from the foundation
     security: {
         encryptionKey?: string;
         signingCert?: string;
