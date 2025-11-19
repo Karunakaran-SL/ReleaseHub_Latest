@@ -213,7 +213,7 @@ export default function NewDeploymentWizardPage() {
                     </div>
                 );
             case 3:
-                const filteredFoundations = platformFoundations.filter(f => f.specification?.id === wizardData.specificationId || f.specification?._id === wizardData.specificationId);
+                const filteredFoundations = platformFoundations.filter(f => f.specification?._id === wizardData.specificationId);
                 return (
                     <div className="space-y-4">
                         <Label>Select Default Platform Foundation</Label>
