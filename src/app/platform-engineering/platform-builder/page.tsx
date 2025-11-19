@@ -14,12 +14,14 @@ import Step2VmConfig from './_components/step2-vm-config';
 import Step3Kubernetes from './_components/step3-kubernetes';
 import Step4Summary from './_components/step4-summary';
 import { VisualBuilder } from './_components/visual-builder';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export default function PlatformBuilderPage() {
     const [user, setUser] = useState<User | null>(null);
     const [step, setStep] = useState(1);
     const [platformFoundation, setPlatformFoundation] = useState<any>({
-        name: "New Platform Foundation",
+        name: `New Platform ${new Date().toISOString().slice(0, 10)}`,
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
@@ -49,7 +51,8 @@ export default function PlatformBuilderPage() {
                 throw new Error(error.message || 'Failed to save platform foundation.');
             }
             toast({ title: 'Success', description: 'Platform Foundation saved successfully.' });
-            router.push('/platform-engineering/platform-builder'); // Or a list page
+            router.push('/platform-engineering/platform-foundations');
+            router.refresh();
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error', description: error.message });
         } finally {
@@ -77,7 +80,13 @@ export default function PlatformBuilderPage() {
             case 1:
                 return !platformFoundation.specification;
             case 2:
-                return !platformFoundation.virtual_machines || platformFoundation.virtual_machines.length === 0;
+                const needsHypervisor = platformFoundation.specification?.hw_type?.name === 'Blade' && platformFoundation.hypervisor;
+                const isVirtual = platformFoundation.specification?.hw_type?.name === 'Virtual';
+                if (needsHypervisor) {
+                    return !platformFoundation.virtual_machines || platformFoundation.virtual_machines.length === 0;
+                }
+                if (isVirtual) return false;
+                return true; // For other physical types, we can't configure VMs yet.
             case 3:
                 return !platformFoundation.kubernetes?.distribution;
             default:
@@ -90,7 +99,10 @@ export default function PlatformBuilderPage() {
             <main className="flex-1 p-6 md:p-10 flex flex-col h-full">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold">Platform Builder</h1>
-                    <p className="text-muted-foreground">Construct your platform by defining its layers, from hardware to Kubernetes.</p>
+                    <div className="flex justify-between items-center">
+                        <p className="text-muted-foreground">Construct your platform by defining its layers, from hardware to Kubernetes.</p>
+                        <Button variant="outline" onClick={() => router.push('/platform-engineering/platform-foundations')}>View Foundations</Button>
+                    </div>
                 </div>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
@@ -101,6 +113,12 @@ export default function PlatformBuilderPage() {
                             }</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1">
+                            {step === 1 && (
+                                <div className="space-y-4 mb-6">
+                                    <Label htmlFor="foundation-name">Platform Foundation Name</Label>
+                                    <Input id="foundation-name" value={platformFoundation.name} onChange={(e) => updateFoundation({ name: e.target.value })}/>
+                                </div>
+                            )}
                             {renderStep()}
                         </CardContent>
                         <CardFooter className="flex justify-between">

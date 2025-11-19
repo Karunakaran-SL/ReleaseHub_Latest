@@ -312,9 +312,9 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/platform-engineering/platform-builder" isActive={pathname.startsWith('/platform-engineering/platform-builder')}>
-                             <Blocks className="mr-2"/> Platform Builder
+                          <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/platform-engineering/platform-foundations" isActive={pathname.startsWith('/platform-engineering/platform-foundations')}>
+                             <Blocks className="mr-2"/> Platform Foundations
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                          <SidebarMenuSubItem>
