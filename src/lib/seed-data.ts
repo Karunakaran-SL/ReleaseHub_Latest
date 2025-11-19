@@ -585,7 +585,39 @@ const initialApprovalConfigs = [
 const initialSpecVendors = [{ name: 'Dell EMC' }, { name: 'HPE' }, { name: 'Cisco' }, { name: 'Lenovo' }, { name: 'CNCF' }, { name: 'OpenID' }, { name: 'Apache' }, { name: 'Facebook' }, { name: 'Google' }, { name: 'OASIS' }];
 const initialSpecHwTypes = [{ name: 'Rack' }, { name: 'Blade' }, { name: 'Virtual' }];
 const initialSpecHypervisors = [{ name: 'VMWare ESXi' }, { name: 'Microsoft Hyper-V' }, { name: 'KVM' }];
-const initialSpecNetworkCards = [{ name: 'Virtual NIC 10Gbps' }, { name: 'Intel X710' }, { name: 'Mellanox ConnectX-5' }];
+
+const initialSpecNetworkCards = [
+    { name: "Ethernet_1G_RJ45", type: "Ethernet", classification: { speed: "1Gbps", connector: "RJ-45" } },
+    { name: "Ethernet_10G_RJ45", type: "Ethernet", classification: { speed: "10Gbps", connector: "RJ-45" } },
+    { name: "Ethernet_10G_SFP+", type: "Ethernet", classification: { speed: "10Gbps", connector: "SFP+" } },
+    { name: "Ethernet_25G_SFP28", type: "Ethernet", classification: { speed: "25Gbps", connector: "SFP28" } },
+    { name: "Ethernet_40G_QSFP+", type: "Ethernet", classification: { speed: "40Gbps", connector: "QSFP+" } },
+    { name: "Ethernet_100G_QSFP28", type: "Ethernet", classification: { speed: "100Gbps", connector: "QSFP28" } },
+    { name: "FibreChannel_8Gb", type: "Fibre Channel", classification: { speed: "8Gbps" } },
+    { name: "FibreChannel_16Gb", type: "Fibre Channel", classification: { speed: "16Gbps" } },
+    { name: "FibreChannel_32Gb", type: "Fibre Channel", classification: { speed: "32Gbps" } },
+    { name: "InfiniBand_SDR_10Gb", type: "InfiniBand", classification: { speed: "10Gbps", mode: "SDR" } },
+    { name: "InfiniBand_DDR_20Gb", type: "InfiniBand", classification: { speed: "20Gbps", mode: "DDR" } },
+    { name: "InfiniBand_QDR_40Gb", type: "InfiniBand", classification: { speed: "40Gbps", mode: "QDR" } },
+    { name: "InfiniBand_FDR_56Gb", type: "InfiniBand", classification: { speed: "56Gbps", mode: "FDR" } },
+    { name: "InfiniBand_EDR_100Gb", type: "InfiniBand", classification: { speed: "100Gbps", mode: "EDR" } },
+    { name: "Wireless_WiFi5_802.11ac", type: "Wireless", classification: { standard: "802.11ac", generation: "Wi-Fi 5" } },
+    { name: "Wireless_WiFi6_802.11ax", type: "Wireless", classification: { standard: "802.11ax", generation: "Wi-Fi 6" } },
+    { name: "Wireless_WiFi7_802.11be", type: "Wireless", classification: { standard: "802.11be", generation: "Wi-Fi 7" } },
+    { name: "Virtual_VLAN_802.1Q", type: "Virtual", classification: { protocol: "802.1Q", description: "VLAN" } },
+    { name: "Virtual_VXLAN", type: "Virtual", classification: { protocol: "VXLAN" } },
+    { name: "Virtual_GRE_Tunnel", type: "Virtual", classification: { protocol: "GRE" } },
+    { name: "Virtual_IPsec_Tunnel", type: "Virtual", classification: { protocol: "IPsec" } },
+    { name: "Virtual_SDN_OpenvSwitch", type: "Virtual", classification: { platform: "Open vSwitch" } },
+    { name: "Virtual_SDN_VMwareNSX", type: "Virtual", classification: { platform: "VMware NSX" } },
+    { name: "Specialized_RoCE", type: "Specialized", classification: { protocol: "RDMA over Converged Ethernet" } },
+    { name: "Specialized_iSCSI", type: "Specialized", classification: { protocol: "iSCSI" } },
+    { name: "Specialized_NVMeoF", type: "Specialized", classification: { protocol: "NVMe over Fabrics" } },
+    { name: "Management_IPMI", type: "Management", classification: { protocol: "IPMI" } },
+    { name: "Management_Redfish", type: "Management", classification: { protocol: "Redfish" } },
+    { name: "Management_SerialConsole", type: "Management", classification: { protocol: "Serial" } }
+];
+
 const initialSpecPlugPowerCords = [{ name: 'Virtual Power' }, { name: 'NEMA 5-15P' }, { name: 'C13/C14' }];
 
 const initialSpecCpuTypes = [
@@ -677,7 +709,7 @@ const initialServiceContracts = [
 
 const fullSpecifications: Omit<Specification, '_id'>[] = [
     {
-        _id: "ArgoCDSyncSpec", name: 'ArgoCD Sync Spec', vendor: 'CNCF', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' }, total_cpu: 16, memory_gb: 64, storage_gb: 512, network_cards: [{id: 'VirtualNIC10Gbps', name: 'Virtual NIC 10Gbps'}], plug_power_cords: [{id: 'VirtualPower', name: 'Virtual Power'}],
+        _id: "ArgoCDSyncSpec", name: 'ArgoCD Sync Spec', vendor: 'CNCF', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' }, total_cpu: 16, memory_gb: 64, storage_gb: 512, network_cards: [{id: 'Virtual_VLAN_802.1Q', name: 'Virtual_VLAN_802.1Q'}], plug_power_cords: [{id: 'VirtualPower', name: 'Virtual Power'}],
         cpuArchitecture: "x86_64", virtualizationSupport: true, biosVersion: "2.3a", firmwareVersion: "4.1.0",
         networkTopology: { managementVLAN: "100", storageVLAN: "200", workloadVLAN: "300" },
         ipAddressPool: { management: "10.0.1.0/24", storage: "10.0.2.0/24", workload: "10.0.3.0/24" },
@@ -687,13 +719,13 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
         _id: "SingleSignOnSpec", name: 'Single Sign-On Spec', vendor: 'OpenID', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' }, total_cpu: 8, memory_gb: 32, storage_gb: 256
     },
     {
-        _id: 'DellPowerEdgeR760', name: 'Dell PowerEdge R760', vendor: 'Dell EMC', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, total_cpu: 64, memory_gb: 256, storage_gb: 4096, network_cards: [{id: 'IntelX710', name: 'Intel X710'}], plug_power_cords: [{id: 'C13C14', name: 'C13/C14'}]
+        _id: 'DellPowerEdgeR760', name: 'Dell PowerEdge R760', vendor: 'Dell EMC', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, total_cpu: 64, memory_gb: 256, storage_gb: 4096, network_cards: [{id: 'Ethernet_10G_SFP+', name: 'Ethernet_10G_SFP+'}], plug_power_cords: [{id: 'C13/C14', name: 'C13/C14'}]
     },
     {
         _id: 'HPEProLiantDL380', name: 'HPE ProLiant DL380 Gen11', vendor: 'HPE', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_Foundation_Care', name: 'Foundation Care'}, total_cpu: 48, memory_gb: 192, storage_gb: 2048
     },
     {
-        _id: 'CiscoUCSB200M7', name: 'Cisco UCS B200 M7 Blade', vendor: 'Cisco', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, symmetric: true, bladeCount: 8, cpuType: 'Intel Xeon Platinum', memoryPerBlade: 128
+        _id: 'CiscoUCSB200M7', name: 'Cisco UCS B200 M7 Blade', vendor: 'Cisco', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, symmetric: true, bladeCount: 8, blades: [{ name: 'Blade Template', cpuType: 'Intel Xeon Scalable', memory: 128 }]
     },
     {
         _id: 'AsymmetricBladeServer', name: 'Asymmetric Blade Server', vendor: 'Lenovo', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, symmetric: false, blades: [
@@ -711,7 +743,7 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
       "blades": [
         {
           "name": "Blade 1",
-          "cpuType": "3",
+          "cpuType": "Intel Xeon E-series",
           "cpuCores": 3,
           "memory": 3,
           "diskType": "SSD_SATA_2.5inch",

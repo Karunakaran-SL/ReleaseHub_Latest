@@ -368,7 +368,10 @@ export default function SpecificationBuilderPage() {
                                             {Array.isArray(formData.blades?.[0]?.networkInterfaces) && formData.blades[0].networkInterfaces.map((iface: any, ifaceIndex: number) => (
                                                 <div key={ifaceIndex} className="grid grid-cols-4 gap-2 items-center">
                                                     <Input placeholder="Name" value={iface.name} onChange={e => handleBladeNetworkInterfaceChange(0, ifaceIndex, 'name', e.target.value, true)} />
-                                                    <Input placeholder="Type" value={iface.type} onChange={e => handleBladeNetworkInterfaceChange(0, ifaceIndex, 'type', e.target.value, true)} />
+                                                    <Select value={iface.type} onValueChange={(v) => handleBladeNetworkInterfaceChange(0, ifaceIndex, 'type', v, true)}>
+                                                        <SelectTrigger><SelectValue placeholder="Select Type..."/></SelectTrigger>
+                                                        <SelectContent>{options.networkCards.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
+                                                    </Select>
                                                     <Input placeholder="Speed" value={iface.speed} onChange={e => handleBladeNetworkInterfaceChange(0, ifaceIndex, 'speed', e.target.value, true)} />
                                                     <Button variant="ghost" size="icon" onClick={() => removeBladeNetworkInterface(0, ifaceIndex, true)} type="button"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                                                 </div>
@@ -411,7 +414,10 @@ export default function SpecificationBuilderPage() {
                                                 {(blade.networkInterfaces || []).map((iface: any, ifaceIndex: number) => (
                                                     <div key={ifaceIndex} className="grid grid-cols-4 gap-2 items-center">
                                                         <Input placeholder="Name" value={iface.name} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'name', e.target.value, false)} />
-                                                        <Input placeholder="Type" value={iface.type} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'type', e.target.value, false)} />
+                                                         <Select value={iface.type} onValueChange={(v) => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'type', v, false)}>
+                                                            <SelectTrigger><SelectValue placeholder="Select Type..."/></SelectTrigger>
+                                                            <SelectContent>{options.networkCards.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
+                                                        </Select>
                                                         <Input placeholder="Speed" value={iface.speed} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'speed', e.target.value, false)} />
                                                         <Button variant="ghost" size="icon" onClick={() => removeBladeNetworkInterface(index, ifaceIndex, false)} type="button"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                                                     </div>

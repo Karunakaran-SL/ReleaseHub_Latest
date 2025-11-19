@@ -123,7 +123,7 @@ export default function EditSpecificationPage() {
         }
         
         const list = listMap[field as string];
-        const selectedOption = list.find(opt => opt._id === value);
+        const selectedOption = list.find(opt => opt._id === value || opt.name === value);
         
         if (field === 'vendor') {
             setFormState((prev: any) => ({...prev, vendor: value}));
@@ -396,7 +396,10 @@ export default function EditSpecificationPage() {
                                                                     {(blade.networkInterfaces || []).map((iface: any, ifaceIndex: number) => (
                                                                         <div key={ifaceIndex} className="grid grid-cols-4 gap-2 items-center">
                                                                             <Input placeholder="Name" value={iface.name} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'name', e.target.value)} />
-                                                                            <Input placeholder="Type" value={iface.type} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'type', e.target.value)} />
+                                                                            <Select value={iface.type} onValueChange={(v) => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'type', v)}>
+                                                                                <SelectTrigger><SelectValue placeholder="Select Type..."/></SelectTrigger>
+                                                                                <SelectContent>{options.networkCards.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
+                                                                            </Select>
                                                                             <Input placeholder="Speed" value={iface.speed} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'speed', e.target.value)} />
                                                                             <Button variant="ghost" size="icon" onClick={() => removeBladeNetworkInterface(index, ifaceIndex)} type="button"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                                                                         </div>
