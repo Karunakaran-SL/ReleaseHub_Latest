@@ -16,6 +16,8 @@ export default function SpecificationsSettingsPage() {
     const tables = [
         { title: 'HW Types', apiEndpoint: 'hw-types' },
         { title: 'Vendors', apiEndpoint: 'vendors' },
+        { title: 'CPU Types', apiEndpoint: 'cpu-types' },
+        { title: 'GPU Types', apiEndpoint: 'gpu-types' },
         { title: 'Plug/Power Cord Types', apiEndpoint: 'plug-power-cords' },
         { title: 'Network Card Types', apiEndpoint: 'network-cards' },
         { title: 'Hypervisors', apiEndpoint: 'hypervisors' },

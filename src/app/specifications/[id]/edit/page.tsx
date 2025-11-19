@@ -40,6 +40,7 @@ export default function EditSpecificationPage() {
         serviceContracts: [] as Option[],
         networkCards: [] as Option[],
         plugPowerCords: [] as Option[],
+        cpuTypes: [] as Option[],
     });
 
     useEffect(() => {
@@ -49,7 +50,7 @@ export default function EditSpecificationPage() {
         async function fetchData() {
             setLoading(true);
             try {
-                const [specRes, hwTypesRes, vendorsRes, hypervisorsRes, contractsRes, networkCardsRes, plugPowerCordsRes] = await Promise.all([
+                const [specRes, hwTypesRes, vendorsRes, hypervisorsRes, contractsRes, networkCardsRes, plugPowerCordsRes, cpuTypesRes] = await Promise.all([
                     fetch(`/api/specifications/${id}`),
                     fetch('/api/settings/specifications/hw-types'),
                     fetch('/api/settings/specifications/vendors'),
@@ -57,6 +58,7 @@ export default function EditSpecificationPage() {
                     fetch('/api/documents/service-contracts'),
                     fetch('/api/settings/specifications/network-cards'),
                     fetch('/api/settings/specifications/plug-power-cords'),
+                    fetch('/api/settings/specifications/cpu-types'),
                 ]);
 
                 if (!specRes.ok) throw new Error('Failed to fetch specification');
@@ -71,6 +73,7 @@ export default function EditSpecificationPage() {
                     serviceContracts: await contractsRes.json(),
                     networkCards: await networkCardsRes.json(),
                     plugPowerCords: await plugPowerCordsRes.json(),
+                    cpuTypes: await cpuTypesRes.json(),
                 });
 
             } catch (err: any) {
@@ -109,7 +112,8 @@ export default function EditSpecificationPage() {
             'hw_type': options.hwTypes,
             'vendor': options.vendors,
             'hypervisor': options.hypervisors,
-            'service_contract_type': options.serviceContracts
+            'service_contract_type': options.serviceContracts,
+            'cpuType': options.cpuTypes,
         }
         
         const list = listMap[field as string];
@@ -119,6 +123,8 @@ export default function EditSpecificationPage() {
             setFormState((prev: any) => ({...prev, vendor: value}));
         } else if (selectedOption) {
             setFormState((prev: any) => ({ ...prev, [field]: { id: selectedOption._id, name: selectedOption.name } }));
+        } else if (field === 'cpuType') { // For Blade CPU Type which is a string
+            setFormState((prev: any) => ({ ...prev, [field]: value }));
         }
     };
     
@@ -303,7 +309,13 @@ export default function EditSpecificationPage() {
                                         {isBladeSelected && formState.symmetric && (
                                             <div className="space-y-4 border p-4 rounded-md">
                                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                                    <div><Label>CPU Type</Label><Input value={formState.blades?.[0]?.cpuType || ''} onChange={e => handleSymmetricBladeChange('cpuType', e.target.value)} /></div>
+                                                    <div>
+                                                        <Label>CPU Type</Label>
+                                                        <Select value={formState.blades?.[0]?.cpuType} onValueChange={(v) => handleSymmetricBladeChange('cpuType', v)}>
+                                                            <SelectTrigger><SelectValue placeholder="Select CPU..."/></SelectTrigger>
+                                                            <SelectContent>{options.cpuTypes.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
+                                                        </Select>
+                                                    </div>
                                                     <div><Label>CPU Cores</Label><Input type="number" value={formState.blades?.[0]?.cpuCores || ''} onChange={e => handleSymmetricBladeChange('cpuCores', Number(e.target.value))} /></div>
                                                     <div><Label>Memory (GB)</Label><Input type="number" value={formState.blades?.[0]?.memory || ''} onChange={e => handleSymmetricBladeChange('memory', Number(e.target.value))} /></div>
                                                     <div><Label>Disk Type</Label><Select value={formState.blades?.[0]?.diskType} onValueChange={(v) => handleSymmetricBladeChange('diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
@@ -319,7 +331,13 @@ export default function EditSpecificationPage() {
                                                         <CardContent className="space-y-4">
                                                             <div><Label>Name</Label><Input value={blade.name} onChange={e => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>
                                                             <div className="grid grid-cols-2 gap-4">
-                                                                <div><Label>CPU Type</Label><Input value={blade.cpuType || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuType', e.target.value)} /></div>
+                                                                <div>
+                                                                    <Label>CPU Type</Label>
+                                                                    <Select value={blade.cpuType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'cpuType', v)}>
+                                                                        <SelectTrigger><SelectValue placeholder="Select CPU..."/></SelectTrigger>
+                                                                        <SelectContent>{options.cpuTypes.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
+                                                                    </Select>
+                                                                </div>
                                                                 <div><Label>CPU Cores</Label><Input type="number" value={blade.cpuCores || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuCores', Number(e.target.value))} /></div>
                                                                 <div><Label>Memory (GB)</Label><Input type="number" value={blade.memory || ''} onChange={e => handleAsymmetricBladeChange(index, 'memory', Number(e.target.value))} /></div>
                                                                 <div><Label>Disk Type</Label><Select value={blade.diskType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>

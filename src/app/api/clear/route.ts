@@ -20,7 +20,9 @@ const collectionsToClear = [
     'cmdb',
     'deployments',
     'licenses',
-    'product_licensing'
+    'product_licensing',
+    'specification_cpu_types',
+    'specification_gpu_types'
 ];
 
 export async function POST(req: NextRequest) {
