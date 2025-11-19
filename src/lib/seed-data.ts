@@ -1,4 +1,5 @@
 
+
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification } from './definitions';
@@ -584,7 +585,7 @@ const initialApprovalConfigs = [
 
 const initialSpecVendors = [{ name: 'Dell EMC' }, { name: 'HPE' }, { name: 'Cisco' }, { name: 'Lenovo' }, { name: 'CNCF' }, { name: 'OpenID' }, { name: 'Apache' }, { name: 'Facebook' }, { name: 'Google' }, { name: 'OASIS' }];
 const initialSpecHwTypes = [{ name: 'Rack' }, { name: 'Blade' }, { name: 'Virtual' }];
-const initialSpecHypervisors = [{ name: 'VMWare ESXi' }, { name: 'Microsoft Hyper-V' }, { name: 'KVM' }];
+const initialSpecHypervisors = [{ name: 'VMWare ESXi' }, { name: 'Microsoft Hyper-V' }, { name: 'KVM' }, { name: 'Harvester' }];
 
 const initialSpecNetworkCards = [
     { "name": "Ethernet_1G_RJ45", "type": "Ethernet", "classification": { "speed": "1Gbps", "connector": "RJ-45" } },
@@ -1023,9 +1024,45 @@ const initialProductLicensing: Omit<ProductLicensing, '_id'>[] = [
 ];
 
 const initialPlatformFoundations: any[] = [
+    ...initialSpecHypervisors.map(hypervisor => ({
+        _id: `DellR760-${hypervisor.name.replace(/[^a-zA-Z0-9]/g, '')}`,
+        name: `Dell R760 with ${hypervisor.name}`,
+        createdAt: new Date().toISOString(),
+        createdBy: 'seed',
+        specification: fullSpecifications.find(s => s.name === 'Dell PowerEdge R760'),
+        hypervisor: { id: hypervisor._id, name: hypervisor.name },
+        virtual_machines: [
+            ...Array.from({ length: 3 }, (_, i) => ({ vmName: `dell-cp-${i+1}`, role: 'Control Plane', cpuCores: 8, memory: 32, diskSize: 200, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_10G_SFP+', connectivity: 'Private', dns: 'dell.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }})),
+            ...Array.from({ length: 10 }, (_, i) => ({ vmName: `dell-w-${i+1}`, role: 'Worker', cpuCores: 16, memory: 64, diskSize: 500, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_10G_SFP+', connectivity: 'Private', dns: 'dell.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }})),
+        ],
+        kubernetes: {
+            distribution: 'rke2',
+            cniPlugin: 'cilium',
+            controlPlaneNodes: Array.from({ length: 3 }, (_, i) => ({ id: `dell-cp-${i+1}`, label: `dell-cp-${i+1}` })),
+            workerNodes: Array.from({ length: 10 }, (_, i) => ({ id: `dell-w-${i+1}`, label: `dell-w-${i+1}` })),
+        }
+    })),
+    ...initialSpecHypervisors.map(hypervisor => ({
+        _id: `CiscoBlade-${hypervisor.name.replace(/[^a-zA-Z0-9]/g, '')}`,
+        name: `Cisco Blade Cluster on ${hypervisor.name}`,
+        createdAt: new Date().toISOString(),
+        createdBy: 'seed',
+        specification: fullSpecifications.find(s => s.name === 'Cisco UCS B200 M7 Blade'),
+        hypervisor: { id: hypervisor._id, name: hypervisor.name },
+        virtual_machines: [
+            ...Array.from({ length: 3 }, (_, i) => ({ vmName: `cisco-cp-${i+1}`, role: 'Control Plane', cpuCores: 4, memory: 16, diskSize: 100, osType: 'RHEL 9', networkInterface: 'Ethernet_40G_QSFP+', connectivity: 'Private', dns: 'cisco.internal', ssh: { username: 'ec2-user', sshKey: 'ssh-rsa...' }})),
+            ...Array.from({ length: 5 }, (_, i) => ({ vmName: `cisco-w-${i+1}`, role: 'Worker', cpuCores: 8, memory: 32, diskSize: 200, osType: 'RHEL 9', networkInterface: 'Ethernet_40G_QSFP+', connectivity: 'Private', dns: 'cisco.internal', ssh: { username: 'ec2-user', sshKey: 'ssh-rsa...' }})),
+        ],
+        kubernetes: {
+            distribution: 'k3s',
+            cniPlugin: 'calico',
+            controlPlaneNodes: Array.from({ length: 3 }, (_, i) => ({ id: `cisco-cp-${i+1}`, label: `cisco-cp-${i+1}` })),
+            workerNodes: Array.from({ length: 5 }, (_, i) => ({ id: `cisco-w-${i+1}`, label: `cisco-w-${i+1}` })),
+        }
+    })),
     {
-        _id: 'argocd-virtual-foundation-1',
-        name: 'ArgoCD Virtual KVM Foundation',
+        _id: `ArgoCD-VirtualFoundation`,
+        name: `ArgoCD Virtual Foundation`,
         createdAt: new Date().toISOString(),
         createdBy: 'seed',
         specification: fullSpecifications.find(s => s.name === 'ArgoCD Sync Spec'),
@@ -1043,43 +1080,22 @@ const initialPlatformFoundations: any[] = [
         }
     },
     {
-        _id: 'dell-r760-vmware-foundation',
-        name: 'Dell R760 VMWare Cluster',
+        _id: `SSO-VirtualFoundation`,
+        name: `SSO Virtual Foundation`,
         createdAt: new Date().toISOString(),
         createdBy: 'seed',
-        specification: fullSpecifications.find(s => s.name === 'Dell PowerEdge R760'),
+        specification: fullSpecifications.find(s => s.name === 'Single Sign-On Spec'),
         hypervisor: { id: 'VMWare ESXi', name: 'VMWare ESXi' },
-        virtual_machines: [
-            ...Array.from({ length: 3 }, (_, i) => ({ vmName: `prod-cp-${i+1}`, role: 'Control Plane', cpuCores: 8, memory: 32, diskSize: 100, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_10G_SFP+', connectivity: 'Private', dns: 'prod.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }})),
-            ...Array.from({ length: 5 }, (_, i) => ({ vmName: `prod-w-${i+1}`, role: 'Worker', cpuCores: 16, memory: 64, diskSize: 250, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_10G_SFP+', connectivity: 'Private', dns: 'prod.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }})),
-        ],
-        kubernetes: {
-            distribution: 'rke2',
-            clusterCidr: '10.52.0.0/16',
-            serviceCidr: '10.53.0.0/16',
-            dnsDomain: 'prod.cluster.local',
-            cniPlugin: 'canal',
-            useCustomCerts: true,
-            controlPlaneNodes: Array.from({ length: 3 }, (_, i) => ({ id: `prod-cp-${i+1}`, label: `prod-cp-${i+1}` })),
-            workerNodes: Array.from({ length: 5 }, (_, i) => ({ id: `prod-w-${i+1}`, label: `prod-w-${i+1}` })),
-        }
-    },
-    {
-        _id: 'cisco-blade-k3s-foundation',
-        name: 'Cisco Blade K3s Edge Cluster',
-        createdAt: new Date().toISOString(),
-        createdBy: 'seed',
-        specification: fullSpecifications.find(s => s.name === 'Cisco UCS B200 M7 Blade'),
-        hypervisor: { id: 'KVM', name: 'KVM' },
-        virtual_machines: [
-            { vmName: `edge-master-1`, role: 'Control Plane', cpuCores: 4, memory: 8, diskSize: 60, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_40G_QSFP+', connectivity: 'Private', dns: 'edge.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }},
-            ...Array.from({ length: 2 }, (_, i) => ({ vmName: `edge-worker-${i+1}`, role: 'Worker', cpuCores: 8, memory: 16, diskSize: 100, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_40G_QSFP+', connectivity: 'Private', dns: 'edge.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }})),
-        ],
+        virtual_machines: fullSpecifications.find(s => s.name === 'Single Sign-On Spec')?.nodes,
         kubernetes: {
             distribution: 'k3s',
-            cniPlugin: 'flannel',
-            controlPlaneNodes: [{ id: 'edge-master-1', label: 'edge-master-1' }],
-            workerNodes: Array.from({ length: 2 }, (_, i) => ({ id: `edge-worker-${i+1}`, label: `edge-worker-${i+1}` })),
+            clusterCidr: '10.62.0.0/16',
+            serviceCidr: '10.63.0.0/16',
+            dnsDomain: 'sso.cluster.local',
+            cniPlugin: 'calico',
+            useCustomCerts: true,
+            controlPlaneNodes: fullSpecifications.find(s => s.name === 'Single Sign-On Spec')?.nodes?.filter(n => n.role === 'Control Plane').map(n => ({ id: n.vmName, label: n.vmName })),
+            workerNodes: fullSpecifications.find(s => s.name === 'Single Sign-On Spec')?.nodes?.filter(n => n.role === 'Worker').map(n => ({ id: n.vmName, label: n.vmName })),
         }
     }
 ];
