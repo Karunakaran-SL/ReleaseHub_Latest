@@ -117,7 +117,7 @@ export function DependencyDialog({ onAddDependencies }: { onAddDependencies: (de
                     <DialogDescription>Select the capabilities and services your project needs.</DialogDescription>
                 </DialogHeader>
                 <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 flex-1 min-h-0">
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4 min-h-0">
                         <Input placeholder="Search dependencies..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                         <ScrollArea className="flex-1 border rounded-md">
                             <div className="p-4 space-y-4">
