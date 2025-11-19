@@ -7,7 +7,7 @@ import type { User, Specification, VirtualNode } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Package, Copy, Check, FileJson, Server, HardDrive, Cpu, MemoryStick } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Package, Copy, Check, FileJson, Server, Monitor } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';

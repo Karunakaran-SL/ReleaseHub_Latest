@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -9,14 +10,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, Specification } from '@/lib/definitions';
+import type { User, Specification, VirtualNode } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { PlusCircle, Trash2, Loader2, Server, Cpu, MemoryStick, Database, Zap } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, Server, Monitor } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 import { DiagramDisplay } from '../../_components/diagram-display';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface Option {
     _id: string;
@@ -112,25 +114,60 @@ export default function EditSpecificationPage() {
         const { id, value, type } = e.target;
         setFormState(prev => ({ ...prev, [id]: type === 'number' ? Number(value) : value }));
     };
+
+    const handleNodeCountChange = (role: 'controlPlane' | 'worker', count: number) => {
+        const newCount = Math.max(0, count);
+        const newTotal = role === 'controlPlane' ? newCount + (formState.nodeCount?.worker || 0) : (formState.nodeCount?.controlPlane || 0) + newCount;
+        
+        const currentNodes = formState.nodes || [];
+        const newNodes: VirtualNode[] = Array.from({ length: newTotal }).map((_, i) => {
+            if (currentNodes[i]) return currentNodes[i];
+            const isControlPlane = i < (role === 'controlPlane' ? newCount : (formState.nodeCount?.controlPlane || 0));
+            return {
+                vmName: `${isControlPlane ? 'cp' : 'w'}-${i+1}`,
+                role: isControlPlane ? 'Control Plane' : 'Worker',
+                cpuCores: 0, memory: 0, diskSize: 0, osType: 'Ubuntu 22.04',
+                networkInterface: '', connectivity: 'Private', dns: '', ssh: {username: 'admin', sshKey: ''}
+            }
+        });
+
+        setFormState((prev: any) => ({
+            ...prev,
+            nodeCount: {
+                ...prev.nodeCount,
+                [role]: newCount,
+            },
+            nodes: newNodes.slice(0, newTotal),
+        }));
+    };
+    
+    const handleNodeChange = (index: number, field: string, value: any) => {
+        const newNodes = [...(formState.nodes || [])];
+        if (field.startsWith('ssh.')) {
+            const sshField = field.split('.')[1];
+            newNodes[index] = { ...newNodes[index], ssh: { ...newNodes[index].ssh, [sshField]: value } };
+        } else {
+            newNodes[index] = { ...newNodes[index], [field]: value } as VirtualNode;
+        }
+        setFormState((prev: any) => ({...prev, nodes: newNodes}));
+    };
     
     const handleSelectChange = (field: keyof Specification | string, value: string) => {
         const listMap: Record<string, Option[]> = {
             'hw_type': options.hwTypes,
-            'vendor': options.vendors,
             'hypervisor': options.hypervisors,
             'service_contract_type': options.serviceContracts,
             'cpuType': options.cpuTypes,
         }
         
-        const list = listMap[field as string];
-        const selectedOption = list.find(opt => opt._id === value || opt.name === value);
-        
         if (field === 'vendor') {
             setFormState((prev: any) => ({...prev, vendor: value}));
-        } else if (selectedOption) {
-            setFormState((prev: any) => ({ ...prev, [field]: { id: selectedOption._id, name: selectedOption.name } }));
-        } else if (field === 'cpuType') { // For Blade CPU Type which is a string
-            setFormState((prev: any) => ({ ...prev, [field]: value }));
+        } else if (listMap[field as string]) {
+            const list = listMap[field as string];
+            const selectedOption = list.find(opt => opt._id === value || opt.name === value);
+            if (selectedOption) {
+                setFormState((prev: any) => ({ ...prev, [field]: { id: selectedOption._id, name: selectedOption.name } }));
+            }
         }
     };
     
@@ -234,6 +271,10 @@ export default function EditSpecificationPage() {
     const isBladeSelected = useMemo(() => {
         return formState.hw_type?.name === 'Blade';
     }, [formState.hw_type]);
+
+    const isVirtualSelected = useMemo(() => {
+        return formState.hw_type?.name === 'Virtual';
+    }, [formState.hw_type]);
     
     if (loading) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
@@ -295,6 +336,52 @@ export default function EditSpecificationPage() {
                                 <div className="space-y-4">
                                      <div className="space-y-4">
                                         <h3 className="font-semibold text-lg">Hardware Specification</h3>
+                                        {isVirtualSelected && (
+                                            <div className="space-y-4 p-4 border rounded-md">
+                                                <h4 className="font-semibold">Cluster Basics</h4>
+                                                <div className="space-y-2"><Label htmlFor="clusterName">Cluster Name</Label><Input id="clusterName" value={formState.clusterName || ''} onChange={handleInputChange}/></div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div><Label>Control Plane Nodes</Label><Input type="number" min="0" value={formState.nodeCount?.controlPlane || 0} onChange={(e) => handleNodeCountChange('controlPlane', Number(e.target.value))} /></div>
+                                                    <div><Label>Worker Nodes</Label><Input type="number" min="0" value={formState.nodeCount?.worker || 0} onChange={(e) => handleNodeCountChange('worker', Number(e.target.value))} /></div>
+                                                </div>
+                                                {(formState.nodes || []).map((node: VirtualNode, index: number) => (
+                                                    <Accordion type="single" collapsible key={index}>
+                                                        <AccordionItem value={`node-${index}`}>
+                                                            <AccordionTrigger>
+                                                                <div className="flex items-center gap-2">
+                                                                    {node.role === 'Control Plane' ? <Monitor className="h-5 w-5 text-blue-500" /> : <Server className="h-5 w-5 text-green-600" />}
+                                                                    <span>{node.vmName || `${node.role} ${index + 1}`}</span>
+                                                                </div>
+                                                            </AccordionTrigger>
+                                                            <AccordionContent className="p-4 space-y-4">
+                                                                <div><Label>VM Name</Label><Input value={node.vmName} onChange={(e) => handleNodeChange(index, 'vmName', e.target.value)} /></div>
+                                                                <div className="grid grid-cols-3 gap-2">
+                                                                    <div><Label>CPU Cores</Label><Input type="number" value={node.cpuCores} onChange={(e) => handleNodeChange(index, 'cpuCores', Number(e.target.value))} /></div>
+                                                                    <div><Label>Memory (GB)</Label><Input type="number" value={node.memory} onChange={(e) => handleNodeChange(index, 'memory', Number(e.target.value))} /></div>
+                                                                    <div><Label>Disk (GB)</Label><Input type="number" value={node.diskSize} onChange={(e) => handleNodeChange(index, 'diskSize', Number(e.target.value))} /></div>
+                                                                </div>
+                                                                <div><Label>OS Type & Version</Label><Input value={node.osType} onChange={(e) => handleNodeChange(index, 'osType', e.target.value)} /></div>
+                                                                <div><Label>Network Interface</Label>
+                                                                    <Select value={node.networkInterface} onValueChange={(v) => handleNodeChange(index, 'networkInterface', v)}>
+                                                                        <SelectTrigger><SelectValue placeholder="Select network type..." /></SelectTrigger>
+                                                                        <SelectContent>{options.networkCards.map(nc => <SelectItem key={nc._id} value={nc.name}>{nc.name}</SelectItem>)}</SelectContent>
+                                                                    </Select>
+                                                                </div>
+                                                                <div><Label>Connectivity</Label>
+                                                                    <RadioGroup value={node.connectivity} onValueChange={(v) => handleNodeChange(index, 'connectivity', v)} className="flex gap-4">
+                                                                        <div className="flex items-center space-x-2"><RadioGroupItem value="Private" id={`private-${index}`} /><Label htmlFor={`private-${index}`}>Private IP</Label></div>
+                                                                        <div className="flex items-center space-x-2"><RadioGroupItem value="Public" id={`public-${index}`} /><Label htmlFor={`public-${index}`}>Public IP</Label></div>
+                                                                    </RadioGroup>
+                                                                </div>
+                                                                <div><Label>DNS Settings</Label><Input value={node.dns} onChange={(e) => handleNodeChange(index, 'dns', e.target.value)} /></div>
+                                                                <div><Label>SSH Username</Label><Input value={node.ssh.username} onChange={(e) => handleNodeChange(index, 'ssh.username', e.target.value)} /></div>
+                                                                <div><Label>SSH Public Key</Label><Textarea value={node.ssh.sshKey} onChange={(e) => handleNodeChange(index, 'ssh.sshKey', e.target.value)} /></div>
+                                                            </AccordionContent>
+                                                        </AccordionItem>
+                                                    </Accordion>
+                                                ))}
+                                            </div>
+                                        )}
                                         {isBladeSelected ? (
                                              <div className="space-y-4">
                                                 <RadioGroup onValueChange={(v) => setFormState(p => ({...p, symmetric: v === 'true'}))} value={String(formState.symmetric)} className="mt-2 space-y-1">
@@ -310,107 +397,6 @@ export default function EditSpecificationPage() {
                                                 <div><Label htmlFor="memory_gb">Memory (GB) *</Label><Input id="memory_gb" type="number" value={formState.memory_gb || ''} onChange={handleInputChange} required /></div>
                                                 <div><Label htmlFor="storage_gb">Total Storage (GB) *</Label><Input id="storage_gb" type="number" value={formState.storage_gb || ''} onChange={handleInputChange} required /></div>
                                              </div>
-                                        )}
-                                        {isBladeSelected && formState.symmetric && (
-                                            <div className="space-y-4 border p-4 rounded-md">
-                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                                    <div>
-                                                        <Label>CPU Type</Label>
-                                                        <Select value={formState.blades?.[0]?.cpuType} onValueChange={(v) => handleSymmetricBladeChange('cpuType', v)}>
-                                                            <SelectTrigger><SelectValue placeholder="Select CPU..."/></SelectTrigger>
-                                                            <SelectContent>{options.cpuTypes.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
-                                                        </Select>
-                                                    </div>
-                                                    <div><Label>CPU Cores</Label><Input type="number" value={formState.blades?.[0]?.cpuCores || ''} onChange={e => handleSymmetricBladeChange('cpuCores', Number(e.target.value))} /></div>
-                                                    <div><Label>Memory (GB)</Label><Input type="number" value={formState.blades?.[0]?.memory || ''} onChange={e => handleSymmetricBladeChange('memory', Number(e.target.value))} /></div>
-                                                    <div><Label>Disk Type</Label>
-                                                        <Select value={formState.blades?.[0]?.diskType} onValueChange={(v) => handleSymmetricBladeChange('diskType', v)}>
-                                                            <SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger>
-                                                            <SelectContent>{options.diskTypes.map(d => <SelectItem key={d._id} value={d.name}>{d.name}</SelectItem>)}</SelectContent>
-                                                        </Select>
-                                                    </div>
-                                                    <div><Label>Disk Capacity (GB)</Label><Input type="number" value={formState.blades?.[0]?.diskCapacity || ''} onChange={e => handleSymmetricBladeChange('diskCapacity', Number(e.target.value))} /></div>
-                                                </div>
-                                                <div className="flex items-center space-x-2 pt-2">
-                                                    <Checkbox id="symmetric-hasGpu" checked={formState.blades?.[0]?.hasGpu || false} onCheckedChange={(checked) => handleSymmetricBladeChange('hasGpu', !!checked)} />
-                                                    <Label htmlFor="symmetric-hasGpu">Has GPU?</Label>
-                                                </div>
-                                                {formState.blades?.[0]?.hasGpu && (
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div>
-                                                            <Label>GPU Type</Label>
-                                                            <Select value={formState.blades?.[0]?.gpuType} onValueChange={(v) => handleSymmetricBladeChange('gpuType', v)}>
-                                                                <SelectTrigger><SelectValue placeholder="Select GPU..." /></SelectTrigger>
-                                                                <SelectContent>{options.gpuTypes.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
-                                                            </Select>
-                                                        </div>
-                                                        <div><Label>GPU Cores</Label><Input type="number" value={formState.blades?.[0]?.gpuCores || ''} onChange={(e) => handleSymmetricBladeChange('gpuCores', Number(e.target.value))} /></div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                         {isBladeSelected && !formState.symmetric && (
-                                            <div className="space-y-4 border p-4 rounded-md">
-                                                {(formState.blades || []).map((blade: any, index: number) => (
-                                                    <Card key={index}>
-                                                        <CardHeader><CardTitle>Blade {index + 1}</CardTitle></CardHeader>
-                                                        <CardContent className="space-y-4">
-                                                            <div><Label>Name</Label><Input value={blade.name} onChange={e => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>
-                                                            <div className="grid grid-cols-2 gap-4">
-                                                                <div>
-                                                                    <Label>CPU Type</Label>
-                                                                    <Select value={blade.cpuType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'cpuType', v)}>
-                                                                        <SelectTrigger><SelectValue placeholder="Select CPU..."/></SelectTrigger>
-                                                                        <SelectContent>{options.cpuTypes.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
-                                                                    </Select>
-                                                                </div>
-                                                                <div><Label>CPU Cores</Label><Input type="number" value={blade.cpuCores || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuCores', Number(e.target.value))} /></div>
-                                                                <div><Label>Memory (GB)</Label><Input type="number" value={blade.memory || ''} onChange={e => handleAsymmetricBladeChange(index, 'memory', Number(e.target.value))} /></div>
-                                                                <div><Label>Disk Type</Label>
-                                                                    <Select value={blade.diskType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'diskType', v)}>
-                                                                        <SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger>
-                                                                        <SelectContent>{options.diskTypes.map(d => <SelectItem key={d._id} value={d.name}>{d.name}</SelectItem>)}</SelectContent>
-                                                                    </Select>
-                                                                </div>
-                                                                <div><Label>Disk Capacity (GB)</Label><Input type="number" value={blade.diskCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'diskCapacity', Number(e.target.value))} /></div>
-                                                            </div>
-                                                            <div className="flex items-center space-x-2 pt-2">
-                                                                <Checkbox id={`asymmetric-hasGpu-${index}`} checked={blade.hasGpu || false} onCheckedChange={(checked) => handleAsymmetricBladeChange(index, 'hasGpu', !!checked)} />
-                                                                <Label htmlFor={`asymmetric-hasGpu-${index}`}>Has GPU?</Label>
-                                                            </div>
-                                                            {blade.hasGpu && (
-                                                                <div className="grid grid-cols-2 gap-4">
-                                                                    <div>
-                                                                        <Label>GPU Type</Label>
-                                                                        <Select value={blade.gpuType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'gpuType', v)}>
-                                                                            <SelectTrigger><SelectValue placeholder="Select GPU..." /></SelectTrigger>
-                                                                            <SelectContent>{options.gpuTypes.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
-                                                                        </Select>
-                                                                    </div>
-                                                                    <div><Label>GPU Cores</Label><Input type="number" value={blade.gpuCores || ''} onChange={(e) => handleAsymmetricBladeChange(index, 'gpuCores', Number(e.target.value))} /></div>
-                                                                </div>
-                                                            )}
-                                                            <div>
-                                                                <Label>Network Interfaces</Label>
-                                                                <div className="space-y-2 mt-1">
-                                                                    {(blade.networkInterfaces || []).map((iface: any, ifaceIndex: number) => (
-                                                                        <div key={ifaceIndex} className="grid grid-cols-4 gap-2 items-center">
-                                                                            <Input placeholder="Name" value={iface.name} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'name', e.target.value)} />
-                                                                            <Select value={iface.type} onValueChange={(v) => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'type', v)}>
-                                                                                <SelectTrigger><SelectValue placeholder="Select Type..."/></SelectTrigger>
-                                                                                <SelectContent>{options.networkCards.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent>
-                                                                            </Select>
-                                                                            <Input placeholder="Speed" value={iface.speed} onChange={e => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'speed', e.target.value)} />
-                                                                            <Button variant="ghost" size="icon" onClick={() => removeBladeNetworkInterface(index, ifaceIndex)} type="button"><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                                                                        </div>
-                                                                    ))}
-                                                                    <Button variant="outline" size="sm" onClick={() => addBladeNetworkInterface(index)} type="button">Add Interface</Button>
-                                                                </div>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                ))}
-                                            </div>
                                         )}
                                     </div>
                                     <h3 className="font-semibold text-lg">Connectivity</h3>
