@@ -16,13 +16,32 @@ const BladeSchema = z.object({
   cpuType: z.string().optional(),
   cpuCores: z.number().optional(),
   memory: z.number().optional(),
-  diskType: z.enum(['SSD', 'HDD']).optional(),
+  diskType: z.string().optional(),
   diskCapacity: z.number().optional(),
+  hasGpu: z.boolean().optional(),
+  gpuType: z.string().optional(),
+  gpuCores: z.number().optional(),
   networkInterfaces: z.array(z.object({
       name: z.string(),
       type: z.string(),
       speed: z.string(),
   })).optional(),
+});
+
+const VirtualNodeSchema = z.object({
+    vmName: z.string(),
+    role: z.enum(['Control Plane', 'Worker']),
+    cpuCores: z.number(),
+    memory: z.number(),
+    diskSize: z.number(),
+    osType: z.string(),
+    networkInterface: z.string(),
+    connectivity: z.enum(['Public', 'Private']),
+    dns: z.string(),
+    ssh: z.object({
+        username: z.string(),
+        sshKey: z.string(),
+    }),
 });
 
 const SpecificationUpdateSchema = z.object({
@@ -34,18 +53,25 @@ const SpecificationUpdateSchema = z.object({
   contact_point_email: z.string().email().optional().nullable(),
   contact_point_phone: z.string().optional().nullable(),
   custom_fields: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
+  
+  // Virtual Cluster Fields
+  clusterName: z.string().optional(),
+  nodeCount: z.object({
+      controlPlane: z.number().optional(),
+      worker: z.number().optional(),
+  }).optional(),
+  nodes: z.array(VirtualNodeSchema).optional(),
+
+  // Physical Hardware Fields
   symmetric: z.boolean().optional(),
   total_cpu: z.number().optional(),
   memory_gb: z.number().optional(),
   storage_gb: z.number().optional(),
   bladeCount: z.number().optional(),
-  cpuType: z.string().optional(),
-  memoryPerBlade: z.number().optional(),
   blades: z.array(BladeSchema).optional(),
   network_cards: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   plug_power_cords: z.array(z.object({ id: z.string(), name: z.string() })).optional(),
   hypervisor: OptionSchema,
-  updateComment: z.string().min(1, 'Update comment is required.'),
   cpuArchitecture: z.string().optional(),
   virtualizationSupport: z.boolean().optional(),
   biosVersion: z.string().optional(),
@@ -71,6 +97,7 @@ const SpecificationUpdateSchema = z.object({
   raidConfiguration: z.string().optional(),
   timeSync: z.string().optional(),
   sshKeys: z.string().optional(),
+  updateComment: z.string().min(1, 'Update comment is required.'),
 });
 
 

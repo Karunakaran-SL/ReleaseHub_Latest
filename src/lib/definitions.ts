@@ -1,4 +1,5 @@
 
+
 export type User = {
   _id: string;
   username: string;
@@ -50,6 +51,22 @@ export type Product = {
   version: string;
 };
 
+export type VirtualNode = {
+  vmName: string;
+  role: 'Control Plane' | 'Worker';
+  cpuCores: number;
+  memory: number;
+  diskSize: number;
+  osType: string;
+  networkInterface: string;
+  connectivity: 'Public' | 'Private';
+  dns: string;
+  ssh: {
+    username: string;
+    sshKey: string;
+  };
+};
+
 export type Specification = {
     _id: string;
     name: string;
@@ -60,13 +77,21 @@ export type Specification = {
     contact_point_email?: string;
     contact_point_phone?: string;
     custom_fields?: { key: string; value: string }[];
+    
+    // Virtual Cluster Fields
+    clusterName?: string;
+    nodeCount?: {
+        controlPlane: number;
+        worker: number;
+    };
+    nodes?: VirtualNode[];
+
+    // Physical Hardware Fields
     symmetric?: boolean;
     total_cpu?: number;
     memory_gb?: number;
     storage_gb?: number;
     bladeCount?: number;
-    cpuType?: string;
-    memoryPerBlade?: number;
     blades?: {
         name: string;
         cpuType?: string;
