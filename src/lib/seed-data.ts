@@ -588,6 +588,29 @@ const initialSpecHypervisors = [{ name: 'VMWare ESXi' }, { name: 'Microsoft Hype
 const initialSpecNetworkCards = [{ name: 'Virtual NIC 10Gbps' }, { name: 'Intel X710' }, { name: 'Mellanox ConnectX-5' }];
 const initialSpecPlugPowerCords = [{ name: 'Virtual Power' }, { name: 'NEMA 5-15P' }, { name: 'C13/C14' }];
 
+const initialSpecCpuTypes = [
+  { name: 'Intel Xeon Scalable'}, { name: 'Intel Xeon E-series'},
+  { name: 'AMD EPYC 7002'}, { name: 'AMD EPYC 9004 series'},
+  { name: 'IBM POWER9'}, { name: 'IBM POWER10'},
+  { name: 'Oracle SPARC'}, { name: 'Ampere Altra'}, { name: 'AWS Graviton'},
+  { name: 'Intel Core i3'}, { name: 'Intel Core i5'}, { name: 'Intel Core i7'}, { name: 'Intel Core i9'},
+  { name: 'AMD Ryzen 3'}, { name: 'AMD Ryzen 5'}, { name: 'AMD Ryzen 7'}, { name: 'AMD Ryzen 9'},
+  { name: 'Apple M1'}, { name: 'Apple M2'}, { name: 'Apple M3'},
+  { name: 'Intel Atom'}, { name: 'ARM Cortex'}
+];
+
+const initialSpecGpuTypes = [
+  { name: 'NVIDIA A100'}, { name: 'NVIDIA H100'},
+  { name: 'NVIDIA Tesla V100'}, { name: 'NVIDIA Tesla P100'},
+  { name: 'AMD Instinct MI100'}, { name: 'AMD Instinct MI250'},
+  { name: 'Intel Data Center GPU Flex Series'},
+  { name: 'NVIDIA RTX A6000'}, { name: 'NVIDIA RTX A5000'},
+  { name: 'AMD Radeon Pro Series'},
+  { name: 'NVIDIA GeForce RTX 4090'}, { name: 'NVIDIA GeForce RTX 4080'}, { name: 'NVIDIA GeForce RTX 4070'},
+  { name: 'AMD Radeon RX 7900'}, { name: 'AMD Radeon RX 6800'},
+  { name: 'Intel Iris Xe'}, { name: 'AMD Radeon Vega'}, { name: 'Apple GPU (in M-series chips)'}
+];
+
 
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
@@ -926,6 +949,8 @@ export async function seedDatabase() {
         { name: 'specification_hypervisors', data: initialSpecHypervisors },
         { name: 'specification_network_cards', data: initialSpecNetworkCards },
         { name: 'specification_plug_power_cords', data: initialSpecPlugPowerCords },
+        { name: 'specification_cpu_types', data: initialSpecCpuTypes },
+        { name: 'specification_gpu_types', data: initialSpecGpuTypes },
         ...initialApprovalConfigs,
         { name: 'licenses', data: initialLicenses.map(l => ({ ...l, _id: l.id })) },
         { name: 'product_licensing', data: initialProductLicensing.map(pl => ({ ...pl, _id: pl.id })) },
