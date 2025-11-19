@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import type { CmdbComponent } from '@/lib/definitions';
 import { Plus } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 export interface Dependency {
     id: string;
