@@ -260,37 +260,17 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </SidebarMenuItem>
                 </Collapsible>
 
-                <Collapsible asChild defaultOpen={isSpecificationsPage}>
-                    <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                        <SidebarMenuButton
-                            isActive={isSpecificationsPage}
-                            tooltip={{ children: 'Specifications' }}
-                            className="data-[state=open]:bg-sidebar-accent"
-                        >
-                            <Link href="/specifications" className='flex items-center gap-2 w-full'>
-                                <FileText />
-                                Specifications
-                            </Link>
-                            <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                        </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                            <SidebarMenuSub>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton href="/specifications" isActive={pathname === '/specifications'}>
-                                        All Specifications
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton href="/specifications/builder" isActive={pathname.startsWith('/specifications/builder')}>
-                                        Builder
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                            </SidebarMenuSub>
-                        </CollapsibleContent>
-                    </SidebarMenuItem>
-                </Collapsible>
+                 <SidebarMenuItem>
+                    <SidebarMenuButton
+                        href="/specifications"
+                        isActive={isSpecificationsPage}
+                        tooltip={{ children: 'Specifications' }}
+                    >
+                        <FileText />
+                        Specifications
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+
                  <Collapsible asChild defaultOpen={isDocumentsPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
