@@ -764,7 +764,7 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
         name: 'Cisco UCS B200 M7 Blade', vendor: 'Cisco', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'},
         symmetric: true, bladeCount: 8,
         blades: [{
-            name: 'Blade Template', cpuType: 'Intel Xeon Scalable', cpuCores: 24, memory: 128, diskType: 'SSD_NVMe_M2_PCIeGen4', diskCapacity: 1024, hasGpu: true, gpuType: 'NVIDIA A100', gpuCores: 108,
+            name: 'Blade Template', cpuType: 'Intel Xeon Scalable', cpuCores: 24, memory: 128, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 1024, hasGpu: true, gpuType: 'NVIDIA A100', gpuCores: 108,
             networkInterfaces: [{name: 'vic1520', type: 'Ethernet_40G_QSFP+', speed: '40Gbps'}]
         }],
         biosVersion: "S52.4.1.0.1", firmwareVersion: "5.0(2)", virtualizationSupport: true
@@ -1022,6 +1022,69 @@ const initialProductLicensing: Omit<ProductLicensing, '_id'>[] = [
     { id: 'pl-data-fabric', product_id: 'UnifiedDataFabric', license_model: 'online', entitlements: ['feature-streaming', 'feature-batch'], package_included: false, validity: '2025-12-31', compliance: 'SOC 2 Type II' }
 ];
 
+const initialPlatformFoundations: any[] = [
+    {
+        _id: 'argocd-virtual-foundation-1',
+        name: 'ArgoCD Virtual KVM Foundation',
+        createdAt: new Date().toISOString(),
+        createdBy: 'seed',
+        specification: fullSpecifications.find(s => s.name === 'ArgoCD Sync Spec'),
+        hypervisor: { id: 'KVM', name: 'KVM' },
+        virtual_machines: fullSpecifications.find(s => s.name === 'ArgoCD Sync Spec')?.nodes,
+        kubernetes: {
+            distribution: 'rke2',
+            clusterCidr: '10.42.0.0/16',
+            serviceCidr: '10.43.0.0/16',
+            dnsDomain: 'argo.cluster.local',
+            cniPlugin: 'canal',
+            useCustomCerts: false,
+            controlPlaneNodes: fullSpecifications.find(s => s.name === 'ArgoCD Sync Spec')?.nodes?.filter(n => n.role === 'Control Plane').map(n => ({ id: n.vmName, label: n.vmName })),
+            workerNodes: fullSpecifications.find(s => s.name === 'ArgoCD Sync Spec')?.nodes?.filter(n => n.role === 'Worker').map(n => ({ id: n.vmName, label: n.vmName })),
+        }
+    },
+    {
+        _id: 'dell-r760-vmware-foundation',
+        name: 'Dell R760 VMWare Cluster',
+        createdAt: new Date().toISOString(),
+        createdBy: 'seed',
+        specification: fullSpecifications.find(s => s.name === 'Dell PowerEdge R760'),
+        hypervisor: { id: 'VMWare ESXi', name: 'VMWare ESXi' },
+        virtual_machines: [
+            ...Array.from({ length: 3 }, (_, i) => ({ vmName: `prod-cp-${i+1}`, role: 'Control Plane', cpuCores: 8, memory: 32, diskSize: 100, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_10G_SFP+', connectivity: 'Private', dns: 'prod.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }})),
+            ...Array.from({ length: 5 }, (_, i) => ({ vmName: `prod-w-${i+1}`, role: 'Worker', cpuCores: 16, memory: 64, diskSize: 250, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_10G_SFP+', connectivity: 'Private', dns: 'prod.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }})),
+        ],
+        kubernetes: {
+            distribution: 'rke2',
+            clusterCidr: '10.52.0.0/16',
+            serviceCidr: '10.53.0.0/16',
+            dnsDomain: 'prod.cluster.local',
+            cniPlugin: 'canal',
+            useCustomCerts: true,
+            controlPlaneNodes: Array.from({ length: 3 }, (_, i) => ({ id: `prod-cp-${i+1}`, label: `prod-cp-${i+1}` })),
+            workerNodes: Array.from({ length: 5 }, (_, i) => ({ id: `prod-w-${i+1}`, label: `prod-w-${i+1}` })),
+        }
+    },
+    {
+        _id: 'cisco-blade-k3s-foundation',
+        name: 'Cisco Blade K3s Edge Cluster',
+        createdAt: new Date().toISOString(),
+        createdBy: 'seed',
+        specification: fullSpecifications.find(s => s.name === 'Cisco UCS B200 M7 Blade'),
+        hypervisor: { id: 'KVM', name: 'KVM' },
+        virtual_machines: [
+            { vmName: `edge-master-1`, role: 'Control Plane', cpuCores: 4, memory: 8, diskSize: 60, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_40G_QSFP+', connectivity: 'Private', dns: 'edge.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }},
+            ...Array.from({ length: 2 }, (_, i) => ({ vmName: `edge-worker-${i+1}`, role: 'Worker', cpuCores: 8, memory: 16, diskSize: 100, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_40G_QSFP+', connectivity: 'Private', dns: 'edge.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }})),
+        ],
+        kubernetes: {
+            distribution: 'k3s',
+            cniPlugin: 'flannel',
+            controlPlaneNodes: [{ id: 'edge-master-1', label: 'edge-master-1' }],
+            workerNodes: Array.from({ length: 2 }, (_, i) => ({ id: `edge-worker-${i+1}`, label: `edge-worker-${i+1}` })),
+        }
+    }
+];
+
+
 export async function seedDatabase() {
     const client = await clientPromise;
     const db = client.db();
@@ -1053,6 +1116,7 @@ export async function seedDatabase() {
         ...initialApprovalConfigs,
         { name: 'licenses', data: initialLicenses.map(l => ({ ...l, _id: l.id })) },
         { name: 'product_licensing', data: initialProductLicensing.map(pl => ({ ...pl, _id: pl.id })) },
+        { name: 'platform_foundations', data: initialPlatformFoundations }
     ];
     
     let seededCount = 0;
