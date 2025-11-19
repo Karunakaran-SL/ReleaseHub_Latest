@@ -222,8 +222,7 @@ export default function EditSpecificationPage() {
     };
 
     const addCustomField = () => {
-        const newFields = [...(formState.custom_fields || []), { key: '', value: '' }];
-        setFormState(prev => ({ ...prev, custom_fields: newFields }));
+        setFormState(prev => ({ ...prev, custom_fields: [...(prev.custom_fields || []), { key: '', value: '' }]}));
     };
 
     const removeCustomField = (index: number) => {
@@ -383,7 +382,60 @@ export default function EditSpecificationPage() {
                                             </div>
                                         )}
                                         {isBladeSelected ? (
-                                             <></>
+                                            <div className="space-y-4 p-4 border rounded-md">
+                                                <div className="flex items-center space-x-2">
+                                                    <RadioGroup value={formState.symmetric ? 'true' : 'false'} onValueChange={(v) => setFormState((p:any) => ({...p, symmetric: v === 'true'}))} className="flex gap-4">
+                                                        <div className="flex items-center space-x-2"><RadioGroupItem value="true" id="symmetric" /><Label htmlFor="symmetric">Symmetric Blades</Label></div>
+                                                        <div className="flex items-center space-x-2"><RadioGroupItem value="false" id="asymmetric" /><Label htmlFor="asymmetric">Asymmetric Blades</Label></div>
+                                                    </RadioGroup>
+                                                </div>
+                                                <Label>Number of Blades</Label>
+                                                <Input type="number" min="1" value={formState.bladeCount || 1} onChange={handleBladeCountChange} />
+
+                                                {(formState.symmetric ? [formState.blades?.[0] || {name: 'Blade Template'}] : formState.blades || []).map((blade: any, index: number) => (
+                                                    <Accordion type="single" collapsible key={index} className="w-full">
+                                                        <AccordionItem value={`blade-${index}`}>
+                                                            <AccordionTrigger>{formState.symmetric ? 'Blade Template' : blade.name}</AccordionTrigger>
+                                                            <AccordionContent className="p-2 space-y-4">
+                                                                {!formState.symmetric && <div><Label>Blade Name</Label><Input value={blade.name} onChange={(e) => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>}
+                                                                <div className="grid grid-cols-2 gap-4">
+                                                                    <div><Label>CPU Type</Label><Select value={blade.cpuType} onValueChange={(v) => formState.symmetric ? handleSymmetricBladeChange('cpuType', v) : handleAsymmetricBladeChange(index, 'cpuType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent>{options.cpuTypes.map(o => <SelectItem key={o._id} value={o.name}>{o.name}</SelectItem>)}</SelectContent></Select></div>
+                                                                    <div><Label>CPU Cores</Label><Input type="number" value={blade.cpuCores || ''} onChange={(e) => formState.symmetric ? handleSymmetricBladeChange('cpuCores', Number(e.target.value)) : handleAsymmetricBladeChange(index, 'cpuCores', Number(e.target.value))} /></div>
+                                                                    <div><Label>Memory (GB)</Label><Input type="number" value={blade.memory || ''} onChange={(e) => formState.symmetric ? handleSymmetricBladeChange('memory', Number(e.target.value)) : handleAsymmetricBladeChange(index, 'memory', Number(e.target.value))} /></div>
+                                                                    <div><Label>Disk Type</Label><Select value={blade.diskType} onValueChange={(v) => formState.symmetric ? handleSymmetricBladeChange('diskType', v) : handleAsymmetricBladeChange(index, 'diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent>{options.diskTypes.map(o => <SelectItem key={o._id} value={o.name}>{o.name}</SelectItem>)}</SelectContent></Select></div>
+                                                                    <div><Label>Disk Capacity (GB)</Label><Input type="number" value={blade.diskCapacity || ''} onChange={(e) => formState.symmetric ? handleSymmetricBladeChange('diskCapacity', Number(e.target.value)) : handleAsymmetricBladeChange(index, 'diskCapacity', Number(e.target.value))} /></div>
+                                                                    <div className="flex items-center space-x-2 pt-6"><Checkbox checked={blade.hasGpu} onCheckedChange={(c) => formState.symmetric ? handleSymmetricBladeChange('hasGpu', !!c) : handleAsymmetricBladeChange(index, 'hasGpu', !!c)} /> <Label>Has GPU?</Label></div>
+                                                                </div>
+                                                                {blade.hasGpu && (
+                                                                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                                                                        <div><Label>GPU Type</Label><Select value={blade.gpuType} onValueChange={(v) => formState.symmetric ? handleSymmetricBladeChange('gpuType', v) : handleAsymmetricBladeChange(index, 'gpuType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent>{options.gpuTypes.map(o => <SelectItem key={o._id} value={o.name}>{o.name}</SelectItem>)}</SelectContent></Select></div>
+                                                                        <div><Label>GPU Cores</Label><Input type="number" value={blade.gpuCores || ''} onChange={(e) => formState.symmetric ? handleSymmetricBladeChange('gpuCores', Number(e.target.value)) : handleAsymmetricBladeChange(index, 'gpuCores', Number(e.target.value))} /></div>
+                                                                    </div>
+                                                                )}
+                                                                <div className="pt-4 border-t">
+                                                                    <Label>Network Interfaces</Label>
+                                                                    <div className="space-y-2 mt-2">
+                                                                        {(blade.networkInterfaces || []).map((iface: any, ifaceIndex: number) => (
+                                                                            <div key={ifaceIndex} className="grid grid-cols-3 gap-2 items-center">
+                                                                                <Input placeholder="Name (e.g., eth0)" value={iface.name} onChange={(e) => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'name', e.target.value)} />
+                                                                                <Select value={iface.type} onValueChange={(v) => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'type', v)}>
+                                                                                    <SelectTrigger><SelectValue placeholder="Type..."/></SelectTrigger>
+                                                                                    <SelectContent>{options.networkCards.map(o => <SelectItem key={o._id} value={o.name}>{o.name}</SelectItem>)}</SelectContent>
+                                                                                </Select>
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <Input placeholder="Speed (e.g., 10Gbps)" value={iface.speed} onChange={(e) => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'speed', e.target.value)} />
+                                                                                    <Button variant="ghost" size="icon" onClick={() => removeBladeNetworkInterface(index, ifaceIndex)} type="button"><Trash2 className="h-4 w-4 text-destructive"/></Button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                    <Button variant="link" size="sm" onClick={() => addBladeNetworkInterface(index)} type="button"><PlusCircle className="mr-2 h-4 w-4"/>Add Interface</Button>
+                                                                </div>
+                                                            </AccordionContent>
+                                                        </AccordionItem>
+                                                    </Accordion>
+                                                ))}
+                                            </div>
                                         ): (
                                             !isVirtualSelected && (
                                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
@@ -465,3 +517,5 @@ export default function EditSpecificationPage() {
         </DashboardLayout>
     );
 }
+
+    

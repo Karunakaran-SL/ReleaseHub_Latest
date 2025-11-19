@@ -414,8 +414,60 @@ export default function SpecificationBuilderPage() {
                         </div>
                     )}
                     {isBladeSelected && (
-                        // Omitted for brevity: Blade configuration UI from previous steps
-                        <></>
+                         <div className="space-y-4 p-4 border rounded-md">
+                             <div className="flex items-center space-x-2">
+                                <RadioGroup value={formData.symmetric ? 'true' : 'false'} onValueChange={(v) => handleRadioChange('symmetric', v)} className="flex gap-4">
+                                    <div className="flex items-center space-x-2"><RadioGroupItem value="true" id="symmetric" /><Label htmlFor="symmetric">Symmetric Blades</Label></div>
+                                    <div className="flex items-center space-x-2"><RadioGroupItem value="false" id="asymmetric" /><Label htmlFor="asymmetric">Asymmetric Blades</Label></div>
+                                </RadioGroup>
+                            </div>
+                            <Label>Number of Blades</Label>
+                            <Input type="number" min="1" value={formData.bladeCount || 1} onChange={handleBladeCountChange} />
+
+                            {(formData.symmetric ? [formData.blades?.[0] || {name: 'Blade Template'}] : formData.blades || []).map((blade: any, index: number) => (
+                                <Accordion type="single" collapsible key={index} className="w-full">
+                                    <AccordionItem value={`blade-${index}`}>
+                                        <AccordionTrigger>{formData.symmetric ? 'Blade Template' : blade.name}</AccordionTrigger>
+                                        <AccordionContent className="p-2 space-y-4">
+                                            {!formData.symmetric && <div><Label>Blade Name</Label><Input value={blade.name} onChange={(e) => handleAsymmetricBladeChange(index, 'name', e.target.value)} /></div>}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div><Label>CPU Type</Label><Select value={blade.cpuType} onValueChange={(v) => formData.symmetric ? handleSymmetricBladeChange('cpuType', v) : handleAsymmetricBladeChange(index, 'cpuType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent>{options.cpuTypes.map(o => <SelectItem key={o._id} value={o.name}>{o.name}</SelectItem>)}</SelectContent></Select></div>
+                                                <div><Label>CPU Cores</Label><Input type="number" value={blade.cpuCores || ''} onChange={(e) => formData.symmetric ? handleSymmetricBladeChange('cpuCores', Number(e.target.value)) : handleAsymmetricBladeChange(index, 'cpuCores', Number(e.target.value))} /></div>
+                                                <div><Label>Memory (GB)</Label><Input type="number" value={blade.memory || ''} onChange={(e) => formData.symmetric ? handleSymmetricBladeChange('memory', Number(e.target.value)) : handleAsymmetricBladeChange(index, 'memory', Number(e.target.value))} /></div>
+                                                <div><Label>Disk Type</Label><Select value={blade.diskType} onValueChange={(v) => formData.symmetric ? handleSymmetricBladeChange('diskType', v) : handleAsymmetricBladeChange(index, 'diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent>{options.diskTypes.map(o => <SelectItem key={o._id} value={o.name}>{o.name}</SelectItem>)}</SelectContent></Select></div>
+                                                <div><Label>Disk Capacity (GB)</Label><Input type="number" value={blade.diskCapacity || ''} onChange={(e) => formData.symmetric ? handleSymmetricBladeChange('diskCapacity', Number(e.target.value)) : handleAsymmetricBladeChange(index, 'diskCapacity', Number(e.target.value))} /></div>
+                                                <div className="flex items-center space-x-2 pt-6"><Checkbox checked={blade.hasGpu} onCheckedChange={(c) => formData.symmetric ? handleSymmetricBladeChange('hasGpu', !!c) : handleAsymmetricBladeChange(index, 'hasGpu', !!c)} /> <Label>Has GPU?</Label></div>
+                                            </div>
+                                             {blade.hasGpu && (
+                                                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                                                    <div><Label>GPU Type</Label><Select value={blade.gpuType} onValueChange={(v) => formData.symmetric ? handleSymmetricBladeChange('gpuType', v) : handleAsymmetricBladeChange(index, 'gpuType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent>{options.gpuTypes.map(o => <SelectItem key={o._id} value={o.name}>{o.name}</SelectItem>)}</SelectContent></Select></div>
+                                                    <div><Label>GPU Cores</Label><Input type="number" value={blade.gpuCores || ''} onChange={(e) => formData.symmetric ? handleSymmetricBladeChange('gpuCores', Number(e.target.value)) : handleAsymmetricBladeChange(index, 'gpuCores', Number(e.target.value))} /></div>
+                                                </div>
+                                            )}
+                                            <div className="pt-4 border-t">
+                                                <Label>Network Interfaces</Label>
+                                                <div className="space-y-2 mt-2">
+                                                    {(blade.networkInterfaces || []).map((iface: any, ifaceIndex: number) => (
+                                                        <div key={ifaceIndex} className="grid grid-cols-3 gap-2 items-center">
+                                                            <Input placeholder="Name (e.g., eth0)" value={iface.name} onChange={(e) => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'name', e.target.value, !!formData.symmetric)} />
+                                                            <Select value={iface.type} onValueChange={(v) => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'type', v, !!formData.symmetric)}>
+                                                                <SelectTrigger><SelectValue placeholder="Type..."/></SelectTrigger>
+                                                                <SelectContent>{options.networkCards.map(o => <SelectItem key={o._id} value={o.name}>{o.name}</SelectItem>)}</SelectContent>
+                                                            </Select>
+                                                            <div className="flex items-center gap-1">
+                                                                <Input placeholder="Speed (e.g., 10Gbps)" value={iface.speed} onChange={(e) => handleBladeNetworkInterfaceChange(index, ifaceIndex, 'speed', e.target.value, !!formData.symmetric)} />
+                                                                <Button variant="ghost" size="icon" onClick={() => removeBladeNetworkInterface(index, ifaceIndex, !!formData.symmetric)} type="button"><Trash2 className="h-4 w-4 text-destructive"/></Button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <Button variant="link" size="sm" onClick={() => addBladeNetworkInterface(index, !!formData.symmetric)} type="button"><PlusCircle className="mr-2 h-4 w-4"/>Add Interface</Button>
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                </Accordion>
+                            ))}
+                         </div>
                     )}
                     {!isBladeSelected && !isVirtualSelected && (
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
@@ -569,3 +621,5 @@ export default function SpecificationBuilderPage() {
         </DashboardLayout>
     );
 }
+
+    
