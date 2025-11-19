@@ -383,52 +383,59 @@ export default function EditSpecificationPage() {
                                             </div>
                                         )}
                                         {isBladeSelected ? (
-                                             <div className="space-y-4">
-                                                <RadioGroup onValueChange={(v) => setFormState(p => ({...p, symmetric: v === 'true'}))} value={String(formState.symmetric)} className="mt-2 space-y-1">
-                                                    <div className="flex items-center space-x-2"><RadioGroupItem value="true" id="sym1" /><Label htmlFor="sym1" className="font-normal">Symmetric</Label></div>
-                                                    <div className="flex items-center space-x-2"><RadioGroupItem value="false" id="sym2" /><Label htmlFor="sym2" className="font-normal">Asymmetric</Label></div>
-                                                </RadioGroup>
-                                                <Label>Number of Blades</Label>
-                                                <Input id="bladeCount" type="number" value={formState.bladeCount || 1} onChange={handleBladeCountChange} min={1} />
-                                            </div>
+                                             <></>
                                         ): (
+                                            !isVirtualSelected && (
                                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-md">
                                                 <div><Label htmlFor="total_cpu">Total CPU *</Label><Input id="total_cpu" type="number" value={formState.total_cpu || ''} onChange={handleInputChange} required /></div>
                                                 <div><Label htmlFor="memory_gb">Memory (GB) *</Label><Input id="memory_gb" type="number" value={formState.memory_gb || ''} onChange={handleInputChange} required /></div>
                                                 <div><Label htmlFor="storage_gb">Total Storage (GB) *</Label><Input id="storage_gb" type="number" value={formState.storage_gb || ''} onChange={handleInputChange} required /></div>
                                              </div>
+                                            )
                                         )}
                                     </div>
-                                    <h3 className="font-semibold text-lg">Connectivity</h3>
-                                    <div>
-                                        <Label>Network Cards</Label>
-                                        <MultiSelectListBox
-                                            available={options.networkCards.filter(opt => !(formState.network_cards || []).some((c:any) => c.id === opt._id)).map(o => ({id: o._id, label: o.name}))}
-                                            chosen={(formState.network_cards || []).map((c:any) => ({id: c.id, name: c.name})).map((o: any) => ({id: o.id, label: o.name}))}
-                                            onMoveToChosen={(ids) => handleMultiSelectChange('network_cards', [...(formState.network_cards || []), ...ids.map(id => ({id, name: options.networkCards.find(o => o._id === id)?.name || ''}))] )}
-                                            onMoveToAvailable={(ids) => handleMultiSelectChange('network_cards', (formState.network_cards || []).filter((c:any) => !ids.includes(c.id)))}
-                                            onMoveAllToChosen={() => handleMultiSelectChange('network_cards', options.networkCards.map(o => ({id: o._id, name: o.name})))}
-                                            onMoveAllToAvailable={() => handleMultiSelectChange('network_cards', [])}
-                                        />
+                                    {!isVirtualSelected && (
+                                    <div className="space-y-4">
+                                        <h3 className="font-semibold text-lg pt-4 border-t">Firmware &amp; OS</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div><Label htmlFor="biosVersion">BIOS Version</Label><Input id="biosVersion" value={formState.biosVersion || ''} onChange={handleInputChange} /></div>
+                                            <div><Label htmlFor="firmwareVersion">Firmware Version</Label><Input id="firmwareVersion" value={formState.firmwareVersion || ''} onChange={handleInputChange} /></div>
+                                            <div><Label htmlFor="cpuArchitecture">CPU Architecture</Label><Input id="cpuArchitecture" value={formState.cpuArchitecture || ''} onChange={handleInputChange} /></div>
+                                            <div className="flex items-center space-x-2 pt-6">
+                                                <Checkbox id="virtualizationSupport" checked={formState.virtualizationSupport} onCheckedChange={(checked) => setFormState(p => ({...p, virtualizationSupport: !!checked}))} />
+                                                <Label htmlFor="virtualizationSupport">Virtualization Support</Label>
+                                            </div>
+                                        </div>
+
+                                        <h3 className="font-semibold text-lg pt-4 border-t">Remote Management</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div><Label htmlFor="username">iLO Username</Label><Input data-group="iloCredentials" id="username" value={formState.iloCredentials?.username || ''} onChange={handleInputChange} /></div>
+                                            <div><Label htmlFor="password">iLO Password</Label><Input data-group="iloCredentials" id="password" type="password" value={formState.iloCredentials?.password || ''} onChange={handleInputChange} /></div>
+                                        </div>
+
+                                        <h3 className="font-semibold text-lg pt-4 border-t">Network &amp; Storage</h3>
+                                        <div><Label>Time Sync (NTP Server)</Label><Input id="timeSync" value={formState.timeSync || ''} onChange={handleInputChange} /></div>
+                                        <div>
+                                            <Label>Disk Layout</Label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <Input data-group="diskLayout" id="osDisk" placeholder="OS Disk (e.g., 200GB SSD)" value={formState.diskLayout?.osDisk || ''} onChange={handleInputChange} />
+                                                <Input data-group="diskLayout" id="dataDisk" placeholder="Data Disk (e.g., 1TB NVMe)" value={formState.diskLayout?.dataDisk || ''} onChange={handleInputChange} />
+                                            </div>
+                                        </div>
+                                        <div><Label>RAID Configuration</Label><Input id="raidConfiguration" value={formState.raidConfiguration || ''} onChange={handleInputChange} placeholder="e.g., RAID 10"/></div>
+                                        <div>
+                                            <Label>SSH Keys</Label>
+                                            <Textarea id="sshKeys" value={formState.sshKeys || ''} onChange={handleInputChange} placeholder="Paste public SSH keys for access..."/>
+                                        </div>
+                                        <div>
+                                            <Label>Hypervisor</Label>
+                                            <Select value={formState.hypervisor?.id} onValueChange={(value) => handleSelectChange('hypervisor', value)}>
+                                                <SelectTrigger><SelectValue placeholder="N/A" /></SelectTrigger>
+                                                <SelectContent>{options.hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
+                                            </Select>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <Label>Power Cords</Label>
-                                        <MultiSelectListBox
-                                            available={options.plugPowerCords.filter(opt => !(formState.plug_power_cords || []).some((c:any) => c.id === opt._id)).map(o => ({id: o._id, label: o.name}))}
-                                            chosen={(formState.plug_power_cords || []).map((c:any) => ({id: c.id, name: c.name})).map((o: any) => ({id: o.id, label: o.name}))}
-                                            onMoveToChosen={(ids) => handleMultiSelectChange('plug_power_cords', [...(formState.plug_power_cords || []), ...ids.map(id => ({id, name: options.plugPowerCords.find(o => o._id === id)?.name || ''}))] )}
-                                            onMoveToAvailable={(ids) => handleMultiSelectChange('plug_power_cords', (formState.plug_power_cords || []).filter((c:any) => !ids.includes(c.id)))}
-                                            onMoveAllToChosen={() => handleMultiSelectChange('plug_power_cords', options.plugPowerCords.map(o => ({id: o._id, name: o.name})))}
-                                            onMoveAllToAvailable={() => handleMultiSelectChange('plug_power_cords', [])}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label>Hypervisor</Label>
-                                        <Select value={formState.hypervisor?.id} onValueChange={(value) => handleSelectChange('hypervisor', value)}>
-                                            <SelectTrigger><SelectValue placeholder="N/A" /></SelectTrigger>
-                                            <SelectContent>{options.hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
-                                        </Select>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                              <div className="space-y-4 md:col-span-2">

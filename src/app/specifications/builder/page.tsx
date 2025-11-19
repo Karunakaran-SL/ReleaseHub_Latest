@@ -350,25 +350,18 @@ export default function SpecificationBuilderPage() {
                     <div><Label htmlFor="contact_point_phone">Contact Phone</Label><Input id="contact_point_phone" type="tel" value={formData.contact_point_phone || ''} onChange={handleInputChange} /></div>
                 </div>
 
-                <div className="space-y-4 pt-4 border-t">
-                    <h3 className="font-semibold text-lg">Firmware &amp; OS</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><Label htmlFor="biosVersion">BIOS Version</Label><Input id="biosVersion" value={formData.biosVersion || ''} onChange={handleInputChange} /></div>
-                        <div><Label htmlFor="firmwareVersion">Firmware Version</Label><Input id="firmwareVersion" value={formData.firmwareVersion || ''} onChange={handleInputChange} /></div>
-                        <div><Label htmlFor="cpuArchitecture">CPU Architecture</Label><Input id="cpuArchitecture" value={formData.cpuArchitecture || ''} onChange={handleInputChange} /></div>
-                        <div className="flex items-center space-x-2 pt-6">
-                            <Checkbox id="virtualizationSupport" checked={formData.virtualizationSupport} onCheckedChange={(checked) => setFormData(p => ({...p, virtualizationSupport: !!checked}))} />
-                            <Label htmlFor="virtualizationSupport">Virtualization Support</Label>
-                        </div>
+                 <div>
+                    <h3 className="font-semibold text-lg mt-6">Custom Fields</h3>
+                    <div className="space-y-2">
+                        {(formData.custom_fields || []).map((field, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <Input placeholder="Key" value={field.key} onChange={(e) => handleCustomFieldChange(index, 'key', e.target.value)} />
+                                <Input placeholder="Value" value={field.value} onChange={(e) => handleCustomFieldChange(index, 'value', e.target.value)} />
+                                <Button variant="ghost" size="icon" onClick={() => removeCustomField(index)} type="button"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </div>
+                        ))}
                     </div>
-                </div>
-
-                <div className="space-y-4 pt-4 border-t">
-                    <h3 className="font-semibold text-lg">Remote Management</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><Label htmlFor="username" data-group="iloCredentials">iLO Username</Label><Input data-group="iloCredentials" id="username" value={formData.iloCredentials?.username || ''} onChange={handleInputChange} /></div>
-                        <div><Label htmlFor="password" data-group="iloCredentials">iLO Password</Label><Input data-group="iloCredentials" id="password" type="password" value={formData.iloCredentials?.password || ''} onChange={handleInputChange} /></div>
-                    </div>
+                    <Button variant="link" size="sm" onClick={addCustomField} type="button" className="mt-2 px-0"><PlusCircle className="mr-2 h-4 w-4" />ADD CUSTOM FIELD</Button>
                 </div>
             </div>
             <div className="space-y-4">
@@ -432,38 +425,62 @@ export default function SpecificationBuilderPage() {
                          </div>
                     )}
                 </div>
-                 <div className="space-y-4 pt-4 border-t">
-                    <h3 className="font-semibold text-lg">Network &amp; Storage</h3>
-                     <div>
-                        <Label>Network Topology</Label>
-                        <div className="grid grid-cols-3 gap-2">
-                           <Input data-group="networkTopology" id="managementVLAN" placeholder="Mgmt VLAN" value={formData.networkTopology?.managementVLAN || ''} onChange={handleInputChange}/>
-                           <Input data-group="networkTopology" id="storageVLAN" placeholder="Storage VLAN" value={formData.networkTopology?.storageVLAN || ''} onChange={handleInputChange}/>
-                           <Input data-group="networkTopology" id="workloadVLAN" placeholder="Workload VLAN" value={formData.networkTopology?.workloadVLAN || ''} onChange={handleInputChange}/>
+                 {!isVirtualSelected && (
+                 <div className="space-y-4">
+                    <div className="space-y-4 pt-4 border-t">
+                        <h3 className="font-semibold text-lg">Firmware &amp; OS</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><Label htmlFor="biosVersion">BIOS Version</Label><Input id="biosVersion" value={formData.biosVersion || ''} onChange={handleInputChange} /></div>
+                            <div><Label htmlFor="firmwareVersion">Firmware Version</Label><Input id="firmwareVersion" value={formData.firmwareVersion || ''} onChange={handleInputChange} /></div>
+                            <div><Label htmlFor="cpuArchitecture">CPU Architecture</Label><Input id="cpuArchitecture" value={formData.cpuArchitecture || ''} onChange={handleInputChange} /></div>
+                            <div className="flex items-center space-x-2 pt-6">
+                                <Checkbox id="virtualizationSupport" checked={formData.virtualizationSupport} onCheckedChange={(checked) => setFormData(p => ({...p, virtualizationSupport: !!checked}))} />
+                                <Label htmlFor="virtualizationSupport">Virtualization Support</Label>
+                            </div>
                         </div>
                     </div>
-                     <div>
-                        <Label>IP Address Pool</Label>
-                        <div className="grid grid-cols-3 gap-2">
-                           <Input data-group="ipAddressPool" id="management" placeholder="Mgmt CIDR" value={formData.ipAddressPool?.management || ''} onChange={handleInputChange}/>
-                           <Input data-group="ipAddressPool" id="storage" placeholder="Storage CIDR" value={formData.ipAddressPool?.storage || ''} onChange={handleInputChange}/>
-                           <Input data-group="ipAddressPool" id="workload" placeholder="Workload CIDR" value={formData.ipAddressPool?.workload || ''} onChange={handleInputChange}/>
+
+                    <div className="space-y-4 pt-4 border-t">
+                        <h3 className="font-semibold text-lg">Remote Management</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><Label htmlFor="username" data-group="iloCredentials">iLO Username</Label><Input data-group="iloCredentials" id="username" value={formData.iloCredentials?.username || ''} onChange={handleInputChange} /></div>
+                            <div><Label htmlFor="password" data-group="iloCredentials">iLO Password</Label><Input data-group="iloCredentials" id="password" type="password" value={formData.iloCredentials?.password || ''} onChange={handleInputChange} /></div>
                         </div>
                     </div>
-                     <div><Label>Time Sync (NTP Server)</Label><Input id="timeSync" value={formData.timeSync || ''} onChange={handleInputChange} /></div>
-                     <div>
-                        <Label>Disk Layout</Label>
-                        <div className="grid grid-cols-2 gap-2">
-                            <Input data-group="diskLayout" id="osDisk" placeholder="OS Disk (e.g., 200GB SSD)" value={formData.diskLayout?.osDisk || ''} onChange={handleInputChange} />
-                            <Input data-group="diskLayout" id="dataDisk" placeholder="Data Disk (e.g., 1TB NVMe)" value={formData.diskLayout?.dataDisk || ''} onChange={handleInputChange} />
+                     <div className="space-y-4 pt-4 border-t">
+                        <h3 className="font-semibold text-lg">Network &amp; Storage</h3>
+                        <div>
+                            <Label>Network Topology</Label>
+                            <div className="grid grid-cols-3 gap-2">
+                                <Input data-group="networkTopology" id="managementVLAN" placeholder="Mgmt VLAN" value={formData.networkTopology?.managementVLAN || ''} onChange={handleInputChange}/>
+                                <Input data-group="networkTopology" id="storageVLAN" placeholder="Storage VLAN" value={formData.networkTopology?.storageVLAN || ''} onChange={handleInputChange}/>
+                                <Input data-group="networkTopology" id="workloadVLAN" placeholder="Workload VLAN" value={formData.networkTopology?.workloadVLAN || ''} onChange={handleInputChange}/>
+                            </div>
                         </div>
-                    </div>
-                     <div><Label>RAID Configuration</Label><Input id="raidConfiguration" value={formData.raidConfiguration || ''} onChange={handleInputChange} placeholder="e.g., RAID 10"/></div>
-                      <div>
-                        <Label>SSH Keys</Label>
-                        <Textarea id="sshKeys" value={formData.sshKeys || ''} onChange={handleInputChange} placeholder="Paste public SSH keys for access..."/>
+                        <div>
+                            <Label>IP Address Pool</Label>
+                            <div className="grid grid-cols-3 gap-2">
+                                <Input data-group="ipAddressPool" id="management" placeholder="Mgmt CIDR" value={formData.ipAddressPool?.management || ''} onChange={handleInputChange}/>
+                                <Input data-group="ipAddressPool" id="storage" placeholder="Storage CIDR" value={formData.ipAddressPool?.storage || ''} onChange={handleInputChange}/>
+                                <Input data-group="ipAddressPool" id="workload" placeholder="Workload CIDR" value={formData.ipAddressPool?.workload || ''} onChange={handleInputChange}/>
+                            </div>
+                        </div>
+                        <div><Label>Time Sync (NTP Server)</Label><Input id="timeSync" value={formData.timeSync || ''} onChange={handleInputChange} /></div>
+                        <div>
+                            <Label>Disk Layout</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <Input data-group="diskLayout" id="osDisk" placeholder="OS Disk (e.g., 200GB SSD)" value={formData.diskLayout?.osDisk || ''} onChange={handleInputChange} />
+                                <Input data-group="diskLayout" id="dataDisk" placeholder="Data Disk (e.g., 1TB NVMe)" value={formData.diskLayout?.dataDisk || ''} onChange={handleInputChange} />
+                            </div>
+                        </div>
+                        <div><Label>RAID Configuration</Label><Input id="raidConfiguration" value={formData.raidConfiguration || ''} onChange={handleInputChange} placeholder="e.g., RAID 10"/></div>
+                        <div>
+                            <Label>SSH Keys</Label>
+                            <Textarea id="sshKeys" value={formData.sshKeys || ''} onChange={handleInputChange} placeholder="Paste public SSH keys for access..."/>
+                        </div>
                     </div>
                 </div>
+                 )}
             </div>
         </div>
     );
