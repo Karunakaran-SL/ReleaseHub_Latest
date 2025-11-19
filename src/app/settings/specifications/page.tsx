@@ -18,6 +18,7 @@ export default function SpecificationsSettingsPage() {
         { title: 'Vendors', apiEndpoint: 'vendors' },
         { title: 'CPU Types', apiEndpoint: 'cpu-types' },
         { title: 'GPU Types', apiEndpoint: 'gpu-types' },
+        { title: 'Disk Types', apiEndpoint: 'disk-types' },
         { title: 'Plug/Power Cord Types', apiEndpoint: 'plug-power-cords' },
         { title: 'Network Card Types', apiEndpoint: 'network-cards' },
         { title: 'Hypervisors', apiEndpoint: 'hypervisors' },

@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -43,6 +42,7 @@ export default function EditSpecificationPage() {
         plugPowerCords: [] as Option[],
         cpuTypes: [] as Option[],
         gpuTypes: [] as Option[],
+        diskTypes: [] as Option[],
     });
 
     useEffect(() => {
@@ -52,7 +52,7 @@ export default function EditSpecificationPage() {
         async function fetchData() {
             setLoading(true);
             try {
-                const [specRes, hwTypesRes, vendorsRes, hypervisorsRes, contractsRes, networkCardsRes, plugPowerCordsRes, cpuTypesRes, gpuTypesRes] = await Promise.all([
+                const [specRes, hwTypesRes, vendorsRes, hypervisorsRes, contractsRes, networkCardsRes, plugPowerCordsRes, cpuTypesRes, gpuTypesRes, diskTypesRes] = await Promise.all([
                     fetch(`/api/specifications/${id}`),
                     fetch('/api/settings/specifications/hw-types'),
                     fetch('/api/settings/specifications/vendors'),
@@ -62,6 +62,7 @@ export default function EditSpecificationPage() {
                     fetch('/api/settings/specifications/plug-power-cords'),
                     fetch('/api/settings/specifications/cpu-types'),
                     fetch('/api/settings/specifications/gpu-types'),
+                    fetch('/api/settings/specifications/disk-types'),
                 ]);
 
                 if (!specRes.ok) throw new Error('Failed to fetch specification');
@@ -78,6 +79,7 @@ export default function EditSpecificationPage() {
                     plugPowerCords: await plugPowerCordsRes.json(),
                     cpuTypes: await cpuTypesRes.json(),
                     gpuTypes: await gpuTypesRes.json(),
+                    diskTypes: await diskTypesRes.json(),
                 });
 
             } catch (err: any) {
@@ -321,7 +323,12 @@ export default function EditSpecificationPage() {
                                                     </div>
                                                     <div><Label>CPU Cores</Label><Input type="number" value={formState.blades?.[0]?.cpuCores || ''} onChange={e => handleSymmetricBladeChange('cpuCores', Number(e.target.value))} /></div>
                                                     <div><Label>Memory (GB)</Label><Input type="number" value={formState.blades?.[0]?.memory || ''} onChange={e => handleSymmetricBladeChange('memory', Number(e.target.value))} /></div>
-                                                    <div><Label>Disk Type</Label><Select value={formState.blades?.[0]?.diskType} onValueChange={(v) => handleSymmetricBladeChange('diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
+                                                    <div><Label>Disk Type</Label>
+                                                        <Select value={formState.blades?.[0]?.diskType} onValueChange={(v) => handleSymmetricBladeChange('diskType', v)}>
+                                                            <SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger>
+                                                            <SelectContent>{options.diskTypes.map(d => <SelectItem key={d._id} value={d.name}>{d.name}</SelectItem>)}</SelectContent>
+                                                        </Select>
+                                                    </div>
                                                     <div><Label>Disk Capacity (GB)</Label><Input type="number" value={formState.blades?.[0]?.diskCapacity || ''} onChange={e => handleSymmetricBladeChange('diskCapacity', Number(e.target.value))} /></div>
                                                 </div>
                                                 <div className="flex items-center space-x-2 pt-2">
@@ -359,7 +366,12 @@ export default function EditSpecificationPage() {
                                                                 </div>
                                                                 <div><Label>CPU Cores</Label><Input type="number" value={blade.cpuCores || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuCores', Number(e.target.value))} /></div>
                                                                 <div><Label>Memory (GB)</Label><Input type="number" value={blade.memory || ''} onChange={e => handleAsymmetricBladeChange(index, 'memory', Number(e.target.value))} /></div>
-                                                                <div><Label>Disk Type</Label><Select value={blade.diskType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
+                                                                <div><Label>Disk Type</Label>
+                                                                    <Select value={blade.diskType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'diskType', v)}>
+                                                                        <SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger>
+                                                                        <SelectContent>{options.diskTypes.map(d => <SelectItem key={d._id} value={d.name}>{d.name}</SelectItem>)}</SelectContent>
+                                                                    </Select>
+                                                                </div>
                                                                 <div><Label>Disk Capacity (GB)</Label><Input type="number" value={blade.diskCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'diskCapacity', Number(e.target.value))} /></div>
                                                             </div>
                                                             <div className="flex items-center space-x-2 pt-2">

@@ -1,5 +1,4 @@
 
-
 export type User = {
   _id: string;
   username: string;
@@ -73,7 +72,7 @@ export type Specification = {
         cpuType?: string;
         cpuCores?: number;
         memory?: number;
-        diskType?: 'SSD' | 'HDD';
+        diskType?: string;
         diskCapacity?: number;
         hasGpu?: boolean;
         gpuType?: string;

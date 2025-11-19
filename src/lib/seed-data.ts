@@ -611,6 +611,30 @@ const initialSpecGpuTypes = [
   { name: 'Intel Iris Xe'}, { name: 'AMD Radeon Vega'}, { name: 'Apple GPU (in M-series chips)'}
 ];
 
+const initialSpecDiskTypes = [
+    { "name": "HDD_3.5inch_SATA_5400RPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SATA", "speed": "5400 RPM" } },
+    { "name": "HDD_3.5inch_SATA_7200RPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SATA", "speed": "7200 RPM" } },
+    { "name": "HDD_3.5inch_SAS_10KRPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SAS", "speed": "10K RPM" } },
+    { "name": "HDD_3.5inch_SAS_15KRPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SAS", "speed": "15K RPM" } },
+    { "name": "SSD_SATA_2.5inch", "type": "SSD", "classification": { "interface": "SATA", "form_factor": "2.5-inch" } },
+    { "name": "SSD_NVMe_M2_PCIeGen3", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "M.2", "generation": "PCIe Gen3" } },
+    { "name": "SSD_NVMe_M2_PCIeGen4", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "M.2", "generation": "PCIe Gen4" } },
+    { "name": "SSD_NVMe_U2_PCIeGen3", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "U.2", "generation": "PCIe Gen3" } },
+    { "name": "SSD_NVMe_U2_PCIeGen4", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "U.2", "generation": "PCIe Gen4" } },
+    { "name": "Hybrid_2.5inch_SATA", "type": "Hybrid", "classification": { "form_factor": "2.5-inch", "interface": "SATA" } },
+    { "name": "Hybrid_3.5inch_SATA", "type": "Hybrid", "classification": { "form_factor": "3.5-inch", "interface": "SATA" } },
+    { "name": "Enterprise_SAS_10KRPM", "type": "Enterprise", "classification": { "interface": "SAS", "speed": "10K RPM" } },
+    { "name": "Enterprise_SAS_15KRPM", "type": "Enterprise", "classification": { "interface": "SAS", "speed": "15K RPM" } },
+    { "name": "Enterprise_FibreChannel_HighSpeed", "type": "Enterprise", "classification": { "interface": "Fibre Channel", "speed": "High-Speed" } },
+    { "name": "Specialized_NVMeoF", "type": "Specialized", "classification": { "interface": "NVMe-oF", "description": "Network NVMe" } },
+    { "name": "Specialized_PersistentMemory_Optane", "type": "Specialized", "classification": { "interface": "Persistent Memory", "description": "Intel Optane" } },
+    { "name": "Virtual_VMDK_VMware", "type": "Virtual", "classification": { "format": "VMDK", "platform": "VMware" } },
+    { "name": "Virtual_VHDX_HyperV", "type": "Virtual", "classification": { "format": "VHD/VHDX", "platform": "Hyper-V" } },
+    { "name": "Virtual_QCOW2_KVM", "type": "Virtual", "classification": { "format": "QCOW2", "platform": "KVM" } },
+    { "name": "Cloud_Object_S3Compatible", "type": "Cloud", "classification": { "storage_type": "Object", "protocol": "S3-Compatible" } },
+    { "name": "Cloud_Block_EBS", "type": "Cloud", "classification": { "storage_type": "Block", "example": "EBS-Type" } }
+];
+
 
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
@@ -673,10 +697,10 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     },
     {
         _id: 'AsymmetricBladeServer', name: 'Asymmetric Blade Server', vendor: 'Lenovo', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'}, symmetric: false, blades: [
-            { name: 'Compute-Blade-1', cpuType: 'Intel Xeon Gold 6442Y', cpuCores: 32, memory: 256, diskType: 'NVMe', diskCapacity: 2048 },
-            { name: 'Compute-Blade-2', cpuType: 'Intel Xeon Gold 6442Y', cpuCores: 32, memory: 256, diskType: 'NVMe', diskCapacity: 2048 },
-            { name: 'Storage-Blade-1', cpuType: 'Intel Xeon Silver 4410Y', cpuCores: 16, memory: 128, diskType: 'SSD', diskCapacity: 16384 },
-            { name: 'GPU-Blade-1', cpuType: 'Intel Xeon Platinum 8470Q', cpuCores: 52, memory: 512, diskType: 'NVMe', diskCapacity: 4096 },
+            { name: 'Compute-Blade-1', cpuType: 'Intel Xeon Gold 6442Y', cpuCores: 32, memory: 256, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 2048 },
+            { name: 'Compute-Blade-2', cpuType: 'Intel Xeon Gold 6442Y', cpuCores: 32, memory: 256, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 2048 },
+            { name: 'Storage-Blade-1', cpuType: 'Intel Xeon Silver 4410Y', cpuCores: 16, memory: 128, diskType: 'HDD_3.5inch_SAS_15KRPM', diskCapacity: 16384 },
+            { name: 'GPU-Blade-1', cpuType: 'Intel Xeon Platinum 8470Q', cpuCores: 52, memory: 512, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 4096, hasGpu: true, gpuType: 'NVIDIA H100', gpuCores: 80 },
         ]
     },
     {
@@ -688,7 +712,9 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
         {
           "name": "Blade 1",
           "cpuType": "3",
+          "cpuCores": 3,
           "memory": 3,
+          "diskType": "SSD_SATA_2.5inch",
           "diskCapacity": 33
         }
       ]
@@ -951,6 +977,7 @@ export async function seedDatabase() {
         { name: 'specification_plug_power_cords', data: initialSpecPlugPowerCords },
         { name: 'specification_cpu_types', data: initialSpecCpuTypes },
         { name: 'specification_gpu_types', data: initialSpecGpuTypes },
+        { name: 'specification_disk_types', data: initialSpecDiskTypes },
         ...initialApprovalConfigs,
         { name: 'licenses', data: initialLicenses.map(l => ({ ...l, _id: l.id })) },
         { name: 'product_licensing', data: initialProductLicensing.map(pl => ({ ...pl, _id: pl.id })) },

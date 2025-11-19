@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
@@ -55,13 +54,14 @@ export default function SpecificationBuilderPage() {
         plugPowerCords: [] as Option[],
         cpuTypes: [] as Option[],
         gpuTypes: [] as Option[],
+        diskTypes: [] as Option[],
     });
 
     useEffect(() => {
         getUser().then(setUser);
          async function fetchOptions() {
             try {
-                const [hwTypesRes, vendorsRes, hypervisorsRes, contractsRes, networkCardsRes, plugPowerCordsRes, cpuTypesRes, gpuTypesRes] = await Promise.all([
+                const [hwTypesRes, vendorsRes, hypervisorsRes, contractsRes, networkCardsRes, plugPowerCordsRes, cpuTypesRes, gpuTypesRes, diskTypesRes] = await Promise.all([
                     fetch('/api/settings/specifications/hw-types'),
                     fetch('/api/settings/specifications/vendors'),
                     fetch('/api/settings/specifications/hypervisors'),
@@ -70,6 +70,7 @@ export default function SpecificationBuilderPage() {
                     fetch('/api/settings/specifications/plug-power-cords'),
                     fetch('/api/settings/specifications/cpu-types'),
                     fetch('/api/settings/specifications/gpu-types'),
+                    fetch('/api/settings/specifications/disk-types'),
                 ]);
                 setOptions({
                     hwTypes: await hwTypesRes.json(),
@@ -80,6 +81,7 @@ export default function SpecificationBuilderPage() {
                     plugPowerCords: await plugPowerCordsRes.json(),
                     cpuTypes: await cpuTypesRes.json(),
                     gpuTypes: await gpuTypesRes.json(),
+                    diskTypes: await diskTypesRes.json(),
                 });
             } catch (error) {
                 toast({ variant: 'destructive', title: 'Error', description: 'Could not load options for form.' });
@@ -143,7 +145,7 @@ export default function SpecificationBuilderPage() {
     };
 
     const handleBladeCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const count = parseInt(e.target.value, 10);
+        const count = parseInt(e.target.value, 10) || 1;
         setFormData((prev: any) => ({ ...prev, bladeCount: count, blades: Array.from({length: count}).map((_, i) => prev.blades?.[i] || {name: `Blade ${i+1}`, networkInterfaces: []}) }));
     }
     
@@ -347,7 +349,7 @@ export default function SpecificationBuilderPage() {
                                         <div><Label>CPU Type</Label><Select value={formData.blades?.[0]?.cpuType} onValueChange={(v) => handleSymmetricBladeChange('cpuType', v)}><SelectTrigger><SelectValue placeholder="Select CPU..."/></SelectTrigger><SelectContent>{options.cpuTypes.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent></Select></div>
                                         <div><Label>CPU Cores</Label><Input type="number" value={formData.blades?.[0]?.cpuCores || ''} onChange={e => handleSymmetricBladeChange('cpuCores', Number(e.target.value))} /></div>
                                         <div><Label>Memory (GB)</Label><Input type="number" value={formData.blades?.[0]?.memory || ''} onChange={e => handleSymmetricBladeChange('memory', Number(e.target.value))} /></div>
-                                        <div><Label>Disk Type</Label><Select value={formData.blades?.[0]?.diskType} onValueChange={(v) => handleSymmetricBladeChange('diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
+                                        <div><Label>Disk Type</Label><Select value={formData.blades?.[0]?.diskType} onValueChange={(v) => handleSymmetricBladeChange('diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent>{options.diskTypes.map(d => <SelectItem key={d._id} value={d.name}>{d.name}</SelectItem>)}</SelectContent></Select></div>
                                         <div><Label>Disk Capacity (GB)</Label><Input type="number" value={formData.blades?.[0]?.diskCapacity || ''} onChange={e => handleSymmetricBladeChange('diskCapacity', Number(e.target.value))} /></div>
                                     </div>
                                     <div className="flex items-center space-x-2 pt-2">
@@ -390,7 +392,7 @@ export default function SpecificationBuilderPage() {
                                             <div><Label>CPU Type</Label><Select value={blade.cpuType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'cpuType', v)}><SelectTrigger><SelectValue placeholder="Select CPU..."/></SelectTrigger><SelectContent>{options.cpuTypes.map(t => <SelectItem key={t._id} value={t.name}>{t.name}</SelectItem>)}</SelectContent></Select></div>
                                             <div><Label>CPU Cores</Label><Input type="number" value={blade.cpuCores || ''} onChange={e => handleAsymmetricBladeChange(index, 'cpuCores', Number(e.target.value))} /></div>
                                             <div><Label>Memory (GB)</Label><Input type="number" value={blade.memory || ''} onChange={e => handleAsymmetricBladeChange(index, 'memory', Number(e.target.value))} /></div>
-                                            <div><Label>Disk Type</Label><Select value={blade.diskType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent><SelectItem value="SSD">SSD</SelectItem><SelectItem value="HDD">HDD</SelectItem></SelectContent></Select></div>
+                                            <div><Label>Disk Type</Label><Select value={blade.diskType} onValueChange={(v) => handleAsymmetricBladeChange(index, 'diskType', v)}><SelectTrigger><SelectValue placeholder="Select..."/></SelectTrigger><SelectContent>{options.diskTypes.map(d => <SelectItem key={d._id} value={d.name}>{d.name}</SelectItem>)}</SelectContent></Select></div>
                                             <div><Label>Disk Capacity (GB)</Label><Input type="number" value={blade.diskCapacity || ''} onChange={e => handleAsymmetricBladeChange(index, 'diskCapacity', Number(e.target.value))} /></div>
                                         </div>
                                         <div className="flex items-center space-x-2 pt-2">
@@ -543,5 +545,3 @@ export default function SpecificationBuilderPage() {
         </DashboardLayout>
     );
 }
-
-    
