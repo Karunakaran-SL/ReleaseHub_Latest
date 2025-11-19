@@ -57,7 +57,7 @@ export default function ViewPlatformFoundationPage() {
                         <CardTitle>View Platform Foundation: {foundation.name}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="h-[70vh]">
+                        <div className="h-[75vh]">
                             <VisualBuilder foundation={foundation} />
                         </div>
                     </CardContent>
