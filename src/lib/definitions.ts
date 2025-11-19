@@ -1,5 +1,6 @@
 
 
+
 export type User = {
   _id: string;
   username: string;
@@ -423,3 +424,21 @@ export type ProductLicensing = {
   validity: string;
   compliance: string;
 };
+
+export type DevelopmentEnvironment = {
+    _id: string;
+    name: string;
+    productId: string;
+    specificationId: string;
+    baselineId?: string;
+    tenantIds: string[];
+    createdAt: string;
+    createdBy: string;
+    status: 'PROVISIONING' | 'READY' | 'ERROR' | 'DELETING';
+    estimatedCost: number;
+    resourceUsage: {
+        cpu: string;
+        memory: string;
+        storage: string;
+    };
+}

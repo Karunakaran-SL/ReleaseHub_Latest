@@ -2,7 +2,7 @@
 
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
-import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification } from './definitions';
+import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment } from './definitions';
 
 
 const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
@@ -1100,6 +1100,11 @@ const initialPlatformFoundations: any[] = [
     }
 ];
 
+const initialDevEnvironments = [
+    { _id: 'dev-env-1', name: 'Feature Branch - SSO', productId: 'OneStopShopPortal', specificationId: 'ArgoCDSyncSpec', baselineId: 'OneStopShopPortal_1.0.0', tenantIds: ['CorePlatformServices', 'RetailOperations'], createdAt: '2024-06-01T10:00:00.000Z', createdBy: 'dev-user-1', status: 'READY', estimatedCost: 15.50, resourceUsage: { cpu: '8 vCPU', memory: '32 GB', storage: '200 GB' } },
+    { _id: 'dev-env-2', name: 'Analytics Hotfix', productId: 'UnifiedDataFabric', specificationId: 'DellPowerEdgeR760', baselineId: null, tenantIds: ['CustomerAnalytics'], createdAt: '2024-06-05T14:30:00.000Z', createdBy: 'dev-user-2', status: 'PROVISIONING', estimatedCost: 25.00, resourceUsage: { cpu: '16 vCPU', memory: '64 GB', storage: '500 GB' } },
+];
+
 
 export async function seedDatabase() {
     const client = await clientPromise;
@@ -1132,7 +1137,8 @@ export async function seedDatabase() {
         ...initialApprovalConfigs,
         { name: 'licenses', data: initialLicenses.map(l => ({ ...l, _id: l.id })) },
         { name: 'product_licensing', data: initialProductLicensing.map(pl => ({ ...pl, _id: pl.id })) },
-        { name: 'platform_foundations', data: initialPlatformFoundations }
+        { name: 'platform_foundations', data: initialPlatformFoundations },
+        { name: 'development_environments', data: initialDevEnvironments }
     ];
     
     let seededCount = 0;
