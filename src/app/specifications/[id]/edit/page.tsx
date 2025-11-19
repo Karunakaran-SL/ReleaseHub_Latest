@@ -144,9 +144,9 @@ export default function EditSpecificationPage() {
     }
     
     const handleSymmetricBladeChange = (field: string, value: any) => {
-        const templateBlade = formData.blades?.[0] || { networkInterfaces: [] };
+        const templateBlade = formState.blades?.[0] || { networkInterfaces: [] };
         const updatedBlade = { ...templateBlade, [field]: value };
-        setFormData((prev: any) => ({ ...prev, blades: [updatedBlade] }));
+        setFormState((prev: any) => ({ ...prev, blades: [updatedBlade] }));
     };
     
     const handleBladeNetworkInterfaceChange = (bladeIndex: number, ifaceIndex: number, field: 'name' | 'type' | 'speed', value: string) => {
