@@ -2,7 +2,7 @@
 'use client';
 
 import { cn } from "@/lib/utils";
-import { Cpu, MemoryStick, Database, NetworkIcon, Server } from "lucide-react";
+import { Cpu, MemoryStick, Database, NetworkIcon, Server, Zap } from "lucide-react";
 
 export function DiagramDisplay({ specJson }: { specJson: string }) {
     let spec;
@@ -26,6 +26,8 @@ export function DiagramDisplay({ specJson }: { specJson: string }) {
                 cpuType: spec.blades?.[0]?.cpuType,
                 memory: spec.blades?.[0]?.memory,
                 diskCapacity: spec.blades?.[0]?.diskCapacity,
+                hasGpu: spec.blades?.[0]?.hasGpu,
+                gpuType: spec.blades?.[0]?.gpuType,
               }))
             : spec.blades || [];
 
@@ -46,6 +48,9 @@ export function DiagramDisplay({ specJson }: { specJson: string }) {
                                     <div className="flex items-center gap-1"><Cpu className="h-3 w-3"/><span>{blade.cpuType || 'N/A'}</span></div>
                                     <div className="flex items-center gap-1"><MemoryStick className="h-3 w-3"/><span>{blade.memory || 'N/A'} GB</span></div>
                                     <div className="flex items-center gap-1"><Database className="h-3 w-3"/><span>{blade.diskCapacity || 'N/A'} GB</span></div>
+                                    {blade.hasGpu && (
+                                         <div className="flex items-center gap-1"><Zap className="h-3 w-3 text-yellow-500"/><span>{blade.gpuType || 'GPU'}</span></div>
+                                    )}
                                 </div>
                             </div>
                         ))}

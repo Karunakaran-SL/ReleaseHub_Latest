@@ -75,6 +75,9 @@ export type Specification = {
         memory?: number;
         diskType?: 'SSD' | 'HDD';
         diskCapacity?: number;
+        hasGpu?: boolean;
+        gpuType?: string;
+        gpuCores?: number;
         networkInterfaces?: {
             name: string;
             type: string;
