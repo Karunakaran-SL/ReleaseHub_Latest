@@ -1,3 +1,4 @@
+
 'use client';
 import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -262,12 +263,13 @@ export default function DashboardLayout({ children, user }: { children: React.Re
 
                  <SidebarMenuItem>
                     <SidebarMenuButton
-                        href="/specifications"
                         isActive={isSpecificationsPage}
                         tooltip={{ children: 'Specifications' }}
                     >
-                        <FileText />
-                        Specifications
+                        <Link href="/specifications" className='flex items-center gap-2 w-full'>
+                            <FileText />
+                            Specifications
+                        </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
 
