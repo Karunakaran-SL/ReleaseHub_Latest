@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
@@ -93,17 +94,21 @@ export default function ViewSdkAppPage() {
                                 {appConfig.simulators?.map((sim: any) => (
                                     <Card key={sim.id}>
                                         <CardHeader><CardTitle className="text-base">{sim.name} (Simulator) - {sim.instanceCount} instances</CardTitle></CardHeader>
-                                        <CardContent>
-                                            {sim.instances.map((inst: any, i: number) => <p key={i} className="text-sm font-mono">{inst.name}@{inst.ip}</p>)}
-                                        </CardContent>
+                                        {sim.instances && sim.instances.length > 0 && (
+                                            <CardContent>
+                                                {sim.instances.map((inst: any, i: number) => <p key={i} className="text-sm font-mono">{inst.name}@{inst.ip}</p>)}
+                                            </CardContent>
+                                        )}
                                     </Card>
                                 ))}
                                 {appConfig.emulators?.map((emu: any) => (
                                      <Card key={emu.id}>
                                         <CardHeader><CardTitle className="text-base">{emu.name} (Emulator) - {emu.instanceCount} instances</CardTitle></CardHeader>
-                                        <CardContent>
-                                            {emu.instances.map((inst: any, i: number) => <p key={i} className="text-sm font-mono">{inst.name}@{inst.ip}</p>)}
-                                        </CardContent>
+                                        {emu.instances && emu.instances.length > 0 && (
+                                            <CardContent>
+                                                {emu.instances.map((inst: any, i: number) => <p key={i} className="text-sm font-mono">{inst.name}@{inst.ip}</p>)}
+                                            </CardContent>
+                                        )}
                                     </Card>
                                 ))}
                             </div>
