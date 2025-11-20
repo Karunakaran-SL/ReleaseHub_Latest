@@ -2,6 +2,7 @@
 
 
 
+
 export type User = {
   _id: string;
   username: string;
@@ -430,22 +431,21 @@ export type DevelopmentEnvironment = {
     _id: string;
     name: string;
     productId: string;
+    productName?: string;
     specificationId: string;
+    specName?: string;
     baselineId?: string;
-    tenantIds: string[];
+    tenantIds?: string[];
     createdAt: string;
     createdBy: string;
     status: 'PROVISIONING' | 'READY' | 'ERROR' | 'DELETING';
-    estimatedCost: number;
-    resourceUsage: {
+    estimatedCost?: number;
+    resourceUsage?: {
         cpu: string;
         memory: string;
         storage: string;
     };
-    dependencySummary?: {
-        type: 'Tenant' | 'Component' | 'Application';
-        id: string;
-        name: string;
-        version: string;
-    }[];
+    dependencySummary?: any[];
 }
+
+export type TestEnvironment = DevelopmentEnvironment;

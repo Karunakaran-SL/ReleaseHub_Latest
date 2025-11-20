@@ -1,0 +1,297 @@
+
+'use client';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import DashboardLayout from '@/app/dashboard-layout';
+import type { User, Product, Specification, Baseline, CmdbTenant, TestEnvironment } from '@/lib/definitions';
+import { getUser } from '@/lib/auth';
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Loader2, ArrowRight, ArrowLeft, Package, AlertTriangle } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
+import { useRouter } from 'next/navigation';
+import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+
+type WizardData = Partial<Omit<TestEnvironment, '_id' | 'createdAt' | 'createdBy' | 'status'>>;
+
+export default function CreateTestEnvironmentPage() {
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+    const { toast } = useToast();
+    const router = useRouter();
+
+    const [step, setStep] = useState(1);
+    const [wizardData, setWizardData] = useState<WizardData>({ selectionMode: 'baseline' });
+
+    const [products, setProducts] = useState<Product[]>([]);
+    const [specifications, setSpecifications] = useState<Specification[]>([]);
+    const [baselines, setBaselines] = useState<Baseline[]>([]);
+    const [tenants, setTenants] = useState<CmdbTenant[]>([]);
+
+    useEffect(() => {
+        getUser().then(setUser);
+        async function fetchData() {
+            setLoading(true);
+            try {
+                const [productsRes, specsRes, baselinesRes, tenantsRes] = await Promise.all([
+                    fetch('/api/products'),
+                    fetch('/api/specifications'),
+                    fetch('/api/baselines'),
+                    fetch('/api/cmdb/tenants'),
+                ]);
+                if (!productsRes.ok || !specsRes.ok || !baselinesRes.ok || !tenantsRes.ok) throw new Error('Failed to fetch initial data.');
+                setProducts(await productsRes.json());
+                setSpecifications(await specsRes.json());
+                setBaselines(await baselinesRes.json());
+                setTenants(await tenantsRes.json());
+            } catch (error: any) {
+                toast({ variant: 'destructive', title: 'Error', description: error.message });
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
+    }, [toast]);
+    
+    const handleNext = () => setStep(s => s + 1);
+    const handleBack = () => setStep(s => s - 1);
+
+    const handleUpdate = (data: Partial<WizardData>) => {
+        setWizardData(prev => ({ ...prev, ...data }));
+    };
+    
+    const dependencySummary = useMemo(() => {
+        if (!wizardData) return [];
+        let items: any[] = [];
+        if (wizardData.selectionMode === 'baseline') {
+            const baseline = baselines.find(b => b._id === wizardData.baselineId);
+            if (baseline) {
+                items = (baseline.tenants || []).flatMap((tenant: any) => [
+                    { type: 'Tenant', ...tenant },
+                    ...(tenant.components || []).map((c: any) => ({ type: 'Component', ...c })),
+                    ...(tenant.applications || []).map((a: any) => ({ type: 'Application', ...a }))
+                ]);
+            }
+        } else {
+             items = tenants.filter(t => wizardData.tenantIds?.includes(t.id)).map(t => ({type: 'Tenant', ...t}));
+        }
+        
+        const uniqueItems = new Map();
+        items.forEach(item => {
+            if (!item || !item.type || !item.id) return;
+            const key = `${item.type}-${item.id}`;
+            if (!uniqueItems.has(key)) {
+                uniqueItems.set(key, item);
+            }
+        });
+        return Array.from(uniqueItems.values());
+    }, [wizardData.selectionMode, wizardData.baselineId, wizardData.tenantIds, baselines, tenants]);
+
+    const handleCreateEnvironment = async () => {
+        setLoading(true);
+        try {
+            const payload = {
+                ...wizardData,
+                dependencySummary: dependencySummary,
+                estimatedCost: 50.00, // Updated cost for test env
+                resourceUsage: { cpu: '32 vCPU', memory: '128 GB', storage: '1 TB' } // Higher resources
+            };
+
+            const response = await fetch('/api/platform-engineering/test-environments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error('Failed to create test environment.');
+
+            toast({ title: 'Success', description: 'Test environment is being provisioned.' });
+            router.push('/platform-engineering/test-environments');
+            router.refresh();
+
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const isNextDisabled = (): boolean => {
+        switch (step) {
+            case 1: return !wizardData.name || !wizardData.productId || !wizardData.specificationId;
+            case 2:
+                if (!wizardData.selectionMode) return true;
+                if (wizardData.selectionMode === 'baseline' && !wizardData.baselineId) return true;
+                if (wizardData.selectionMode === 'manual' && (!wizardData.tenantIds || wizardData.tenantIds.length === 0)) return true;
+                return false;
+            case 3: return false;
+            default: return false;
+        }
+    };
+    
+    const renderStepContent = () => {
+        if (loading) {
+            return <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+        }
+
+        switch(step) {
+            case 1:
+                return (
+                    <div className="space-y-6">
+                         <Alert variant="destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTitle>Warning: High Cost</AlertTitle>
+                            <AlertDescription>
+                                Test Environments are provisioned with higher resources for non-functional testing and will incur significantly higher costs than development environments.
+                            </AlertDescription>
+                        </Alert>
+                        <div className="space-y-2">
+                             <Label htmlFor="env-name">Environment Name *</Label>
+                             <Input id="env-name" placeholder="e.g., performance-test-q3" value={wizardData.name || ''} onChange={(e) => handleUpdate({ name: e.target.value })} required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="product-select">Product *</Label>
+                            <Select value={wizardData.productId} onValueChange={(v) => handleUpdate({ productId: v, productName: products.find(p => p._id === v)?.name })}>
+                                <SelectTrigger id="product-select"><SelectValue placeholder="Select a product..." /></SelectTrigger>
+                                <SelectContent>
+                                    {products.map(p => <SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="spec-select">Specification *</Label>
+                            <Select value={wizardData.specificationId} onValueChange={(v) => handleUpdate({ specificationId: v, specName: specifications.find(s => s._id === v)?.name })}>
+                                <SelectTrigger id="spec-select"><SelectValue placeholder="Select a specification..." /></SelectTrigger>
+                                <SelectContent>
+                                    {specifications.map(s => <SelectItem key={s._id} value={s._id}>{s.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                );
+            case 2:
+                return (
+                    <div className="space-y-6">
+                        <RadioGroup value={wizardData.selectionMode} onValueChange={(v) => handleUpdate({ selectionMode: v as 'baseline' | 'manual', baselineId: undefined, tenantIds: [] })}>
+                             <div className="flex items-center space-x-2"><RadioGroupItem value="baseline" id="mode-baseline"/><Label htmlFor="mode-baseline">Use a Baseline</Label></div>
+                             <div className="flex items-center space-x-2"><RadioGroupItem value="manual" id="mode-manual"/><Label htmlFor="mode-manual">Select Tenants Manually</Label></div>
+                        </RadioGroup>
+                        <Separator />
+                        {wizardData.selectionMode === 'baseline' && (
+                             <div className="space-y-2">
+                                <Label htmlFor="baseline-select">Baseline</Label>
+                                <Select value={wizardData.baselineId} onValueChange={(v) => handleUpdate({ baselineId: v })}>
+                                    <SelectTrigger id="baseline-select"><SelectValue placeholder="Select a baseline..." /></SelectTrigger>
+                                    <SelectContent>
+                                        {baselines.filter(b => b.product.id === wizardData.productId && b.status === 'RELEASED').map(b => (
+                                            <SelectItem key={b._id} value={b._id}>{b.product.name} v{b.product.version}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+                         {wizardData.selectionMode === 'manual' && (
+                             <div className="space-y-2">
+                                <Label>Tenants</Label>
+                                <MultiSelectListBox
+                                    available={tenants.filter(t => !(wizardData.tenantIds || []).includes(t.id)).map(t => ({id: t.id, label: t.name}))}
+                                    chosen={(wizardData.tenantIds || []).map(id => {
+                                        const tenant = tenants.find(t => t.id === id);
+                                        return { id: id, label: tenant?.name || id };
+                                    })}
+                                    onMoveToChosen={(ids) => handleUpdate({ tenantIds: [...(wizardData.tenantIds || []), ...ids] })}
+                                    onMoveToAvailable={(ids) => handleUpdate({ tenantIds: (wizardData.tenantIds || []).filter(id => !ids.includes(id))})}
+                                    onMoveAllToChosen={() => handleUpdate({ tenantIds: tenants.map(t => t.id) })}
+                                    onMoveAllToAvailable={() => handleUpdate({ tenantIds: [] })}
+                                />
+                            </div>
+                        )}
+                    </div>
+                );
+            case 3:
+                return (
+                     <div>
+                        <h3 className="text-lg font-semibold mb-2">Dependency Summary</h3>
+                        <p className="text-sm text-muted-foreground mb-4">The following will be provisioned in the new test environment.</p>
+                        <Card>
+                             <Table>
+                                <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Name</TableHead><TableHead>Version</TableHead></TableRow></TableHeader>
+                                <TableBody>
+                                    {dependencySummary.length > 0 ? dependencySummary.map(item => (
+                                         <TableRow key={`${item.type}-${item.id}`}>
+                                            <TableCell>{item.type}</TableCell>
+                                            <TableCell>{item.name}</TableCell>
+                                            <TableCell>{item.version || 'N/A'}</TableCell>
+                                        </TableRow>
+                                    )) : <TableRow><TableCell colSpan={3} className="text-center">No dependencies to show.</TableCell></TableRow>}
+                                </TableBody>
+                            </Table>
+                        </Card>
+                    </div>
+                );
+            case 4:
+                return (
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Final Review</h3>
+                        <Card>
+                            <CardContent className="pt-6 grid grid-cols-2 gap-4 text-sm">
+                                <div><Label>Name:</Label> <p>{wizardData.name}</p></div>
+                                <div><Label>Product:</Label> <p>{wizardData.productName}</p></div>
+                                <div><Label>Specification:</Label> <p>{wizardData.specName}</p></div>
+                                 <div><Label>Mode:</Label> <p className="capitalize">{wizardData.selectionMode}</p></div>
+                                {wizardData.selectionMode === 'baseline' && (
+                                     <div><Label>Baseline:</Label> <p>{baselines.find(b=>b._id === wizardData.baselineId)?.product.version}</p></div>
+                                )}
+                                <div className="col-span-2"><Label>Tenants:</Label> <p>{wizardData.tenantIds?.length || 'From Baseline'}</p></div>
+                                <div className="col-span-2 border-t pt-4 mt-2">
+                                     <h4 className="font-semibold">Estimated Resources</h4>
+                                     <p>CPU: 32 vCPU</p>
+                                     <p>Memory: 128 GB</p>
+                                     <p>Storage: 1 TB</p>
+                                     <p className="font-bold mt-2 text-destructive">Est. Cost: $50.00 / hr</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )
+        }
+    };
+
+    return (
+        <DashboardLayout user={user}>
+            <main className="flex-1 p-6 md:p-10">
+                <Card className="w-full max-w-3xl mx-auto">
+                    <CardHeader>
+                        <CardTitle>Create Test Environment</CardTitle>
+                        <CardDescription>Step {step} of 4</CardDescription>
+                    </CardHeader>
+                    <CardContent className="min-h-[400px]">
+                        {renderStepContent()}
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                         <Button variant="outline" onClick={handleBack} disabled={step === 1 || loading}>
+                            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                        </Button>
+                        {step < 4 ? (
+                            <Button onClick={handleNext} disabled={isNextDisabled()}>
+                                Next <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        ) : (
+                             <Button onClick={handleCreateEnvironment} disabled={loading}>
+                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Package className="mr-2 h-4 w-4"/>}
+                                Create Test Environment
+                            </Button>
+                        )}
+                    </CardFooter>
+                </Card>
+            </main>
+        </DashboardLayout>
+    );
+}
