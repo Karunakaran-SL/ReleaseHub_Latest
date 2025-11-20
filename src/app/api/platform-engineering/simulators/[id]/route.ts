@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
@@ -52,12 +53,25 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     try {
         const { id } = params;
         if (!ObjectId.isValid(id)) return NextResponse.json({ message: 'Invalid ID' }, { status: 400 });
+        
+        const { comment } = await req.json();
+        if (!comment) {
+            return NextResponse.json({ message: 'A comment is required for deletion.' }, { status: 400 });
+        }
+
         const client = await clientPromise;
         const db = client.db();
         const result = await db.collection(COLLECTION_NAME).deleteOne({ _id: new ObjectId(id) });
+        
         if (result.deletedCount === 0) return NextResponse.json({ message: 'Item not found' }, { status: 404 });
+
+        // In a real app, you would log this to an audit trail with the user info
+        console.log(`Item ${id} deleted with comment: "${comment}"`);
+        
         return new NextResponse(null, { status: 204 });
     } catch (error) {
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }
+
+    

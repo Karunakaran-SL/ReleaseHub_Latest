@@ -14,10 +14,80 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, PlusCircle, Trash2, Edit } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 interface CrudTableProps<T extends { _id: string; name: string }> {
   title: 'Simulators' | 'Emulators';
   apiEndpoint: 'simulators' | 'emulators';
+}
+
+function DeleteConfirmationDialog({ itemId, itemName, apiEndpoint, onDeleted }: { itemId: string; itemName: string; apiEndpoint: string; onDeleted: () => void; }) {
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteComment, setDeleteComment] = useState('');
+    const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+    const { toast } = useToast();
+
+    const handleDelete = async () => {
+        if (deleteConfirmationText !== 'delete' || !deleteComment) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Please type "delete" and provide a comment to confirm deletion.'
+            });
+            return;
+        }
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`/api/platform-engineering/${apiEndpoint}/${itemId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment: deleteComment }),
+            });
+            if (!res.ok) {
+                 const errorData = await res.json();
+                 throw new Error(errorData.message || 'Failed to delete item.');
+            }
+            toast({ title: 'Success', description: `${itemName} deleted successfully.` });
+            onDeleted();
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: error.message });
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    return (
+        <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive"/></Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action is permanent and will delete the <strong>{itemName}</strong>. Please provide a reason and type "delete" to confirm.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="delete-comment">Reason for Deletion *</Label>
+                        <Textarea id="delete-comment" placeholder="Provide a comment for auditing..." value={deleteComment} onChange={(e) => setDeleteComment(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="delete-confirmation">Type "delete" to confirm *</Label>
+                        <Input id="delete-confirmation" value={deleteConfirmationText} onChange={(e) => setDeleteConfirmationText(e.target.value)} />
+                    </div>
+                </div>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting || deleteConfirmationText !== 'delete' || !deleteComment}>
+                        {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>} Delete
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
 }
 
 function CrudTable<T extends { _id: string; name: string; dockerImage: string; helmChartUrl?: string; registryUrl?: string; registryUsername?: string; registryPassword?: string; }>({ title, apiEndpoint }: CrudTableProps<T>) {
@@ -60,7 +130,7 @@ function CrudTable<T extends { _id: string; name: string; dockerImage: string; h
     
     let payload = {...currentItem};
     if (!useCustomRegistry) {
-        payload.registryUrl = ''; // Corrected from undefined
+        payload.registryUrl = '';
         payload.registryUsername = undefined;
         payload.registryPassword = undefined;
     }
@@ -74,17 +144,6 @@ function CrudTable<T extends { _id: string; name: string; dockerImage: string; h
         toast({ title: 'Success', description: `${title.slice(0, -1)} saved.` });
         fetchItems();
         setIsDialogOpen(false);
-    } catch (error: any) {
-        toast({ variant: 'destructive', title: 'Error', description: error.message });
-    }
-  };
-  
-  const handleDelete = async (id: string) => {
-    try {
-        const res = await fetch(`/api/platform-engineering/${apiEndpoint}/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error(`Failed to delete ${title.slice(0, -1)}`);
-        toast({ title: 'Success', description: `${title.slice(0, -1)} deleted.` });
-        fetchItems();
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Error', description: error.message });
     }
@@ -110,7 +169,12 @@ function CrudTable<T extends { _id: string; name: string; dockerImage: string; h
                   <TableCell>{item.helmChartUrl || 'N/A'}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => openDialog(item)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(item._id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                    <DeleteConfirmationDialog 
+                        itemId={item._id}
+                        itemName={item.name}
+                        apiEndpoint={apiEndpoint}
+                        onDeleted={fetchItems}
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -136,7 +200,7 @@ function CrudTable<T extends { _id: string; name: string; dockerImage: string; h
                     <div className="space-y-2"><Label htmlFor="registryPassword">Password</Label><Input id="registryPassword" type="password" value={currentItem?.registryPassword || ''} onChange={(e) => setCurrentItem(prev => ({...prev, registryPassword: e.target.value}))}/></div>
                 </div>
              )}
-             <div className="space-y-2"><Label htmlFor="helmChartUrl">Helm Chart URL</Label><Input id="helmChartUrl" value={currentItem?.helmChartUrl || ''} onChange={(e) => setCurrentItem(prev => ({...prev, helmChartUrl: e.target.value}))}/></div>
+             <div className="space-y-2"><Label htmlFor="helmChartUrl">Helm Chart Reference</Label><Input id="helmChartUrl" value={currentItem?.helmChartUrl || ''} onChange={(e) => setCurrentItem(prev => ({...prev, helmChartUrl: e.target.value}))}/></div>
           </div>
           <DialogFooter>
             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
@@ -180,3 +244,5 @@ export default function SimulatorsPage() {
         </DashboardLayout>
     );
 }
+
+    
