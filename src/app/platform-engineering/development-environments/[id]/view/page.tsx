@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, DevelopmentEnvironment, Product, Specification, Baseline, CmdbTenant } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
@@ -32,7 +32,6 @@ export default function ViewDevelopmentEnvironmentPage() {
         product: Product | null,
         specification: Specification | null,
         baseline: Baseline | null,
-        tenants: CmdbTenant[],
     } | null>(null);
 
     const { toast } = useToast();
@@ -47,32 +46,29 @@ export default function ViewDevelopmentEnvironmentPage() {
         async function fetchData() {
             setLoading(true);
             try {
-                const [envRes, productsRes, specsRes, baselinesRes, tenantsRes] = await Promise.all([
+                const [envRes, productsRes, specsRes, baselinesRes] = await Promise.all([
                     fetch(`/api/development-environments/${id}`),
                     fetch('/api/products'),
                     fetch('/api/specifications'),
                     fetch('/api/baselines'),
-                    fetch('/api/cmdb/tenants'),
                 ]);
 
                 if (!envRes.ok) throw new Error('Failed to fetch environment details');
-                if (!productsRes.ok || !specsRes.ok || !baselinesRes.ok || !tenantsRes.ok) {
-                    throw new Error('Failed to fetch related project data.');
-                }
+                if (!productsRes.ok) throw new Error('Failed to fetch products.');
+                if (!specsRes.ok) throw new Error('Failed to fetch specifications.');
+                if (!baselinesRes.ok) throw new Error('Failed to fetch baselines.');
                 
                 const envData: DevelopmentEnvironment = await envRes.json();
                 const products = await productsRes.json();
                 const specifications = await specsRes.json();
                 const baselines = await baselinesRes.json();
-                const allTenants = await tenantsRes.json();
-
-                const product = products.find((p: Product) => p._id === envData.productId);
-                const specification = specifications.find((s: Specification) => s._id === envData.specificationId);
-                const baseline = envData.baselineId ? baselines.find((b: Baseline) => b._id === envData.baselineId) : null;
-                const tenants = envData.tenantIds ? allTenants.filter((t: CmdbTenant) => envData.tenantIds.includes(t.id)) : [];
                 
                 setEnvironment(envData);
-                setRelatedData({ product, specification, baseline, tenants });
+                setRelatedData({
+                    product: products.find((p: Product) => p._id === envData.productId) || null,
+                    specification: specifications.find((s: Specification) => s._id === envData.specificationId) || null,
+                    baseline: envData.baselineId ? baselines.find((b: Baseline) => b._id === envData.baselineId) : null,
+                });
 
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -84,37 +80,6 @@ export default function ViewDevelopmentEnvironmentPage() {
         fetchData();
     }, [id, toast]);
     
-    const dependencyItems = useMemo(() => {
-        if (!relatedData || (!relatedData.baseline && relatedData.tenants.length === 0)) return [];
-        
-        let items: any[] = [];
-        
-        if (relatedData.baseline) {
-            items = (relatedData.baseline.tenants || []).flatMap((tenant: any) => [
-                { type: 'Tenant', ...tenant },
-                ...(tenant.components || []).map((c: any) => ({ type: 'Component', ...c })),
-                ...(tenant.applications || []).map((a: any) => ({ type: 'Application', ...a }))
-            ]);
-        } else {
-             items = relatedData.tenants.flatMap((tenant: any) => [
-                { type: 'Tenant', ...tenant },
-                ...(tenant.components || []).map((c: any) => ({ type: 'Component', ...c })),
-                ...(tenant.applications || []).map((a: any) => ({ type: 'Application', ...a }))
-            ]);
-        }
-        
-        const uniqueItems = new Map();
-        items.forEach(item => {
-            if (!item || !item.type || !item.id) return;
-            const key = `${item.type}-${item.id}`;
-            if (!uniqueItems.has(key)) {
-                uniqueItems.set(key, item);
-            }
-        });
-        
-        return Array.from(uniqueItems.values());
-    }, [relatedData]);
-
     if (loading) {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
@@ -163,17 +128,17 @@ export default function ViewDevelopmentEnvironmentPage() {
                         <div className="grid md:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold">Sourcing</h3>
-                                {relatedData?.baseline ? (
+                                {environment.baselineId ? (
                                     <div>
                                         <Label>Baseline</Label>
-                                        <Input value={`${relatedData.baseline.product.name} v${relatedData.baseline.product.version}`} disabled />
+                                        <Input value={`${relatedData?.baseline?.product.name} v${relatedData?.baseline?.product.version}` || 'N/A'} disabled />
                                     </div>
                                 ) : (
                                     <div>
-                                        <Label>Manually Selected Tenants ({relatedData?.tenants.length || 0})</Label>
+                                        <Label>Manually Selected Tenants ({environment.tenantIds?.length || 0})</Label>
                                         <Card className="max-h-40 overflow-y-auto">
                                             <CardContent className="p-2">
-                                                {relatedData?.tenants.map(t => <div key={t.id} className="p-1">{t.name}</div>)}
+                                                {environment.tenantIds?.map(id => <div key={id} className="p-1">{id}</div>)}
                                             </CardContent>
                                         </Card>
                                     </div>
@@ -203,7 +168,7 @@ export default function ViewDevelopmentEnvironmentPage() {
                              <Table>
                                 <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Name</TableHead><TableHead>Version</TableHead></TableRow></TableHeader>
                                 <TableBody>
-                                    {dependencyItems.length > 0 ? dependencyItems.map(item => (
+                                    {environment.dependencySummary && environment.dependencySummary.length > 0 ? environment.dependencySummary.map(item => (
                                          <TableRow key={`${item.type}-${item.id}`}>
                                             <TableCell>
                                                 <Badge variant="outline">
@@ -216,7 +181,7 @@ export default function ViewDevelopmentEnvironmentPage() {
                                             <TableCell>{item.name}</TableCell>
                                             <TableCell>{item.version || 'N/A'}</TableCell>
                                         </TableRow>
-                                    )) : <TableRow><TableCell colSpan={3} className="text-center">No dependencies to show.</TableCell></TableRow>}
+                                    )) : <TableRow><TableCell colSpan={3} className="text-center">No dependency summary available.</TableCell></TableRow>}
                                 </TableBody>
                             </Table>
                         </div>

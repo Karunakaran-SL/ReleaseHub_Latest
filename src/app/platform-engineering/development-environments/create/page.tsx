@@ -1,13 +1,13 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Product, Specification, Baseline, CmdbTenant } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowRight, ArrowLeft, Package, Warehouse } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, Package } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,12 @@ interface WizardData {
     selectionMode?: 'baseline' | 'manual';
     baselineId?: string;
     tenantIds?: string[];
+    dependencySummary?: {
+        type: 'Tenant' | 'Component' | 'Application';
+        id: string;
+        name: string;
+        version: string;
+    }[];
 }
 
 export default function CreateDevelopmentEnvironmentPage() {
@@ -74,6 +80,37 @@ export default function CreateDevelopmentEnvironmentPage() {
         setWizardData(prev => ({ ...prev, ...data }));
     };
     
+    const dependencySummary = useMemo(() => {
+        if (!wizardData) return [];
+        let items: any[] = [];
+        if (wizardData.selectionMode === 'baseline') {
+            const baseline = baselines.find(b => b._id === wizardData.baselineId);
+            if (baseline) {
+                items = (baseline.tenants || []).flatMap((tenant: any) => [
+                    { type: 'Tenant', ...tenant },
+                    ...(tenant.components || []).map((c: any) => ({ type: 'Component', ...c })),
+                    ...(tenant.applications || []).map((a: any) => ({ type: 'Application', ...a }))
+                ]);
+            }
+        } else {
+             items = tenants.filter(t => wizardData.tenantIds?.includes(t.id)).map(t => ({type: 'Tenant', ...t}));
+        }
+        
+        const uniqueItems = new Map();
+        items.forEach(item => {
+            if (!item || !item.type || !item.id) return;
+            const key = `${item.type}-${item.id}`;
+            if (!uniqueItems.has(key)) {
+                uniqueItems.set(key, item);
+            }
+        });
+        return Array.from(uniqueItems.values());
+    }, [wizardData, baselines, tenants]);
+
+    useEffect(() => {
+        handleUpdate({ dependencySummary });
+    }, [dependencySummary]);
+
     const handleCreateEnvironment = async () => {
         setLoading(true);
         try {
@@ -85,7 +122,7 @@ export default function CreateDevelopmentEnvironmentPage() {
                 specName: wizardData.specName,
                 baselineId: wizardData.baselineId,
                 tenantIds: wizardData.tenantIds,
-                // These are placeholder values
+                dependencySummary: dependencySummary,
                 estimatedCost: 25.00,
                 resourceUsage: { cpu: '16 vCPU', memory: '64 GB', storage: '500 GB' }
             };
@@ -203,19 +240,6 @@ export default function CreateDevelopmentEnvironmentPage() {
                     </div>
                 );
             case 3: // Summary
-                 let summaryItems: any[] = [];
-                if (wizardData.selectionMode === 'baseline') {
-                    const baseline = baselines.find(b => b._id === wizardData.baselineId);
-                    if (baseline) {
-                         summaryItems = baseline.tenants?.flatMap((t: any) => [
-                            { type: 'Tenant', ...t },
-                            ...(t.components || []).map((c: any) => ({ type: 'Component', ...c})),
-                            ...(t.applications || []).map((a: any) => ({ type: 'Application', ...a}))
-                         ]);
-                    }
-                } else {
-                     summaryItems = tenants.filter(t => wizardData.tenantIds?.includes(t.id)).map(t => ({type: 'Tenant', ...t}));
-                }
                 return (
                      <div>
                         <h3 className="text-lg font-semibold mb-2">Dependency Summary</h3>
@@ -224,7 +248,7 @@ export default function CreateDevelopmentEnvironmentPage() {
                              <Table>
                                 <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Name</TableHead><TableHead>Version</TableHead></TableRow></TableHeader>
                                 <TableBody>
-                                    {summaryItems.length > 0 ? summaryItems.map(item => (
+                                    {dependencySummary.length > 0 ? dependencySummary.map(item => (
                                          <TableRow key={`${item.type}-${item.id}`}>
                                             <TableCell>{item.type}</TableCell>
                                             <TableCell>{item.name}</TableCell>

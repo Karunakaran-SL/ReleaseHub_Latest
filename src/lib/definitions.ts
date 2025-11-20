@@ -1,6 +1,7 @@
 
 
 
+
 export type User = {
   _id: string;
   username: string;
@@ -441,4 +442,10 @@ export type DevelopmentEnvironment = {
         memory: string;
         storage: string;
     };
+    dependencySummary?: {
+        type: 'Tenant' | 'Component' | 'Application';
+        id: string;
+        name: string;
+        version: string;
+    }[];
 }

@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MultiSelectListBox, type Option as MultiSelectOption } from '@/components/ui/multi-select-list-box';
+import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -21,6 +21,7 @@ type EditEnvironmentState = Partial<Omit<DevelopmentEnvironment, '_id' | 'create
     productName?: string;
     specName?: string;
     selectionMode?: 'baseline' | 'manual';
+    dependencySummary?: any[];
 };
 
 export default function EditDevelopmentEnvironmentPage() {
@@ -93,6 +94,37 @@ export default function EditDevelopmentEnvironmentPage() {
         setFormState(prev => ({ ...prev, ...data }));
     };
 
+    const dependencySummary = useMemo(() => {
+        if (!formState) return [];
+        let items: any[] = [];
+        if (formState.selectionMode === 'baseline') {
+            const baseline = baselines.find(b => b._id === formState.baselineId);
+            if (baseline) {
+                items = (baseline.tenants || []).flatMap((tenant: any) => [
+                    { type: 'Tenant', ...tenant },
+                    ...(tenant.components || []).map((c: any) => ({ type: 'Component', ...c })),
+                    ...(tenant.applications || []).map((a: any) => ({ type: 'Application', ...a }))
+                ]);
+            }
+        } else {
+             items = tenants.filter(t => formState.tenantIds?.includes(t.id)).map(t => ({type: 'Tenant', ...t}));
+        }
+        
+        const uniqueItems = new Map();
+        items.forEach(item => {
+            if (!item || !item.type || !item.id) return;
+            const key = `${item.type}-${item.id}`;
+            if (!uniqueItems.has(key)) {
+                uniqueItems.set(key, item);
+            }
+        });
+        return Array.from(uniqueItems.values());
+    }, [formState, baselines, tenants]);
+
+     useEffect(() => {
+        handleUpdate({ dependencySummary });
+    }, [dependencySummary]);
+
     const handleSave = async () => {
         setIsSaving(true);
         try {
@@ -134,33 +166,6 @@ export default function EditDevelopmentEnvironmentPage() {
             default: return false;
         }
     };
-    
-    const summaryItems = useMemo(() => {
-        if (!formState) return [];
-        let items: any[] = [];
-        if (formState.selectionMode === 'baseline') {
-            const baseline = baselines.find(b => b._id === formState.baselineId);
-            if (baseline) {
-                items = (baseline.tenants || []).flatMap((tenant: any) => [
-                    { type: 'Tenant', ...tenant },
-                    ...(tenant.components || []).map((c: any) => ({ type: 'Component', ...c })),
-                    ...(tenant.applications || []).map((a: any) => ({ type: 'Application', ...a }))
-                ]);
-            }
-        } else {
-             items = tenants.filter(t => formState.tenantIds?.includes(t.id)).map(t => ({type: 'Tenant', ...t}));
-        }
-        
-        const uniqueItems = new Map();
-        items.forEach(item => {
-            if (!item || !item.type || !item.id) return;
-            const key = `${item.type}-${item.id}`;
-            if (!uniqueItems.has(key)) {
-                uniqueItems.set(key, item);
-            }
-        });
-        return Array.from(uniqueItems.values());
-    }, [formState, baselines, tenants]);
     
     const renderStepContent = () => {
         if (loading || Object.keys(formState).length === 0) {
@@ -233,7 +238,7 @@ export default function EditDevelopmentEnvironmentPage() {
                              <Table>
                                 <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Name</TableHead><TableHead>Version</TableHead></TableRow></TableHeader>
                                 <TableBody>
-                                    {summaryItems.length > 0 ? summaryItems.map(item => (
+                                    {dependencySummary.length > 0 ? dependencySummary.map(item => (
                                          <TableRow key={`${item.type}-${item.id}`}>
                                             <TableCell>{item.type}</TableCell>
                                             <TableCell>{item.name}</TableCell>
@@ -280,4 +285,3 @@ export default function EditDevelopmentEnvironmentPage() {
         </DashboardLayout>
     );
 }
-
