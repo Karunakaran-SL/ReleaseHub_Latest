@@ -2,7 +2,7 @@
 
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
-import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment } from './definitions';
+import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator } from './definitions';
 
 
 const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
@@ -668,6 +668,20 @@ const initialSpecDiskTypes = [
     { "name": "Cloud_Block_EBS", "type": "Cloud", "classification": { "storage_type": "Block", "example": "EBS-Type" } }
 ];
 
+const initialSimulators: Omit<Simulator, '_id'>[] = [
+    { name: 'High-Latency WAN Simulator', dockerImage: 'slow-network/wan-sim:latest', helmChartUrl: 'charts/wan-simulator' },
+    { name: 'Packet-Loss Network Simulator (5%)', dockerImage: 'fault-injector/packet-loss:5.0' },
+    { name: 'CPU Stress Test Simulator', dockerImage: 'stress-ng/cpu-burner:latest' },
+    { name: 'Disk I/O Bottleneck Simulator', dockerImage: 'fio/io-simulator:latest' },
+];
+
+const initialEmulators: Omit<Emulator, '_id'>[] = [
+    { name: 'Raspberry Pi 4 (QEMU)', dockerImage: 'qemu/raspi4-emulator:latest', registryUrl: 'docker.io', helmChartUrl: '' },
+    { name: 'HPE ProLiant DL380 Gen11', dockerImage: 'hpe-sim/dl380-g11:latest', registryUrl: 'registry.hpe.com' },
+    { name: 'Cisco Nexus 9000v Switch', dockerImage: 'cisco/nexus9000v:latest', registryUrl: 'registry.cisco.com' },
+    { name: 'Android 14 Emulator', dockerImage: 'google/android-emulator:14.0', registryUrl: 'gcr.io' },
+];
+
 
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
@@ -1138,7 +1152,9 @@ export async function seedDatabase() {
         { name: 'licenses', data: initialLicenses.map(l => ({ ...l, _id: l.id })) },
         { name: 'product_licensing', data: initialProductLicensing.map(pl => ({ ...pl, _id: pl.id })) },
         { name: 'platform_foundations', data: initialPlatformFoundations },
-        { name: 'development_environments', data: initialDevEnvironments }
+        { name: 'development_environments', data: initialDevEnvironments },
+        { name: 'simulators', data: initialSimulators },
+        { name: 'emulators', data: initialEmulators },
     ];
     
     let seededCount = 0;
