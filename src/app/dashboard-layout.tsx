@@ -1,3 +1,4 @@
+
 'use client';
 import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -381,11 +382,6 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                                         <SidebarMenuSubItem>
                                             <SidebarMenuSubButton href="/platform-engineering/quality/dynamic-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/dynamic-analyzer')}>
                                                 <ScanSearch className="mr-2"/> Dynamic Analyzer
-                                            </SidebarMenuSubButton>
-                                        </SidebarMenuSubItem>
-                                         <SidebarMenuSubItem>
-                                            <SidebarMenuSubButton href="/platform-engineering/quality/integration" isActive={pathname.startsWith('/platform-engineering/quality/integration')}>
-                                                <WrenchIcon className="mr-2"/> Integrations
                                             </SidebarMenuSubButton>
                                         </SidebarMenuSubItem>
                                     </SidebarMenuSub>
