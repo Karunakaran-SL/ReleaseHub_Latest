@@ -28,12 +28,12 @@ export default function ViewDevelopmentEnvironmentPage() {
     const [user, setUser] = useState<User | null>(null);
     const [environment, setEnvironment] = useState<DevelopmentEnvironment | null>(null);
     const [loading, setLoading] = useState(true);
-    const [relatedData, setRelatedData] = useState({
-        product: null as Product | null,
-        specification: null as Specification | null,
-        baseline: null as Baseline | null,
-        tenants: [] as CmdbTenant[],
-    });
+    const [relatedData, setRelatedData] = useState<{
+        product: Product | null,
+        specification: Specification | null,
+        baseline: Baseline | null,
+        tenants: CmdbTenant[],
+    } | null>(null);
 
     const { toast } = useToast();
     const router = useRouter();
@@ -56,12 +56,15 @@ export default function ViewDevelopmentEnvironmentPage() {
                 ]);
 
                 if (!envRes.ok) throw new Error('Failed to fetch environment details');
-                const envData: DevelopmentEnvironment = await envRes.json();
+                if (!productsRes.ok || !specsRes.ok || !baselinesRes.ok || !tenantsRes.ok) {
+                    throw new Error('Failed to fetch related project data.');
+                }
                 
-                const products = productsRes.ok ? await productsRes.json() : [];
-                const specifications = specsRes.ok ? await specsRes.json() : [];
-                const baselines = baselinesRes.ok ? await baselinesRes.json() : [];
-                const allTenants = tenantsRes.ok ? await tenantsRes.json() : [];
+                const envData: DevelopmentEnvironment = await envRes.json();
+                const products = await productsRes.json();
+                const specifications = await specsRes.json();
+                const baselines = await baselinesRes.json();
+                const allTenants = await tenantsRes.json();
 
                 const product = products.find((p: Product) => p._id === envData.productId);
                 const specification = specifications.find((s: Specification) => s._id === envData.specificationId);
@@ -73,6 +76,7 @@ export default function ViewDevelopmentEnvironmentPage() {
 
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
+                setEnvironment(null);
             } finally {
                 setLoading(false);
             }
@@ -81,7 +85,7 @@ export default function ViewDevelopmentEnvironmentPage() {
     }, [id, toast]);
     
     const dependencyItems = useMemo(() => {
-        if (!relatedData.baseline && relatedData.tenants.length === 0) return [];
+        if (!relatedData || (!relatedData.baseline && relatedData.tenants.length === 0)) return [];
         
         let items: any[] = [];
         
@@ -115,7 +119,7 @@ export default function ViewDevelopmentEnvironmentPage() {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
     
-    if (!environment) {
+    if (!environment || !relatedData) {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center p-8 text-center"><p>Could not load environment data. It may have been deleted or an error occurred.</p></div></DashboardLayout>;
     }
     
