@@ -14,6 +14,8 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { MultiSelectListBox, type Option as MultiSelectOption } from '@/components/ui/multi-select-list-box';
 import { useRouter } from 'next/navigation';
+import { Separator } from '@/components/ui/separator';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface WizardData {
     name?: string;
@@ -33,7 +35,7 @@ export default function CreateDevelopmentEnvironmentPage() {
     const router = useRouter();
 
     const [step, setStep] = useState(1);
-    const [wizardData, setWizardData] = useState<WizardData>({});
+    const [wizardData, setWizardData] = useState<WizardData>({ selectionMode: 'baseline' });
 
     const [products, setProducts] = useState<Product[]>([]);
     const [specifications, setSpecifications] = useState<Specification[]>([]);
