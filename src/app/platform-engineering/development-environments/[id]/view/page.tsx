@@ -56,6 +56,11 @@ export default function ViewDevelopmentEnvironmentPage() {
                 ]);
 
                 if (!envRes.ok) throw new Error('Failed to fetch environment details');
+                if (!productsRes.ok) throw new Error('Failed to fetch products');
+                if (!specsRes.ok) throw new Error('Failed to fetch specifications');
+                if (!baselinesRes.ok) throw new Error('Failed to fetch baselines');
+                if (!tenantsRes.ok) throw new Error('Failed to fetch tenants');
+                
                 const envData: DevelopmentEnvironment = await envRes.json();
                 setEnvironment(envData);
                 
@@ -86,7 +91,7 @@ export default function ViewDevelopmentEnvironmentPage() {
         let items: any[] = [];
         
         if (relatedData.baseline) {
-            items = relatedData.baseline.tenants.flatMap((tenant: any) => [
+            items = (relatedData.baseline.tenants || []).flatMap((tenant: any) => [
                 { type: 'Tenant', ...tenant },
                 ...(tenant.components || []).map((c: any) => ({ type: 'Component', ...c })),
                 ...(tenant.applications || []).map((a: any) => ({ type: 'Application', ...a }))
@@ -103,7 +108,7 @@ export default function ViewDevelopmentEnvironmentPage() {
         const uniqueItems = new Map();
         items.forEach(item => {
             const key = `${item.type}-${item.id}`;
-            if (!uniqueItems.has(key)) {
+            if (item.id && !uniqueItems.has(key)) {
                 uniqueItems.set(key, item);
             }
         });
