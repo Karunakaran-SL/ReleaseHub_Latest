@@ -56,24 +56,19 @@ export default function ViewDevelopmentEnvironmentPage() {
                 ]);
 
                 if (!envRes.ok) throw new Error('Failed to fetch environment details');
-                if (!productsRes.ok) throw new Error('Failed to fetch products');
-                if (!specsRes.ok) throw new Error('Failed to fetch specifications');
-                if (!baselinesRes.ok) throw new Error('Failed to fetch baselines');
-                if (!tenantsRes.ok) throw new Error('Failed to fetch tenants');
-                
                 const envData: DevelopmentEnvironment = await envRes.json();
-                setEnvironment(envData);
                 
-                const products = await productsRes.json();
-                const specifications = await specsRes.json();
-                const baselines = await baselinesRes.json();
-                const allTenants = await tenantsRes.json();
+                const products = productsRes.ok ? await productsRes.json() : [];
+                const specifications = specsRes.ok ? await specsRes.json() : [];
+                const baselines = baselinesRes.ok ? await baselinesRes.json() : [];
+                const allTenants = tenantsRes.ok ? await tenantsRes.json() : [];
 
                 const product = products.find((p: Product) => p._id === envData.productId);
                 const specification = specifications.find((s: Specification) => s._id === envData.specificationId);
                 const baseline = envData.baselineId ? baselines.find((b: Baseline) => b._id === envData.baselineId) : null;
                 const tenants = envData.tenantIds ? allTenants.filter((t: CmdbTenant) => envData.tenantIds.includes(t.id)) : [];
                 
+                setEnvironment(envData);
                 setRelatedData({ product, specification, baseline, tenants });
 
             } catch (error: any) {
@@ -104,11 +99,11 @@ export default function ViewDevelopmentEnvironmentPage() {
             ]);
         }
         
-        // Deduplicate
         const uniqueItems = new Map();
         items.forEach(item => {
+            if (!item || !item.type || !item.id) return;
             const key = `${item.type}-${item.id}`;
-            if (item.id && !uniqueItems.has(key)) {
+            if (!uniqueItems.has(key)) {
                 uniqueItems.set(key, item);
             }
         });
@@ -121,7 +116,7 @@ export default function ViewDevelopmentEnvironmentPage() {
     }
     
     if (!environment) {
-        return <DashboardLayout user={user}><div className="flex h-full items-center justify-center">Environment not found.</div></DashboardLayout>;
+        return <DashboardLayout user={user}><div className="flex h-full items-center justify-center p-8 text-center"><p>Could not load environment data. It may have been deleted or an error occurred.</p></div></DashboardLayout>;
     }
     
     return (
