@@ -2,8 +2,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { getUser } from '@/lib/auth';
+import { z } from 'zod';
 
 const COLLECTION_NAME = 'test_environments';
+
+const CreateSchema = z.object({
+  name: z.string().min(1),
+  productId: z.string().min(1),
+  productName: z.string().optional(),
+  specificationId: z.string().min(1),
+  specName: z.string().optional(),
+  baselineId: z.string().optional(),
+  tenantIds: z.array(z.string()).optional(),
+  dependencySummary: z.array(z.any()).optional(),
+  estimatedCost: z.number().optional(),
+  resourceUsage: z.any().optional(),
+});
+
 
 // List all test environments
 export async function GET(req: NextRequest) {
@@ -34,16 +49,17 @@ export async function POST(req: NextRequest) {
 
         const body = await req.json();
         
-        // Basic validation
-        if (!body.name || !body.productId || !body.specificationId) {
-            return NextResponse.json({ message: 'Missing required fields: name, productId, specificationId.' }, { status: 400 });
+        const validatedData = CreateSchema.safeParse(body);
+        if (!validatedData.success) {
+            console.error(validatedData.error);
+            return NextResponse.json({ message: 'Invalid data.', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
         }
 
         const client = await clientPromise;
         const db = client.db();
         
         const newItem = {
-            ...body,
+            ...validatedData.data,
             createdBy: user.username,
             createdAt: new Date().toISOString(),
             status: 'PROVISIONING', // Initial status

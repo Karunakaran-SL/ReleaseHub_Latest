@@ -2,7 +2,7 @@
 
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
-import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator } from './definitions';
+import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment } from './definitions';
 
 
 const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
@@ -1114,11 +1114,15 @@ const initialPlatformFoundations: any[] = [
     }
 ];
 
-const initialDevEnvironments = [
-    { _id: 'dev-env-1', name: 'Feature Branch - SSO', productId: 'OneStopShopPortal', specificationId: 'ArgoCDSyncSpec', baselineId: 'OneStopShopPortal_1.0.0', tenantIds: ['CorePlatformServices', 'RetailOperations'], createdAt: '2024-06-01T10:00:00.000Z', createdBy: 'dev-user-1', status: 'READY', estimatedCost: 15.50, resourceUsage: { cpu: '8 vCPU', memory: '32 GB', storage: '200 GB' } },
-    { _id: 'dev-env-2', name: 'Analytics Hotfix', productId: 'UnifiedDataFabric', specificationId: 'DellPowerEdgeR760', baselineId: null, tenantIds: ['CustomerAnalytics'], createdAt: '2024-06-05T14:30:00.000Z', createdBy: 'dev-user-2', status: 'PROVISIONING', estimatedCost: 25.00, resourceUsage: { cpu: '16 vCPU', memory: '64 GB', storage: '500 GB' } },
+const initialDevEnvironments: Omit<DevelopmentEnvironment, '_id'>[] = [
+    { name: 'Feature Branch - SSO', productId: 'OneStopShopPortal', productName: 'OneStopShop Portal', specificationId: 'ArgoCDSyncSpec', specName: 'ArgoCD Sync Spec', baselineId: 'OneStopShopPortal_1.0.0', tenantIds: [], createdAt: '2024-06-01T10:00:00.000Z', createdBy: 'dev-user-1', status: 'READY', estimatedCost: 15.50, resourceUsage: { cpu: '8 vCPU', memory: '32 GB', storage: '200 GB' } },
+    { name: 'Analytics Hotfix', productId: 'UnifiedDataFabric', productName: 'Unified Data Fabric', specificationId: 'DellPowerEdgeR760', specName: 'Dell PowerEdge R760', baselineId: undefined, tenantIds: ['CustomerAnalytics'], createdAt: '2024-06-05T14:30:00.000Z', createdBy: 'dev-user-2', status: 'PROVISIONING', estimatedCost: 25.00, resourceUsage: { cpu: '16 vCPU', memory: '64 GB', storage: '500 GB' } },
 ];
 
+const initialTestEnvironments: Omit<TestEnvironment, '_id'>[] = [
+    { name: 'Q3 Performance Run', productId: 'UnifiedDataFabric', productName: 'Unified Data Fabric', specificationId: 'CiscoUCSB200M7Blade', specName: 'Cisco UCS B200 M7 Blade', baselineId: 'UnifiedDataFabric_1.1.0', createdAt: '2024-05-20T10:00:00.000Z', createdBy: 'qa-user-1', status: 'READY', estimatedCost: 50.00, resourceUsage: { cpu: '32 vCPU', memory: '128 GB', storage: '1TB' } },
+    { name: 'Retail E2E Testbed', productId: 'OneStopShopPortal', productName: 'OneStopShop Portal', specificationId: 'HPEProLiantDL380Gen11', specName: 'HPE ProLiant DL380 Gen11', baselineId: undefined, tenantIds: ['RetailOperations', 'SupplyChainLogistics'], createdAt: '2024-06-10T11:00:00.000Z', createdBy: 'qa-user-2', status: 'ERROR', estimatedCost: 50.00, resourceUsage: { cpu: '32 vCPU', memory: '128 GB', storage: '1TB' } },
+];
 
 export async function seedDatabase() {
     const client = await clientPromise;
@@ -1153,6 +1157,7 @@ export async function seedDatabase() {
         { name: 'product_licensing', data: initialProductLicensing.map(pl => ({ ...pl, _id: pl.id })) },
         { name: 'platform_foundations', data: initialPlatformFoundations },
         { name: 'development_environments', data: initialDevEnvironments },
+        { name: 'test_environments', data: initialTestEnvironments },
         { name: 'simulators', data: initialSimulators },
         { name: 'emulators', data: initialEmulators },
     ];
