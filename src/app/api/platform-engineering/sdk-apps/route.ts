@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { getUser } from '@/lib/auth';
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
         
         const newItem = {
             ...body,
+            version: body.version || '1.0.0', // Add version
             createdBy: user.username,
             createdAt: new Date().toISOString(),
         };

@@ -337,7 +337,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                                 </SidebarMenuSubItem>
                                  <SidebarMenuSubItem>
                                     <SidebarMenuSubButton href="/platform-engineering/sdk/apps" isActive={pathname === '/platform-engineering/sdk/apps'}>
-                                        Generated Apps
+                                        Generated Applications
                                     </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
                               </SidebarMenuSub>

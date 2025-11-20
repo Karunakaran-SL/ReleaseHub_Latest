@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
@@ -39,7 +40,7 @@ export default function SdkGeneratorPage() {
 
     // Data for Step 1
     const [tenants, setTenants] = useState<CmdbTenant[]>([]);
-    const [selectedTenant, setSelectedTenant] = useState<CmdbTenant | null>(null);
+    const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
     const [projectName, setProjectName] = useState('demo');
     const [group, setGroup] = useState('com.example');
     const [dependencies, setDependencies] = useState<Dependency[]>([]);
@@ -101,7 +102,7 @@ export default function SdkGeneratorPage() {
     const handleTenantChange = (tenantId: string) => {
         const tenant = tenants.find(t => t.id === tenantId);
         if (tenant) {
-            setSelectedTenant(tenant);
+            setSelectedTenantId(tenantId);
             setProjectName(tenant.name.toLowerCase().replace(/\s+/g, '-'));
             setGroup(`com.example.${tenant.id.toLowerCase()}`);
         }
@@ -157,6 +158,8 @@ export default function SdkGeneratorPage() {
             pipelineType,
             environmentType,
             environmentId: selectedEnvironmentId,
+            tenantId: selectedTenantId,
+            status: 'PROVISIONING', // Add status
             simulators: Object.values(simulatorConfigs).filter(s => selectedSimulators.includes(s.id)),
             emulators: Object.values(emulatorConfigs).filter(e => selectedEmulators.includes(e.id)),
         };
@@ -210,7 +213,7 @@ export default function SdkGeneratorPage() {
                                         <div className="space-y-2"><Label htmlFor="artifact">Artifact</Label><Input id="artifact" value={projectName} onChange={e => setProjectName(e.target.value)} /></div>
                                     </div>
                                     <div className="space-y-2"><Label htmlFor="name">Name</Label><Input id="name" value={projectName} onChange={e => setProjectName(e.target.value)} /></div>
-                                    <div className="space-y-2"><Label htmlFor="description">Description</Label><Input id="description" placeholder={`Demo project for ${selectedTenant?.name || 'Spring Boot'}`} /></div>
+                                    <div className="space-y-2"><Label htmlFor="description">Description</Label><Input id="description" placeholder={`Demo project for ${tenants.find(t=> t.id === selectedTenantId)?.name || 'Spring Boot'}`} /></div>
                                     <div className="space-y-2"><Label htmlFor="package-name">Package name</Label><Input id="package-name" value={`${group}.${projectName}`} disabled /></div>
                                 </CardContent>
                             </Card>
@@ -316,7 +319,7 @@ export default function SdkGeneratorPage() {
                     </div>
                 );
              case 4:
-                const envs = availableEnvironments.filter(env => (env as any).createdBy !== undefined); // Simple way to filter based on type
+                const envs = availableEnvironments.filter(env => ((env as DevelopmentEnvironment).createdBy !== undefined ? 'development' : 'test') === environmentType);
                 return (
                      <div className="space-y-4">
                          <Label>Select an available <strong>{environmentType}</strong> environment to deploy to:</Label>

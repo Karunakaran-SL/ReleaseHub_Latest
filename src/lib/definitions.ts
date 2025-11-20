@@ -4,6 +4,7 @@
 
 
 
+
 export type User = {
   _id: string;
   username: string;
@@ -462,3 +463,19 @@ export interface Simulator {
 }
 
 export interface Emulator extends Simulator {}
+
+export interface SdkApp {
+  _id: string;
+  projectName: string;
+  group: string;
+  dependencies: any[];
+  repoUrl?: string;
+  pipelineType?: string;
+  environmentType?: 'development' | 'test';
+  environmentId?: string;
+  tenantId?: string;
+  status: 'PROVISIONING' | 'READY' | 'FAILED';
+  version?: string;
+  simulators?: any[];
+  emulators?: any[];
+}
