@@ -1,8 +1,8 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, DevelopmentEnvironment, Product, Specification, Baseline, CmdbTenant, CmdbComponent, CmdbApplication } from '@/lib/definitions';
+import type { User, DevelopmentEnvironment, Baseline, CmdbTenant, CmdbComponent, CmdbApplication } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +24,7 @@ const statusColors: Record<string, string> = {
     DELETING: 'bg-gray-300 text-gray-900',
 };
 
-const iconMap = {
+const iconMap: Record<string, React.ReactNode> = {
     Tenant: <Warehouse className="h-4 w-4" />,
     Component: <Puzzle className="h-4 w-4" />,
     Application: <AppWindow className="h-4 w-4" />,
@@ -35,7 +35,7 @@ function DependencyItem({ item }: { item: any }) {
         <TableRow>
             <TableCell>
                 <div className="flex items-center gap-2">
-                    {iconMap[item.type as keyof typeof iconMap]}
+                    {iconMap[item.type] || null}
                     <span>{item.type}</span>
                 </div>
             </TableCell>
@@ -126,14 +126,16 @@ export default function ViewDevelopmentEnvironmentPage() {
                                 {environment.baselineId ? (
                                     <div>
                                         <Label>Baseline</Label>
-                                        <Input value={environment.baselineId || 'N/A'} disabled />
+                                        <Input value={environment.baselineId} disabled />
                                     </div>
                                 ) : (
                                     <div>
                                         <Label>Manually Selected Tenants ({environment.tenantIds?.length || 0})</Label>
                                         <Card className="max-h-40 overflow-y-auto">
                                             <CardContent className="p-2">
-                                                {environment.tenantIds?.map(id => <div key={id} className="p-1">{id}</div>)}
+                                                {(environment.tenantIds && environment.tenantIds.length > 0) ? (
+                                                    environment.tenantIds?.map(id => <div key={id} className="p-1">{id}</div>)
+                                                ) : <p className="p-2 text-muted-foreground text-sm">No tenants were manually selected.</p>}
                                             </CardContent>
                                         </Card>
                                     </div>
@@ -163,9 +165,11 @@ export default function ViewDevelopmentEnvironmentPage() {
                              <Table>
                                 <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Name</TableHead><TableHead>Version</TableHead></TableRow></TableHeader>
                                 <TableBody>
-                                    {environment.dependencySummary && environment.dependencySummary.length > 0 ? environment.dependencySummary.map(item => (
-                                         <DependencyItem key={`${item.type}-${item.id}`} item={item} />
-                                    )) : <TableRow><TableCell colSpan={3} className="text-center">No dependency summary available.</TableCell></TableRow>}
+                                    {environment.dependencySummary && environment.dependencySummary.length > 0 ? (
+                                        environment.dependencySummary.map((item, index) => (
+                                         <DependencyItem key={`${item.id}-${index}`} item={item} />
+                                    ))
+                                    ) : <TableRow><TableCell colSpan={3} className="text-center">No dependency summary available.</TableCell></TableRow>}
                                 </TableBody>
                             </Table>
                         </div>
