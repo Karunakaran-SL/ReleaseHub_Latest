@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, DevelopmentEnvironment, Product, Specification, Baseline, CmdbTenant } from '@/lib/definitions';
+import type { User, DevelopmentEnvironment, Product, Specification, Baseline, CmdbTenant, CmdbComponent, CmdbApplication } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -24,16 +24,31 @@ const statusColors: Record<string, string> = {
     DELETING: 'bg-gray-300 text-gray-900',
 };
 
+const iconMap = {
+    Tenant: <Warehouse className="h-4 w-4" />,
+    Component: <Puzzle className="h-4 w-4" />,
+    Application: <AppWindow className="h-4 w-4" />,
+};
+
+function DependencyItem({ item }: { item: any }) {
+    return (
+        <TableRow>
+            <TableCell>
+                <div className="flex items-center gap-2">
+                    {iconMap[item.type as keyof typeof iconMap]}
+                    <span>{item.type}</span>
+                </div>
+            </TableCell>
+            <TableCell>{item.name}</TableCell>
+            <TableCell>{item.version || 'N/A'}</TableCell>
+        </TableRow>
+    );
+}
+
 export default function ViewDevelopmentEnvironmentPage() {
     const [user, setUser] = useState<User | null>(null);
     const [environment, setEnvironment] = useState<DevelopmentEnvironment | null>(null);
     const [loading, setLoading] = useState(true);
-    const [relatedData, setRelatedData] = useState<{
-        product: Product | null,
-        specification: Specification | null,
-        baseline: Baseline | null,
-    } | null>(null);
-
     const { toast } = useToast();
     const router = useRouter();
     const params = useParams();
@@ -46,30 +61,10 @@ export default function ViewDevelopmentEnvironmentPage() {
         async function fetchData() {
             setLoading(true);
             try {
-                const [envRes, productsRes, specsRes, baselinesRes] = await Promise.all([
-                    fetch(`/api/development-environments/${id}`),
-                    fetch('/api/products'),
-                    fetch('/api/specifications'),
-                    fetch('/api/baselines'),
-                ]);
-
-                if (!envRes.ok) throw new Error('Failed to fetch environment details');
-                if (!productsRes.ok) throw new Error('Failed to fetch products.');
-                if (!specsRes.ok) throw new Error('Failed to fetch specifications.');
-                if (!baselinesRes.ok) throw new Error('Failed to fetch baselines.');
-                
-                const envData: DevelopmentEnvironment = await envRes.json();
-                const products = await productsRes.json();
-                const specifications = await specsRes.json();
-                const baselines = await baselinesRes.json();
-                
-                setEnvironment(envData);
-                setRelatedData({
-                    product: products.find((p: Product) => p._id === envData.productId) || null,
-                    specification: specifications.find((s: Specification) => s._id === envData.specificationId) || null,
-                    baseline: envData.baselineId ? baselines.find((b: Baseline) => b._id === envData.baselineId) : null,
-                });
-
+                const res = await fetch(`/api/development-environments/${id}`);
+                if (!res.ok) throw new Error('Failed to fetch environment details');
+                const data: DevelopmentEnvironment = await res.json();
+                setEnvironment(data);
             } catch (error: any) {
                 toast({ variant: 'destructive', title: 'Error', description: error.message });
                 setEnvironment(null);
@@ -107,11 +102,11 @@ export default function ViewDevelopmentEnvironmentPage() {
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div className="space-y-2">
                                 <Label>Product</Label>
-                                <Input value={relatedData?.product?.name || 'N/A'} disabled />
+                                <Input value={environment.productName || 'N/A'} disabled />
                             </div>
                             <div className="space-y-2">
                                 <Label>Specification</Label>
-                                <Input value={relatedData?.specification?.name || 'N/A'} disabled />
+                                <Input value={environment.specName || 'N/A'} disabled />
                             </div>
                              <div className="space-y-2">
                                 <Label>Created By</Label>
@@ -131,7 +126,7 @@ export default function ViewDevelopmentEnvironmentPage() {
                                 {environment.baselineId ? (
                                     <div>
                                         <Label>Baseline</Label>
-                                        <Input value={`${relatedData?.baseline?.product.name} v${relatedData?.baseline?.product.version}` || 'N/A'} disabled />
+                                        <Input value={environment.baselineId || 'N/A'} disabled />
                                     </div>
                                 ) : (
                                     <div>
@@ -169,18 +164,7 @@ export default function ViewDevelopmentEnvironmentPage() {
                                 <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Name</TableHead><TableHead>Version</TableHead></TableRow></TableHeader>
                                 <TableBody>
                                     {environment.dependencySummary && environment.dependencySummary.length > 0 ? environment.dependencySummary.map(item => (
-                                         <TableRow key={`${item.type}-${item.id}`}>
-                                            <TableCell>
-                                                <Badge variant="outline">
-                                                    {item.type === 'Tenant' && <Warehouse className="mr-1 h-3 w-3"/>}
-                                                    {item.type === 'Component' && <Puzzle className="mr-1 h-3 w-3"/>}
-                                                    {item.type === 'Application' && <AppWindow className="mr-1 h-3 w-3"/>}
-                                                    {item.type}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>{item.name}</TableCell>
-                                            <TableCell>{item.version || 'N/A'}</TableCell>
-                                        </TableRow>
+                                         <DependencyItem key={`${item.type}-${item.id}`} item={item} />
                                     )) : <TableRow><TableCell colSpan={3} className="text-center">No dependency summary available.</TableCell></TableRow>}
                                 </TableBody>
                             </Table>
