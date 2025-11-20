@@ -9,10 +9,10 @@ const COLLECTION_NAME = 'simulators';
 const UpdateSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   dockerImage: z.string().min(1, 'Docker Image is required'),
-  registryUrl: z.string().url().optional().or(z.literal('')),
+  registryUrl: z.string().optional(),
   registryUsername: z.string().optional(),
   registryPassword: z.string().optional(),
-  helmChartUrl: z.string().optional().or(z.literal('')),
+  helmChartUrl: z.string().optional(),
 });
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -73,5 +73,3 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }
-
-    

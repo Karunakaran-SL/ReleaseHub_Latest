@@ -147,9 +147,13 @@ export default function CreateApplicationPage() {
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
 
-        const available: Option[] = allOptions.filter(opt => !chosenIds.has(opt.id));
+        const filteredOptions = fieldName === 'dependent_applications' && formState.id
+            ? allOptions.filter(opt => opt.id !== formState.id)
+            : allOptions;
+            
+        const available: Option[] = filteredOptions.filter(opt => !chosenIds.has(opt.id));
         const chosen: Option[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
-
+        
         const moveItems = (ids: string[], source: Option[], dest: Option[]) => {
             const itemsToMove = source.filter(item => ids.includes(item.id));
             const newDest = [...dest, ...itemsToMove];

@@ -64,7 +64,7 @@ function DeleteConfirmationDialog({ itemId, itemName, apiEndpoint, onDeleted }: 
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                     <AlertDialogDescription>
                         This action is permanent and will delete the <strong>{itemName}</strong>. Please provide a reason and type "delete" to confirm.
                     </AlertDialogDescription>
@@ -244,5 +244,3 @@ export default function SimulatorsPage() {
         </DashboardLayout>
     );
 }
-
-    
