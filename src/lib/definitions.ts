@@ -3,6 +3,7 @@
 
 
 
+
 export type User = {
   _id: string;
   username: string;
@@ -449,3 +450,15 @@ export type DevelopmentEnvironment = {
 }
 
 export type TestEnvironment = DevelopmentEnvironment;
+
+export interface Simulator {
+    _id: string;
+    name: string;
+    dockerImage: string;
+    registryUrl?: string;
+    registryUsername?: string;
+    registryPassword?: string;
+    helmChartUrl?: string;
+}
+
+export interface Emulator extends Simulator {}

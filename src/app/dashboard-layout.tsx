@@ -55,6 +55,7 @@ import {
   BadgeCheck,
   ScanLine,
   ScanSearch,
+  Waypoints,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -335,6 +336,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                          <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/platform-engineering/test-environments" isActive={pathname.startsWith('/platform-engineering/test-environments')}>
                              <FlaskConical className="mr-2"/> Test Environments
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/platform-engineering/simulators" isActive={pathname.startsWith('/platform-engineering/simulators')}>
+                             <Waypoints className="mr-2"/> Simulators
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                          <Collapsible asChild defaultOpen={pathname.startsWith('/platform-engineering/quality')}>
