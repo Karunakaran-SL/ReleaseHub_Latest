@@ -53,7 +53,7 @@ export default function EditDevelopmentEnvironmentPage() {
             });
             if (!res.ok) throw new Error('Failed to update environment.');
             toast({ title: 'Success', description: 'Environment updated successfully.' });
-            router.push(`/platform-engineering/development-environments/${id}/view`);
+            router.push(`/platform-engineering/development-environments/${environment._id}/view`);
             router.refresh();
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -85,11 +85,11 @@ export default function EditDevelopmentEnvironmentPage() {
                         </div>
                         <div className="space-y-2">
                             <Label>Product</Label>
-                            <Input value={environment?.productId || ''} disabled />
+                            <Input value={(environment as any)?.productName || environment?.productId || ''} disabled />
                         </div>
                          <div className="space-y-2">
                             <Label>Specification</Label>
-                            <Input value={environment?.specificationId || ''} disabled />
+                            <Input value={(environment as any)?.specName || environment?.specificationId || ''} disabled />
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">

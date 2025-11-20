@@ -119,7 +119,7 @@ export default function ViewDevelopmentEnvironmentPage() {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
     
-    if (!environment || !relatedData) {
+    if (!environment) {
         return <DashboardLayout user={user}><div className="flex h-full items-center justify-center p-8 text-center"><p>Could not load environment data. It may have been deleted or an error occurred.</p></div></DashboardLayout>;
     }
     
@@ -142,11 +142,11 @@ export default function ViewDevelopmentEnvironmentPage() {
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div className="space-y-2">
                                 <Label>Product</Label>
-                                <Input value={relatedData.product?.name || 'N/A'} disabled />
+                                <Input value={relatedData?.product?.name || 'N/A'} disabled />
                             </div>
                             <div className="space-y-2">
                                 <Label>Specification</Label>
-                                <Input value={relatedData.specification?.name || 'N/A'} disabled />
+                                <Input value={relatedData?.specification?.name || 'N/A'} disabled />
                             </div>
                              <div className="space-y-2">
                                 <Label>Created By</Label>
@@ -163,17 +163,17 @@ export default function ViewDevelopmentEnvironmentPage() {
                         <div className="grid md:grid-cols-2 gap-8">
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold">Sourcing</h3>
-                                {relatedData.baseline ? (
+                                {relatedData?.baseline ? (
                                     <div>
                                         <Label>Baseline</Label>
                                         <Input value={`${relatedData.baseline.product.name} v${relatedData.baseline.product.version}`} disabled />
                                     </div>
                                 ) : (
                                     <div>
-                                        <Label>Manually Selected Tenants ({relatedData.tenants.length})</Label>
+                                        <Label>Manually Selected Tenants ({relatedData?.tenants.length || 0})</Label>
                                         <Card className="max-h-40 overflow-y-auto">
                                             <CardContent className="p-2">
-                                                {relatedData.tenants.map(t => <div key={t.id} className="p-1">{t.name}</div>)}
+                                                {relatedData?.tenants.map(t => <div key={t.id} className="p-1">{t.name}</div>)}
                                             </CardContent>
                                         </Card>
                                     </div>
@@ -189,9 +189,9 @@ export default function ViewDevelopmentEnvironmentPage() {
                                         </div>
                                          <div>
                                             <Label>Resource Summary</Label>
-                                            <p className="text-sm">{environment.resourceUsage?.cpu || 'N/A'} CPU</p>
-                                            <p className="text-sm">{environment.resourceUsage?.memory || 'N/A'} Memory</p>
-                                            <p className="text-sm">{environment.resourceUsage?.storage || 'N/A'} Storage</p>
+                                            <p className="text-sm">{environment.resourceUsage?.cpu || 'N/A'}</p>
+                                            <p className="text-sm">{environment.resourceUsage?.memory || 'N/A'}</p>
+                                            <p className="text-sm">{environment.resourceUsage?.storage || 'N/A'}</p>
                                         </div>
                                     </CardContent>
                                 </Card>
