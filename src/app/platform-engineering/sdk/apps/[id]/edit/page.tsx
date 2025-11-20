@@ -1,3 +1,4 @@
+
 'use client';
 // This is a placeholder. The SDK edit page has a complex state and would require
 // the full wizard logic from the create page to be adapted for editing.
@@ -9,7 +10,7 @@ import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter, useParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
