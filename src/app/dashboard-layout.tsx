@@ -56,6 +56,7 @@ import {
   ScanLine,
   ScanSearch,
   Waypoints,
+  Rocket,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -318,11 +319,30 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                              <Blocks className="mr-2"/> Platform Foundations
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/platform-engineering/sdk" isActive={pathname.startsWith('/platform-engineering/sdk')}>
-                             <BookText className="mr-2"/> SDK
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
+                        <Collapsible asChild defaultOpen={pathname.startsWith('/platform-engineering/sdk')}>
+                          <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                              <SidebarMenuSubButton>
+                                <Rocket className="mr-2"/> SDK
+                                <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                              </SidebarMenuSubButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <SidebarMenuSub>
+                                <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton href="/platform-engineering/sdk" isActive={pathname === '/platform-engineering/sdk'}>
+                                        Project Initializer
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                 <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton href="/platform-engineering/sdk/apps" isActive={pathname === '/platform-engineering/sdk/apps'}>
+                                        Generated Apps
+                                    </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              </SidebarMenuSub>
+                            </CollapsibleContent>
+                          </SidebarMenuItem>
+                        </Collapsible>
                          <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/platform-engineering/no-code-platform" isActive={pathname.startsWith('/platform-engineering/no-code-platform')}>
                              <MousePointerClick className="mr-2"/> No Code Platform
