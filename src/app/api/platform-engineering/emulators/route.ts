@@ -10,7 +10,7 @@ const CreateSchema = z.object({
   registryUrl: z.string().url().optional().or(z.literal('')),
   registryUsername: z.string().optional(),
   registryPassword: z.string().optional(),
-  helmChartUrl: z.string().url().optional().or(z.literal('')),
+  helmChartUrl: z.string().optional().or(z.literal('')),
 });
 
 export async function GET(req: NextRequest) {
