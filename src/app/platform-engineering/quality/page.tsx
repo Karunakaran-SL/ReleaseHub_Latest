@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
@@ -80,8 +79,8 @@ export default function StaticAnalyzerPage() {
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold">Quality: Static Analyzer</h1>
-                    <p className="text-muted-foreground">Analysis results for project "OneStopShop Portal".</p>
+                    <h1 className="text-3xl font-bold">Quality Dashboard</h1>
+                    <p className="text-muted-foreground">Static analysis results for project "OneStopShop Portal".</p>
                 </div>
 
                 <div className="grid gap-6">

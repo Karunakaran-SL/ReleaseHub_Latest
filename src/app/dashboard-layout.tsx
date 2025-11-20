@@ -1,4 +1,3 @@
-
 'use client';
 import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -57,6 +56,7 @@ import {
   ScanSearch,
   Waypoints,
   Rocket,
+  WrenchIcon,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -366,7 +366,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                          <Collapsible asChild defaultOpen={pathname.startsWith('/platform-engineering/quality')}>
                             <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
-                                    <SidebarMenuSubButton>
+                                    <SidebarMenuSubButton href="/platform-engineering/quality" isActive={pathname === '/platform-engineering/quality'}>
                                         <BadgeCheck className="mr-2"/> Quality
                                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                                     </SidebarMenuSubButton>
@@ -374,13 +374,13 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                                 <CollapsibleContent>
                                      <SidebarMenuSub>
                                         <SidebarMenuSubItem>
-                                            <SidebarMenuSubButton href="/platform-engineering/quality/static-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/static-analyzer')}>
-                                                <ScanLine className="mr-2"/> Static Analyzer
-                                            </SidebarMenuSubButton>
-                                        </SidebarMenuSubItem>
-                                        <SidebarMenuSubItem>
                                             <SidebarMenuSubButton href="/platform-engineering/quality/dynamic-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/dynamic-analyzer')}>
                                                 <ScanSearch className="mr-2"/> Dynamic Analyzer
+                                            </SidebarMenuSubButton>
+                                        </SidebarMenuSubItem>
+                                         <SidebarMenuSubItem>
+                                            <SidebarMenuSubButton href="/platform-engineering/quality/integration" isActive={pathname.startsWith('/platform-engineering/quality/integration')}>
+                                                <WrenchIcon className="mr-2"/> Integrations
                                             </SidebarMenuSubButton>
                                         </SidebarMenuSubItem>
                                     </SidebarMenuSub>
