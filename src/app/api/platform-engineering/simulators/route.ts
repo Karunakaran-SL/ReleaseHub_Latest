@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
@@ -10,7 +11,7 @@ const CreateSchema = z.object({
   registryUrl: z.string().optional(),
   registryUsername: z.string().optional(),
   registryPassword: z.string().optional(),
-  helmChartUrl: z.string().optional(),
+  helmChartUrl: z.string().optional().or(z.literal('')),
 });
 
 export async function GET(req: NextRequest) {
