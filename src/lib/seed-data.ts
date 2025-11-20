@@ -2,7 +2,7 @@
 
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
-import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment } from './definitions';
+import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp } from './definitions';
 
 
 const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
@@ -1124,6 +1124,76 @@ const initialTestEnvironments: Omit<TestEnvironment, '_id'>[] = [
     { name: 'Retail E2E Testbed', productId: 'OneStopShopPortal', productName: 'OneStopShop Portal', specificationId: 'HPEProLiantDL380Gen11', specName: 'HPE ProLiant DL380 Gen11', baselineId: undefined, tenantIds: ['RetailOperations', 'SupplyChainLogistics'], createdAt: '2024-06-10T11:00:00.000Z', createdBy: 'qa-user-2', status: 'ERROR', estimatedCost: 50.00, resourceUsage: { cpu: '32 vCPU', memory: '128 GB', storage: '1TB' } },
 ];
 
+const initialSdkApps: Omit<SdkApp, '_id'| 'createdAt'>[] = [
+    {
+        projectName: 'supply-chain-logistics-app',
+        group: 'com.example.supplychain',
+        dependencies: [
+            { id: 'sql-postgres', name: 'SQL Database (PostgreSQL)', description: 'Adds JDBC driver and configuration for PostgreSQL.', group: 'Databases' },
+            { id: 'messaging-kafka', name: 'Messaging (Kafka)', description: 'Adds Spring for Kafka for producing/consuming messages.', group: 'Messaging' },
+            { id: 'web-react', name: 'Web Portal (React)', description: 'Generates a React frontend structure.', group: 'Web' },
+        ],
+        repoUrl: 'https://github.com/example/supply-chain-app.git',
+        pipelineType: 'gitlab',
+        environmentType: 'development',
+        environmentId: initialDevEnvironments.find(e => e.name === 'Feature Branch - SSO')?._id, // This will be assigned dynamically later if needed
+        tenantId: 'SupplyChainLogistics',
+        status: 'READY',
+        version: '1.0.0',
+        simulators: [
+            {
+                id: initialSimulators.find(s => s.name === 'High-Latency WAN Simulator')!._id,
+                name: 'High-Latency WAN Simulator',
+                instanceCount: 2,
+                instances: [
+                    { name: 'wan-sim-us', ip: '10.1.1.5', user: 'admin', pass: 'pass' },
+                    { name: 'wan-sim-eu', ip: '10.2.1.5', user: 'admin', pass: 'pass' },
+                ]
+            }
+        ],
+        emulators: [
+             {
+                id: initialEmulators.find(s => s.name === 'Raspberry Pi 4 (QEMU)')!._id,
+                name: 'Raspberry Pi 4 (QEMU)',
+                instanceCount: 1,
+                instances: [
+                    { name: 'rpi-sensor-1', ip: '192.168.1.101', user: 'pi', pass: 'raspberry' }
+                ]
+            }
+        ]
+    },
+    {
+        projectName: 'analytics-dashboard-v2',
+        group: 'com.example.analytics',
+        dependencies: [
+            { id: 'nosql-mongodb', name: 'NoSQL Database (MongoDB)', description: 'Adds MongoDB driver and Spring Data MongoDB.', group: 'Databases' },
+            { id: 'web-angular', name: 'Web Portal (Angular)', description: 'Generates an Angular frontend structure.', group: 'Web' },
+            { id: 'monitoring-prometheus', name: 'Monitoring (Prometheus)', description: 'Exposes application metrics for Prometheus scraping.', group: 'Observability' },
+        ],
+        repoUrl: 'https://github.com/example/analytics-dashboard.git',
+        pipelineType: 'github',
+        environmentType: 'test',
+        environmentId: initialTestEnvironments.find(e => e.name === 'Q3 Performance Run')?._id,
+        tenantId: 'CustomerAnalytics',
+        status: 'PROVISIONING',
+        version: '2.0.0',
+        simulators: [
+            {
+                id: initialSimulators.find(s => s.name === 'CPU Stress Test Simulator')!._id,
+                name: 'CPU Stress Test Simulator',
+                instanceCount: 3,
+                instances: [
+                    { name: 'cpu-stress-1', ip: '10.3.1.1', user: 'root', pass: '' },
+                    { name: 'cpu-stress-2', ip: '10.3.1.2', user: 'root', pass: '' },
+                    { name: 'cpu-stress-3', ip: '10.3.1.3', user: 'root', pass: '' },
+                ]
+            }
+        ],
+        emulators: []
+    }
+];
+
+
 export async function seedDatabase() {
     const client = await clientPromise;
     const db = client.db();
@@ -1160,6 +1230,7 @@ export async function seedDatabase() {
         { name: 'test_environments', data: initialTestEnvironments },
         { name: 'simulators', data: initialSimulators },
         { name: 'emulators', data: initialEmulators },
+        { name: 'sdk_apps', data: initialSdkApps.map(app => ({ ...app, createdAt: new Date().toISOString() })) }
     ];
     
     let seededCount = 0;
