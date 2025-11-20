@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     const client = await clientPromise;
     const db = client.db();
-    const items = await db.collection(COLLECTION_NAME).find({ createdBy: user.username }).sort({ createdAt: -1 }).toArray();
+    const items = await db.collection(COLLECTION_NAME).find({}).sort({ createdAt: -1 }).toArray();
 
     return NextResponse.json(items, { status: 200 });
   } catch (error) {

@@ -1,5 +1,4 @@
 
-
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp } from './definitions';
@@ -1140,6 +1139,7 @@ const initialSdkApps: Omit<SdkApp, '_id'| 'createdAt'>[] = [
         tenantId: 'SupplyChainLogistics',
         status: 'READY',
         version: '1.0.0',
+        createdBy: 'seed-user',
         simulators: [
             {
                 id: initialSimulators.find(s => s.name === 'High-Latency WAN Simulator')!._id,
@@ -1177,6 +1177,7 @@ const initialSdkApps: Omit<SdkApp, '_id'| 'createdAt'>[] = [
         tenantId: 'CustomerAnalytics',
         status: 'PROVISIONING',
         version: '2.0.0',
+        createdBy: 'seed-user',
         simulators: [
             {
                 id: initialSimulators.find(s => s.name === 'CPU Stress Test Simulator')!._id,
