@@ -374,6 +374,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                                 <CollapsibleContent>
                                      <SidebarMenuSub>
                                         <SidebarMenuSubItem>
+                                            <SidebarMenuSubButton href="/platform-engineering/quality/static-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/static-analyzer')}>
+                                                <ScanLine className="mr-2"/> Static Analyzer
+                                            </SidebarMenuSubButton>
+                                        </SidebarMenuSubItem>
+                                        <SidebarMenuSubItem>
                                             <SidebarMenuSubButton href="/platform-engineering/quality/dynamic-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/dynamic-analyzer')}>
                                                 <ScanSearch className="mr-2"/> Dynamic Analyzer
                                             </SidebarMenuSubButton>
