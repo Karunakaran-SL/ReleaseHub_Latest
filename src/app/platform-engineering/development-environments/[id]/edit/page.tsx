@@ -21,7 +21,6 @@ type EditEnvironmentState = Partial<Omit<DevelopmentEnvironment, '_id' | 'create
     productName?: string;
     specName?: string;
     selectionMode?: 'baseline' | 'manual';
-    dependencySummary?: any[];
 };
 
 export default function EditDevelopmentEnvironmentPage() {
@@ -119,16 +118,17 @@ export default function EditDevelopmentEnvironmentPage() {
             }
         });
         return Array.from(uniqueItems.values());
-    }, [formState, baselines, tenants]);
-
-     useEffect(() => {
-        handleUpdate({ dependencySummary });
-    }, [dependencySummary]);
+    }, [formState.selectionMode, formState.baselineId, formState.tenantIds, baselines, tenants]);
 
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            const { productName, specName, selectionMode, ...payload } = formState;
+            const { productName, specName, selectionMode, ...basePayload } = formState;
+            
+            const payload = {
+                ...basePayload,
+                dependencySummary: dependencySummary, // ensure summary is included
+            };
 
             if (selectionMode === 'baseline') {
                 payload.tenantIds = [];

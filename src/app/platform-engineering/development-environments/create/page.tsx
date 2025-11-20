@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { MultiSelectListBox, type Option as MultiSelectOption } from '@/components/ui/multi-select-list-box';
+import { MultiSelectListBox } from '@/components/ui/multi-select-list-box';
 import { useRouter } from 'next/navigation';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -105,11 +105,7 @@ export default function CreateDevelopmentEnvironmentPage() {
             }
         });
         return Array.from(uniqueItems.values());
-    }, [wizardData, baselines, tenants]);
-
-    useEffect(() => {
-        handleUpdate({ dependencySummary });
-    }, [dependencySummary]);
+    }, [wizardData.selectionMode, wizardData.baselineId, wizardData.tenantIds, baselines, tenants]);
 
     const handleCreateEnvironment = async () => {
         setLoading(true);
