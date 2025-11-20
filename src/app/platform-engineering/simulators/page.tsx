@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
@@ -19,7 +20,7 @@ interface CrudTableProps<T extends { _id: string; name: string }> {
   apiEndpoint: 'simulators' | 'emulators';
 }
 
-function CrudTable<T extends { _id: string; name: string; dockerImage: string; helmChartUrl?: string }>({ title, apiEndpoint }: CrudTableProps<T>) {
+function CrudTable<T extends { _id: string; name: string; dockerImage: string; helmChartUrl?: string; registryUrl?: string; registryUsername?: string; registryPassword?: string; }>({ title, apiEndpoint }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -59,7 +60,7 @@ function CrudTable<T extends { _id: string; name: string; dockerImage: string; h
     
     let payload = {...currentItem};
     if (!useCustomRegistry) {
-        payload.registryUrl = undefined;
+        payload.registryUrl = ''; // Corrected from undefined
         payload.registryUsername = undefined;
         payload.registryPassword = undefined;
     }
