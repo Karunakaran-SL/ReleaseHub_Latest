@@ -24,6 +24,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 const statusColors: Record<string, string> = {
     PROVISIONING: 'bg-yellow-200 text-yellow-800',
@@ -34,12 +37,27 @@ const statusColors: Record<string, string> = {
 
 function DeleteDialog({ environment, onDeleted }: { environment: any, onDeleted: () => void }) {
     const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteComment, setDeleteComment] = useState('');
+    const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
     const { toast } = useToast();
 
     const handleDelete = async () => {
+        if (deleteConfirmationText !== 'delete' || !deleteComment) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Please type "delete" and provide a comment to confirm deletion.'
+            });
+            return;
+        }
+
         setIsDeleting(true);
         try {
-            const res = await fetch(`/api/development-environments/${environment._id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/development-environments/${environment._id}`, { 
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment: deleteComment }),
+            });
             if (!res.ok) throw new Error('Failed to delete environment.');
             toast({ title: 'Success', description: 'Development environment deleted.' });
             onDeleted();
@@ -50,8 +68,10 @@ function DeleteDialog({ environment, onDeleted }: { environment: any, onDeleted:
         }
     };
     
+    const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
+
     return (
-        <AlertDialog>
+        <AlertDialog onOpenChange={(open) => { if (!open) { setDeleteComment(''); setDeleteConfirmationText(''); }}}>
             <AlertDialogTrigger asChild>
                 <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive"/></Button>
             </AlertDialogTrigger>
@@ -59,12 +79,32 @@ function DeleteDialog({ environment, onDeleted }: { environment: any, onDeleted:
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will delete the environment "{environment.name}" and deprovision its resources. This action cannot be undone.
+                        This action is permanent. This will delete the environment "{environment.name}".
+                        Please provide a reason and type <strong>delete</strong> to confirm.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
+                 <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor={`delete-comment-${environment._id}`}>Reason for Deletion *</Label>
+                        <Textarea 
+                            id={`delete-comment-${environment._id}`}
+                            placeholder="Provide a comment for auditing purposes."
+                            value={deleteComment}
+                            onChange={(e) => setDeleteComment(e.target.value)}
+                        />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor={`delete-confirmation-${environment._id}`}>Type "delete" to confirm *</Label>
+                        <Input 
+                            id={`delete-confirmation-${environment._id}`}
+                            value={deleteConfirmationText}
+                            onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                        />
+                    </div>
+                </div>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90" disabled={isDeleting}>
+                    <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90" disabled={isDeleteButtonDisabled}>
                         {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Delete
                     </AlertDialogAction>

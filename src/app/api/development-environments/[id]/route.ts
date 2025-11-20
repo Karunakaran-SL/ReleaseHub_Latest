@@ -80,6 +80,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         if (!ObjectId.isValid(id)) {
             return NextResponse.json({ message: 'Invalid ID format' }, { status: 400 });
         }
+        
+        const body = await req.json();
+        const { comment } = body;
+        if (!comment) {
+            return NextResponse.json({ message: 'A comment is required for deletion.' }, { status: 400 });
+        }
 
         const client = await clientPromise;
         const db = client.db();
@@ -88,6 +94,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Environment not found.' }, { status: 404 });
         }
+        
+        // In a real app, you would log this to an audit trail
+        console.log(`User ${user.username} deleted environment ${id} with comment: "${comment}"`);
 
         return NextResponse.json({ message: 'Environment deleted successfully.' }, { status: 200 });
 
