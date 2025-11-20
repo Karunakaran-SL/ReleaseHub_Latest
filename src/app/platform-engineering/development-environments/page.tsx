@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/app/dashboard-layout';
@@ -72,6 +73,7 @@ function DeleteDialog({ environment, onDeleted }: { environment: any, onDeleted:
         </AlertDialog>
     );
 }
+
 
 export default function DevelopmentEnvironmentsPage() {
     const [user, setUser] = useState<User | null>(null);
