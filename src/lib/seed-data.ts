@@ -1,4 +1,5 @@
 
+
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp, Baseline } from './definitions';
@@ -1237,10 +1238,10 @@ const initialBaselines: Omit<Baseline, '_id'>[] = [
 ];
 
 const generateDeployments = (): Omit<Deployment, '_id'>[] => {
-    const data = [];
+    const data: Omit<Deployment, '_id'>[] = [];
     const customers = ['Innovate Inc.', 'Solutions Corp', 'Synergy LLC', 'Quantum Enterprises', 'Apex Industries', 'Starlight Logistics'];
-    const countries = ['United States', 'Germany', 'Japan', 'Brazil', 'Australia', 'South Africa'];
-    const statuses: Deployment['status'][] = ['ACTIVE', 'PROVISIONING', 'UPGRADING', 'FAILED', 'UPGRADE_APPROVAL'];
+    const countries = ['United States', 'Germany', 'Japan', 'Brazil', 'Australia', 'South Africa', 'United Kingdom', 'France', 'India', 'Canada'];
+    const statuses: Deployment['status'][] = ['ACTIVE', 'PROVISIONING', 'UPGRADING', 'FAILED', 'UPGRADE_APPROVAL', 'ACTIVE', 'ACTIVE'];
     
     for (let i = 0; i < 50; i++) {
         const product = initialProducts[i % initialProducts.length];
@@ -1251,8 +1252,8 @@ const generateDeployments = (): Omit<Deployment, '_id'>[] => {
         const date = new Date(2024, i % 12, (i % 28) + 1);
 
         data.push({
-            productId: product._id,
-            specificationId: spec._id,
+            productId: product.name.replace(/[^a-zA-Z0-9]/g, ''),
+            specificationId: spec.name.replace(/[^a-zA-Z0-9]/g, ''),
             hypervisorId: 'KVM',
             foundationComponentIds: [],
             security: {},
@@ -1260,7 +1261,7 @@ const generateDeployments = (): Omit<Deployment, '_id'>[] => {
                 deploymentId: `DEP-${(2000 + i).toString()}`,
                 customer: customer,
                 country: country,
-                region: 'Americas'
+                region: 'Americas' // Simplified for example
             },
             createdBy: 'seed-user',
             createdAt: date.toISOString(),
