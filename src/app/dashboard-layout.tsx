@@ -58,6 +58,8 @@ import {
   Waypoints,
   Rocket,
   WrenchIcon,
+  Globe,
+  PieChart,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -488,6 +490,16 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                           <SidebarMenuSubButton href="/fleet-management/deployment" isActive={pathname.startsWith('/fleet-management/deployment')}>
                             Deployment
                           </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/fleet-management/resource-management" isActive={pathname.startsWith('/fleet-management/resource-management')}>
+                                <Globe className="mr-2"/> Global View
+                            </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/fleet-management/resource-management/details" isActive={pathname.startsWith('/fleet-management/resource-management/details')}>
+                                <PieChart className="mr-2"/> Detailed View
+                            </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
