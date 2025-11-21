@@ -229,6 +229,7 @@ export default function ProductsPage() {
                             width={40} 
                             height={40} 
                             className="rounded-full"
+                            unoptimized
                         />
                       </TableCell>
                       <TableCell className="font-medium">
