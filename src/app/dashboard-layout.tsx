@@ -488,13 +488,13 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/fleet-management/deployment" isActive={pathname.startsWith('/fleet-management/deployment')}>
-                            Deployment
+                            <Rocket className="mr-2"/> Deployment
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                          <Collapsible asChild defaultOpen={pathname.startsWith('/fleet-management/resource-management')}>
                             <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
-                                    <SidebarMenuSubButton href="/fleet-management/resource-management" isActive={pathname === '/fleet-management/resource-management'}>
+                                    <SidebarMenuSubButton href="/fleet-management/resource-management" isActive={pathname.startsWith('/fleet-management/resource-management')}>
                                         <Globe className="mr-2"/> Resource Mgmt
                                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                                     </SidebarMenuSubButton>
