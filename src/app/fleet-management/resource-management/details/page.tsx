@@ -18,6 +18,7 @@ import {
     DialogDescription,
     DialogFooter,
     DialogTrigger,
+    DialogClose,
 } from '@/components/ui/dialog';
 
 export default function DetailedResourceViewPage() {
@@ -181,7 +182,7 @@ export default function DetailedResourceViewPage() {
                 </header>
 
                 <main className="flex-1 flex overflow-hidden">
-                    <DependencyTreeSidebar tree={dependencyTree} isLoading={loading.tree} onNodeSelect={setSelectedNode} />
+                    <DependencyTreeSidebar tree={dependencyTree} isLoading={loading.tree} onNodeSelect={setSelectedNode} selectedNode={selectedNode} />
                      <div className="flex-1 flex items-center justify-center bg-muted/20 p-4">
                         <ResourceDetailsView node={selectedNode} isLoading={loading.tree} />
                     </div>
