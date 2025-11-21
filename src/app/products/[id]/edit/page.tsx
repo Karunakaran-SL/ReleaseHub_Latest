@@ -247,7 +247,7 @@ export default function EditProductPage() {
                                 </div>
                                 <div>
                                     <Label>Custom Approval Workflow</Label>
-                                    {renderMultiSelect('custom_workflows', workflows)}
+                                    {renderMultiSelect('custom_workflows', workflows.map(o => ({id: o.id, label: o.name})))}
                                 </div>
                             </div>
 
@@ -255,7 +255,7 @@ export default function EditProductPage() {
                             <div className="space-y-6">
                                  <div>
                                     <Label>Select the compliance check</Label>
-                                     {renderMultiSelect('compliance_checks', complianceChecks)}
+                                     {renderMultiSelect('compliance_checks', complianceChecks.map(o => ({id: o.id, label: o.name})))}
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Deployment Type</Label>
@@ -297,7 +297,7 @@ export default function EditProductPage() {
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
-                                         {renderMultiSelect('specifications', specifications)}
+                                         {renderMultiSelect('specifications', specifications.map(o => ({id: o.id, label: o.name})))}
                                     </div>
                                 )}
                                 

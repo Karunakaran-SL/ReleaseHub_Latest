@@ -1,5 +1,4 @@
 
-
 'use client';
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -87,14 +86,14 @@ export function MultiSelectListBox({
           <ScrollArea className="h-40">
             <div className="p-2 space-y-1">
               {available.map(option => (
-                <div key={option.id} className="flex items-center space-x-2">
+                <div key={option.id} className="flex items-center space-x-2 p-1 rounded-md hover:bg-accent">
                   <Checkbox
                     id={`available-${option.id}`}
                     checked={selectedAvailable.has(option.id)}
                     onCheckedChange={() => handleToggle(option.id, 'available')}
                     disabled={disabled}
                   />
-                  <label htmlFor={`available-${option.id}`} className={cn("text-sm font-normal", {'text-muted-foreground': disabled})}>
+                  <label htmlFor={`available-${option.id}`} className={cn("text-sm font-normal w-full cursor-pointer", {'text-muted-foreground': disabled})}>
                     {option.label}
                   </label>
                 </div>
@@ -127,14 +126,14 @@ export function MultiSelectListBox({
           <ScrollArea className="h-40">
             <div className="p-2 space-y-1">
              {chosen.map(option => (
-                <div key={option.id} className="flex items-center space-x-2">
+                <div key={option.id} className="flex items-center space-x-2 p-1 rounded-md hover:bg-accent">
                    <Checkbox
                     id={`chosen-${option.id}`}
                     checked={selectedChosen.has(option.id)}
                     onCheckedChange={() => handleToggle(option.id, 'chosen')}
                     disabled={disabled}
                   />
-                  <label htmlFor={`chosen-${option.id}`} className={cn("text-sm font-normal", {'text-muted-foreground': disabled})}>
+                  <label htmlFor={`chosen-${option.id}`} className={cn("text-sm font-normal w-full cursor-pointer", {'text-muted-foreground': disabled})}>
                     {option.label}
                   </label>
                 </div>
@@ -146,5 +145,3 @@ export function MultiSelectListBox({
     </div>
   );
 }
-
-    
