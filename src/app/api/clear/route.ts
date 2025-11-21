@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { getUser } from '@/lib/auth';
+import { logAuditEvent } from '@/lib/audit';
 
 const collectionsToClear = [
     'products',
@@ -87,6 +88,13 @@ export async function POST(req: NextRequest) {
                 message: `Cleanup operation might have failed. Some collections were not cleared.` 
             }, { status: 500 });
         }
+        
+        await logAuditEvent({
+            action: 'DELETE',
+            entity: 'database',
+            entityId: 'all',
+            comment: `All data cleared from specified collections.`,
+        });
 
 
         return NextResponse.json({ message: `Successfully cleared data from specified collections.` }, { status: 200 });

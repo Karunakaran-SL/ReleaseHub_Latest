@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
+import { getUser } from '@/lib/auth';
+import { logAuditEvent } from '@/lib/audit';
 
 const DeploymentTypeUpdateSchema = z.object({
   id: z.string().optional(),
@@ -33,6 +35,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 // Update an item
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
     try {
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
         const { id } = params;
         const body = await req.json();
         const validatedData = DeploymentTypeUpdateSchema.safeParse(body);
@@ -54,6 +61,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             return NextResponse.json({ message: 'Item not found.' }, { status: 404 });
         }
 
+        await logAuditEvent({
+            action: 'UPDATE',
+            entity: 'deployment_type',
+            entityId: id,
+            comment: `Updated deployment type ${validatedData.data.name || id}.`,
+        });
+
         const updatedItem = await collection.findOne({ _id: id });
 
         return NextResponse.json(updatedItem, { status: 200 });
@@ -68,14 +82,32 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 // Delete an item
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     try {
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
         const { id } = params;
         const client = await clientPromise;
         const db = client.db();
+        
+        const itemToDelete = await db.collection('deployment_types').findOne({ _id: id });
+        if (!itemToDelete) {
+             return NextResponse.json({ message: 'Item not found' }, { status: 404 });
+        }
+
         const result = await db.collection('deployment_types').deleteOne({ _id: id });
 
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Item not found.' }, { status: 404 });
         }
+        
+        await logAuditEvent({
+            action: 'DELETE',
+            entity: 'deployment_type',
+            entityId: id,
+            comment: `Deleted deployment type "${(itemToDelete as any).name}".`,
+        });
 
         return NextResponse.json({ message: 'Item deleted successfully.' }, { status: 200 });
 

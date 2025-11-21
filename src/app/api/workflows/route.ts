@@ -1,8 +1,9 @@
 
-
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
+import { getUser } from '@/lib/auth';
+import { logAuditEvent } from '@/lib/audit';
 
 const WorkflowSchema = z.object({
   id: z.string(),
@@ -29,6 +30,11 @@ export async function GET(req: NextRequest) {
 // Create a new item
 export async function POST(req: NextRequest) {
     try {
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await req.json();
         const validatedData = WorkflowSchema.safeParse(body);
 
@@ -47,6 +53,12 @@ export async function POST(req: NextRequest) {
         
         await collection.insertOne(newItem as any);
 
+        await logAuditEvent({
+            action: 'CREATE',
+            entity: 'workflow',
+            entityId: newItem._id,
+            comment: `Created workflow "${newItem.name}".`,
+        });
 
         return NextResponse.json(newItem, { status: 201 });
 

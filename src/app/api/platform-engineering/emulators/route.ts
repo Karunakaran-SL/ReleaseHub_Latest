@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { z } from 'zod';
+import { logAuditEvent } from '@/lib/audit';
+import { getUser } from '@/lib/auth';
 
 const COLLECTION_NAME = 'emulators';
 
@@ -27,6 +29,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
+        const user = await getUser();
+        if (!user) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        }
+
         const body = await req.json();
         const validatedData = CreateSchema.safeParse(body);
         if (!validatedData.success) {
@@ -38,6 +45,14 @@ export async function POST(req: NextRequest) {
 
         const result = await db.collection(COLLECTION_NAME).insertOne(validatedData.data as any);
         const newItem = { ...validatedData.data, _id: result.insertedId };
+        
+        await logAuditEvent({
+            action: 'CREATE',
+            entity: 'emulator',
+            entityId: result.insertedId.toHexString(),
+            comment: `Created emulator "${newItem.name}".`,
+        });
+
         return NextResponse.json(newItem, { status: 201 });
     } catch (error) {
         return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
