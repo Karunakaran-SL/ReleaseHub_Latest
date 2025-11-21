@@ -173,12 +173,6 @@ export default function EditProductPage() {
             handleMultiSelectChange(fieldName, newDestAsProductField);
         };
         
-        const moveAll = (source: Option[], dest: Option[]) => {
-            const newDest = [...dest, ...source];
-            const newDestAsProductField = newDest.map(i => ({ id: i.id, name: i.label }));
-            handleMultiSelectChange(fieldName, newDestAsProductField);
-        };
-
         return (
             <MultiSelectListBox
                 available={available}
@@ -188,7 +182,7 @@ export default function EditProductPage() {
                      const newChosen = chosen.filter(item => !ids.includes(item.id));
                      handleMultiSelectChange(fieldName, newChosen.map(i => ({id: i.id, name: i.label})))
                 }}
-                onMoveAllToChosen={() => moveAll(available, chosen)}
+                onMoveAllToChosen={() => handleMultiSelectChange(fieldName, allOptions.map(i => ({id: i.id, name: i.name})))}
                 onMoveAllToAvailable={() => handleMultiSelectChange(fieldName, [])}
             />
         );
@@ -247,7 +241,7 @@ export default function EditProductPage() {
                                 </div>
                                 <div>
                                     <Label>Custom Approval Workflow</Label>
-                                    {renderMultiSelect('custom_workflows', workflows.map(o => ({id: o.id, label: o.name})))}
+                                    {renderMultiSelect('custom_workflows', workflows.map(o => ({_id: o._id, id: o.id, name: o.name})))}
                                 </div>
                             </div>
 
@@ -255,7 +249,7 @@ export default function EditProductPage() {
                             <div className="space-y-6">
                                  <div>
                                     <Label>Select the compliance check</Label>
-                                     {renderMultiSelect('compliance_checks', complianceChecks.map(o => ({id: o.id, label: o.name})))}
+                                     {renderMultiSelect('compliance_checks', complianceChecks.map(o => ({_id: o._id, id: o.id, name: o.name})))}
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Deployment Type</Label>
@@ -297,7 +291,7 @@ export default function EditProductPage() {
                                     <div>
                                         <h3 className="font-medium text-lg mb-2">Specifications</h3>
                                         <Label>Select Applicable HW Variants</Label>
-                                         {renderMultiSelect('specifications', specifications.map(o => ({id: o.id, label: o.name})))}
+                                         {renderMultiSelect('specifications', specifications.map(o => ({_id: o._id, id: o.id, name: o.name})))}
                                     </div>
                                 )}
                                 
@@ -326,5 +320,3 @@ export default function EditProductPage() {
         </DashboardLayout>
     );
 }
-
-    

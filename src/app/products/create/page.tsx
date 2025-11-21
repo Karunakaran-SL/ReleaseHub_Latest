@@ -160,9 +160,10 @@ export default function CreateProductPage() {
         fieldName: keyof Pick<NewProductFormState, 'custom_workflows' | 'compliance_checks' | 'specifications'>,
         allOptions: Option[]
     ) => {
-        const chosenIds = new Set((formState[fieldName] || []).map(item => item.id));
+        const chosenItems = (formState[fieldName] || []).map(item => ({ id: item.id, label: item.name }));
+        const chosenIds = new Set(chosenItems.map(item => item.id));
         const available = allOptions.filter(opt => !chosenIds.has(opt.id));
-        const chosen = allOptions.filter(opt => chosenIds.has(opt.id));
+        
 
         const onMoveToChosen = (ids: string[]) => {
             const newChosen = [...(formState[fieldName] || []), ...available.filter(i => ids.includes(i.id)).map(i => ({id: i.id, name: i.label}))];
@@ -177,7 +178,7 @@ export default function CreateProductPage() {
         return (
             <MultiSelectListBox
                 available={available}
-                chosen={chosen}
+                chosen={chosenItems}
                 onMoveToChosen={onMoveToChosen}
                 onMoveToAvailable={onMoveToAvailable}
                 onMoveAllToChosen={() => handleMultiSelectUpdate(fieldName, allOptions.map(i => ({id: i.id, name: i.label})))}
@@ -328,5 +329,3 @@ export default function CreateProductPage() {
         </DashboardLayout>
     );
 }
-
-    
