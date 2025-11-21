@@ -491,16 +491,25 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             Deployment
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/fleet-management/resource-management" isActive={pathname.startsWith('/fleet-management/resource-management')}>
-                                <Globe className="mr-2"/> Resource Mgmt
-                            </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/fleet-management/resource-management/details" isActive={pathname.startsWith('/fleet-management/resource-management/details')}>
-                                <PieChart className="mr-2"/> Detailed View
-                            </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
+                         <Collapsible asChild defaultOpen={pathname.startsWith('/fleet-management/resource-management')}>
+                            <SidebarMenuItem>
+                                <CollapsibleTrigger asChild>
+                                    <SidebarMenuSubButton href="/fleet-management/resource-management" isActive={pathname === '/fleet-management/resource-management'}>
+                                        <Globe className="mr-2"/> Resource Mgmt
+                                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                                    </SidebarMenuSubButton>
+                                </CollapsibleTrigger>
+                                <CollapsibleContent>
+                                     <SidebarMenuSub>
+                                        <SidebarMenuSubItem>
+                                            <SidebarMenuSubButton href="/fleet-management/resource-management/details" isActive={pathname.startsWith('/fleet-management/resource-management/details')}>
+                                                <PieChart className="mr-2"/> Detailed View
+                                            </SidebarMenuSubButton>
+                                        </SidebarMenuSubItem>
+                                    </SidebarMenuSub>
+                                </CollapsibleContent>
+                            </SidebarMenuItem>
+                        </Collapsible>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
