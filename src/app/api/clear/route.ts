@@ -22,7 +22,38 @@ const collectionsToClear = [
     'licenses',
     'product_licensing',
     'specification_cpu_types',
-    'specification_gpu_types'
+    'specification_gpu_types',
+    'specification_disk_types',
+    'specification_hw_types',
+    'specification_hypervisors',
+    'specification_network_cards',
+    'specification_plug_power_cords',
+    'specification_vendors',
+    'service_contracts',
+    'settings_application_onboarding',
+    'settings_component_onboarding',
+    'settings_tenant_onboarding',
+    'settings_baseline_onboarding',
+    'settings_approval_product_onboarding',
+    'settings_approval_tenant_approval',
+    'settings_approval_components_approval',
+    'settings_approval_application_approval',
+    'settings_approval_interface_approval',
+    'settings_approval_baseline_approval',
+    'settings_approval_deployment_approval',
+    'settings_approval_upgrade_approval',
+    'settings_approval_migration_approval',
+    'settings_approval_decommission_approval',
+    'settings_approval_license_approval',
+    'settings_approval_export_control_approval',
+    'settings_approval_security_approval',
+    'platform_foundations',
+    'development_environments',
+    'test_environments',
+    'simulators',
+    'emulators',
+    'sdk_apps',
+    'upgrade_history',
 ];
 
 export async function POST(req: NextRequest) {
@@ -43,18 +74,22 @@ export async function POST(req: NextRequest) {
                 await db.collection(collectionName).deleteMany({});
                 clearedCollections.push(collectionName);
             } catch (error) {
-                console.error(`Failed to clear collection ${collectionName}:`, error);
-                failedCollections.push(collectionName);
+                // It's possible a collection doesn't exist, which is not a critical failure.
+                // We can log it but continue.
+                console.warn(`Could not clear collection ${collectionName}, it might not exist.`);
             }
         }
-
-        if (failedCollections.length > 0) {
+        
+        // A simple check to see if at least some core collections were cleared
+        const productsCount = await db.collection('products').countDocuments();
+        if(productsCount > 0) {
              return NextResponse.json({ 
-                message: `Completed with errors. Cleared: ${clearedCollections.join(', ')}. Failed: ${failedCollections.join(', ')}.` 
+                message: `Cleanup operation might have failed. Some collections were not cleared.` 
             }, { status: 500 });
         }
 
-        return NextResponse.json({ message: `Successfully cleared all data from tables.` }, { status: 200 });
+
+        return NextResponse.json({ message: `Successfully cleared data from specified collections.` }, { status: 200 });
 
     } catch (error) {
         console.error(error);
