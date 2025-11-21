@@ -1,6 +1,5 @@
-
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Product, Deployment } from '@/lib/definitions';
@@ -10,20 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DependencyTreeSidebar } from './_components/dependency-tree';
 import { ResourceDetailsView } from './_components/resource-details-view';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-    DialogTrigger,
-    DialogClose,
-} from '@/components/ui/dialog';
+import Link from 'next/link';
 
 export default function DetailedResourceViewPage() {
     const [user, setUser] = useState<User | null>(null);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
     const { toast } = useToast();
 
     const [products, setProducts] = useState<Product[]>([]);
@@ -129,17 +118,6 @@ export default function DetailedResourceViewPage() {
         fetchTree();
     }, [selectedDeploymentId, selectedProductId, toast]);
 
-
-    const handleAnalysis = () => {
-        setIsAnalyzing(true);
-        toast({ title: 'Analysis Started', description: 'Optimal resource suggestions will be generated. This is a placeholder for the workflow.' });
-        setTimeout(() => {
-            setIsAnalyzing(false);
-            toast({ title: 'Analysis Complete', description: 'Workflow finished. See console for suggestions.' });
-            console.log('Analysis suggestions: Reduce memory for Tenant X by 20%, increase CPU for Component Y by 2 cores.');
-        }, 3000);
-    };
-
     return (
         <DashboardLayout user={user}>
             <div className="flex-1 flex flex-col h-full">
@@ -159,26 +137,12 @@ export default function DetailedResourceViewPage() {
                             </SelectContent>
                         </Select>
                     </div>
-                     <Dialog>
-                        <DialogTrigger asChild>
-                            <Button disabled={isAnalyzing}>
-                                {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Zap className="mr-2 h-4 w-4" />}
-                                Run Analysis
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Confirm Resource Optimization Analysis</DialogTitle>
-                                <DialogDescription>
-                                    This will start a workflow to analyze the resource usage for the selected deployment and suggest optimizations. Are you sure you want to continue?
-                                </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                                <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                                <DialogClose asChild><Button onClick={handleAnalysis}>Start Workflow</Button></DialogClose>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                     <Button asChild disabled={!selectedDeploymentId}>
+                        <Link href={`/fleet-management/resource-management/analysis/${selectedDeploymentId}`}>
+                            <Zap className="mr-2 h-4 w-4" />
+                            Run Analysis
+                        </Link>
+                    </Button>
                 </header>
 
                 <main className="flex-1 flex overflow-hidden">
