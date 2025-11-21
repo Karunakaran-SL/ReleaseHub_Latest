@@ -4,32 +4,40 @@ This is a NextJS starter in Firebase Studio.
 
 To get started, take a look at src/app/page.tsx.
 
-## Running Locally with Docker
+## Running Locally
 
-This project is configured to run in a containerized environment using Docker and Docker Compose. This is the recommended way to run the application locally as it manages both the Next.js application and the MongoDB database.
+This project is configured to run locally using `npm` and can connect to an external MongoDB database.
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Node.js](https://nodejs.org/) (v18 or later recommended)
+- [npm](https://www.npmjs.com/) (usually comes with Node.js)
+- A MongoDB database and its connection string (URI).
 
-### Build and Run
+### 1. Install Dependencies
 
-1.  Open a terminal in the root directory of the project.
-2.  Run the following command to build the Docker images and start the services:
-
-    ```sh
-    docker-compose up --build
-    ```
-
-This command will start the Next.js application and the MongoDB database. Your application will be available at `http://localhost:3000`.
-
-### Stop the Application
-
-To stop the running services, press `Ctrl + C` in the terminal where `docker-compose` is running.
-
-To stop and remove the containers, run:
+Open a terminal in the root directory of the project and run:
 
 ```sh
-docker-compose down
+npm install
 ```
+
+### 2. Configure Database Connection
+
+Create a new file named `.env.local` in the root of your project and add your MongoDB connection string:
+
+```
+MONGODB_URI="your-mongodb-connection-string-goes-here"
+```
+
+Replace `your-mongodb-connection-string-goes-here` with your actual database URI.
+
+### 3. Run the Development Server
+
+Start the Next.js development server with the following command:
+
+```sh
+npm run dev
+```
+
+Your application will be available at `http://localhost:9002`.
