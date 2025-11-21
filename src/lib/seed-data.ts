@@ -1,7 +1,7 @@
 
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
-import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp } from './definitions';
+import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp, Baseline } from './definitions';
 
 
 const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
@@ -686,7 +686,7 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
     "name": "OneStopShop Portal",
     "owner": "Platform Engineering", "owner_email": "platform@example.com",
-    "product_image": "https://picsum.photos/seed/OneStopShopPortal/40/40",
+    "product_image": "https://picsum.photos/seed/product1/400/400",
     "approval_needed": true,
     "default_workflow": { "id": "StandardApproval", "name": "Standard Approval" },
     "custom_workflows": [],
@@ -701,7 +701,7 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
     "name": "Unified Data Fabric",
     "owner": "Data Platform Team", "owner_email": "data-platform@example.com",
-    "product_image": "https://picsum.photos/seed/UnifiedDataFabric/40/40",
+    "product_image": "https://picsum.photos/seed/product2/400/400",
     "approval_needed": true,
     "default_workflow": { "id": "DataGovernanceReview", "name": "Data Governance Review" },
     "custom_workflows": [],
@@ -710,8 +710,8 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
     "git_repo": "http://git.example.com/platform/data-fabric",
     "artifacts_repo": "http://artifacts.example.com/data-fabric",
     "pipeline": "http://cicd.example.com/data-fabric",
-    "specifications": [{ "id": "SparkProcessing", "name": "Spark Processing" }, { "id": "KafkaStreaming", "name": "Kafka Streaming" }],
-    "version": "1.0.0",
+    "specifications": [{ "id": "DellPowerEdgeR760", "name": "Dell PowerEdge R760" }],
+    "version": "1.1.0",
   }
 ];
 
@@ -726,6 +726,7 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
         name: 'ArgoCD Sync Spec', vendor: 'CNCF', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' },
         clusterName: 'ArgoCD Management Cluster',
         nodeCount: { controlPlane: 3, worker: 5 },
+        image: 'https://picsum.photos/seed/spec1/400/400',
         nodes: [
             ...Array.from({ length: 3 }, (_, i) => ({
                 vmName: `argo-cp-${i+1}`,
@@ -746,6 +747,7 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     {
         name: 'Single Sign-On Spec', vendor: 'OpenID', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'VMWare ESXi', name: 'VMWare ESXi' }, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' },
         clusterName: 'SSO Authentication Service',
+        image: 'https://picsum.photos/seed/spec2/400/400',
         nodeCount: { controlPlane: 2, worker: 3 },
         nodes: [
             ...Array.from({ length: 2 }, (_, i) => ({
@@ -762,7 +764,7 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     },
     {
         name: 'Dell PowerEdge R760', vendor: 'Dell EMC', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'},
-        total_cpu: 64, memory_gb: 256, storage_gb: 4096,
+        total_cpu: 64, memory_gb: 256, storage_gb: 4096, image: 'https://picsum.photos/seed/spec3/400/400',
         network_cards: [{id: 'Ethernet_10G_SFP+', name: 'Ethernet_10G_SFP+'}], plug_power_cords: [{id: 'C13/C14', name: 'C13/C14'}],
         hypervisor: { id: 'VMWare ESXi', name: 'VMWare ESXi' }, biosVersion: "2.10.1", firmwareVersion: "7.00.10.00 (iDRAC 9)", cpuArchitecture: "x86_64", virtualizationSupport: true,
         iloCredentials: { username: 'root', password: 'password123' }, timeSync: 'ntp.dell.com', raidConfiguration: 'RAID 1 (OS), RAID 5 (Data)',
@@ -770,12 +772,14 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     },
     {
         name: 'HPE ProLiant DL380 Gen11', vendor: 'HPE', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_Foundation_Care', name: 'Foundation Care'},
-        total_cpu: 48, memory_gb: 192, storage_gb: 2048, biosVersion: "U52 v1.50", firmwareVersion: "3.01 (iLO 6)", cpuArchitecture: "x86_64", virtualizationSupport: true,
+        total_cpu: 48, memory_gb: 192, storage_gb: 2048, image: 'https://picsum.photos/seed/spec4/400/400',
+        biosVersion: "U52 v1.50", firmwareVersion: "3.01 (iLO 6)", cpuArchitecture: "x86_64", virtualizationSupport: true,
         iloCredentials: { username: 'admin', password: 'password' }, timeSync: 'time.nist.gov', raidConfiguration: 'RAID 1 (OS), RAID 6 (Data)',
         diskLayout: { osDisk: '2x 480GB SSD', dataDisk: '6x 1.2TB SAS HDD' }
     },
     {
         name: 'Cisco UCS B200 M7 Blade', vendor: 'Cisco', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'},
+        image: 'https://picsum.photos/seed/spec5/400/400',
         symmetric: true, bladeCount: 8,
         blades: [{
             name: 'Blade Template', cpuType: 'Intel Xeon Scalable', cpuCores: 24, memory: 128, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 1024, hasGpu: true, gpuType: 'NVIDIA A100', gpuCores: 108,
@@ -785,6 +789,7 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     },
     {
         name: 'Asymmetric Blade Server', vendor: 'Lenovo', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'},
+        image: 'https://picsum.photos/seed/spec6/400/400',
         symmetric: false, bladeCount: 4,
         blades: [
             { name: 'Compute-Blade-1', cpuType: 'AMD EPYC 7002', cpuCores: 32, memory: 256, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 2048, hasGpu: false },
@@ -796,6 +801,7 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     {
       "name": "Spec-hardware-Blade-1763392192219",
       "hw_type": { "id": "Blade", "name": "Blade"},
+      "image": "https://picsum.photos/seed/spec7/400/400",
       "symmetric": false,
       "bladeCount": 1,
       "blades": [
@@ -1194,6 +1200,78 @@ const initialSdkApps: Omit<SdkApp, '_id'| 'createdAt'>[] = [
     }
 ];
 
+const initialBaselines: Omit<Baseline, '_id'>[] = [
+    {
+        product: { id: "OneStopShopPortal", name: "OneStopShop Portal", version: "1.0.0" },
+        specifications: [{ id: "ArgoCDSyncSpec", name: "ArgoCD Sync Spec", version: "1.0.0" }],
+        tenants: initialTenants.filter(t => t.products?.some(p => p.id === 'OneStopShopPortal')),
+        status: 'RELEASED',
+        created_at: new Date('2023-10-26T10:00:00Z').toISOString(),
+        updated_at: new Date('2023-11-01T12:00:00Z').toISOString(),
+        created_by: 'release-manager',
+        artifacts: [{ name: 'onestopshop-1.0.0.zip', url: '#', size: '128 MB' }],
+        package_properties: { location: 's3://releases/onestopshop/1.0.0', checksum_md5: 'mock-md5-sum', checksum_sha256: 'mock-sha256-sum' }
+    },
+    {
+        product: { id: "UnifiedDataFabric", name: "Unified Data Fabric", version: "1.1.0" },
+        specifications: [{ id: "DellPowerEdgeR760", name: "Dell PowerEdge R760", version: "1.0.0" }],
+        tenants: initialTenants.filter(t => t.products?.some(p => p.id === 'UnifiedDataFabric')),
+        status: 'RELEASED',
+        created_at: new Date('2024-01-15T10:00:00Z').toISOString(),
+        updated_at: new Date('2024-01-20T12:00:00Z').toISOString(),
+        created_by: 'release-manager',
+        artifacts: [{ name: 'datafabric-1.1.0.zip', url: '#', size: '256 MB' }],
+        package_properties: { location: 's3://releases/datafabric/1.1.0', checksum_md5: 'mock-md5-sum', checksum_sha256: 'mock-sha256-sum' }
+    },
+     {
+        product: { id: "UnifiedDataFabric", name: "Unified Data Fabric", version: "1.2.0-draft" },
+        specifications: [{ id: "DellPowerEdgeR760", name: "Dell PowerEdge R760", version: "1.0.0" }],
+        tenants: initialTenants.filter(t => t.products?.some(p => p.id === 'UnifiedDataFabric')),
+        status: 'DRAFT',
+        created_at: new Date('2024-06-15T10:00:00Z').toISOString(),
+        updated_at: new Date('2024-06-15T12:00:00Z').toISOString(),
+        created_by: 'dev-user',
+        artifacts: [{ name: 'datafabric-1.2.0-draft.zip', url: '#', size: '260 MB' }],
+        package_properties: { location: 's3://releases/datafabric/1.2.0-draft', checksum_md5: 'mock-md5-sum', checksum_sha256: 'mock-sha256-sum' }
+    }
+];
+
+const generateDeployments = (): Omit<Deployment, '_id'>[] => {
+    const data = [];
+    const customers = ['Innovate Inc.', 'Solutions Corp', 'Synergy LLC', 'Quantum Enterprises', 'Apex Industries', 'Starlight Logistics'];
+    const countries = ['United States', 'Germany', 'Japan', 'Brazil', 'Australia', 'South Africa'];
+    const statuses: Deployment['status'][] = ['ACTIVE', 'PROVISIONING', 'UPGRADING', 'FAILED', 'UPGRADE_APPROVAL'];
+    
+    for (let i = 0; i < 50; i++) {
+        const product = initialProducts[i % initialProducts.length];
+        const spec = fullSpecifications[i % fullSpecifications.length];
+        const customer = customers[i % customers.length];
+        const country = countries[i % countries.length];
+        const status = statuses[i % statuses.length];
+        const date = new Date(2024, i % 12, (i % 28) + 1);
+
+        data.push({
+            productId: product._id,
+            specificationId: spec._id,
+            hypervisorId: 'KVM',
+            foundationComponentIds: [],
+            security: {},
+            details: {
+                deploymentId: `DEP-${(2000 + i).toString()}`,
+                customer: customer,
+                country: country,
+                region: 'Americas'
+            },
+            createdBy: 'seed-user',
+            createdAt: date.toISOString(),
+            status: status
+        });
+    }
+    return data;
+};
+
+const initialDeployments = generateDeployments();
+
 
 export async function seedDatabase() {
     const client = await clientPromise;
@@ -1231,7 +1309,9 @@ export async function seedDatabase() {
         { name: 'test_environments', data: initialTestEnvironments },
         { name: 'simulators', data: initialSimulators },
         { name: 'emulators', data: initialEmulators },
-        { name: 'sdk_apps', data: initialSdkApps.map(app => ({ ...app, createdAt: new Date().toISOString() })) }
+        { name: 'sdk_apps', data: initialSdkApps.map(app => ({ ...app, createdAt: new Date().toISOString(), createdBy: 'seed-user' })) },
+        { name: 'baselines', data: initialBaselines.map(b => ({ ...b, _id: `${b.product.id}_${b.product.version}` })) },
+        { name: 'deployments', data: initialDeployments.map(d => ({ ...d, _id: d.details.deploymentId })) },
     ];
     
     let seededCount = 0;
