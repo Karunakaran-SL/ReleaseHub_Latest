@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -223,7 +224,7 @@ export default function ProductsPage() {
                     <TableRow key={product._id}>
                       <TableCell>
                         <Image 
-                            src={product.product_image} 
+                            src={product.product_image || 'https://picsum.photos/seed/placeholder/40/40'} 
                             alt={product.name} 
                             width={40} 
                             height={40} 

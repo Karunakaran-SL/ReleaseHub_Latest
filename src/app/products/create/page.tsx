@@ -121,7 +121,7 @@ export default function CreateProductPage() {
 
         const productName = formState.name || 'NewProduct';
         const productId = productName.replace(/[^a-zA-Z0-9]/g, '');
-        const imageUrl = formState.product_image || `https://picsum.photos/seed/${productId}/40/40`;
+        const imageUrl = formState.product_image || `https://picsum.photos/seed/${productId}/400/400`;
 
         const payload = {
             ...initialFormState,
