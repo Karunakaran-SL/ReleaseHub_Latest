@@ -493,7 +493,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         </SidebarMenuSubItem>
                          <SidebarMenuSubItem>
                             <SidebarMenuSubButton href="/fleet-management/resource-management" isActive={pathname.startsWith('/fleet-management/resource-management')}>
-                                <Globe className="mr-2"/> Global View
+                                <Globe className="mr-2"/> Resource Mgmt
                             </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                          <SidebarMenuSubItem>
