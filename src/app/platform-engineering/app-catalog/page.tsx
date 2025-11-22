@@ -164,17 +164,16 @@ export default function AppCatalogPage() {
                        <Accordion type="multiple" className="w-full">
                            {categories.map((category) => (
                                <AccordionItem value={category.name} key={category.name}>
-                                   <AccordionTrigger>
-                                        <div className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id={`cat-${category.name}`}
-                                                checked={selectedCategories.has(category.name)}
-                                                onCheckedChange={(checked) => handleCategoryToggle(category.name, !!checked)}
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
+                                   <div className="flex items-center space-x-2 p-2">
+                                        <Checkbox
+                                            id={`cat-${category.name}`}
+                                            checked={selectedCategories.has(category.name)}
+                                            onCheckedChange={(checked) => handleCategoryToggle(category.name, !!checked)}
+                                        />
+                                        <AccordionTrigger className="p-0 flex-1">
                                             <Label htmlFor={`cat-${category.name}`} className="font-semibold cursor-pointer">{category.name}</Label>
-                                        </div>
-                                   </AccordionTrigger>
+                                        </AccordionTrigger>
+                                   </div>
                                    <AccordionContent className="pl-8 pt-2 space-y-2">
                                        {category.subcategories.map(sub => (
                                             <div key={sub} className="flex items-center space-x-2">
