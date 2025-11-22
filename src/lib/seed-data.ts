@@ -1786,7 +1786,7 @@ const initialComponentOnboarding: Omit<OnboardingConfiguration, '_id'> = {
       statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
       fields: [
         { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
-        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
+        { type: "Checkbox", name: "specChanged", label = "System level Specification changed?", proof: true },
         { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
       ],
     },
@@ -1899,7 +1899,7 @@ const initialTenantOnboarding: Omit<OnboardingConfiguration, '_id'> = {
       statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
       fields: [
         { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
-        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
+        { type: "Checkbox", name: "specChanged", label = "System level Specification changed?", proof: true },
         { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
       ],
     },
@@ -2503,7 +2503,7 @@ function generatePhases(config: OnboardingConfiguration) {
 
 const initialTenants: Omit<CmdbTenant, '_id'| 'created_at' | 'updated_at'>[] = [
     { id: 'CorePlatformServices', name: 'Core Platform Services', description: 'Holds core infrastructure components.', version: '2.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, {id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'CustomerAnalytics', name: 'Customer Analytics', description: 'Tenant for customer-facing analytics dashboards.', version: '1.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
+    { id: 'CustomerAnalytics', name: 'Customer Analytics', description: 'Tenant for customer-facing analytics dashboards.', version: '1.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified DataFabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
     { id: 'RetailOperations', name: 'Retail Operations', description: 'Manages retail and e-commerce services.', version: '1.2.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
     { id: 'SupplyChainLogistics', name: 'Supply Chain Logistics', description: 'Tenant for SCM and logistics.', version: '3.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'RetailOperations', name: 'Retail Operations', version: '1.2.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
     { id: 'MarketingAutomation', name: 'Marketing Automation', description: 'Handles marketing campaigns and user outreach.', version: '1.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
@@ -2540,7 +2540,7 @@ const initialComponents: Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'
 const initialApplications: Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at'>[] = [
     { id: 'UserProfileApp', name: 'User Profile App', version: '1.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}, {id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
     { id: 'AnalyticsDashboard', name: 'Analytics Dashboard', version: '2.1.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'RetailStorefront', name: 'Retail Storefront', version: '3.2.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}, {id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
+    { id: 'RetailStorefront', name: 'Retail Storefront', version: '3.2.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}, {id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'ProcessPaymentAPI'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
     { id: 'WarehouseManager', name: 'Warehouse Manager', version: '1.8.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
     { id: 'MarketingCampaignDashboard', name: 'Marketing Campaign Dashboard', version: '1.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}, {id: 'SendPushAPI', name: 'Send Push API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
     { id: 'FraudAnalystConsole', name: 'Fraud Analyst Console', version: '2.4.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
@@ -2975,3 +2975,5 @@ export async function seedDatabase() {
 
     return { seededCount, skippedCount };
 }
+
+    
