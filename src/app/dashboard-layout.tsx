@@ -60,6 +60,7 @@ import {
   WrenchIcon,
   Globe,
   PieChart,
+  Grid3x3,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -346,6 +347,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             </CollapsibleContent>
                           </SidebarMenuItem>
                         </Collapsible>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/platform-engineering/app-catalog" isActive={pathname.startsWith('/platform-engineering/app-catalog')}>
+                             <Grid3x3 className="mr-2"/> App Catalog
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
                          <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/platform-engineering/no-code-platform" isActive={pathname.startsWith('/platform-engineering/no-code-platform')}>
                              <MousePointerClick className="mr-2"/> No Code Platform

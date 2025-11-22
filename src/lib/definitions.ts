@@ -5,6 +5,7 @@
 
 
 
+
 export type User = {
   _id: string;
   username: string;
@@ -478,4 +479,15 @@ export interface SdkApp {
   version?: string;
   simulators?: any[];
   emulators?: any[];
+}
+
+export interface AppCatalogItem {
+    _id: string;
+    category: string;
+    subcategory: string;
+    name: string;
+    logo: string;
+    website: string;
+    description: string;
+    kubernetesConfig?: Record<string, any>;
 }

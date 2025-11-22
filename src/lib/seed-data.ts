@@ -1,9 +1,8 @@
 
-
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
 import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp, Baseline } from './definitions';
-
+import { appCatalogData } from './app-catalog-data';
 
 const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
   name: 'Application Onboarding',
@@ -1313,6 +1312,7 @@ export async function seedDatabase() {
         { name: 'sdk_apps', data: initialSdkApps.map(app => ({ ...app, createdAt: new Date().toISOString(), createdBy: 'seed-user' })) },
         { name: 'baselines', data: initialBaselines.map(b => ({ ...b, _id: `${b.product.id}_${b.product.version}` })) },
         { name: 'deployments', data: initialDeployments.map(d => ({ ...d, _id: d.details.deploymentId })) },
+        { name: 'app_catalog', data: appCatalogData },
     ];
     
     let seededCount = 0;
