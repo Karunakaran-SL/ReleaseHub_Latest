@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface AppCatalogItem {
     _id: string;
@@ -82,6 +83,7 @@ export default function AppCatalogPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set());
+    const [selectedSubcategories, setSelectedSubcategories] = useState<Set<string>>(new Set());
     const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
     const { toast } = useToast();
 
@@ -101,27 +103,53 @@ export default function AppCatalogPage() {
         fetchData();
     }, [toast]);
 
-    const { categories, filteredItems } = useMemo(() => {
-        const categories = [...new Set(items.map(item => item.category))];
+    const { categories } = useMemo(() => {
+        const categoryMap = new Map<string, Set<string>>();
+        items.forEach(item => {
+            if (!categoryMap.has(item.category)) {
+                categoryMap.set(item.category, new Set());
+            }
+            categoryMap.get(item.category)!.add(item.subcategory);
+        });
+
+        const categories = Array.from(categoryMap.entries()).map(([name, subcategories]) => ({
+            name,
+            subcategories: Array.from(subcategories).sort(),
+        })).sort((a,b) => a.name.localeCompare(b.name));
         
-        const filtered = items.filter(item => {
+        return { categories };
+    }, [items]);
+
+    const filteredItems = useMemo(() => {
+        return items.filter(item => {
             const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                   item.description.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = selectedCategories.size === 0 || selectedCategories.has(item.category);
-            return matchesSearch && matchesCategory;
+            const matchesSubcategory = selectedSubcategories.size === 0 || selectedSubcategories.has(item.subcategory);
+            return matchesSearch && matchesCategory && matchesSubcategory;
         });
-        return { categories, filteredItems: filtered };
-    }, [items, searchTerm, selectedCategories]);
+    }, [items, searchTerm, selectedCategories, selectedSubcategories]);
 
-    const handleCategoryToggle = (category: string) => {
+    const handleCategoryToggle = (category: string, isChecked: boolean) => {
         const newSelection = new Set(selectedCategories);
-        if (newSelection.has(category)) {
-            newSelection.delete(category);
-        } else {
+        if (isChecked) {
             newSelection.add(category);
+        } else {
+            newSelection.delete(category);
         }
         setSelectedCategories(newSelection);
     };
+
+    const handleSubcategoryToggle = (subcategory: string, isChecked: boolean) => {
+        const newSelection = new Set(selectedSubcategories);
+        if (isChecked) {
+            newSelection.add(subcategory);
+        } else {
+            newSelection.delete(subcategory);
+        }
+        setSelectedSubcategories(newSelection);
+    };
+
 
     return (
         <DashboardLayout user={user}>
@@ -133,23 +161,35 @@ export default function AppCatalogPage() {
                         <Input placeholder="Search..." className="pl-8" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                     </div>
                     <ScrollArea className="flex-1">
-                        <div className="space-y-4">
-                            <div>
-                                <h3 className="font-semibold mb-2">Category</h3>
-                                <div className="space-y-2">
-                                    {categories.map(category => (
-                                        <div key={category} className="flex items-center space-x-2">
+                       <Accordion type="multiple" className="w-full">
+                           {categories.map((category) => (
+                               <AccordionItem value={category.name} key={category.name}>
+                                   <AccordionTrigger>
+                                        <div className="flex items-center space-x-2">
                                             <Checkbox
-                                                id={`cat-${category}`}
-                                                checked={selectedCategories.has(category)}
-                                                onCheckedChange={() => handleCategoryToggle(category)}
+                                                id={`cat-${category.name}`}
+                                                checked={selectedCategories.has(category.name)}
+                                                onCheckedChange={(checked) => handleCategoryToggle(category.name, !!checked)}
+                                                onClick={(e) => e.stopPropagation()}
                                             />
-                                            <Label htmlFor={`cat-${category}`} className="font-normal cursor-pointer">{category}</Label>
+                                            <Label htmlFor={`cat-${category.name}`} className="font-semibold cursor-pointer">{category.name}</Label>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                                   </AccordionTrigger>
+                                   <AccordionContent className="pl-8 pt-2 space-y-2">
+                                       {category.subcategories.map(sub => (
+                                            <div key={sub} className="flex items-center space-x-2">
+                                                <Checkbox
+                                                    id={`sub-${sub}`}
+                                                    checked={selectedSubcategories.has(sub)}
+                                                    onCheckedChange={(checked) => handleSubcategoryToggle(sub, !!checked)}
+                                                />
+                                                <Label htmlFor={`sub-${sub}`} className="font-normal cursor-pointer">{sub}</Label>
+                                            </div>
+                                       ))}
+                                   </AccordionContent>
+                               </AccordionItem>
+                           ))}
+                       </Accordion>
                     </ScrollArea>
                 </aside>
                 <main className="flex-1 p-6 md:p-10 flex flex-col">
