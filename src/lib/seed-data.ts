@@ -162,7 +162,7 @@ const appCatalogData = [
     "name": "Idem Project",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/idem-project.svg",
     "website": "https://www.idemproject.io",
-    "description": "Idem reduces your cloud configuration to data – for you! Instead of Infrastructure as Code, Idem delivers Infrastructure as Data. The cloud\nbecomes simplified, easier to maintain, easier to discover, and easier to use."
+    "description": "Idem reduces your cloud configuration to data – for you! Instead of Infrastructure as Code, Idem delivers Infrastructure as Data. The cloud becomes simplified, easier to maintain, easier to discover, and easier to use."
   },
   {
     "category": "Provisioning",
@@ -226,7 +226,7 @@ const appCatalogData = [
     "name": "Kosko",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kosko.svg",
     "website": "https://kosko.dev",
-    "description": "Kosko can help you organize your Kubernetes manifests in TypeScript, manage multiple environments,\nensure type safety using OpenAPI schema, and find issues in your manifests."
+    "description": "Kosko can help you organize your Kubernetes manifests in TypeScript, manage multiple environments, ensure type safety using OpenAPI schema, and find issues in your manifests."
   },
   {
     "category": "Provisioning",
@@ -458,7 +458,7 @@ const appCatalogData = [
     "name": "Terranetes",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/terranetes.svg",
     "website": "https://www.appvia.io/terranetes",
-    "description": "The Appvia Terranetes Controller manages the life-cycle of Terraform and OpenTofu resources defined and built inside Kubernetes. This allows teams\nrunning workloads inside the cluster to self-serve application dependencies and reuse the wealth of Terraform modules already written."
+    "description": "The Appvia Terranetes Controller manages the life-cycle of Terraform and OpenTofu resources defined and built inside Kubernetes. This allows teams running workloads inside the cluster to self-serve application dependencies and reuse the wealth of Terraform modules already written."
   },
   {
     "category": "Provisioning",
@@ -482,7 +482,7 @@ const appCatalogData = [
     "name": "VMware vSphere",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/vmware-vsphere.svg",
     "website": "https://www.vmware.com/products/vsphere.html",
-    "description": "vSphere is the industry-leading server virtualization software and the heart of a modern SDDC, helping you run, manage, connect, and secure your\napplications in a common operating environment across clouds."
+    "description": "vSphere is the industry-leading server virtualization software and the heart of a modern SDDC, helping you run, manage, connect, and secure your applications in a common operating environment across clouds."
   },
   {
     "category": "Provisioning",
@@ -498,7 +498,7 @@ const appCatalogData = [
     "name": "Alibaba Cloud Container Registry (ACR)",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/alibaba-cloud-container-registry.svg",
     "website": "https://www.alibabacloud.com/zh/product/container-registry",
-    "description": "Alibaba Cloud Container Registry (ACR) is a cloud-native artifacts management platform that helps your team build, manage, and ship containerized\napplications,\n also provides vulnerability analysis, global synchronization, content trust, and more functionalities out of the box."
+    "description": "Alibaba Cloud Container Registry (ACR) is a cloud-native artifacts management platform that helps your team build, manage, and ship containerized applications, also provides vulnerability analysis, global synchronization, content trust, and more functionalities out of the box."
   },
   {
     "category": "Provisioning",
@@ -506,7 +506,7 @@ const appCatalogData = [
     "name": "Amazon Elastic Container Registry (ECR)",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/amazon-ecr.svg",
     "website": "https://aws.amazon.com/ecr/",
-    "description": "Amazon Elastic Container Registry (ECR) is a fully-managed Docker container registry that makes it easy for developers to store, manage, and\ndeploy Docker container images."
+    "description": "Amazon Elastic Container Registry (ECR) is a fully-managed Docker container registry that makes it easy for developers to store, manage, and deploy Docker container images."
   },
   {
     "category": "Provisioning",
@@ -514,7 +514,7 @@ const appCatalogData = [
     "name": "Azure Registry",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/azure-registry.svg",
     "website": "https://azure.microsoft.com/en-us/services/container-registry/",
-    "description": "Azure Container Registry allows you to store images for all types of container deployments including DC/OS, Docker Swarm, Kubernetes, and Azure\nservices such as App Service, Batch, Service Fabric, and others."
+    "description": "Azure Container Registry allows you to store images for all types of container deployments including DC/OS, Docker Swarm, Kubernetes, and Azure services such as App Service, Batch, Service Fabric, and others."
   },
   {
     "category": "Provisioning",
@@ -538,7 +538,7 @@ const appCatalogData = [
     "name": "Google Container Registry",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/google-container-registry.svg",
     "website": "https://cloud.google.com/container-registry/",
-    "description": "Container Registry is a single place for your team to manage Docker images, perform vulnerability analysis, and decide who can access what with\nfine-grained access control."
+    "description": "Container Registry is a single place for your team to manage Docker images, perform vulnerability analysis, and decide who can access what with fine-grained access control."
   },
   {
     "category": "Provisioning",
@@ -570,7 +570,7 @@ const appCatalogData = [
     "name": "JFrog Artifactory",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/j-frog-artifactory.svg",
     "website": "https://jfrog.com/artifactory/",
-    "description": "Shipping updates continuously and automatically has become a critical element of any successful operation. JFrog is revolutionizing the software\nworld with the practice of Continuous Update, with a speed and continuity that forever changes the way organizations manage and release software."
+    "description": "Shipping updates continuously and automatically has become a critical element of any successful operation. JFrog is revolutionizing the software world with the practice of Continuous Update, with a speed and continuity that forever changes the way organizations manage and release software."
   },
   {
     "category": "Provisioning",
@@ -594,7 +594,7 @@ const appCatalogData = [
     "name": "Spegel",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/spegel.svg",
     "website": "https://spegel.dev/",
-    "description": "Stateless cluster local OCI registry mirror. Spegel enables each node in a Kubernetes cluster to act as a local registry mirror,\nallowing nodes to share images between themselves. Any image already pulled by a node will be available for any other node in the cluster to pull."
+    "description": "Stateless cluster local OCI registry mirror. Spegel enables each node in a Kubernetes cluster to act as a local registry mirror, allowing nodes to share images between themselves. Any image already pulled by a node will be available for any other node in the cluster to pull."
   },
   {
     "category": "Provisioning",
@@ -626,7 +626,7 @@ const appCatalogData = [
     "name": "APIClarity",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/APIClarity.svg",
     "website": "https://openclarity.io/",
-    "description": "APIClarity is a cloud API observability open-source project that provides functionality to discover and monitor any API traffic that interacts\nwith modern applications and report suspected security weaknesses or possible abuses. Once an OpenAPI spec is either uploaded or reconstructed by\nAPIClarity, it monitors for shadow and zombie APIs, Broken Functional-Level Authorization (BFLA), Broken Object-Level Authorization (BOLA), weak\nauthentication, sensitive data leaks and data injection risks."
+    "description": "APIClarity is a cloud API observability open-source project that provides functionality to discover and monitor any API traffic that interacts with modern applications and report suspected security weaknesses or possible abuses. Once an OpenAPI spec is either uploaded or reconstructed by APIClarity, it monitors for shadow and zombie APIs, Broken Functional-Level Authorization (BFLA), Broken Object-Level Authorization (BOLA), weak authentication, sensitive data leaks and data injection risks."
   },
   {
     "category": "Provisioning",
@@ -634,7 +634,7 @@ const appCatalogData = [
     "name": "Apolicy",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/apolicy.svg",
     "website": "https://www.apolicy.io/",
-    "description": "Apolicy fuses security and compliance into your cloud native development pipeline. Using policy-as-code,  we automate risk, policy and remediation\nfrom source to production"
+    "description": "Apolicy fuses security and compliance into your cloud native development pipeline. Using policy-as-code,  we automate risk, policy and remediation from source to production"
   },
   {
     "category": "Provisioning",
@@ -658,7 +658,7 @@ const appCatalogData = [
     "name": "Aserto",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/aserto.svg",
     "website": "https://www.aserto.com",
-    "description": "Fine-grained, policy-based, real-time authorization for APIs and microservices. Aserto is the maintainer of the Topaz and Open Policy Containers\nOSS projects."
+    "description": "Fine-grained, policy-based, real-time authorization for APIs and microservices. Aserto is the maintainer of the Topaz and Open Policy Containers OSS projects."
   },
   {
     "category": "Provisioning",
@@ -674,7 +674,7 @@ const appCatalogData = [
     "name": "Bank-Vaults",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/bank-vaults.svg",
     "website": "https://bank-vaults.dev/",
-    "description": "Bank-Vaults is a Vault swiss-army knife: a K8s operator, Go client with automatic token renewal, automatic configuration, multiple unseal options\nand more. A CLI tool to init, unseal and configure Vault (auth methods, secret engines). Direct secret injection into Pods."
+    "description": "Bank-Vaults is a Vault swiss-army knife: a K8s operator, Go client with automatic token renewal, automatic configuration, multiple unseal options and more. A CLI tool to init, unseal and configure Vault (auth methods, secret engines). Direct secret injection into Pods."
   },
   {
     "category": "Provisioning",
@@ -682,7 +682,7 @@ const appCatalogData = [
     "name": "Black Duck",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/blackduck.svg",
     "website": "https://www.synopsys.com/software-integrity/security-testing/software-composition-analysis.html",
-    "description": "Black Duck provides a comprehensive software composition analysis (SCA) solution for managing security, quality, and license compliance risk that\ncomes from the use of open source and third-party code in applications and containers."
+    "description": "Black Duck provides a comprehensive software composition analysis (SCA) solution for managing security, quality, and license compliance risk that comes from the use of open source and third-party code in applications and containers."
   },
   {
     "category": "Provisioning",
@@ -690,7 +690,7 @@ const appCatalogData = [
     "name": "Bloombase",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/bloombase.svg",
     "website": "https://www.bloombase.com",
-    "description": "Bloombase is an intelligent storage firewall company providing AI-accelerated security and PQC encryption of high-bandwidth, low-latency data cloud\nfrom edge computing, physical/virtual datacenters, through HCI and CDI, to the cloud."
+    "description": "Bloombase is an intelligent storage firewall company providing AI-accelerated security and PQC encryption of high-bandwidth, low-latency data cloud from edge computing, physical/virtual datacenters, through HCI and CDI, to the cloud."
   },
   {
     "category": "Provisioning",
@@ -698,7 +698,7 @@ const appCatalogData = [
     "name": "Bouncy Castle",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/community-bouncy-castle.svg",
     "website": "https://www.bouncycastle.org/",
-    "description": "Bouncy Castle is one of the most widely used FIPS-certified open-source cryptographic APIs for Java and C#, allowing developers to easily\nintegrate  PKI security into their applications."
+    "description": "Bouncy Castle is one of the most widely used FIPS-certified open-source cryptographic APIs for Java and C#, allowing developers to easily integrate  PKI security into their applications."
   },
   {
     "category": "Provisioning",
@@ -762,7 +762,7 @@ const appCatalogData = [
     "name": "Check Point",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/checkpoint.svg",
     "website": "https://www.checkpoint.com",
-    "description": "Check Point Software Technologies Ltd. is a leading provider of cyber security solutions to corporate enterprises and governments globally. Check\nPoint protects over 100,000 organizations of all sizes."
+    "description": "Check Point Software Technologies Ltd. is a leading provider of cyber security solutions to corporate enterprises and governments globally. Check Point protects over 100,000 organizations of all sizes."
   },
   {
     "category": "Provisioning",
@@ -770,7 +770,7 @@ const appCatalogData = [
     "name": "Checkov",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/checkov.svg",
     "website": "https://www.checkov.io/",
-    "description": "Checkov scans cloud infrastructure configurations to find misconfigurations before they are deployed. Checkov manages and analyzes infrastructure\nas code (IaC) scan results across platforms such as Terraform, CloudFormation, Kubernetes, Helm, ARM Templates and Serverless framework."
+    "description": "Checkov scans cloud infrastructure configurations to find misconfigurations before they are deployed. Checkov manages and analyzes infrastructure as code (IaC) scan results across platforms such as Terraform, CloudFormation, Kubernetes, Helm, ARM Templates and Serverless framework."
   },
   {
     "category": "Provisioning",
@@ -794,7 +794,7 @@ const appCatalogData = [
     "name": "CloudMatos",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/cloudmatos.svg",
     "website": "https://www.cloudmatos.com",
-    "description": "Pioneering the world of self-healing, self-aware, self-sustaining, self-resilient, self-secure and intelligent remediation, MatosSphere brings a\ncomplete cloud security and governance solution for your cloud infrastructure."
+    "description": "Pioneering the world of self-healing, self-aware, self-sustaining, self-resilient, self-secure and intelligent remediation, MatosSphere brings a complete cloud security and governance solution for your cloud infrastructure."
   },
   {
     "category": "Provisioning",
@@ -802,7 +802,7 @@ const appCatalogData = [
     "name": "Confidential Containers",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/confidential-containers.svg",
     "website": "https://confidentialcontainers.org/",
-    "description": "Confidential Containers is an open source community working to enable cloud native  confidential computing by leveraging Trusted Execution\nEnvironments to protect  containers and data."
+    "description": "Confidential Containers is an open source community working to enable cloud native  confidential computing by leveraging Trusted Execution Environments to protect  containers and data."
   },
   {
     "category": "Provisioning",
@@ -810,7 +810,7 @@ const appCatalogData = [
     "name": "ContainerSSH",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/containerssh.svg",
     "website": "https://containerssh.io",
-    "description": "ContainerSSH launches a new container for each SSH connection in Kubernetes, Podman or Docker. The user is transparently dropped in the container\nand the container is removed when the user disconnects. Authentication and container configuration are dynamic using webhooks, no system users\nrequired."
+    "description": "ContainerSSH launches a new container for each SSH connection in Kubernetes, Podman or Docker. The user is transparently dropped in the container and the container is removed when the user disconnects. Authentication and container configuration are dynamic using webhooks, no system users required."
   },
   {
     "category": "Provisioning",
@@ -834,7 +834,7 @@ const appCatalogData = [
     "name": "China Mobile Cloud Cloud-native Application Security",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/china-mobile-cloud-cas.svg",
     "website": "https://ecloud.10086.cn/portal/product/cnappsec",
-    "description": "China Mobile Cloud Cloud-native Application Security is an application protection platform based on container technology,\nproviding comprehensive security detection and protection capabilities for cloud-native environments."
+    "description": "China Mobile Cloud Cloud-native Application Security is an application protection platform based on container technology, providing comprehensive security detection and protection capabilities for cloud-native environments."
   },
   {
     "category": "Provisioning",
@@ -914,7 +914,7 @@ const appCatalogData = [
     "name": "Fugue",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/fugue.svg",
     "website": "https://www.fugue.co",
-    "description": "Fugue empowers cloud engineering and security teams to move faster with confidence in their cloud security. Use Fugue to secure the entire\ndevelopment lifecycle—from infrastructure as code through CI/CD and runtime—using a unified policy engine powered by the Open Policy Agent (OPA),\nthe open source standard for policy as code."
+    "description": "Fugue empowers cloud engineering and security teams to move faster with confidence in their cloud security. Use Fugue to secure the entire development lifecycle—from infrastructure as code through CI/CD and runtime—using a unified policy engine powered by the Open Policy Agent (OPA), the open source standard for policy as code."
   },
   {
     "category": "Provisioning",
@@ -922,7 +922,7 @@ const appCatalogData = [
     "name": "GitGuardian",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/gitguardian.svg",
     "website": "https://www.gitguardian.com/",
-    "description": "GitGuardian is the code security platform for the DevOps generation that offers automated Secrets Detection, Infra as Code Security,  and\nHoneytoken capabilities, facilitating a Secure Software Development Lifecycle for Dev, Sec, and Ops teams."
+    "description": "GitGuardian is the code security platform for the DevOps generation that offers automated Secrets Detection, Infra as Code Security,  and Honeytoken capabilities, facilitating a Secure Software Development Lifecycle for Dev, Sec, and Ops teams."
   },
   {
     "category": "Provisioning",
@@ -970,7 +970,7 @@ const appCatalogData = [
     "name": "Keycloak",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/keycloak.svg",
     "website": "https://www.keycloak.org/",
-    "description": "Keycloak is an open-source identity and access management solution for modern applications and services,  built on top of industry security\nstandard protocols."
+    "description": "Keycloak is an open-source identity and access management solution for modern applications and services,  built on top of industry security standard protocols."
   },
   {
     "category": "Provisioning",
@@ -986,7 +986,7 @@ const appCatalogData = [
     "name": "KICS",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kics.svg",
     "website": "https://kics.io/",
-    "description": "Find security vulnerabilities, compliance issues, and infrastructure misconfigurations early in the development cycle of your\ninfrastructure-as-code with KICS by Checkmarx."
+    "description": "Find security vulnerabilities, compliance issues, and infrastructure misconfigurations early in the development cycle of your infrastructure-as-code with KICS by Checkmarx."
   },
   {
     "category": "Provisioning",
@@ -1010,7 +1010,7 @@ const appCatalogData = [
     "name": "KubeArmor",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kubearmor.svg",
     "website": "https://kubearmor.io/",
-    "description": "Runtime protection for Kubernetes & other cloud Workloads. Kubearmor provides a observability and policy enforcement system to restrict any\nunwanted, malicious behaviour of cloud-native workloads at runtime."
+    "description": "Runtime protection for Kubernetes & other cloud Workloads. Kubearmor provides a observability and policy enforcement system to restrict any unwanted, malicious behaviour of cloud-native workloads at runtime."
   },
   {
     "category": "Provisioning",
@@ -1018,7 +1018,7 @@ const appCatalogData = [
     "name": "KubeLinter",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kubelinter.svg",
     "website": "https://docs.kubelinter.io/",
-    "description": "KubeLinter analyzes Kubernetes YAML files and Helm charts, and checks them against a variety of best practices, with a focus on production\nreadiness and security."
+    "description": "KubeLinter analyzes Kubernetes YAML files and Helm charts, and checks them against a variety of best practices, with a focus on production readiness and security."
   },
   {
     "category": "Provisioning",
@@ -1026,7 +1026,7 @@ const appCatalogData = [
     "name": "Kubescape",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kubescape.svg",
     "website": "https://kubescape.io/",
-    "description": "Kubescape is an open source security and compliance platform that scans clusters, Kubernetes manifest files (YAML files, and Helm charts), code\nrepositories, container registries and images. It detects misconfigurations according to frameworks such as the NSA-CISA,  MITRE ATT&CK® and CIS,\nas well as software vulnerabilities, and calculates risk scores."
+    "description": "Kubescape is an open source security and compliance platform that scans clusters, Kubernetes manifest files (YAML files, and Helm charts), code repositories, container registries and images. It detects misconfigurations according to frameworks such as the NSA-CISA,  MITRE ATT&CK® and CIS, as well as software vulnerabilities, and calculates risk scores."
   },
   {
     "category": "Provisioning",
@@ -1034,7 +1034,7 @@ const appCatalogData = [
     "name": "Kubewarden",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kubewarden.svg",
     "website": "https://www.kubewarden.io",
-    "description": "Kubewarden is a Policy Engine powered by WebAssembly policies. Its policies can be written in CEL, Rego (OPA & Gatekeeper flavours), Rust, Go, YAML,\nand others. Kubewarden simplifies Policy-As-Code by allowing policy authors and consumers to use their preferred tooling and stack, develop and\ntest policies out of cluster."
+    "description": "Kubewarden is a Policy Engine powered by WebAssembly policies. Its policies can be written in CEL, Rego (OPA & Gatekeeper flavours), Rust, Go, YAML, and others. Kubewarden simplifies Policy-As-Code by allowing policy authors and consumers to use their preferred tooling and stack, develop and test policies out of cluster."
   },
   {
     "category": "Provisioning",
@@ -1074,7 +1074,7 @@ const appCatalogData = [
     "name": "MoreSec",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/moresec logo.svg",
     "website": "https://www.moresec.cn/",
-    "description": "Moresec Shangfu Cloud Native Protection Platform is a security protection model based on the concept of cloud native. In view of the\ncharacteristics  of cloud native application life-cycle, it involves in many stages of security protection, including R&D construction, security\ntesting, image  control, container deployment, container operation, etc. Shangfu also integrates security with development which means providing\nfeedback of the  application security condition through correlating operation asset, and promoting the iteration and upgrade of application.\nWhereupon, a closed  loop of efficient cloud native application security risk is created, covering the whole stages of DevSecOps."
+    "description": "Moresec Shangfu Cloud Native Protection Platform is a security protection model based on the concept of cloud native. In view of the characteristics  of cloud native application life-cycle, it involves in many stages of security protection, including R&D construction, security testing, image  control, container deployment, container operation, etc. Shangfu also integrates security with development which means providing feedback of the  application security condition through correlating operation asset, and promoting the iteration and upgrade of application. Whereupon, a closed  loop of efficient cloud native application security risk is created, covering the whole stages of DevSecOps."
   },
   {
     "category": "Provisioning",
@@ -1082,7 +1082,7 @@ const appCatalogData = [
     "name": "NeuVector",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/neuvector.svg",
     "website": "https://neuvector.com/",
-    "description": "NeuVector Full Lifecycle Container Security Platform delivers the only cloud-native security with uncompromising end-to-end protection from DevOps\nvulnerability protection to automated run-time security, and featuring a true Layer 7 container firewall."
+    "description": "NeuVector Full Lifecycle Container Security Platform delivers the only cloud-native security with uncompromising end-to-end protection from DevOps vulnerability protection to automated run-time security, and featuring a true Layer 7 container firewall."
   },
   {
     "category": "Provisioning",
@@ -1090,7 +1090,7 @@ const appCatalogData = [
     "name": "Nirmata Cloud Native Policy Manager",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/nirmata.svg",
     "website": "https://www.nirmata.com/",
-    "description": "The solution enables DevSecOps teams to ensure the security, compliance, and operational readiness of their Kubernetes workloads and clusters. By\nautomating the creation, deployment, and lifecycle management of policy-based Intelligent Guardrails, customers can gain insights, alerts, and\nreports, and enable effective collaboration across development and operations teams."
+    "description": "The solution enables DevSecOps teams to ensure the security, compliance, and operational readiness of their Kubernetes workloads and clusters. By automating the creation, deployment, and lifecycle management of policy-based Intelligent Guardrails, customers can gain insights, alerts, and reports, and enable effective collaboration across development and operations teams."
   },
   {
     "category": "Provisioning",
@@ -1154,7 +1154,7 @@ const appCatalogData = [
     "name": "OSCAL-COMPASS",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/oscal-compass-color-stacked.svg",
     "website": "https://github.com/oscal-compass/community",
-    "description": "The OSCAL COMPASS project is set of tools that enable the creation, validation, and governance of documentation artifacts for compliance needs.\nIt leverages NIST's OSCAL (Open Security Controls Assessment Language) as a standard data format for interchange between tools and people,\nand provides an opinionated approach to OSCAL SDK and adoption by policy engines."
+    "description": "The OSCAL COMPASS project is set of tools that enable the creation, validation, and governance of documentation artifacts for compliance needs. It leverages NIST's OSCAL (Open Security Controls Assessment Language) as a standard data format for interchange between tools and people, and provides an opinionated approach to OSCAL SDK and adoption by policy engines."
   },
   {
     "category": "Provisioning",
@@ -1186,7 +1186,7 @@ const appCatalogData = [
     "name": "Paralus",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/paralus.svg",
     "website": "https://www.paralus.io/",
-    "description": "Paralus is a free, open source tool that enables controlled, audited access to Kubernetes infrastructure and Zero trust Kubernetes with zero\nfriction."
+    "description": "Paralus is a free, open source tool that enables controlled, audited access to Kubernetes infrastructure and Zero trust Kubernetes with zero friction."
   },
   {
     "category": "Provisioning",
@@ -1218,7 +1218,7 @@ const appCatalogData = [
     "name": "Permit.io",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/permit.io.svg",
     "website": "https://www.permit.io",
-    "description": "Permit.io provides fine-grained authorization as a service (Policy-as-Code,  APIs, and customer facing UI), so developers can check this as done\nand focus on their core product. Permit.io is the maintainer of the OPAL (Open Policy Administration Layer) project."
+    "description": "Permit.io provides fine-grained authorization as a service (Policy-as-Code,  APIs, and customer facing UI), so developers can check this as done and focus on their core product. Permit.io is the maintainer of the OPAL (Open Policy Administration Layer) project."
   },
   {
     "category": "Provisioning",
@@ -1242,7 +1242,7 @@ const appCatalogData = [
     "name": "Pomerium",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/pomerium.svg",
     "website": "https://www.pomerium.com/",
-    "description": "Pomerium is an identity-aware access proxy that enables teams to implement true zero-trust security, eliminating the need for a VPN. Pomerium\nensures that every single call is authenticated and authorized, providing a secure and seamless user experience."
+    "description": "Pomerium is an identity-aware access proxy that enables teams to implement true zero-trust security, eliminating the need for a VPN. Pomerium ensures that every single call is authenticated and authorized, providing a secure and seamless user experience."
   },
   {
     "category": "Provisioning",
@@ -1266,7 +1266,7 @@ const appCatalogData = [
     "name": "Qingteng",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/qingteng.svg",
     "website": "https://qingteng.cn/",
-    "description": "Qingteng Honeycomb · Container Security Platform can display risk scenarios visually for enterprises through continuous monitoring and analysis of\nthe container security status, and protects the container environment during the entire life cycle (build, ship, and run) of the container."
+    "description": "Qingteng Honeycomb · Container Security Platform can display risk scenarios visually for enterprises through continuous monitoring and analysis of the container security status, and protects the container environment during the entire life cycle (build, ship, and run) of the container."
   },
   {
     "category": "Provisioning",
@@ -1274,7 +1274,7 @@ const appCatalogData = [
     "name": "RAD Security",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/rad-security.svg",
     "website": "https://rad.security/",
-    "description": "RAD Security maps a broad set of cluster components across the Kubernetes lifecycle  using a real-time graph,\ncutting noise in half through contextualized risks, highest impact remediations and Kubernetes-first  incident response."
+    "description": "RAD Security maps a broad set of cluster components across the Kubernetes lifecycle  using a real-time graph, cutting noise in half through contextualized risks, highest impact remediations and Kubernetes-first  incident response."
   },
   {
     "category": "Provisioning",
@@ -1322,7 +1322,7 @@ const appCatalogData = [
     "name": "secureCodeBox",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/secureCodeBox.svg",
     "website": "https://www.securecodebox.io/",
-    "description": "secureCodeBox is an OWASP project providing an automated and scalable open source solution that integrates multiple security scanners with a\nsimple and lightweight interface – for continuous and automated security testing."
+    "description": "secureCodeBox is an OWASP project providing an automated and scalable open source solution that integrates multiple security scanners with a simple and lightweight interface – for continuous and automated security testing."
   },
   {
     "category": "Provisioning",
@@ -1362,7 +1362,7 @@ const appCatalogData = [
     "name": "Sonatype",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/sonatype.svg",
     "website": "https://www.sonatype.com",
-    "description": "Sonatype is the developer-friendly full-spectrum software supply, chain management platform helps organizations and software developers.\nOne of the Sonatype products includes the open source software repository manager Sonatype Nexus Repository."
+    "description": "Sonatype is the developer-friendly full-spectrum software supply, chain management platform helps organizations and software developers. One of the Sonatype products includes the open source software repository manager Sonatype Nexus Repository."
   },
   {
     "category": "Provisioning",
@@ -1378,7 +1378,7 @@ const appCatalogData = [
     "name": "SOPS",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/sops.svg",
     "website": "https://github.com/getsops",
-    "description": "sops is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault,\nage, and PGP."
+    "description": "sops is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault, age, and PGP."
   },
   {
     "category": "Provisioning",
@@ -1386,7 +1386,7 @@ const appCatalogData = [
     "name": "Spyderbat",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/spyderbat.svg",
     "website": "https://www.spyderbat.com/",
-    "description": "Spyderbat provides Linux runtime security, protecting dynamic environments by proactively tracking all user activities by their causal connections\nto detect and resolve external attacks, misconfigurations, and insider threats."
+    "description": "Spyderbat provides Linux runtime security, protecting dynamic environments by proactively tracking all user activities by their causal connections to detect and resolve external attacks, misconfigurations, and insider threats."
   },
   {
     "category": "Provisioning",
@@ -1426,7 +1426,7 @@ const appCatalogData = [
     "name": "Sysdig Secure",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/sysdig-secure.svg",
     "website": "https://sysdig.com/use-cases/kubernetes-security",
-    "description": "Sysdig Secure embeds security and compliance into the build, run and respond stages of the Kubernetes lifecycle.\\_"
+    "description": "Sysdig Secure embeds security and compliance into the build, run and respond stages of the Kubernetes lifecycle._"
   },
   {
     "category": "Provisioning",
@@ -1498,7 +1498,7 @@ const appCatalogData = [
     "name": "Tokenetes",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/tokenetes.svg",
     "website": "https://tokenetes.io/",
-    "description": "Tokenetes implements Transaction Tokens (TraTs) for microservices call chains.\nIt's a Kubernetes-native framework providing immutable identity and context in \nservice-to-service communication to prevent attacks like software supply chain \nor privileged user compromise."
+    "description": "Tokenetes implements Transaction Tokens (TraTs) for microservices call chains. It's a Kubernetes-native framework providing immutable identity and context in service-to-service communication to prevent attacks like software supply chain or privileged user compromise."
   },
   {
     "category": "Provisioning",
@@ -1538,7 +1538,7 @@ const appCatalogData = [
     "name": "vArmor",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/varmor.svg",
     "website": "https://varmor.org",
-    "description": "vArmor is a cloud-native container sandbox system. It leverages Linux's AppArmor LSM, BPF LSM and Seccomp technologies to implement enforcers. \nIt can be used to strengthen container isolation, reduce the kernel attack surface, and increase the difficulty and cost of container escape or \nlateral movement attacks. It includes multiple built-in protection rules that are ready to use out of the box."
+    "description": "vArmor is a cloud-native container sandbox system. It leverages Linux's AppArmor LSM, BPF LSM and Seccomp technologies to implement enforcers. It can be used to strengthen container isolation, reduce the kernel attack surface, and increase the difficulty and cost of container escape or lateral movement attacks. It includes multiple built-in protection rules that are ready to use out of the box."
   },
   {
     "category": "Provisioning",
@@ -1786,7 +1786,7 @@ const initialComponentOnboarding: Omit<OnboardingConfiguration, '_id'> = {
       statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
       fields: [
         { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
-        { type: "Checkbox", name: "specChanged", label = "System level Specification changed?", proof: true },
+        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
         { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
       ],
     },
@@ -1899,7 +1899,7 @@ const initialTenantOnboarding: Omit<OnboardingConfiguration, '_id'> = {
       statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
       fields: [
         { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
-        { type: "Checkbox", name: "specChanged", label = "System level Specification changed?", proof: true },
+        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
         { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
       ],
     },
@@ -2455,52 +2455,6 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     }
 ];
 
-const initialDeploymentTypes = [
-    { _id: 'Airgapped', "name": "Airgapped", "description": "Deployment in an isolated, offline environment." },
-    { _id: 'Cloud', "name": "Cloud", "description": "Deployment to a public or private cloud." },
-    { _id: 'On-Prem', "name": "On-Prem", "description": "Deployment to on-premises servers." }
-];
-
-const initialWorkflows = [
-    { "name": "Standard Approval", "description": "Standard linear workflow." },
-    { "name": "Data Governance Review", "description": "Workflow with parallel approval steps." },
-    { "name": "Hardware Compatibility Review", "description": "Security review for hardware." },
-    { "name": "Peer Security Review", "description": "Mandatory security review for sensitive products." }
-];
-
-const initialComplianceChecks = [
-    { "name": "SOC2", "description": "SOC 2 Type II Compliance" },
-    { "name": "GDPR", "description": "General Data Protection Regulation" },
-    { "name": "HIPAA", "description": "Health Insurance Portability and Accountability Act" },
-    { "name": "PCI-DSS", "description": "Payment Card Industry Data Security Standard" },
-];
-
-const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
-    { id: 'REST', name: 'REST API' },
-    { id: 'GraphQL', name: 'GraphQL API' },
-    { id: 'gRPC', name: 'gRPC Service' },
-    { id: 'KafkaTopic', name: 'Kafka Topic' },
-    { id: 'DatabaseConnection', name: 'Database Connection' },
-];
-
-function generatePhases(config: OnboardingConfiguration) {
-    return config.phases.map(phaseConfig => {
-        const statuses = phaseConfig.statusOptions;
-        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-        return {
-            id: phaseConfig.id,
-            name: phaseConfig.name,
-            version: "1.0",
-            status: randomStatus,
-            fields: phaseConfig.fields.map(fieldConfig => ({
-                name: fieldConfig.name,
-                value: `Dummy value for ${fieldConfig.label}`,
-                proof: { link: fieldConfig.proof ? `http://example.com/proof/${phaseConfig.id}/${fieldConfig.name}` : '' },
-            })),
-        };
-    });
-}
-
 const initialTenants: Omit<CmdbTenant, '_id'| 'created_at' | 'updated_at'>[] = [
     { id: 'CorePlatformServices', name: 'Core Platform Services', description: 'Holds core infrastructure components.', version: '2.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, {id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
     { id: 'CustomerAnalytics', name: 'Customer Analytics', description: 'Tenant for customer-facing analytics dashboards.', version: '1.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified DataFabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
@@ -2975,5 +2929,3 @@ export async function seedDatabase() {
 
     return { seededCount, skippedCount };
 }
-
-    
