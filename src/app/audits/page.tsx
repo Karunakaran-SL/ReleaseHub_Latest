@@ -20,7 +20,8 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
-  Loader2
+  Loader2,
+  Info
 } from 'lucide-react';
 import {
   Select,
@@ -35,6 +36,7 @@ import { getUser } from '@/lib/auth';
 import DashboardLayout from '../dashboard-layout';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function AuditsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -89,6 +91,20 @@ export default function AuditsPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Audit Logs</h1>
         </div>
+
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This page provides a comprehensive, immutable record of all significant actions performed within the application. Every creation, update, and deletion of key entities is logged here to ensure traceability, accountability, and security compliance. You can review who made what change, to which entity, and when, along with any comments provided during the action.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
 
         <Card>
           <CardContent className="p-0">
