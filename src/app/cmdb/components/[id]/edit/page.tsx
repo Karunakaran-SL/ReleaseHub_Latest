@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -30,7 +29,7 @@ const statusColors: Record<string, string> = {
 export default function EditComponentPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const [formState, setFormState] = useState<EditComponentFormState>({});
+    const [formState, setFormState] = useState<EditComponentFormState | null>(null);
     const router = useRouter();
     const params = useParams();
     const { id } = params;
@@ -53,8 +52,8 @@ export default function EditComponentPage() {
         getUser().then(setUser);
         if (!id) return;
         
-        setLoading(true);
-        async function fetchData() {
+        const fetchData = async () => {
+            setLoading(true);
             try {
                 const [componentRes, configRes, tenantsRes, componentsRes, applicationsRes, interfacesRes] = await Promise.all([
                     fetch(`/api/cmdb/components/${id}`),
@@ -140,33 +139,35 @@ export default function EditComponentPage() {
         const { id, value, type } = e.target;
         const key = id.split('_')[1];
          if (id.startsWith('resources_')) {
-            setFormState(prev => ({ ...prev, resources: { ...prev.resources, [key]: type === 'number' ? Number(value) : value } as any }));
+            setFormState(prev => prev ? ({ ...prev, resources: { ...prev.resources, [key]: type === 'number' ? Number(value) : value } as any }) : null);
         } else {
-             setFormState(prev => ({ ...prev, [id]: value }));
+             setFormState(prev => prev ? ({ ...prev, [id]: value }) : null);
         }
     };
     
     const handleMultiSelectChange = (field: 'tenants' | 'dependent_components' | 'dependent_applications' | 'provided_interfaces' | 'dependent_interfaces', selectedItems: { id: string; name: string }[]) => {
-        setFormState(prev => ({ ...prev, [field]: selectedItems }));
+        setFormState(prev => prev ? ({ ...prev, [field]: selectedItems }) : null);
     };
     
     const handleCustomLabelChange = (index: number, key: 'key' | 'value', value: string) => {
+        if (!formState) return;
         const updatedLabels = [...(formState.custom_labels || [])];
         updatedLabels[index] = { ...updatedLabels[index], [key]: value };
-        setFormState(prev => ({ ...prev, custom_labels: updatedLabels }));
+        setFormState(prev => prev ? ({ ...prev, custom_labels: updatedLabels }) : null);
     };
 
     const addCustomLabel = () => {
-        setFormState(prev => ({ ...prev, custom_labels: [...(prev.custom_labels || []), { key: '', value: '' }] }));
+        setFormState(prev => prev ? ({ ...prev, custom_labels: [...(prev.custom_labels || []), { key: '', value: '' }] }) : null);
     };
     
     const removeCustomLabel = (index: number) => {
-        setFormState(prev => ({ ...prev, custom_labels: (formState.custom_labels || []).filter((_, i) => i !== index) }));
+        if (!formState) return;
+        setFormState(prev => prev ? ({ ...prev, custom_labels: (formState.custom_labels || []).filter((_, i) => i !== index) }) : null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formState.updateComment) {
+        if (!formState || !formState.updateComment) {
             toast({ variant: 'destructive', title: 'Error', description: 'Update Reason is required.' });
             return;
         }
@@ -216,11 +217,11 @@ export default function EditComponentPage() {
         fieldName: 'tenants' | 'dependent_components' | 'dependent_applications' | 'provided_interfaces' | 'dependent_interfaces',
         allOptions: Option[]
     ) => {
-        if (!formState._id) return null;
+        if (!formState?._id) return null;
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
 
-        const available: Option[] = allOptions.filter(opt => !chosenIds.has(opt.id) && opt.id !== formState.id);
+        const available: Option[] = allOptions.filter(opt => !chosenIds.has(opt.id) && opt.id !== formState._id);
         const chosen: Option[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
 
         const moveItems = (ids: string[], source: Option[], dest: Option[]) => {
@@ -244,7 +245,7 @@ export default function EditComponentPage() {
         );
     };
 
-    if (loading || !formState._id) {
+    if (loading || !formState) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 

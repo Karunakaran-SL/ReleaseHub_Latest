@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -17,7 +16,7 @@ import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-li
 import OnboardingPhaseComponent from '../../../tenants/create/_components/onboarding-phase';
 import { cn } from '@/lib/utils';
 
-type EditTenantFormState = Partial<Omit<CmdbTenant, '_id' | 'created_at' | 'updated_at'>> & { updateComment?: string };
+type EditTenantFormState = Partial<Omit<CmdbTenant, 'created_at' | 'updated_at'>> & { updateComment?: string };
 
 const statusColors: Record<string, string> = {
     'Not Started': 'bg-gray-200 text-gray-800',
@@ -31,7 +30,7 @@ const statusColors: Record<string, string> = {
 export default function EditTenantPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const [formState, setFormState] = useState<EditTenantFormState>({});
+    const [formState, setFormState] = useState<EditTenantFormState | null>(null);
     const router = useRouter();
     const params = useParams();
     const { id } = params;
@@ -52,8 +51,9 @@ export default function EditTenantPage() {
     useEffect(() => {
         getUser().then(setUser);
         if (!id) return;
-        setLoading(true);
-        async function fetchData() {
+
+        const fetchData = async () => {
+            setLoading(true);
             try {
                 const [tenantRes, allTenantsRes, allProductsRes, configRes] = await Promise.all([
                     fetch(`/api/cmdb/tenants/${id}`),
@@ -136,25 +136,25 @@ export default function EditTenantPage() {
         const { id, value, type } = e.target;
         if (id.startsWith('resources_')) {
             const resourceKey = id.replace('resources_', '');
-            setFormState(prev => ({
+            setFormState(prev => prev ? ({
                 ...prev,
                 resources: {
                     ...prev.resources,
                     [resourceKey]: type === 'number' ? Number(value) : value
                 } as any
-            }));
+            }) : null);
         } else {
-             setFormState(prev => ({ ...prev, [id]: type === 'number' ? Number(value) : value }));
+             setFormState(prev => prev ? ({ ...prev, [id]: type === 'number' ? Number(value) : value }) : null);
         }
     };
     
     const handleMultiSelectChange = (field: 'dependent_tenants' | 'products', selectedItems: { id: string; name: string }[]) => {
-        setFormState(prev => ({ ...prev, [field]: selectedItems }));
+        setFormState(prev => prev ? ({ ...prev, [field]: selectedItems }) : null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formState.updateComment) {
+        if (!formState || !formState.updateComment) {
             toast({ variant: 'destructive', title: 'Error', description: 'Update Reason is required.' });
             return;
         }
@@ -236,7 +236,7 @@ export default function EditTenantPage() {
         );
     };
 
-    if (loading || !formState._id) {
+    if (loading || !formState) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 

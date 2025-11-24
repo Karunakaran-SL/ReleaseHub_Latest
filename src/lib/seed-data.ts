@@ -2455,20 +2455,24 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     }
 ];
 
-function generatePhases(config: OnboardingConfiguration): any[] {
-    if (!config || !config.phases) return [];
-    return config.phases.map(phase => ({
-        id: phase.id,
-        name: phase.name,
-        version: "1.0",
-        status: "Not Started",
-        fields: phase.fields.map(field => ({
-            name: field.name,
-            value: "",
-            proof: {}
-        }))
-    }));
+function generatePhases(config: OnboardingConfiguration) {
+  return config.phases.map(phaseConfig => {
+      const statuses = phaseConfig.statusOptions;
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      return {
+          id: phaseConfig.id,
+          name: phaseConfig.name,
+          version: "1.0",
+          status: randomStatus,
+          fields: phaseConfig.fields.map(fieldConfig => ({
+              name: fieldConfig.name,
+              value: `Dummy value for ${fieldConfig.label}`,
+              proof: { link: fieldConfig.proof ? `http://example.com/proof/${phaseConfig.id}/${fieldConfig.name}` : '' },
+          })),
+      };
+  });
 }
+
 
 const initialTenants: Omit<CmdbTenant, '_id'| 'created_at' | 'updated_at'>[] = [
     { id: 'CorePlatformServices', name: 'Core Platform Services', description: 'Holds core infrastructure components.', version: '2.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, {id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
