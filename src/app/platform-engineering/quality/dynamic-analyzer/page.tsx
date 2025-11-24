@@ -12,11 +12,18 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+const iconMap = {
+    CheckCircle: <CheckCircle className="h-3 w-3" />,
+    HelpCircle: <HelpCircle className="h-3 w-3" />,
+    CircleDot: <CircleDot className="h-3 w-3" />,
+    Package: <Package className="h-3 w-3" />,
+};
+
 const statuses = [
-    { text: 'Certified', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300', icon: <CheckCircle className="h-3 w-3" /> },
-    { text: 'In Qualification', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300', icon: <HelpCircle className="h-3 w-3" /> },
-    { text: 'Evaluation Pending', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300', icon: <CircleDot className="h-3 w-3" /> },
-    { text: 'In Inventory', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300', icon: <Package className="h-3 w-3" /> },
+    { text: 'Certified', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300', icon: 'CheckCircle' },
+    { text: 'In Qualification', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300', icon: 'HelpCircle' },
+    { text: 'Evaluation Pending', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300', icon: 'CircleDot' },
+    { text: 'In Inventory', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300', icon: 'Package' },
 ];
 
 const openSourceTools = [
@@ -36,7 +43,7 @@ const commercialTools = [
     { id: 'burp-suite', name: 'Burp Suite Professional', features: ['Advanced web vulnerability scanner', 'Manual testing tools (Proxy, Repeater)', 'Extensible via the BApp Store'], benefits: ['De-facto standard for web penetration testing', 'Combines automated and manual testing effectively'], status: statuses[0] },
     { id: 'acunetix', name: 'Acunetix', features: ['Automated DAST for web apps & APIs', 'Vulnerability scanning with low false positives', 'CI/CD integration'], benefits: ['Fast and easy to use for web security', 'Comprehensive reporting for compliance'], status: statuses[1] },
     { id: 'appscan', name: 'HCL AppScan', features: ['Enterprise DAST solution', 'IAST (Interactive Application Security Testing)', 'Mobile application scanning'], benefits: ['Scales for large enterprise needs', 'Broad coverage including mobile and APIs'], status: statuses[2] },
-    { id: 'veracode-dynamic', name: 'Veracode Dynamic Analysis', features: ['Cloud-based DAST platform', 'Authentication and scheduling support', 'Detailed remediation guidance'], benefits: ['Easy to manage scans without local setup', 'Integrates with other Veracode security tools'], status: statuses[0] },
+    { id: 'veracode-dynamic', name: 'Veracode Dynamic Analysis', features: ['Cloud-based DAST platform', 'Authentication and scheduling support', 'Detailed remediation guidance'], benefits: ['Simplifies security scanning with a SaaS model', 'Provides clear, actionable results for developers'], status: statuses[0] },
     { id: 'checkmarx-dast', name: 'Checkmarx DAST', features: ['Integration with SAST for full coverage', 'API and microservices scanning', 'Actionable results to fix vulnerabilities'], benefits: ['Correlates static and dynamic findings', 'Provides a holistic view of application security'], status: statuses[3] },
     { id: 'fortify-webinspect', name: 'Micro Focus Fortify WebInspect', features: ['Enterprise DAST scanner', 'Real-time analysis and feedback', 'Compliance reporting for major standards'], benefits: ['Deep analysis for complex web applications', 'Strong in enterprise environments'], status: statuses[3] },
     { id: 'insightappsec', name: 'Rapid7 InsightAppSec', features: ['Cloud-based DAST with CI/CD integration', 'Attack replay and validation', 'Universal translator for various API types'], benefits: ['Modern DAST for agile teams', 'Reduces false positives with attack replay'], status: statuses[1] },
@@ -53,7 +60,7 @@ function ToolCard({ tool }: { tool: Tool }) {
                  <div className="flex justify-between items-start">
                     <CardTitle>{tool.name}</CardTitle>
                     <Badge className={cn("flex items-center gap-1", tool.status.color)}>
-                        {tool.status.icon}
+                        {iconMap[tool.status.icon as keyof typeof iconMap]}
                         <span>{tool.status.text}</span>
                     </Badge>
                 </div>

@@ -12,11 +12,18 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+const iconMap = {
+    CheckCircle: <CheckCircle className="h-3 w-3" />,
+    HelpCircle: <HelpCircle className="h-3 w-3" />,
+    CircleDot: <CircleDot className="h-3 w-3" />,
+    Package: <Package className="h-3 w-3" />,
+};
+
 const statuses = [
-    { text: 'Certified', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300', icon: <CheckCircle className="h-3 w-3" /> },
-    { text: 'In Qualification', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300', icon: <HelpCircle className="h-3 w-3" /> },
-    { text: 'Evaluation Pending', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300', icon: <CircleDot className="h-3 w-3" /> },
-    { text: 'In Inventory', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300', icon: <Package className="h-3 w-3" /> },
+    { text: 'Certified', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300', icon: 'CheckCircle' },
+    { text: 'In Qualification', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300', icon: 'HelpCircle' },
+    { text: 'Evaluation Pending', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300', icon: 'CircleDot' },
+    { text: 'In Inventory', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300', icon: 'Package' },
 ];
 
 const openSourceTools = [
@@ -43,7 +50,7 @@ function ToolCard({ tool }: { tool: Tool }) {
                 <div className="flex justify-between items-start">
                     <CardTitle>{tool.name}</CardTitle>
                     <Badge className={cn("flex items-center gap-1", tool.status.color)}>
-                        {tool.status.icon}
+                        {iconMap[tool.status.icon as keyof typeof iconMap]}
                         <span>{tool.status.text}</span>
                     </Badge>
                 </div>
