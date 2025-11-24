@@ -216,6 +216,7 @@ export default function EditComponentPage() {
         fieldName: 'tenants' | 'dependent_components' | 'dependent_applications' | 'provided_interfaces' | 'dependent_interfaces',
         allOptions: Option[]
     ) => {
+        if (!formState.id) return null; // Fix for server-side rendering
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
 

@@ -14,7 +14,7 @@ import type { User, CmdbTenant, Product, OnboardingConfiguration } from '@/lib/d
 import { getUser } from '@/lib/auth';
 import { Loader2, UploadCloud, ChevronRight } from 'lucide-react';
 import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
-import OnboardingPhaseComponent from '../../create/_components/onboarding-phase';
+import OnboardingPhaseComponent from '../../../create/_components/onboarding-phase';
 import { cn } from '@/lib/utils';
 
 type EditTenantFormState = Partial<Omit<CmdbTenant, '_id' | 'created_at' | 'updated_at'>> & { updateComment?: string };
@@ -203,8 +203,8 @@ export default function EditTenantPage() {
         fieldName: 'dependent_tenants' | 'products',
         allOptions: Option[]
     ) => {
-        if (!formState._id) return null; // Don't render if formState is not ready
-        const currentItemAndSelfFilteredOptions = allOptions.filter(opt => opt.id !== formState._id);
+        if (!formState.id) return null; // Don't render if formState is not ready
+        const currentItemAndSelfFilteredOptions = allOptions.filter(opt => opt.id !== formState.id);
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
 
@@ -235,7 +235,7 @@ export default function EditTenantPage() {
         );
     };
 
-    if (loading) {
+    if (loading || !formState.id) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 
