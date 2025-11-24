@@ -1034,7 +1034,7 @@ const appCatalogData = [
     "name": "Kubewarden",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kubewarden.svg",
     "website": "https://www.kubewarden.io",
-    "description": "Kubewarden is a Policy Engine powered by WebAssembly policies. Its policies can be written in CEL, Rego (OPA & Gatekeeper flavours), Rust, Go, YAML, and others. Kubewarden simplifies Policy-As-Code by allowing policy authors and consumers to use their preferred tooling and stack, develop and test policies out of cluster."
+    "description": "Kubewarden is a Policy Engine powered by WebAssembly policies. Its policies can be written in CEL, Rego (OPA & Gatekeeper flavours), Rust, Go, YAML, and others. Kubewarden simplifies Policy-As-Code by allowing policy authors and consumers to use their preferred tooling and stack, develop and test policies out of cluster. "
   },
   {
     "category": "Provisioning",
@@ -2216,7 +2216,7 @@ const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
   { id: 'GraphQL', name: 'GraphQL API', description: 'A GraphQL API endpoint.' },
 ];
 
-function generatePhases(config: OnboardingConfiguration) {
+const generatePhases = (config: OnboardingConfiguration) => {
   return config.phases.map(phaseConfig => {
       const statuses = phaseConfig.statusOptions;
       const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -2232,7 +2232,7 @@ function generatePhases(config: OnboardingConfiguration) {
           })),
       };
   });
-}
+};
 
 export async function seedDatabase() {
     const client = await clientPromise;
@@ -2294,3 +2294,4 @@ export async function seedDatabase() {
 
     return { seededCount, skippedCount };
 }
+
