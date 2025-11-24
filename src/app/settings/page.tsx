@@ -6,7 +6,8 @@ import { getUser } from '@/lib/auth';
 import type { User } from '@/lib/definitions';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { SlidersHorizontal, Settings2, GanttChartSquare, DatabaseZap, HardDrive, CheckSquare } from 'lucide-react';
+import { SlidersHorizontal, Settings2, GanttChartSquare, DatabaseZap, HardDrive, CheckSquare, Info } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const settingsLinks = [
   { name: 'General', href: '/settings/general', icon: Settings2 },
@@ -31,6 +32,20 @@ export default function SettingsPage() {
                     <h1 className="text-3xl font-bold">Settings</h1>
                     <p className="text-muted-foreground">Manage your application settings and configurations.</p>
                 </div>
+
+                <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger className="text-lg font-semibold">
+                            <div className="flex items-center gap-2">
+                                <Info className="h-5 w-5" />
+                                Introduction
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground">
+                            The Settings section is the administrative heart of the application. Here, you can configure the foundational data and processes that drive the entire platform, including onboarding workflows, approval steps, and reference data for CMDB entities and hardware specifications.
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {settingsLinks.map((setting) => (

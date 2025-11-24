@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, Info } from 'lucide-react';
 import Link from 'next/link';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const tools = [
   {
@@ -76,7 +77,22 @@ export default function LicenseToolsPage() {
           <h1 className="text-3xl font-bold">LMS Integrations</h1>
           <p className="text-muted-foreground">An overview of popular open-source license compliance and management tools.</p>
         </div>
-        <ScrollArea className="h-[calc(100vh-12rem)]">
+
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This page provides an overview of various License Management System (LMS) tools that can be integrated into your CI/CD and development workflows. These tools help automate the process of license scanning, compliance checking, and reporting. You can configure the connection to each tool via its "Settings" page to enable seamless integration.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
+        
+        <ScrollArea className="h-[calc(100vh-16rem)]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pr-4">
             {tools.map(tool => (
               <Card key={tool.name} className="flex flex-col">

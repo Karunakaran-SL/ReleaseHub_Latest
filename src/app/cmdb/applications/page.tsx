@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Loader2, Trash2, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { User, CmdbApplication } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
@@ -32,6 +32,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 function DeleteApplicationDialog({ applicationId, applicationName, onApplicationDeleted }: { applicationId: string, applicationName: string, onApplicationDeleted: () => void}) {
     const [deleteComment, setDeleteComment] = useState('');
@@ -167,6 +168,19 @@ export default function ApplicationsPage() {
             <Link href="/cmdb/applications/create">ONBOARD APPLICATION</Link>
           </Button>
         </div>
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This page allows you to manage all business applications within the CMDB. Applications represent deployable software units that deliver specific business functionality. You can onboard new applications, view their details and dependencies, update their configurations, and decommission them when they are no longer needed.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
 
         <Card>
           <CardContent className="p-0">

@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import DashboardLayout from '../dashboard-layout';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Info } from 'lucide-react';
 
 function ApiEndpoint({ 
     method, 
@@ -137,6 +139,20 @@ export default function ApiDocsPage() {
     <DashboardLayout user={user}>
         <main className="flex-1 p-4 md:p-8">
             <h1 className="text-3xl font-bold mb-6">API Documentation</h1>
+
+            <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+              <AccordionItem value="item-1">
+                  <AccordionTrigger className="text-lg font-semibold">
+                      <div className="flex items-center gap-2">
+                          <Info className="h-5 w-5" />
+                          Introduction
+                      </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                      This page provides a detailed reference for all the backend APIs available in this application. Each endpoint is documented with its HTTP method, path, description, request body format, and possible responses. This is the single source of truth for programmatic interaction with the system.
+                  </AccordionContent>
+              </AccordionItem>
+            </Accordion>
             
             <Section title="Authentication" id="authentication">
                 <ApiEndpoint 
