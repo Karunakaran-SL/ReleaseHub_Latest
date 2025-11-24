@@ -6,7 +6,7 @@ import { getUser } from '@/lib/auth';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, Info } from 'lucide-react';
 import Link from 'next/link';
 
 const openSourceTools = [
@@ -87,6 +87,20 @@ export default function StaticAnalyzerPage() {
                     </p>
                 </div>
                 
+                 <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger className="text-lg font-semibold">
+                            <div className="flex items-center gap-2">
+                                <Info className="h-5 w-5" />
+                                Introduction
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground">
+                            This page provides an overview of various Static Application Security Testing (SAST) tools. These tools analyze your source code to find security vulnerabilities, code quality issues, and compliance violations without executing the program. Use the "Settings" button on each card to configure the integration with your CI/CD pipelines.
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+
                 <Accordion type="multiple" defaultValue={['open-source', 'commercial']} className="space-y-4">
                     <AccordionItem value="open-source">
                         <AccordionTrigger className="text-xl font-semibold bg-muted p-4 rounded-md">Open Source Static Code Analysis Tools</AccordionTrigger>

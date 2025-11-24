@@ -6,7 +6,7 @@ import { getUser } from '@/lib/auth';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, Info } from 'lucide-react';
 import Link from 'next/link';
 
 const openSourceTools = [
@@ -82,6 +82,20 @@ export default function DynamicAnalyzerIntegrationPage() {
                         An overview of popular open-source and commercial tools for dynamic code analysis (DAST).
                     </p>
                 </div>
+
+                <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger className="text-lg font-semibold">
+                            <div className="flex items-center gap-2">
+                                <Info className="h-5 w-5" />
+                                Introduction
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground">
+                            This page provides an overview of various Dynamic Application Security Testing (DAST) and instrumentation tools. These tools analyze your running application to find security vulnerabilities, memory errors, and performance bottlenecks. Use the "Settings" button on each card to configure the integration with your CI/CD pipelines and development workflows.
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
                 
                 <Accordion type="multiple" defaultValue={['open-source', 'commercial']} className="space-y-4">
                     <AccordionItem value="open-source">
