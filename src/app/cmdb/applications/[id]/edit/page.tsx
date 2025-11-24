@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -168,12 +167,12 @@ export default function EditApplicationPage() {
         fieldName: 'tenants' | 'dependent_components' | 'dependent_applications' | 'provided_interfaces' | 'dependent_interfaces',
         allOptions: Option[]
     ) => {
-        if (!formState.id) return null; // Fix for server-side rendering
+        if (!formState._id) return null;
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
 
-        const filteredOptions = fieldName === 'dependent_applications' && formState.id
-            ? allOptions.filter(opt => opt.id !== formState.id)
+        const filteredOptions = fieldName === 'dependent_applications' && formState._id
+            ? allOptions.filter(opt => opt.id !== formState._id)
             : allOptions;
 
         const available: Option[] = filteredOptions.filter(opt => !chosenIds.has(opt.id));
@@ -248,7 +247,7 @@ export default function EditApplicationPage() {
         }
     };
 
-    if (loading || !formState.id) {
+    if (loading || !formState._id) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 

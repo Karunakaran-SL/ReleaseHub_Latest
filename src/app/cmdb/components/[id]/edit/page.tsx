@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -17,7 +16,7 @@ import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-li
 import OnboardingPhaseComponent from '../../../tenants/create/_components/onboarding-phase';
 import { cn } from '@/lib/utils';
 
-type EditComponentFormState = Partial<Omit<CmdbComponent, 'created_at' | 'updated_at'>> & { updateComment?: string };
+type EditComponentFormState = Partial<Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'>> & { updateComment?: string };
 
 const statusColors: Record<string, string> = {
     'Not Started': 'bg-gray-200 text-gray-800',
@@ -216,11 +215,11 @@ export default function EditComponentPage() {
         fieldName: 'tenants' | 'dependent_components' | 'dependent_applications' | 'provided_interfaces' | 'dependent_interfaces',
         allOptions: Option[]
     ) => {
-        if (!formState.id) return null; // Fix for server-side rendering
+        if (!formState._id) return null;
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
 
-        const available: Option[] = allOptions.filter(opt => !chosenIds.has(opt.id) && opt.id !== formState.id);
+        const available: Option[] = allOptions.filter(opt => !chosenIds.has(opt.id) && opt.id !== formState._id);
         const chosen: Option[] = chosenItems.map(item => ({ id: item.id, label: item.name }));
 
         const moveItems = (ids: string[], source: Option[], dest: Option[]) => {
@@ -244,7 +243,7 @@ export default function EditComponentPage() {
         );
     };
 
-    if (loading || !formState.id) {
+    if (loading || !formState._id) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 
