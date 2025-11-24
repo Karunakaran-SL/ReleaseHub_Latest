@@ -1646,684 +1646,6 @@ const appCatalogData = [
   }
 ];
 
-const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
-  name: 'Application Onboarding',
-  version: 1,
-  phases: [
-    {
-      id: "phase-1",
-      name: "Initiate Onboarding",
-      ownerName: "Sales Team",
-      ownerEmail: "sales@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
-        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
-        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
-        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
-      ],
-    },
-    {
-      id: "phase-2",
-      name: "Product Definitions",
-      ownerName: "Product Team",
-      ownerEmail: "product@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
-        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
-        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
-      ],
-    },
-    {
-        id: "phase-3",
-        name: "Detail Design",
-        ownerName: "Engineering Team",
-        ownerEmail: "eng@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
-          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
-          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
-          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
-        ],
-    },
-    {
-        id: "phase-4",
-        name: "Delivery",
-        ownerName: "QA Team",
-        ownerEmail: "qa@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
-            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
-            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
-            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
-        ]
-    },
-     {
-        id: "phase-5",
-        name: "Alpha Qualification",
-        ownerName: "Alpha Team",
-        ownerEmail: "alpha@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
-            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
-            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
-        ]
-    },
-    {
-        id: "phase-6",
-        name: "Prepare customer",
-        ownerName: "Support Team",
-        ownerEmail: "support@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
-            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
-        ]
-    },
-    {
-        id: "phase-7",
-        name: "Beta Qualification",
-        ownerName: "Beta Team",
-        ownerEmail: "beta@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
-            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
-            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
-        ]
-    },
-    {
-        id: "phase-8",
-        name: "Completed",
-        ownerName: "Release Team",
-        ownerEmail: "release@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
-        ]
-    }
-  ],
-};
-
-const initialComponentOnboarding: Omit<OnboardingConfiguration, '_id'> = {
-  name: 'Component Onboarding',
-  version: 1,
-  phases: [
-    {
-      id: "phase-1",
-      name: "Initiate Onboarding",
-      ownerName: "Sales Team",
-      ownerEmail: "sales@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
-        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
-        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
-        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
-      ],
-    },
-    {
-      id: "phase-2",
-      name: "Product Definitions",
-      ownerName: "Product Team",
-      ownerEmail: "product@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
-        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
-        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
-      ],
-    },
-    {
-        id: "phase-3",
-        name: "Detail Design",
-        ownerName: "Engineering Team",
-        ownerEmail: "eng@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
-          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
-          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
-          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
-        ],
-    },
-    {
-        id: "phase-4",
-        name: "Delivery",
-        ownerName: "QA Team",
-        ownerEmail: "qa@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
-            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
-            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
-            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
-        ]
-    },
-     {
-        id: "phase-5",
-        name: "Alpha Qualification",
-        ownerName: "Alpha Team",
-        ownerEmail: "alpha@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
-            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
-            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
-        ]
-    },
-    {
-        id: "phase-6",
-        name: "Prepare customer",
-        ownerName: "Support Team",
-        ownerEmail: "support@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
-            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
-        ]
-    },
-    {
-        id: "phase-7",
-        name: "Beta Qualification",
-        ownerName: "Beta Team",
-        ownerEmail: "beta@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
-            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
-            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
-        ]
-    },
-    {
-        id: "phase-8",
-        name: "Completed",
-        ownerName: "Release Team",
-        ownerEmail: "release@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
-        ]
-    }
-  ],
-};
-
-const initialTenantOnboarding: Omit<OnboardingConfiguration, '_id'> = {
-  name: 'Tenant Onboarding',
-  version: 1,
-  phases: [
-    {
-      id: "phase-1",
-      name: "Initiate Onboarding",
-      ownerName: "Sales Team",
-      ownerEmail: "sales@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
-        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
-        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
-        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
-      ],
-    },
-    {
-      id: "phase-2",
-      name: "Product Definitions",
-      ownerName: "Product Team",
-      ownerEmail: "product@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
-        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
-        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
-      ],
-    },
-    {
-        id: "phase-3",
-        name: "Detail Design",
-        ownerName: "Engineering Team",
-        ownerEmail: "eng@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
-          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
-          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
-          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
-        ],
-    },
-    {
-        id: "phase-4",
-        name: "Delivery",
-        ownerName: "QA Team",
-        ownerEmail: "qa@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
-            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
-            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
-            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
-        ]
-    },
-     {
-        id: "phase-5",
-        name: "Alpha Qualification",
-        ownerName: "Alpha Team",
-        ownerEmail: "alpha@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
-            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
-            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
-        ]
-    },
-    {
-        id: "phase-6",
-        name: "Prepare customer",
-        ownerName: "Support Team",
-        ownerEmail: "support@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
-            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
-        ]
-    },
-    {
-        id: "phase-7",
-        name: "Beta Qualification",
-        ownerName: "Beta Team",
-        ownerEmail: "beta@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
-            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
-            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
-        ]
-    },
-    {
-        id: "phase-8",
-        name: "Completed",
-        ownerName: "Release Team",
-        ownerEmail: "release@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
-        ]
-    }
-  ],
-};
-
-const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
-  name: 'Baseline Onboarding',
-  version: 1,
-  phases: [
-    {
-      id: "phase-sanity-test",
-      name: "Sanity Test",
-      ownerName: "DevOps",
-      ownerEmail: "devops@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
-      fields: [
-        { type: "Link", name: "ciJobUrl", label: "CI Job URL", proof: true },
-        { type: "DropDown", name: "triggerMethod", label: "Trigger Method", options: ["manual", "auto"] },
-        { type: "TextField", name: "status", label: "Status" },
-        { type: "Link", name: "logsLink", label: "Logs Link", proof: true },
-      ],
-    },
-    {
-      id: "phase-static-analysis",
-      name: "Static Code Analysis",
-      ownerName: "Security Team",
-      ownerEmail: "security@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Completed", "Failed"],
-      fields: [
-        { type: "TextField", name: "toolUsed", label: "Tool Used", helpText: "e.g., SonarQube, ESLint" },
-        { type: "TextField", name: "score", label: "Score" },
-        { type: "TextField", name: "issuesSummary", label: "Issues Summary" },
-        { type: "Link", name: "reportUrl", label: "Report URL", proof: true },
-      ],
-    },
-    {
-        id: "phase-vulnerability-scan",
-        name: "Vulnerability / Malware Scan",
-        ownerName: "Security Team",
-        ownerEmail: "security@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Completed", "Failed"],
-        fields: [
-            { type: "TextField", name: "scannerTool", label: "Scanner Tool", helpText: "e.g., Snyk, Trivy" },
-            { type: "TextField", name: "cveList", label: "CVE List (comma-separated)"},
-            { type: "TextField", name: "severityBreakdown", label: "Severity Breakdown" },
-            { type: "Link", name: "reportUrl", label: "Report URL", proof: true },
-        ]
-    },
-    {
-        id: "phase-risk-scoping",
-        name: "Risk Scoping",
-        ownerName: "Risk Management",
-        ownerEmail: "risk@example.com",
-        sendEmailOnComplete: false,
-        statusOptions: ["Not Started", "In Progress", "Completed"],
-        fields: [
-            { type: "TextField", name: "riskCategories", label: "Risk Categories" },
-            { type: "DropDown", name: "impactLevel", label: "Impact Level", options: ["Low", "Medium", "High", "Critical"] },
-            { type: "TextField", name: "mitigationPlan", label: "Mitigation Plan", proof: true },
-            { type: "TextField", name: "owner", label: "Owner" },
-        ]
-    },
-    {
-        id: "phase-pen-testing",
-        name: "Penetration Testing",
-        ownerName: "External Security",
-        ownerEmail: "pentest@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Completed", "Failed"],
-        fields: [
-            { type: "TextField", name: "testScope", label: "Test Scope" },
-            { type: "RadioBox", name: "testType", label: "Test Type", options: ["External", "Internal"] },
-            { type: "TextField", name: "findings", label: "Findings Summary", proof: true },
-            { type: "DropDown", name: "remediationStatus", label: "Remediation Status", options: ["Pending", "In Progress", "Completed"] },
-        ]
-    },
-    {
-        id: "phase-functional-tests",
-        name: "Functional Tests",
-        ownerName: "QA Team",
-        ownerEmail: "qa@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
-        fields: [
-            { type: "TextField", name: "testSuiteName", label: "Test Suite Name" },
-            { type: "TextField", name: "coverage", label: "Coverage %" },
-            { type: "TextField", name: "passFailSummary", label: "Pass/Fail Summary" },
-            { type: "Link", name: "testResultsLink", label: "Link to Test Results", proof: true },
-        ]
-    },
-    {
-        id: "phase-non-functional-tests",
-        name: "Non-Functional Tests",
-        ownerName: "Performance Team",
-        ownerEmail: "performance@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
-        fields: [
-            { type: "DropDown", name: "testType", label: "Type", options: ["Load", "Stress", "Scalability"] },
-            { type: "TextField", name: "metrics", label: "Metrics (TPS, latency, etc.)" },
-            { type: "TextField", name: "thresholds", label: "Thresholds" },
-            { type: "TextField", name: "resultSummary", label: "Result Summary", proof: true },
-        ]
-    },
-    {
-        id: "phase-qa-report",
-        name: "QA Report",
-        ownerName: "QA Lead",
-        ownerEmail: "qalead@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"],
-        fields: [
-            { type: "TextField", name: "qaOwner", label: "QA Owner" },
-            { type: "TextField", name: "summary", label: "Summary", proof: true },
-            { type: "TextField", name: "issues", label: "Open Issues" },
-            { type: "DropDown", name: "finalVerdict", label: "Final Verdict", options: ["GO", "NO-GO"] },
-        ]
-    },
-    {
-        id: "phase-approvals",
-        name: "Approvals",
-        ownerName: "Management",
-        ownerEmail: "mgmt@example.com",
-        sendEmailOnComplete: false,
-        statusOptions: ["Pending", "Approved", "Rejected"],
-        fields: [
-            { type: "TextField", name: "approverList", label: "Approver List" },
-            { type: "TextField", name: "approvalStatus", label: "Approval Status" },
-            { type: "TextField", name: "comments", label: "Comments", proof: true },
-            { type: "TextField", name: "timestamp", label: "Timestamp" },
-        ]
-    },
-    {
-        id: "phase-uat",
-        name: "User Acceptance Test (UAT)",
-        ownerName: "Business Owner",
-        ownerEmail: "business@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Signed-off", "Rejected"],
-        fields: [
-            { type: "TextField", name: "testCases", label: "Test Cases" },
-            { type: "TextField", name: "businessOwner", label: "Business Owner" },
-            { type: "TextField", name: "feedback", label: "Feedback", proof: true },
-            { type: "DropDown", name: "signOffStatus", label: "Sign-off Status", options: ["Pending", "Approved", "Rejected"] },
-        ]
-    },
-    {
-        id: "phase-ux-approval",
-        name: "UX Approval",
-        ownerName: "UX Team",
-        ownerEmail: "ux@example.com",
-        sendEmailOnComplete: false,
-        statusOptions: ["Pending", "Approved", "Rejected"],
-        fields: [
-            { type: "TextField", name: "uxReviewer", label: "UX Reviewer" },
-            { type: "Link", name: "designChecklist", label: "Design Checklist", proof: true },
-            { type: "TextField", name: "accessibilityScore", label: "Accessibility Score" },
-            { type: "DropDown", name: "approvalStatus", label: "Approval Status", options: ["Pending", "Approved", "Rejected"] },
-        ]
-    },
-    {
-        id: "phase-export-compliance",
-        name: "Export Compliance",
-        ownerName: "Legal Team",
-        ownerEmail: "legal@example.com",
-        sendEmailOnComplete: false,
-        statusOptions: ["Pending", "Approved", "Rejected"],
-        fields: [
-            { type: "TextField", name: "region", label: "Region" },
-            { type: "Link", name: "complianceChecklist", label: "Compliance Checklist", proof: true },
-            { type: "DropDown", name: "legalReviewStatus", label: "Legal Review Status", options: ["Pending", "Approved", "Rejected"] },
-        ]
-    },
-    {
-        id: "phase-license-validations",
-        name: "License Validations",
-        ownerName: "Legal Team",
-        ownerEmail: "legal@example.com",
-        sendEmailOnComplete: false,
-        statusOptions: ["Pending", "Completed", "Failed"],
-        fields: [
-            { type: "TextField", name: "licenseTypes", label: "License Types" },
-            { type: "TextField", name: "compatibility", label: "Compatibility" },
-            { type: "TextField", name: "violations", label: "Violations", proof: true },
-            { type: "TextField", name: "legalNotes", label: "Legal Notes" },
-        ]
-    },
-    {
-        id: "phase-contract-testing",
-        name: "Contract Testing",
-        ownerName: "API Governance",
-        ownerEmail: "governance@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
-        fields: [
-            { type: "TextField", name: "consumerProviderServices", label: "Consumer/Provider Services" },
-            { type: "Link", name: "pactFileUrl", label: "Pact File URL", proof: true },
-            { type: "TextField", name: "testResult", label: "Test Result" },
-            { type: "TextField", name: "versionCompatibility", label: "Version Compatibility" },
-        ]
-    }
-  ],
-};
-
-const initialDefaultApprovalPhases: OnboardingPhase[] = [
-    { id: 'product-owner', name: 'Product Owner', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'product-manager', name: 'Product Manager', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'quality-assurance', name: 'Quality Assurance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'release-owner', name: 'Release Owner', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'export-control-board', name: 'Export Control Board', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'license-compliance-board', name: 'License Compliance Board', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'security-compliance', name: 'Security Compliance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'data-compliance', name: 'Data Compliance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'customer', name: 'Customer', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'field-engineer', name: 'Field Engineer', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-];
-
-const initialApprovalConfigs = [
-    { name: 'Product Onboarding Approval', key: 'product-onboarding' },
-    { name: 'Tenant Approval', key: 'tenant-approval' },
-    { name: 'Components Approval', key: 'components-approval' },
-    { name: 'Application Approval', key: 'application-approval' },
-    { name: 'Interface Approval', key: 'interface-approval' },
-    { name: 'Baseline Approval', key: 'baseline-approval' },
-    { name: 'Deployment Approval', key: 'deployment-approval' },
-    { name: 'Upgrade Approval', key: 'upgrade-approval' },
-    { name: 'Migration Approval', key: 'migration-approval' },
-    { name: 'Decommission Approval', key: 'decommission-approval' },
-    { name: 'License Approval', key: 'license-approval' },
-    { name: 'Export Control Approval', key: 'export-control-approval' },
-    { name: 'Security Approval', key: 'security-approval' },
-].map(config => ({
-    name: config.name,
-    collectionName: `settings_approval_${config.key.replace(/-/g, '_')}`,
-    data: [{
-        name: config.name,
-        version: 1,
-        phases: initialDefaultApprovalPhases,
-    }]
-}));
-
-const initialSpecVendors = [{ name: 'Dell EMC' }, { name: 'HPE' }, { name: 'Cisco' }, { name: 'Lenovo' }, { name: 'CNCF' }, { name: 'OpenID' }, { name: 'Apache' }, { name: 'Facebook' }, { name: 'Google' }, { name: 'OASIS' }];
-const initialSpecHwTypes = [{ name: 'Rack' }, { name: 'Blade' }, { name: 'Virtual' }];
-const initialSpecHypervisors = [{ name: 'VMWare ESXi' }, { name: 'Microsoft Hyper-V' }, { name: 'KVM' }, { name: 'Harvester' }];
-
-const initialSpecNetworkCards = [
-    { "name": "Ethernet_1G_RJ45", "type": "Ethernet", "classification": { "speed": "1Gbps", "connector": "RJ-45" } },
-    { "name": "Ethernet_10G_RJ45", "type": "Ethernet", "classification": { "speed": "10Gbps", "connector": "RJ-45" } },
-    { "name": "Ethernet_10G_SFP+", "type": "Ethernet", "classification": { "speed": "10Gbps", "connector": "SFP+" } },
-    { "name": "Ethernet_25G_SFP28", "type": "Ethernet", "classification": { "speed": "25Gbps", "connector": "SFP28" } },
-    { "name": "Ethernet_40G_QSFP+", "type": "Ethernet", "classification": { "speed": "40Gbps", "connector": "QSFP+" } },
-    { "name": "Ethernet_100G_QSFP28", "type": "Ethernet", "classification": { "speed": "100Gbps", "connector": "QSFP28" } },
-    { "name": "FibreChannel_8Gb", "type": "Fibre Channel", "classification": { "speed": "8Gbps" } },
-    { "name": "FibreChannel_16Gb", "type": "Fibre Channel", "classification": { "speed": "16Gbps" } },
-    { "name": "FibreChannel_32Gb", "type": "Fibre Channel", "classification": { "speed": "32Gbps" } },
-    { "name": "InfiniBand_SDR_10Gb", "type": "InfiniBand", "classification": { "speed": "10Gbps", "mode": "SDR" } },
-    { "name": "InfiniBand_DDR_20Gb", "type": "InfiniBand", "classification": { "speed": "20Gbps", "mode": "DDR" } },
-    { "name": "InfiniBand_QDR_40Gb", "type": "InfiniBand", "classification": { "speed": "40Gbps", "mode": "QDR" } },
-    { "name": "InfiniBand_FDR_56Gb", "type": "InfiniBand", "classification": { "speed": "56Gbps", "mode": "FDR" } },
-    { "name": "InfiniBand_EDR_100Gb", "type": "InfiniBand", "classification": { "speed": "100Gbps", "mode": "EDR" } },
-    { "name": "Wireless_WiFi5_802.11ac", "type": "Wireless", "classification": { "standard": "802.11ac", "generation": "Wi-Fi 5" } },
-    { "name": "Wireless_WiFi6_802.11ax", "type": "Wireless", "classification": { "standard": "802.11ax", "generation": "Wi-Fi 6" } },
-    { "name": "Wireless_WiFi7_802.11be", "type": "Wireless", "classification": { "standard": "802.11be", "generation": "Wi-Fi 7" } },
-    { "name": "Virtual_VLAN_802.1Q", "type": "Virtual", "classification": { "protocol": "802.1Q", "description": "VLAN" } },
-    { "name": "Virtual_VXLAN", "type": "Virtual", "classification": { "protocol": "VXLAN" } },
-    { "name": "Virtual_GRE_Tunnel", "type": "Virtual", "classification": { "protocol": "GRE" } },
-    { "name": "Virtual_IPsec_Tunnel", "type": "Virtual", "classification": { "protocol": "IPsec" } },
-    { "name": "Virtual_SDN_OpenvSwitch", "type": "Virtual", "classification": { "platform": "Open vSwitch" } },
-    { "name": "Virtual_SDN_VMwareNSX", "type": "Virtual", "classification": { "platform": "VMware NSX" } },
-    { "name": "Specialized_RoCE", "type": "Specialized", "classification": { "protocol": "RDMA over Converged Ethernet" } },
-    { "name": "Specialized_iSCSI", "type": "Specialized", "classification": { "protocol": "iSCSI" } },
-    { "name": "Specialized_NVMeoF", "type": "Specialized", "classification": { "protocol": "NVMe over Fabrics" } },
-    { "name": "Management_IPMI", "type": "Management", "classification": { "protocol": "IPMI" } },
-    { "name": "Management_Redfish", "type": "Management", "classification": { "protocol": "Redfish" } },
-    { "name": "Management_SerialConsole", "type": "Management", "classification": { "protocol": "Serial" } }
-];
-
-const initialSpecPlugPowerCords = [{ name: 'Virtual Power' }, { name: 'NEMA 5-15P' }, { name: 'C13/C14' }];
-
-const initialSpecCpuTypes = [
-  { name: 'Intel Xeon Scalable'}, { name: 'Intel Xeon E-series'},
-  { name: 'AMD EPYC 7002'}, { name: 'AMD EPYC 9004 series'},
-  { name: 'IBM POWER9'}, { name: 'IBM POWER10'},
-  { name: 'Oracle SPARC'}, { name: 'Ampere Altra'}, { name: 'AWS Graviton'},
-  { name: 'Intel Core i3'}, { name: 'Intel Core i5'}, { name: 'Intel Core i7'}, { name: 'Intel Core i9'},
-  { name: 'AMD Ryzen 3'}, { name: 'AMD Ryzen 5'}, { name: 'AMD Ryzen 7'}, { name: 'AMD Ryzen 9'},
-  { name: 'Apple M1'}, { name: 'Apple M2'}, { name: 'Apple M3'},
-  { name: 'Intel Atom'}, { name: 'ARM Cortex'}
-];
-
-const initialSpecGpuTypes = [
-  { name: 'NVIDIA A100'}, { name: 'NVIDIA H100'},
-  { name: 'NVIDIA Tesla V100'}, { name: 'NVIDIA Tesla P100'},
-  { name: 'AMD Instinct MI100'}, { name: 'AMD Instinct MI250'},
-  { name: 'Intel Data Center GPU Flex Series'},
-  { name: 'NVIDIA RTX A6000'}, { name: 'NVIDIA RTX A5000'},
-  { name: 'AMD Radeon Pro Series'},
-  { name: 'NVIDIA GeForce RTX 4090'}, { name: 'NVIDIA GeForce RTX 4080'}, { name: 'NVIDIA GeForce RTX 4070'},
-  { name: 'AMD Radeon RX 7900'}, { name: 'AMD Radeon RX 6800'},
-  { name: 'Intel Iris Xe'}, { name: 'AMD Radeon Vega'}, { name: 'Apple GPU (in M-series chips)'}
-];
-
-const initialSpecDiskTypes = [
-    { "name": "HDD_3.5inch_SATA_5400RPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SATA", "speed": "5400 RPM" } },
-    { "name": "HDD_3.5inch_SATA_7200RPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SATA", "speed": "7200 RPM" } },
-    { "name": "HDD_3.5inch_SAS_10KRPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SAS", "speed": "10K RPM" } },
-    { "name": "HDD_3.5inch_SAS_15KRPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SAS", "speed": "15K RPM" } },
-    { "name": "SSD_SATA_2.5inch", "type": "SSD", "classification": { "interface": "SATA", "form_factor": "2.5-inch" } },
-    { "name": "SSD_NVMe_M2_PCIeGen3", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "M.2", "generation": "PCIe Gen3" } },
-    { "name": "SSD_NVMe_M2_PCIeGen4", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "M.2", "generation": "PCIe Gen4" } },
-    { "name": "SSD_NVMe_U2_PCIeGen3", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "U.2", "generation": "PCIe Gen3" } },
-    { "name": "SSD_NVMe_U2_PCIeGen4", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "U.2", "generation": "PCIe Gen4" } },
-    { "name": "Hybrid_2.5inch_SATA", "type": "Hybrid", "classification": { "form_factor": "2.5-inch", "interface": "SATA" } },
-    { "name": "Hybrid_3.5inch_SATA", "type": "Hybrid", "classification": { "form_factor": "3.5-inch", "interface": "SATA" } },
-    { "name": "Enterprise_SAS_10KRPM", "type": "Enterprise", "classification": { "interface": "SAS", "speed": "10K RPM" } },
-    { "name": "Enterprise_SAS_15KRPM", "type": "Enterprise", "classification": { "interface": "SAS", "speed": "15K RPM" } },
-    { "name": "Enterprise_FibreChannel_HighSpeed", "type": "Enterprise", "classification": { "interface": "Fibre Channel", "speed": "High-Speed" } },
-    { "name": "Specialized_NVMeoF", "type": "Specialized", "classification": { "interface": "NVMe-oF", "description": "Network NVMe" } },
-    { "name": "Specialized_PersistentMemory_Optane", "type": "Specialized", "classification": { "interface": "Persistent Memory", "description": "Intel Optane" } },
-    { "name": "Virtual_VMDK_VMware", "type": "Virtual", "classification": { "format": "VMDK", "platform": "VMware" } },
-    { "name": "Virtual_VHDX_HyperV", "type": "Virtual", "classification": { "format": "VHD/VHDX", "platform": "Hyper-V" } },
-    { "name": "Virtual_QCOW2_KVM", "type": "Virtual", "classification": { "format": "QCOW2", "platform": "KVM" } },
-    { "name": "Cloud_Object_S3Compatible", "type": "Cloud", "classification": { "storage_type": "Object", "protocol": "S3-Compatible" } },
-    { "name": "Cloud_Block_EBS", "type": "Cloud", "classification": { "storage_type": "Block", "example": "EBS-Type" } }
-];
-
-const initialSimulators: Omit<Simulator, '_id'>[] = [
-    { name: 'High-Latency WAN Simulator', dockerImage: 'slow-network/wan-sim:latest', helmChartUrl: 'charts/wan-simulator' },
-    { name: 'Packet-Loss Network Simulator (5%)', dockerImage: 'fault-injector/packet-loss:5.0' },
-    { name: 'CPU Stress Test Simulator', dockerImage: 'stress-ng/cpu-burner:latest' },
-    { name: 'Disk I/O Bottleneck Simulator', dockerImage: 'fio/io-simulator:latest' },
-];
-
-const initialEmulators: Omit<Emulator, '_id'>[] = [
-    { name: 'Raspberry Pi 4 (QEMU)', dockerImage: 'qemu/raspi4-emulator:latest', registryUrl: 'docker.io', helmChartUrl: '' },
-    { name: 'HPE ProLiant DL380 Gen11', dockerImage: 'hpe-sim/dl380-g11:latest', registryUrl: 'registry.hpe.com' },
-    { name: 'Cisco Nexus 9000v Switch', dockerImage: 'cisco/nexus9000v:latest', registryUrl: 'registry.cisco.com' },
-    { name: 'Android 14 Emulator', dockerImage: 'google/android-emulator:14.0', registryUrl: 'gcr.io' },
-];
-
-
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
     "name": "OneStopShop Portal",
@@ -2455,82 +1777,63 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     }
 ];
 
-function generatePhases(config: OnboardingConfiguration) {
-  return config.phases.map(phaseConfig => {
-      const statuses = phaseConfig.statusOptions;
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      return {
-          id: phaseConfig.id,
-          name: phaseConfig.name,
-          version: "1.0",
-          status: randomStatus,
-          fields: phaseConfig.fields.map(fieldConfig => ({
-              name: fieldConfig.name,
-              value: `Dummy value for ${fieldConfig.label}`,
-              proof: { link: fieldConfig.proof ? `http://example.com/proof/${phaseConfig.id}/${fieldConfig.name}` : '' },
-          })),
-      };
-  });
-}
-
-
 const initialTenants: Omit<CmdbTenant, '_id'| 'created_at' | 'updated_at'>[] = [
-    { id: 'CorePlatformServices', name: 'Core Platform Services', description: 'Holds core infrastructure components.', version: '2.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, {id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'CustomerAnalytics', name: 'Customer Analytics', description: 'Tenant for customer-facing analytics dashboards.', version: '1.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified DataFabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'RetailOperations', name: 'Retail Operations', description: 'Manages retail and e-commerce services.', version: '1.2.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'SupplyChainLogistics', name: 'Supply Chain Logistics', description: 'Tenant for SCM and logistics.', version: '3.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'RetailOperations', name: 'Retail Operations', version: '1.2.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'MarketingAutomation', name: 'Marketing Automation', description: 'Handles marketing campaigns and user outreach.', version: '1.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'FraudDetection', name: 'Fraud Detection', description: 'Real-time fraud detection services.', version: '2.1.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'BillingAndPayments', name: 'Billing and Payments', description: 'Handles all financial transactions.', version: '4.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'HumanResources', name: 'Human Resources', description: 'Internal HR systems.', version: '1.8.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'DataScienceWorkbench', name: 'Data Science Workbench', description: 'Environment for data scientists.', version: '1.3.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'IoTPlatform', name: 'IoT Platform', description: 'Platform for managing IoT devices.', version: '2.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
+    { id: 'CorePlatformServices', name: 'Core Platform Services', description: 'Holds core infrastructure components.', version: '2.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, {id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}] },
+    { id: 'CustomerAnalytics', name: 'Customer Analytics', description: 'Tenant for customer-facing analytics dashboards.', version: '1.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified DataFabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
+    { id: 'RetailOperations', name: 'Retail Operations', description: 'Manages retail and e-commerce services.', version: '1.2.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
+    { id: 'SupplyChainLogistics', name: 'Supply Chain Logistics', description: 'Tenant for SCM and logistics.', version: '3.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'RetailOperations', name: 'Retail Operations', version: '1.2.0'}] },
+    { id: 'MarketingAutomation', name: 'Marketing Automation', description: 'Handles marketing campaigns and user outreach.', version: '1.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}] },
+    { id: 'FraudDetection', name: 'Fraud Detection', description: 'Real-time fraud detection services.', version: '2.1.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
+    { id: 'BillingAndPayments', name: 'Billing and Payments', description: 'Handles all financial transactions.', version: '4.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
+    { id: 'HumanResources', name: 'Human Resources', description: 'Internal HR systems.', version: '1.8.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}] },
+    { id: 'DataScienceWorkbench', name: 'Data Science Workbench', description: 'Environment for data scientists.', version: '1.3.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}] },
+    { id: 'IoTPlatform', name: 'IoT Platform', description: 'Platform for managing IoT devices.', version: '2.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
 ];
 
 const initialComponents: Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'>[] = [
-    { id: 'AuthNService', name: 'AuthN Service', version: '3.1.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'AuthZService', name: 'AuthZ Service', version: '2.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'DataIngestor', name: 'Data Ingestor', version: '1.8.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'DataProcessor', name: 'Data Processor', version: '2.2.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], provided_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'ProductCatalog', name: 'Product Catalog', version: '4.0.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], provided_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'InventoryService', name: 'Inventory Service', version: '3.5.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}], provided_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'ShippingCalculator', name: 'Shipping Calculator', version: '1.2.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], provided_interfaces: [{id: 'ShippingRateAPI', name: 'Shipping Rate API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'ShipmentTracker', name: 'Shipment Tracker', version: '2.0.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], provided_interfaces: [{id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'EmailService', name: 'Email Service', version: '5.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], provided_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'PushNotificationService', name: 'Push Notification Service', version: '2.3.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], provided_interfaces: [{id: 'SendPushAPI', name: 'Send Push API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'RiskEngine', name: 'Risk Engine', version: '3.0.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], provided_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'PaymentGateway', name: 'Payment Gateway', version: '6.2.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], provided_interfaces: [{id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'InvoiceGenerator', name: 'Invoice Generator', version: '2.8.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], provided_interfaces: [{id: 'InvoiceAPI', name: 'Invoice API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'PayrollProcessor', name: 'Payroll Processor', version: '4.1.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'BenefitsManager', name: 'Benefits Manager', version: '1.5.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'JupyterHub', name: 'Jupyter Hub', version: '2.0.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'MLModelServing', name: 'ML Model Serving', version: '1.7.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'DeviceRegistry', name: 'Device Registry', version: '3.2.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], provided_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'MQTTBroker', name: 'MQTT Broker', version: '5.0.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'TimeSeriesDB', name: 'Time Series DB', version: '2.9.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
+    { id: 'AuthNService', name: 'AuthN Service', version: '3.1.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}], phases: [] },
+    { id: 'AuthZService', name: 'AuthZ Service', version: '2.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}], phases: [] },
+    { id: 'DataIngestor', name: 'Data Ingestor', version: '1.8.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], phases: [] },
+    { id: 'DataProcessor', name: 'Data Processor', version: '2.2.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], provided_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
+    { id: 'ProductCatalog', name: 'Product Catalog', version: '4.0.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], provided_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}], phases: [] },
+    { id: 'InventoryService', name: 'Inventory Service', version: '3.5.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}], provided_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}], phases: [] },
+    { id: 'ShippingCalculator', name: 'Shipping Calculator', version: '1.2.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], provided_interfaces: [{id: 'ShippingRateAPI', name: 'Shipping Rate API'}], phases: [] },
+    { id: 'ShipmentTracker', name: 'Shipment Tracker', version: '2.0.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], provided_interfaces: [{id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: [] },
+    { id: 'EmailService', name: 'Email Service', version: '5.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], provided_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}], phases: [] },
+    { id: 'PushNotificationService', name: 'Push Notification Service', version: '2.3.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], provided_interfaces: [{id: 'SendPushAPI', name: 'Send Push API'}], phases: [] },
+    { id: 'RiskEngine', name: 'Risk Engine', version: '3.0.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], provided_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: [] },
+    { id: 'PaymentGateway', name: 'Payment Gateway', version: '6.2.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], provided_interfaces: [{id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
+    { id: 'InvoiceGenerator', name: 'Invoice Generator', version: '2.8.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], provided_interfaces: [{id: 'InvoiceAPI', name: 'Invoice API'}], phases: [] },
+    { id: 'PayrollProcessor', name: 'Payroll Processor', version: '4.1.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], phases: [] },
+    { id: 'BenefitsManager', name: 'Benefits Manager', version: '1.5.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], phases: [] },
+    { id: 'JupyterHub', name: 'Jupyter Hub', version: '2.0.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], phases: [] },
+    { id: 'MLModelServing', name: 'ML Model Serving', version: '1.7.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
+    { id: 'DeviceRegistry', name: 'Device Registry', version: '3.2.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], provided_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: [] },
+    { id: 'MQTTBroker', name: 'MQTT Broker', version: '5.0.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: [] },
+    { id: 'TimeSeriesDB', name: 'Time Series DB', version: '2.9.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], phases: [] },
 ];
 
 const initialApplications: Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at'>[] = [
-    { id: 'UserProfileApp', name: 'User Profile App', version: '1.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}, {id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'AnalyticsDashboard', name: 'Analytics Dashboard', version: '2.1.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'RetailStorefront', name: 'Retail Storefront', version: '3.2.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}, {id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'ProcessPaymentAPI'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'WarehouseManager', name: 'Warehouse Manager', version: '1.8.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'MarketingCampaignDashboard', name: 'Marketing Campaign Dashboard', version: '1.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}, {id: 'SendPushAPI', name: 'Send Push API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'FraudAnalystConsole', name: 'Fraud Analyst Console', version: '2.4.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'BillingDashboard', name: 'Billing Dashboard', version: '3.0.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], dependent_interfaces: [{id: 'InvoiceAPI', name: 'Invoice API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'EmployeePortal', name: 'Employee Portal', version: '2.5.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'DSModelBuilder', name: 'DS Model Builder', version: '1.9.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'DeviceProvisioner', name: 'Device Provisioner', version: '2.2.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'AdminConsole', name: 'Admin Console', version: '1.0.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'ReportGeneratorApp', name: 'Report Generator App', version: '1.2.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'ShoppingCartApp', name: 'Shopping Cart App', version: '2.5.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'FleetManagementApp', name: 'Fleet Management App', version: '1.4.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'ABTestingApp', name: 'A/B Testing App', version: '1.0.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'TransactionMonitor', name: 'Transaction Monitor', version: '3.1.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'SubscriptionManager', name: 'Subscription Manager', version: '2.0.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], dependent_interfaces: [{id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'TimeOffManager', name: 'Time Off Manager', version: '1.3.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'FeatureStoreApp', name: 'Feature Store App', version: '1.1.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'DeviceMonitorDashboard', name: 'Device Monitor Dashboard', version: '2.0.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
+    { id: 'UserProfileApp', name: 'User Profile App', version: '1.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}, {id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: [] },
+    { id: 'AnalyticsDashboard', name: 'Analytics Dashboard', version: '2.1.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
+    { id: 'RetailStorefront', name: 'Retail Storefront', version: '3.2.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}, {id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'ProcessPaymentAPI'}], phases: [] },
+    { id: 'WarehouseManager', name: 'Warehouse Manager', version: '1.8.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: [] },
+    { id: 'MarketingCampaignDashboard', name: 'Marketing Campaign Dashboard', version: '1.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}, {id: 'SendPushAPI', name: 'Send Push API'}], phases: [] },
+    { id: 'FraudAnalystConsole', name: 'Fraud Analyst Console', version: '2.4.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: [] },
+    { id: 'BillingDashboard', name: 'Billing Dashboard', version: '3.0.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], dependent_interfaces: [{id: 'InvoiceAPI', name: 'Invoice API'}], phases: [] },
+    { id: 'EmployeePortal', name: 'Employee Portal', version: '2.5.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], dependent_interfaces: [], phases: [] },
+    { id: 'DSModelBuilder', name: 'DS Model Builder', version: '1.9.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [], phases: [] },
+    { id: 'DeviceProvisioner', name: 'Device Provisioner', version: '2.2.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: [] },
+    { id: 'AdminConsole', name: 'Admin Console', version: '1.0.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: [] },
+    { id: 'ReportGeneratorApp', name: 'Report Generator App', version: '1.2.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
+    { id: 'ShoppingCartApp', name: 'Shopping Cart App', version: '2.5.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
+    { id: 'FleetManagementApp', name: 'Fleet Management App', version: '1.4.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: [] },
+    { id: 'ABTestingApp', name: 'A/B Testing App', version: '1.0.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [], phases: [] },
+    { id: 'TransactionMonitor', name: 'Transaction Monitor', version: '3.1.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: [] },
+    { id: 'SubscriptionManager', name: 'Subscription Manager', version: '2.0.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], dependent_interfaces: [{id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
+    { id: 'TimeOffManager', name: 'Time Off Manager', version: '1.3.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], dependent_interfaces: [], phases: [] },
+    { id: 'FeatureStoreApp', name: 'Feature Store App', version: '1.1.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [], phases: [] },
+    { id: 'DeviceMonitorDashboard', name: 'Device Monitor Dashboard', version: '2.0.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [], phases: [] },
 ];
 
 const initialInterfaces: Omit<CmdbInterface, '_id' | 'created_at' | 'updated_at'>[] = [
@@ -2888,6 +2191,49 @@ const generateDeployments = (): Omit<Deployment, '_id'>[] => {
 const initialDeployments = generateDeployments();
 
 
+const initialWorkflows: { _id: string; id: string; name: string; description: string }[] = [
+    { _id: 'StandardApproval', id: 'StandardApproval', name: 'Standard Approval', description: 'Default workflow with a single approval step.' },
+    { _id: 'DataGovernanceReview', id: 'DataGovernanceReview', name: 'Data Governance Review', description: 'Workflow for data-sensitive products requiring governance review.' },
+];
+
+const initialComplianceChecks: { _id: string; id: string; name: string; description: string }[] = [
+    { _id: 'SOC2', id: 'SOC2', name: 'SOC 2', description: 'Checks for SOC 2 compliance.' },
+    { _id: 'GDPR', id: 'GDPR', name: 'GDPR', description: 'Checks for GDPR compliance.' },
+    { _id: 'HIPAA', id: 'HIPAA', name: 'HIPAA', description: 'Checks for HIPAA compliance.' },
+];
+
+const initialDeploymentTypes: { _id: string; id: string; name: string; description: string }[] = [
+    { _id: 'Cloud', id: 'Cloud', name: 'Cloud', description: 'Standard cloud deployment.' },
+    { _id: 'Airgapped', id: 'Airgapped', name: 'Airgapped', description: 'Deployment in an environment with no external network access.' },
+    { _id: 'OnPremise', id: 'OnPremise', name: 'On-Premise', description: 'Deployment on customer-managed hardware.' },
+];
+
+const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
+  { id: 'REST', name: 'REST API', description: 'A standard RESTful API endpoint.' },
+  { id: 'gRPC', name: 'gRPC Service', description: 'A high-performance RPC service.' },
+  { id: 'KafkaTopic', name: 'Kafka Topic', description: 'A topic for asynchronous messaging.' },
+  { id: 'DatabaseConnection', name: 'Database Connection', description: 'A direct database connection string or interface.' },
+  { id: 'GraphQL', name: 'GraphQL API', description: 'A GraphQL API endpoint.' },
+];
+
+function generatePhases(config: OnboardingConfiguration) {
+  return config.phases.map(phaseConfig => {
+      const statuses = phaseConfig.statusOptions;
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      return {
+          id: phaseConfig.id,
+          name: phaseConfig.name,
+          version: "1.0",
+          status: randomStatus,
+          fields: phaseConfig.fields.map(fieldConfig => ({
+              name: fieldConfig.name,
+              value: `Dummy value for ${fieldConfig.label}`,
+              proof: { link: fieldConfig.proof ? `http://example.com/proof/${phaseConfig.id}/${fieldConfig.name}` : '' },
+          })),
+      };
+  });
+}
+
 export async function seedDatabase() {
     const client = await clientPromise;
     const db = client.db();
@@ -2898,9 +2244,9 @@ export async function seedDatabase() {
         { name: 'deployment_types', data: initialDeploymentTypes },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'compliance_checks', data: initialComplianceChecks.map(c => ({...c, _id: c.name.replace(/[^a-zA-Z0-9]/g, '')})) },
-        { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
-        { name: 'cmdb_components', data: initialComponents.map(c => ({ ...c, _id: c.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
-        { name: 'cmdb_applications', data: initialApplications.map(a => ({ ...a, _id: a.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) })) },
+        { name: 'cmdb_components', data: initialComponents.map(c => ({ ...c, _id: c.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) })) },
+        { name: 'cmdb_applications', data: initialApplications.map(a => ({ ...a, _id: a.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) })) },
         { name: 'cmdb_interface_types', data: initialInterfaceTypes.map(i => ({ ...i, _id: i.id })) },
         { name: 'cmdb_interfaces', data: initialInterfaces.map(i => ({ ...i, _id: i.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
         { name: 'settings_application_onboarding', data: [initialApplicationOnboarding] },
