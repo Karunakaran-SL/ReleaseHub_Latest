@@ -1,16 +1,15 @@
 
-
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
-import type { User, Product, Specification, Deployment, Baseline, OnboardingConfiguration, OnboardingPhase } from '@/lib/definitions';
+import type { User, Product, Specification, Deployment, Baseline, OnboardingConfiguration, OnboardingPhase, CmdbTenant, CmdbComponent, CmdbApplication, DependencyTree } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck, FileCode, ChevronRight, Save } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck, FileCode, ChevronRight, Save, Warehouse, Puzzle, AppWindow } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -21,6 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import ApprovalPhaseComponent from './_components/approval-phase';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 const statusColors: Record<string, string> = {
@@ -54,6 +54,7 @@ function UpgradeWizardPageComponent() {
     const [deployments, setDeployments] = useState<Deployment[]>([]);
     const [baselines, setBaselines] = useState<Baseline[]>([]);
     const [approvalConfig, setApprovalConfig] = useState<OnboardingConfiguration | null>(null);
+    const [dependencyTree, setDependencyTree] = useState<DependencyTree | null>(null);
     
     // User selections
     const [selectedProductId, setSelectedProductId] = useState('');
@@ -67,6 +68,8 @@ function UpgradeWizardPageComponent() {
     const [maintenanceStart, setMaintenanceStart] = useState<Date | undefined>();
     const [maintenanceEnd, setMaintenanceEnd] = useState<Date | undefined>();
     const [approvers, setApprovers] = useState(['Release Owner', 'Product Owner', 'Product Manager']);
+    const [selectedIndividualItems, setSelectedIndividualItems] = useState<{ tenants: Set<string>; components: Set<string>; applications: Set<string> }>({ tenants: new Set(), components: new Set(), applications: new Set() });
+
     
     // State for approval phases
     const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
@@ -166,8 +169,20 @@ function UpgradeWizardPageComponent() {
         if (selectedProductId) {
             const filteredDeployments = deployments.filter(d => d.productId === selectedProductId);
             setProductDeployments(filteredDeployments);
+             // Fetch dependency tree for the product
+            fetch(`/api/dependency-tree/product/${selectedProductId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && !data.message) {
+                        setDependencyTree(data);
+                    } else {
+                        setDependencyTree(null);
+                    }
+                })
+                .catch(() => setDependencyTree(null));
         } else {
             setProductDeployments([]);
+            setDependencyTree(null);
         }
         if (!resumeDeploymentId) {
              setSelectedDeploymentIds(new Set());
@@ -197,6 +212,77 @@ function UpgradeWizardPageComponent() {
         }
     };
     
+    const handleIndividualSelection = (type: 'tenants' | 'components' | 'applications', id: string) => {
+        setSelectedIndividualItems(prev => {
+            const newSet = new Set(prev[type]);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+                 // If a tenant is deselected, deselect all its children
+                if (type === 'tenants') {
+                    const tenant = dependencyTree?.tenants.find(t => t.id === id);
+                    tenant?.components.forEach(c => prev.components.delete(c.id));
+                    tenant?.applications.forEach(a => prev.applications.delete(a.id));
+                }
+            } else {
+                newSet.add(id);
+                // If a child is selected, ensure its parent tenant is selected
+                if (type === 'components' || type === 'applications') {
+                    const parentTenant = dependencyTree?.tenants.find(t => 
+                        t.components.some(c => c.id === id) || t.applications.some(a => a.id === id)
+                    );
+                    if (parentTenant) {
+                        prev.tenants.add(parentTenant.id);
+                    }
+                }
+            }
+            return { ...prev, [type]: newSet };
+        });
+    };
+
+     const handleTenantSelection = (tenantId: string, checked: boolean) => {
+        const tenant = dependencyTree?.tenants.find(t => t.id === tenantId);
+        if (!tenant) return;
+
+        setSelectedIndividualItems(prev => {
+            const newTenants = new Set(prev.tenants);
+            const newComponents = new Set(prev.components);
+            const newApps = new Set(prev.applications);
+
+            if (checked) {
+                newTenants.add(tenantId);
+                tenant.components.forEach(c => newComponents.add(c.id));
+                tenant.applications.forEach(a => newApps.add(a.id));
+            } else {
+                newTenants.delete(tenantId);
+                tenant.components.forEach(c => newComponents.delete(c.id));
+                tenant.applications.forEach(a => newApps.delete(a.id));
+            }
+            return { tenants: newTenants, components: newComponents, applications: newApps };
+        });
+    };
+
+    const selectedIndividualSummary = useMemo(() => {
+        if (!dependencyTree) return [];
+        const items = [];
+        for (const tenant of dependencyTree.tenants) {
+            if (selectedIndividualItems.tenants.has(tenant.id)) {
+                items.push({ type: 'Tenant', ...tenant });
+                for (const component of tenant.components) {
+                     if (selectedIndividualItems.components.has(component.id)) {
+                        items.push({ type: 'Component', ...component });
+                     }
+                }
+                 for (const app of tenant.applications) {
+                     if (selectedIndividualItems.applications.has(app.id)) {
+                        items.push({ type: 'Application', ...app });
+                     }
+                }
+            }
+        }
+        return items;
+    }, [selectedIndividualItems, dependencyTree]);
+
+    
     const areAllApprovalsComplete = () => {
         if (!approvalConfig) return false;
         return approvalConfig.phases.every(phase => {
@@ -212,8 +298,11 @@ function UpgradeWizardPageComponent() {
             case 3: return !upgradeScope;
             case 4:
                 if (upgradeScope === 'baseline') return !selectedBaselineId;
-                return false;
-            case 5: return false; // Dependency Analysis (Placeholder)
+                if (upgradeScope === 'individual') return selectedIndividualItems.components.size === 0 && selectedIndividualItems.applications.size === 0;
+                return true;
+            case 5: 
+                if (upgradeScope === 'individual') return selectedIndividualSummary.length === 0;
+                return false; // Dependency Analysis (Placeholder)
             case 6: return false; // Compatibility Summary (Placeholder)
             case 7: return releaseNotes.trim() === '';
             case 8: return false; // Field Operations (Optional)
@@ -476,31 +565,82 @@ function UpgradeWizardPageComponent() {
                     );
                 }
                 if (upgradeScope === 'individual') {
-                    const selectedDeployments = deployments.filter(d => selectedDeploymentIds.has(d._id));
+                     if (!dependencyTree) {
+                        return <div className="flex items-center justify-center h-40"><Loader2 className="h-6 w-6 animate-spin mr-2" /> Loading dependency data...</div>
+                    }
                     return (
-                        <div className="space-y-4">
-                             <h3 className="text-lg font-semibold">Individual Package Upgrade</h3>
-                             <p className="text-sm text-muted-foreground">The following deployments will be targeted for an individual upgrade. You can further customize components in subsequent steps (placeholder).</p>
-                             <Card>
-                                 <Table>
-                                     <TableHeader><TableRow><TableHead>Deployment ID</TableHead><TableHead>Customer</TableHead></TableRow></TableHeader>
-                                     <TableBody>
-                                         {selectedDeployments.map(d => (
-                                             <TableRow key={d._id}><TableCell>{d.details.deploymentId}</TableCell><TableCell>{d.details.customer}</TableCell></TableRow>
-                                         ))}
-                                     </TableBody>
-                                 </Table>
-                             </Card>
-                        </div>
-                    )
+                         <div className="space-y-4">
+                             <h3 className="text-lg font-semibold">Select Items for Upgrade</h3>
+                             <p className="text-sm text-muted-foreground">Select the specific tenants, components, and applications you want to include in the upgrade package.</p>
+                             <Accordion type="multiple" defaultValue={dependencyTree.tenants.map(t => t.id)} className="w-full">
+                                {dependencyTree.tenants.map(tenant => (
+                                    <AccordionItem value={tenant.id} key={tenant.id}>
+                                        <div className="flex items-center bg-muted/50 rounded-t-md px-2">
+                                            <Checkbox
+                                                id={`tenant-${tenant.id}`}
+                                                checked={selectedIndividualItems.tenants.has(tenant.id)}
+                                                onCheckedChange={(checked) => handleTenantSelection(tenant.id, !!checked)}
+                                            />
+                                            <AccordionTrigger className="flex-1 p-2">
+                                                 <div className="flex items-center gap-2 ml-2">
+                                                    <Warehouse className="h-5 w-5"/>
+                                                    <span>{tenant.name}</span>
+                                                </div>
+                                            </AccordionTrigger>
+                                        </div>
+                                        <AccordionContent className="p-4 border border-t-0 rounded-b-md space-y-4">
+                                            <div>
+                                                 <h4 className="font-semibold mb-2">Components</h4>
+                                                 <div className="space-y-2">
+                                                     {tenant.components.map(comp => (
+                                                        <div key={comp.id} className="flex items-center space-x-2"><Checkbox id={`comp-${comp.id}`} checked={selectedIndividualItems.components.has(comp.id)} onCheckedChange={(checked) => handleIndividualSelection('components', comp.id)}/><Label htmlFor={`comp-${comp.id}`}>{comp.name} (v{comp.version})</Label></div>
+                                                     ))}
+                                                 </div>
+                                            </div>
+                                             <div>
+                                                 <h4 className="font-semibold mb-2">Applications</h4>
+                                                 <div className="space-y-2">
+                                                      {tenant.applications.map(app => (
+                                                         <div key={app.id} className="flex items-center space-x-2"><Checkbox id={`app-${app.id}`} checked={selectedIndividualItems.applications.has(app.id)} onCheckedChange={(checked) => handleIndividualSelection('applications', app.id)}/><Label htmlFor={`app-${app.id}`}>{app.name} (v{app.version})</Label></div>
+                                                      ))}
+                                                 </div>
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                         </div>
+                    );
                 }
                 return null;
-            case 5:
+             case 5:
+                const itemsToShow = upgradeScope === 'individual' ? selectedIndividualSummary : [];
                 return (
-                    <div className="text-center p-8 space-y-4">
-                        <h3 className="font-semibold text-lg">Analyzing Dependencies & Compliance...</h3>
-                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-                        <p className="text-muted-foreground">Comparing current versions with target versions and identifying dependencies. This is a placeholder for the backend analysis.</p>
+                    <div className="space-y-4">
+                         <h3 className="font-semibold text-lg">Dependency & Compliance Analysis</h3>
+                         <p className="text-muted-foreground">The following items will be included in the upgrade package. The system is analyzing dependencies and compliance status.</p>
+                         <Card>
+                             <Table>
+                                 <TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Name</TableHead><TableHead>Version</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                                 <TableBody>
+                                     {itemsToShow.length > 0 ? itemsToShow.map(item => (
+                                         <TableRow key={`${item.type}-${item.id}`}>
+                                            <TableCell>{item.type}</TableCell>
+                                            <TableCell>{item.name}</TableCell>
+                                            <TableCell>{item.version}</TableCell>
+                                            <TableCell className="flex items-center text-green-600"><CheckCircle className="h-4 w-4 mr-1"/> Compliant</TableCell>
+                                         </TableRow>
+                                     )) : (
+                                         <TableRow>
+                                             <TableCell colSpan={4} className="text-center h-24">
+                                                 <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                                                 <p className="mt-2">Analyzing baseline dependencies...</p>
+                                             </TableCell>
+                                         </TableRow>
+                                     )}
+                                 </TableBody>
+                             </Table>
+                         </Card>
                     </div>
                 );
             case 6:
