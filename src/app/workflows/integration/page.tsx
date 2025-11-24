@@ -7,29 +7,46 @@ import { getUser } from '@/lib/auth';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Settings, Info } from 'lucide-react';
+import { Settings, Info, CheckCircle, HelpCircle, CircleDot, Package } from 'lucide-react';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+
+const statuses = [
+    { text: 'Certified', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300', icon: <CheckCircle className="h-3 w-3" /> },
+    { text: 'In Qualification', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300', icon: <HelpCircle className="h-3 w-3" /> },
+    { text: 'Evaluation Pending', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300', icon: <CircleDot className="h-3 w-3" /> },
+    { text: 'In Inventory', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300', icon: <Package className="h-3 w-3" /> },
+];
 
 const openSourceTools = [
-    { id: 'airflow', name: 'Apache Airflow', features: ['Python-based DAGs', 'Rich UI for monitoring', 'Extensible with custom operators'], benefits: ['Excellent for complex, scheduled data pipelines', 'Strong community and large set of integrations'] },
-    { id: 'temporal', name: 'Temporal', features: ['Durable, stateful workflows as code', 'Supports Go, Java, Python, TypeScript', 'Built-in support for retries, timeouts, and compensation logic (Sagas)'], benefits: ['Guarantees workflow execution', 'Highly resilient to process and infrastructure failures'] },
-    { id: 'argo', name: 'Argo Workflows', features: ['Kubernetes-native workflow engine', 'Container-based steps', 'Directed Acyclic Graph (DAG) or step-based workflows'], benefits: ['Perfectly suited for orchestrating jobs on Kubernetes', 'Integrates well with other Argo projects like CD and Events'] },
-    { id: 'n8n', name: 'n8n', features: ['Node-based visual workflow editor', 'Large library of pre-built integrations', 'Self-hostable or cloud version available'], benefits: ['Easy for non-developers to build automations', 'Great for connecting different SaaS applications'] },
-    { id: 'camunda', name: 'Camunda Platform', features: ['BPMN 2.0 standard for workflow modeling', 'Human workflow and decision management (DMN)', 'REST API for integration'], benefits: ['Strong for business process automation involving human tasks', 'Visually model complex business logic'] },
-    { id: 'bonita', name: 'Bonita', features: ['Low-code visual process design', 'Application generator for UI', 'Connectors for many systems (DBs, APIs)'], benefits: ['Accelerates development of process-driven applications', 'Empowers both developers and business users'] },
+    { id: 'airflow', name: 'Apache Airflow', features: ['Python-based DAGs', 'Rich UI for monitoring', 'Extensible with custom operators'], benefits: ['Excellent for complex, scheduled data pipelines', 'Strong community and large set of integrations'], status: statuses[0] },
+    { id: 'temporal', name: 'Temporal', features: ['Durable, stateful workflows as code', 'Supports Go, Java, Python, TypeScript', 'Built-in support for retries, timeouts, and compensation logic (Sagas)'], benefits: ['Guarantees workflow execution', 'Highly resilient to process and infrastructure failures'], status: statuses[1] },
+    { id: 'argo', name: 'Argo Workflows', features: ['Kubernetes-native workflow engine', 'Container-based steps', 'Directed Acyclic Graph (DAG) or step-based workflows'], benefits: ['Perfectly suited for orchestrating jobs on Kubernetes', 'Integrates well with other Argo projects like CD and Events'], status: statuses[0] },
+    { id: 'n8n', name: 'n8n', features: ['Node-based visual workflow editor', 'Large library of pre-built integrations', 'Self-hostable or cloud version available'], benefits: ['Easy for non-developers to build automations', 'Great for connecting different SaaS applications'], status: statuses[2] },
+    { id: 'camunda', name: 'Camunda Platform', features: ['BPMN 2.0 standard for workflow modeling', 'Human workflow and decision management (DMN)', 'REST API for integration'], benefits: ['Strong for business process automation involving human tasks', 'Visually model complex business logic'], status: statuses[3] },
+    { id: 'bonita', name: 'Bonita', features: ['Low-code visual process design', 'Application generator for UI', 'Connectors for many systems (DBs, APIs)'], benefits: ['Accelerates development of process-driven applications', 'Empowers both developers and business users'], status: statuses[3] },
 ];
 
 const commercialTools = [
-    { id: 'zapier', name: 'Zapier', features: ['Connects thousands of web apps', 'Simple "trigger-action" model', 'No-code visual builder'], benefits: ['Extremely easy to use for simple integrations', 'Vast library of supported apps'] },
-    { id: 'make', name: 'Make (formerly Integromat)', features: ['Visual workflow builder with advanced logic (routers, iterators)', 'Connects to hundreds of applications', 'Real-time execution visualization'], benefits: ['More powerful and flexible than simpler tools', 'Good for complex multi-step automations'] },
-    { id: 'boomi', name: 'Boomi', features: ['Enterprise iPaaS (Integration Platform as a Service)', 'Visual process design', 'API management and master data hub'], benefits: ['Scales to handle enterprise-level integration challenges', 'Unified platform for data and application integration'] },
+    { id: 'zapier', name: 'Zapier', features: ['Connects thousands of web apps', 'Simple "trigger-action" model', 'No-code visual builder'], benefits: ['Extremely easy to use for simple integrations', 'Vast library of supported apps'], status: statuses[1] },
+    { id: 'make', name: 'Make (formerly Integromat)', features: ['Visual workflow builder with advanced logic (routers, iterators)', 'Connects to hundreds of applications', 'Real-time execution visualization'], benefits: ['More powerful and flexible than simpler tools', 'Good for complex multi-step automations'], status: statuses[2] },
+    { id: 'boomi', name: 'Boomi', features: ['Enterprise iPaaS (Integration Platform as a Service)', 'Visual process design', 'API management and master data hub'], benefits: ['Scales to handle enterprise-level integration challenges', 'Unified platform for data and application integration'], status: statuses[3] },
 ];
 
-function ToolCard({ tool }: { tool: { id: string, name: string; features: string[]; benefits: string[] } }) {
+type Tool = typeof openSourceTools[0];
+
+function ToolCard({ tool }: { tool: Tool }) {
     return (
         <Card className="flex flex-col">
             <CardHeader>
-                <CardTitle>{tool.name}</CardTitle>
+                <div className="flex justify-between items-start">
+                    <CardTitle>{tool.name}</CardTitle>
+                    <Badge className={cn("flex items-center gap-1", tool.status.color)}>
+                        {tool.status.icon}
+                        <span>{tool.status.text}</span>
+                    </Badge>
+                </div>
             </CardHeader>
             <CardContent className="space-y-4 flex-grow">
                 <div>
