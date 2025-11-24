@@ -53,8 +53,8 @@ export default function EditApplicationPage() {
         getUser().then(setUser);
         if (!id) return;
         
-        setLoading(true);
-        async function fetchData() {
+        const fetchData = async () => {
+            setLoading(true);
             try {
                 const [applicationRes, configRes, tenantsRes, componentsRes, applicationsRes, interfacesRes] = await Promise.all([
                     fetch(`/api/cmdb/applications/${id}`),
@@ -168,11 +168,12 @@ export default function EditApplicationPage() {
         fieldName: 'tenants' | 'dependent_components' | 'dependent_applications' | 'provided_interfaces' | 'dependent_interfaces',
         allOptions: Option[]
     ) => {
+        if (!formState._id) return null;
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
 
-        const filteredOptions = fieldName === 'dependent_applications' && formState.id
-            ? allOptions.filter(opt => opt.id !== formState.id)
+        const filteredOptions = fieldName === 'dependent_applications' && formState._id
+            ? allOptions.filter(opt => opt.id !== formState._id)
             : allOptions;
 
         const available: Option[] = filteredOptions.filter(opt => !chosenIds.has(opt.id));
@@ -247,7 +248,7 @@ export default function EditApplicationPage() {
         }
     };
 
-    if (loading || !formState.id) {
+    if (loading || !formState._id) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 
@@ -281,65 +282,69 @@ export default function EditApplicationPage() {
                                 </div>
                              </div>
                              
-                             <div className="space-y-2">
-                                <Label>Tenants</Label>
-                                {renderMultiSelect('tenants', allTenants.map(t => ({ id: t._id, label: t.name })))}
-                            </div>
+                             {formState._id && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label>Tenants</Label>
+                                        {renderMultiSelect('tenants', allTenants.map(t => ({ id: t._id, label: t.name })))}
+                                    </div>
 
-                            <div className="space-y-4">
-                                <Label>Resources</Label>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
-                                    <div className="space-y-2">
-                                         <Label htmlFor="resources_default_instances" className="text-xs">Default Instances</Label>
-                                         <Input id="resources_default_instances" type="number" value={formState.resources?.default_instances || '1'} onChange={handleInputChange} />
-                                    </div>
-                                    <div className="space-y-2">
-                                         <Label htmlFor="resources_cpu" className="text-xs">CPU</Label>
-                                         <Input id="resources_cpu" type="number" placeholder="vCores" value={formState.resources?.cpu || ''} onChange={handleInputChange} />
-                                    </div>
-                                    <div className="space-y-2">
-                                         <Label htmlFor="resources_memory" className="text-xs">Memory</Label>
-                                         <Input id="resources_memory" type="number" placeholder="GB" value={formState.resources?.memory || ''} onChange={handleInputChange} />
-                                    </div>
-                                    <div className="space-y-2">
-                                         <Label htmlFor="resources_storage" className="text-xs">Storage</Label>
-                                         <Input id="resources_storage" type="number" placeholder="GB" value={formState.resources?.storage || ''} onChange={handleInputChange} />
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="space-y-2">
-                                <Label>Custom Labels</Label>
-                                <div className="space-y-2">
-                                    {(formState.custom_labels || []).map((label, index) => (
-                                        <div key={index} className="flex items-center gap-2">
-                                            <Input placeholder="Key" value={label.key} onChange={e => handleCustomLabelChange(index, 'key', e.target.value)} />
-                                            <Input placeholder="Value" value={label.value} onChange={e => handleCustomLabelChange(index, 'value', e.target.value)} />
-                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeCustomLabel(index)}>
-                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                            </Button>
+                                    <div className="space-y-4">
+                                        <Label>Resources</Label>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="resources_default_instances" className="text-xs">Default Instances</Label>
+                                                <Input id="resources_default_instances" type="number" value={formState.resources?.default_instances || '1'} onChange={handleInputChange} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="resources_cpu" className="text-xs">CPU</Label>
+                                                <Input id="resources_cpu" type="number" placeholder="vCores" value={formState.resources?.cpu || ''} onChange={handleInputChange} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="resources_memory" className="text-xs">Memory</Label>
+                                                <Input id="resources_memory" type="number" placeholder="GB" value={formState.resources?.memory || ''} onChange={handleInputChange} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="resources_storage" className="text-xs">Storage</Label>
+                                                <Input id="resources_storage" type="number" placeholder="GB" value={formState.resources?.storage || ''} onChange={handleInputChange} />
+                                            </div>
                                         </div>
-                                    ))}
-                                </div>
-                                <Button type="button" variant="outline" size="sm" onClick={addCustomLabel}><PlusCircle className="mr-2 h-4 w-4" /> Add Label</Button>
-                            </div>
-                            
-                             <div className="space-y-2">
-                                <Label>Dependent Components</Label>
-                                {renderMultiSelect('dependent_components', allComponents.map(c => ({ id: c._id, label: c.name })))}
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Dependent Applications</Label>
-                                {renderMultiSelect('dependent_applications', allApplications.map(a => ({ id: a._id, label: a.name })))}
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Provided Interfaces</Label>
-                                {renderMultiSelect('provided_interfaces', allInterfaces.map(i => ({ id: i._id, label: i.name })))}
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Dependent (Required) Interfaces</Label>
-                                {renderMultiSelect('dependent_interfaces', allInterfaces.map(i => ({ id: i._id, label: i.name })))}
-                            </div>
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                        <Label>Custom Labels</Label>
+                                        <div className="space-y-2">
+                                            {(formState.custom_labels || []).map((label, index) => (
+                                                <div key={index} className="flex items-center gap-2">
+                                                    <Input placeholder="Key" value={label.key} onChange={e => handleCustomLabelChange(index, 'key', e.target.value)} />
+                                                    <Input placeholder="Value" value={label.value} onChange={e => handleCustomLabelChange(index, 'value', e.target.value)} />
+                                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeCustomLabel(index)}>
+                                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <Button type="button" variant="outline" size="sm" onClick={addCustomLabel}><PlusCircle className="mr-2 h-4 w-4" /> Add Label</Button>
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                        <Label>Dependent Components</Label>
+                                        {renderMultiSelect('dependent_components', allComponents.map(c => ({ id: c._id, label: c.name })))}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Dependent Applications</Label>
+                                        {renderMultiSelect('dependent_applications', allApplications.map(a => ({ id: a._id, label: a.name })))}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Provided Interfaces</Label>
+                                        {renderMultiSelect('provided_interfaces', allInterfaces.map(i => ({ id: i._id, label: i.name })))}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Dependent (Required) Interfaces</Label>
+                                        {renderMultiSelect('dependent_interfaces', allInterfaces.map(i => ({ id: i._id, label: i.name })))}
+                                    </div>
+                                </>
+                             )}
                         </CardContent>
                     </Card>
 

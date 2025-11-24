@@ -1,7 +1,7 @@
 
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
-import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp, Baseline } from './definitions';
+import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, OnboardingPhase, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp, Baseline } from './definitions';
 
 const appCatalogData = [
   {
@@ -2454,6 +2454,21 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
       ]
     }
 ];
+
+function generatePhases(config: OnboardingConfiguration): any[] {
+    if (!config || !config.phases) return [];
+    return config.phases.map(phase => ({
+        id: phase.id,
+        name: phase.name,
+        version: "1.0",
+        status: "Not Started",
+        fields: phase.fields.map(field => ({
+            name: field.name,
+            value: "",
+            proof: {}
+        }))
+    }));
+}
 
 const initialTenants: Omit<CmdbTenant, '_id'| 'created_at' | 'updated_at'>[] = [
     { id: 'CorePlatformServices', name: 'Core Platform Services', description: 'Holds core infrastructure components.', version: '2.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, {id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },

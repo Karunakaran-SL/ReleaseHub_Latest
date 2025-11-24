@@ -52,14 +52,16 @@ export default function EditTenantPage() {
     useEffect(() => {
         getUser().then(setUser);
         if (!id) return;
-        setLoading(true);
-        try {
-            Promise.all([
-                fetch(`/api/cmdb/tenants/${id}`),
-                fetch('/api/cmdb/tenants'),
-                fetch('/api/products'),
-                fetch('/api/settings/tenant-onboarding')
-            ]).then(async ([tenantRes, allTenantsRes, allProductsRes, configRes]) => {
+        
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [tenantRes, allTenantsRes, allProductsRes, configRes] = await Promise.all([
+                    fetch(`/api/cmdb/tenants/${id}`),
+                    fetch('/api/cmdb/tenants'),
+                    fetch('/api/products'),
+                    fetch('/api/settings/tenant-onboarding')
+                ]);
 
                 if (!tenantRes.ok) throw new Error('Failed to fetch tenant data');
                 
@@ -86,13 +88,13 @@ export default function EditTenantPage() {
                         setOnboardingConfig(configs.reduce((latest: any, current: any) => current.version > latest.version ? current : latest, configs[0]));
                     }
                 }
-            });
-
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Error', description: `Failed to load data: ${error.message}` });
-        } finally {
-            setLoading(false);
+            } catch (error: any) {
+                toast({ variant: 'destructive', title: 'Error', description: `Failed to load data: ${error.message}` });
+            } finally {
+                setLoading(false);
+            }
         }
+        fetchData();
     }, [id, toast]);
 
     const handleExpandPhase = (phaseId: string) => {
@@ -203,7 +205,7 @@ export default function EditTenantPage() {
         fieldName: 'dependent_tenants' | 'products',
         allOptions: Option[]
     ) => {
-        if (!formState._id) return null; // Don't render if formState is not ready
+        if (!formState?._id) return null; // Don't render if formState is not ready
         const currentItemAndSelfFilteredOptions = allOptions.filter(opt => opt.id !== formState._id);
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
@@ -235,7 +237,7 @@ export default function EditTenantPage() {
         );
     };
 
-    if (loading || !formState.name) {
+    if (loading || !formState._id) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 
@@ -275,14 +277,18 @@ export default function EditTenantPage() {
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="dependent_tenants">Dependent Tenants</Label>
-                                    {renderMultiSelect('dependent_tenants', allTenants.map(t => ({id: t._id, label: t.name})))}
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="products">Products</Label>
-                                    {renderMultiSelect('products', allProducts.map(p => ({id: p._id, label: p.name})))}
-                                </div>
+                                {formState._id && (
+                                    <>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="dependent_tenants">Dependent Tenants</Label>
+                                            {renderMultiSelect('dependent_tenants', allTenants.map(t => ({id: t._id, label: t.name})))}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="products">Products</Label>
+                                            {renderMultiSelect('products', allProducts.map(p => ({id: p._id, label: p.name})))}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                              <div className="space-y-2">
                                 <Label>Resources</Label>

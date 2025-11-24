@@ -14,7 +14,7 @@ import type { User, CmdbTenant, Product, OnboardingConfiguration } from '@/lib/d
 import { getUser } from '@/lib/auth';
 import { Loader2, UploadCloud, ChevronRight } from 'lucide-react';
 import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
-import OnboardingPhaseComponent from '../../create/_components/onboarding-phase';
+import OnboardingPhaseComponent from '../create/_components/onboarding-phase';
 import { cn } from '@/lib/utils';
 
 type EditTenantFormState = Partial<Omit<CmdbTenant, '_id' | 'created_at' | 'updated_at'>> & { updateComment?: string };
