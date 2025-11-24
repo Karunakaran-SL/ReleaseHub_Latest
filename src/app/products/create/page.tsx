@@ -35,9 +35,9 @@ const initialFormState: Partial<NewProductFormState> = {
     custom_workflows: [],
     compliance_checks: [],
     deployment_type: { id: 'Cloud', name: 'Cloud' },
-    git_repo: '',
-    artifacts_repo: '',
-    pipeline: '',
+    git_repo: 'http://git.example.com/product/new-product',
+    artifacts_repo: 'http://artifacts.example.com/product/new-product',
+    pipeline: 'http://cicd.example.com/product/new-product',
     specifications: [],
 };
 
