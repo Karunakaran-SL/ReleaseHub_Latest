@@ -32,7 +32,7 @@ interface FileContent {
 }
 
 function FileTree({ files }: { files: FileContent[] }) {
-    if (!files) return null;
+    if (!Array.isArray(files)) return <p className="text-xs text-destructive">Could not load files.</p>;
     return (
         <ul className="space-y-1">
             {files.map(file => (
@@ -55,8 +55,18 @@ function RepoDetailView({ repo }: { repo: RepoDetails }) {
             setLoadingFiles(true);
             fetch(`/api/scm/github/files?repo=${repo.name}&branch=${selectedBranch}`)
                 .then(res => res.json())
-                .then(data => setFiles(data))
-                .catch(err => console.error("Failed to fetch files", err))
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        setFiles(data);
+                    } else {
+                        setFiles([]); // Ensure files is always an array
+                        console.error("API did not return an array for files:", data);
+                    }
+                })
+                .catch(err => {
+                    console.error("Failed to fetch files", err);
+                    setFiles([]);
+                })
                 .finally(() => setLoadingFiles(false));
         }
     }, [repo.name, selectedBranch]);
