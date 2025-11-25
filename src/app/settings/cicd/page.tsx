@@ -10,6 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Settings, Info } from 'lucide-react';
 import Link from 'next/link';
 
+const scmTools = [
+    { id: 'github', name: 'GitHub', description: 'Code hosting platform for version control and collaboration.' },
+    { id: 'gitlab', name: 'GitLab', description: 'A complete DevOps platform, delivered as a single application.' },
+    { id: 'bitbucket', name: 'Bitbucket', description: 'Git repository management for professional teams.' },
+];
+
 const ciTools = [
     { id: 'jenkins', name: 'Jenkins', description: 'The leading open source automation server.' },
     { id: 'gitlab', name: 'GitLab CI', description: 'CI/CD built into the GitLab platform.' },
@@ -80,12 +86,18 @@ export default function CICDSettingsPage() {
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="text-muted-foreground">
-                           This section allows you to configure connections to your various CI/CD tools, artifact repositories, and container registries. By integrating these services, ReleaseHub can automate tasks, track build and deployment statuses, and manage artifacts seamlessly across your software development lifecycle. Each integration is configured with security in mind, storing credentials securely on the backend.
+                           This section allows you to configure connections to your various SCM, CI/CD tools, artifact repositories, and container registries. By integrating these services, ReleaseHub can automate tasks, track build and deployment statuses, and manage artifacts seamlessly across your software development lifecycle. Each integration is configured with security in mind, storing credentials securely on the backend.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
 
                 <div className="space-y-8">
+                    <section>
+                        <h2 className="text-2xl font-semibold mb-4">Source Code Management (SCM)</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {scmTools.map(tool => <IntegrationCard key={tool.id} tool={tool} type="scm" />)}
+                        </div>
+                    </section>
                     <section>
                         <h2 className="text-2xl font-semibold mb-4">CI/CD Task Runners</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
