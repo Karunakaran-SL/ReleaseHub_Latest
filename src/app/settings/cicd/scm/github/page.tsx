@@ -13,6 +13,7 @@ import { Loader2, CheckCircle, XCircle, GitBranch, GitCommit, Edit, Eye } from '
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Switch } from '@/components/ui/switch';
+import { useRouter } from 'next/navigation';
 
 interface RepoDetails {
     name: string;
@@ -26,41 +27,12 @@ export default function GitHubScmSettingsPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
     const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'failed'>('idle');
-    const [formState, setFormState] = useState({ type: 'github', pat: '', includePublicRepos: false });
+    const [formState, setFormState] = useState({ type: 'github', pat: '', includePublicRepos: false, _id: '' });
     const [repoDetails, setRepoDetails] = useState<RepoDetails[] | null>(null);
     const [mode, setMode] = useState<'view' | 'edit'>('loading');
+    const router = useRouter();
 
     const { toast } = useToast();
-
-    useEffect(() => {
-        getUser().then(setUser);
-        
-        async function checkInitialConfig() {
-            setLoading(true);
-            try {
-                const response = await fetch('/api/settings/cicd/scm');
-                if (response.ok) {
-                    const configs = await response.json();
-                    const githubConfig = configs.find((c: any) => c.type === 'github');
-                    if (githubConfig?._id) { // Check if it's a real config
-                        setFormState({ ...githubConfig, pat: '' }); // Don't load PAT into state
-                        setMode('view');
-                        fetchRepoDetails(githubConfig.includePublicRepos);
-                    } else {
-                        setMode('edit');
-                    }
-                } else {
-                    setMode('edit');
-                }
-            } catch (error) {
-                setMode('edit');
-                console.error("Could not check for existing config:", error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        checkInitialConfig();
-    }, []);
 
     const fetchRepoDetails = async (includePublic?: boolean) => {
         setLoading(true);
@@ -89,6 +61,36 @@ export default function GitHubScmSettingsPage() {
             setLoading(false);
         }
     };
+    
+    useEffect(() => {
+        getUser().then(setUser);
+        
+        async function checkInitialConfig() {
+            setLoading(true);
+            try {
+                const response = await fetch('/api/settings/cicd/scm');
+                if (response.ok) {
+                    const configs = await response.json();
+                    const githubConfig = configs.find((c: any) => c.type === 'github');
+                    if (githubConfig?._id) {
+                        setFormState({ ...githubConfig, pat: '' });
+                        setMode('view');
+                        fetchRepoDetails(githubConfig.includePublicRepos);
+                    } else {
+                        setMode('edit');
+                    }
+                } else {
+                    setMode('edit');
+                }
+            } catch (error) {
+                setMode('edit');
+                console.error("Could not check for existing config:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        checkInitialConfig();
+    }, []);
 
     const handleTestConnection = async () => {
         const fetched = await fetchRepoDetails(formState.includePublicRepos);
