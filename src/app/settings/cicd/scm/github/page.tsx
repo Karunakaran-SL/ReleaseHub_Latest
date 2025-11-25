@@ -9,8 +9,18 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, GitBranch, GitCommit, FileCode } from 'lucide-react';
 import Link from 'next/link';
+import { Separator } from '@/components/ui/separator';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
+interface RepoDetails {
+    name: string;
+    description: string;
+    private: boolean;
+    branches: { name: string }[];
+    commits: { sha: string; message: string }[];
+}
 
 export default function GitHubScmSettingsPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -20,6 +30,7 @@ export default function GitHubScmSettingsPage() {
         type: 'github',
         pat: ''
     });
+    const [repoDetails, setRepoDetails] = useState<RepoDetails[] | null>(null);
 
     const { toast } = useToast();
 
@@ -27,13 +38,34 @@ export default function GitHubScmSettingsPage() {
         getUser().then(setUser);
     }, []);
 
+    const fetchRepoDetails = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/scm/github/details');
+            if (response.ok) {
+                const data = await response.json();
+                setRepoDetails(data);
+            } else {
+                console.error("Failed to fetch repo details");
+                setRepoDetails(null);
+            }
+        } catch (error) {
+            console.error("Error fetching repo details", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     const handleTestConnection = async () => {
         setTestStatus('testing');
-        // In a real app, this would make an API call to a backend that proxies the test
-        setTimeout(() => {
+        setRepoDetails(null);
+        // This is a placeholder for a real API call to a backend proxy
+        setTimeout(async () => {
             if (formState.pat.startsWith('github_pat_')) {
                 setTestStatus('success');
                 toast({ title: 'Connection Successful', description: 'Successfully connected to GitHub API.' });
+                await fetchRepoDetails();
             } else {
                 setTestStatus('failed');
                 toast({ variant: 'destructive', title: 'Connection Failed', description: 'Invalid token format. Please use a Fine-Grained Personal Access Token.' });
@@ -54,6 +86,7 @@ export default function GitHubScmSettingsPage() {
             });
             if (!response.ok) throw new Error('Failed to save configuration');
             toast({ title: "Success", description: "GitHub configuration saved." });
+            await handleTestConnection();
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error', description: error.message });
         } finally {
@@ -107,6 +140,45 @@ export default function GitHubScmSettingsPage() {
                         </CardFooter>
                     </Card>
                 </form>
+
+                {repoDetails && (
+                    <Card className="mt-8">
+                        <CardHeader>
+                            <CardTitle>Repository Details</CardTitle>
+                            <CardDescription>A list of repositories accessible with the provided token.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Accordion type="single" collapsible className="w-full">
+                                {repoDetails.map((repo, index) => (
+                                    <AccordionItem value={`item-${index}`} key={repo.name}>
+                                        <AccordionTrigger>{repo.name}</AccordionTrigger>
+                                        <AccordionContent>
+                                            <p className="text-sm text-muted-foreground mb-4">{repo.description || 'No description.'}</p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <h4 className="font-semibold mb-2 flex items-center gap-2"><GitBranch/>Branches</h4>
+                                                    <ul className="list-disc pl-5 text-sm">
+                                                        {repo.branches.map(branch => <li key={branch.name}>{branch.name}</li>)}
+                                                    </ul>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-semibold mb-2 flex items-center gap-2"><GitCommit/>Recent Commits</h4>
+                                                    <ul className="space-y-2 text-sm">
+                                                        {repo.commits.map(commit => (
+                                                            <li key={commit.sha} className="font-mono text-xs truncate" title={commit.message}>
+                                                                <span className="text-muted-foreground">{commit.sha.substring(0, 7)}</span> - {commit.message.split('\n')[0]}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                        </CardContent>
+                    </Card>
+                )}
             </main>
         </DashboardLayout>
     );
