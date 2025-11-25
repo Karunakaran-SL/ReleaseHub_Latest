@@ -20,22 +20,20 @@ export async function GET(req: NextRequest) {
         }
 
         const { searchParams } = new URL(req.url);
-        const repoName = searchParams.get('repo');
+        const repoFullName = searchParams.get('repo'); // Expecting owner/repo format
         const branchName = searchParams.get('branch');
         const path = searchParams.get('path') || '';
 
-        if (!repoName || !branchName) {
-            return NextResponse.json({ message: 'Repository and branch names are required.' }, { status: 400 });
+        if (!repoFullName || !branchName) {
+            return NextResponse.json({ message: 'Repository full name and branch are required.' }, { status: 400 });
         }
-        
-        const owner = "firebase"; // This should be dynamic based on your logic, e.g. from the repo full_name
         
         const token = await getGitHubToken();
         if (!token) {
             return NextResponse.json({ message: 'GitHub Personal Access Token not configured.' }, { status: 404 });
         }
 
-        const apiUrl = `https://api.github.com/repos/${owner}/${repoName}/contents/${path}?ref=${branchName}`;
+        const apiUrl = `https://api.github.com/repos/${repoFullName}/contents/${path}?ref=${branchName}`;
 
         const response = await fetch(apiUrl, {
             headers: {

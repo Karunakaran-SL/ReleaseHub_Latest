@@ -70,6 +70,7 @@ export async function GET(req: NextRequest) {
 
             return {
                 name: repo.name,
+                full_name: repo.full_name,
                 description: repo.description,
                 private: repo.private,
                 default_branch: repo.default_branch,

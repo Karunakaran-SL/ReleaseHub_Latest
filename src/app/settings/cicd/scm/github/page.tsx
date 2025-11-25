@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 interface RepoDetails {
     name: string;
+    full_name: string;
     description: string;
     private: boolean;
     branches: { name: string }[];
@@ -53,7 +54,7 @@ function RepoDetailView({ repo }: { repo: RepoDetails }) {
     useEffect(() => {
         if (selectedBranch) {
             setLoadingFiles(true);
-            fetch(`/api/scm/github/files?repo=${repo.name}&branch=${selectedBranch}`)
+            fetch(`/api/scm/github/files?repo=${repo.full_name}&branch=${selectedBranch}`)
                 .then(res => res.json())
                 .then(data => {
                     if (Array.isArray(data)) {
@@ -69,7 +70,7 @@ function RepoDetailView({ repo }: { repo: RepoDetails }) {
                 })
                 .finally(() => setLoadingFiles(false));
         }
-    }, [repo.name, selectedBranch]);
+    }, [repo.name, repo.full_name, selectedBranch]);
 
     return (
         <AccordionItem value={repo.name} key={repo.name}>
