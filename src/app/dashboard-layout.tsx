@@ -420,7 +420,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/workflows/integration" isActive={pathname.startsWith('/workflows/integration')}>
+                          <SidebarMenuSubButton href="/cicd/integration" isActive={pathname.startsWith('/cicd/integration')}>
                             <DatabaseZap className="mr-2"/> Integration
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -671,6 +671,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/approval" isActive={pathname.startsWith('/settings/approval')}>
                             <CheckSquare className="mr-2"/> Approval
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/settings/cicd" isActive={pathname.startsWith('/settings/cicd')}>
+                            <GitBranch className="mr-2"/> CICD
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
