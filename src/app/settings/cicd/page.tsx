@@ -5,7 +5,7 @@ import DashboardLayout from '@/app/dashboard-layout';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Settings, Info } from 'lucide-react';
 import Link from 'next/link';
