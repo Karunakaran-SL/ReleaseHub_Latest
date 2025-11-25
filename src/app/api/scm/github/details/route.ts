@@ -5,12 +5,16 @@ import { getUser } from '@/lib/auth';
 
 const COLLECTION_NAME = 'cicd_integrations';
 
-async function getGitHubToken(): Promise<{token: string | null, includePublic: boolean}> {
+async function getGitHubToken(): Promise<{token: string | null, includePublic: boolean, showFiles: boolean}> {
     const client = await clientPromise;
     const db = client.db();
     const config = await db.collection(COLLECTION_NAME).findOne({ type: 'github' });
     // In a real app, this should be decrypted.
-    return { token: config?.pat || null, includePublic: config?.includePublicRepos || false };
+    return { 
+        token: config?.pat || null, 
+        includePublic: config?.includePublicRepos || false,
+        showFiles: config?.showFiles !== false // Default to true
+    };
 }
 
 export async function GET(req: NextRequest) {
@@ -68,6 +72,7 @@ export async function GET(req: NextRequest) {
                 name: repo.name,
                 description: repo.description,
                 private: repo.private,
+                default_branch: repo.default_branch,
                 branches: branches.map((b: any) => ({ name: b.name })),
                 commits: commits.map((c: any) => ({ sha: c.sha, message: c.commit.message }))
             };

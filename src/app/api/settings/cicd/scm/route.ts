@@ -10,6 +10,7 @@ const SCMConfigSchema = z.union([
         type: z.literal('github'),
         pat: z.string().min(1),
         includePublicRepos: z.boolean().default(false),
+        showFiles: z.boolean().default(true),
     }),
     z.object({
         type: z.literal('gitlab'),

@@ -9,11 +9,12 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, CheckCircle, XCircle, GitBranch, GitCommit, Edit, Eye } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, GitBranch, GitCommit, Edit, Eye, Folder, File as FileIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Switch } from '@/components/ui/switch';
 import { useRouter } from 'next/navigation';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface RepoDetails {
     name: string;
@@ -21,20 +22,95 @@ interface RepoDetails {
     private: boolean;
     branches: { name: string }[];
     commits: { sha: string; message: string }[];
+    default_branch: string;
 }
+
+interface FileContent {
+    name: string;
+    path: string;
+    type: 'file' | 'dir';
+}
+
+function FileTree({ files }: { files: FileContent[] }) {
+    if (!files) return null;
+    return (
+        <ul className="space-y-1">
+            {files.map(file => (
+                <li key={file.path} className="flex items-center gap-2 text-sm">
+                    {file.type === 'dir' ? <Folder className="h-4 w-4 text-blue-500" /> : <FileIcon className="h-4 w-4 text-gray-500" />}
+                    <span>{file.name}</span>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
+function RepoDetailView({ repo }: { repo: RepoDetails }) {
+    const [selectedBranch, setSelectedBranch] = useState(repo.default_branch);
+    const [files, setFiles] = useState<FileContent[]>([]);
+    const [loadingFiles, setLoadingFiles] = useState(false);
+
+    useEffect(() => {
+        if (selectedBranch) {
+            setLoadingFiles(true);
+            fetch(`/api/scm/github/files?repo=${repo.name}&branch=${selectedBranch}`)
+                .then(res => res.json())
+                .then(data => setFiles(data))
+                .catch(err => console.error("Failed to fetch files", err))
+                .finally(() => setLoadingFiles(false));
+        }
+    }, [repo.name, selectedBranch]);
+
+    return (
+        <AccordionItem value={repo.name} key={repo.name}>
+            <AccordionTrigger>{repo.name}</AccordionTrigger>
+            <AccordionContent>
+                <p className="text-sm text-muted-foreground mb-4">{repo.description || 'No description.'}</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <h4 className="font-semibold mb-2 flex items-center gap-2"><GitBranch/>Branches</h4>
+                         <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a branch..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {repo.branches.map(branch => <SelectItem key={branch.name} value={branch.name}>{branch.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold mb-2 flex items-center gap-2"><GitCommit/>Recent Commits</h4>
+                        <ul className="space-y-2 text-sm">
+                            {repo.commits.map(commit => (
+                                <li key={commit.sha} className="font-mono text-xs truncate" title={commit.message}>
+                                    <span className="text-muted-foreground">{commit.sha.substring(0, 7)}</span> - {commit.message.split('\n')[0]}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold mb-2">Files in <span className="font-mono bg-muted px-1 rounded">{selectedBranch}</span></h4>
+                        {loadingFiles ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileTree files={files} />}
+                    </div>
+                </div>
+            </AccordionContent>
+        </AccordionItem>
+    );
+}
+
 
 export default function GitHubScmSettingsPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
     const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'failed'>('idle');
-    const [formState, setFormState] = useState({ type: 'github', pat: '', includePublicRepos: false, _id: '' });
+    const [formState, setFormState] = useState({ type: 'github', pat: '', includePublicRepos: false, showFiles: true, _id: '' });
     const [repoDetails, setRepoDetails] = useState<RepoDetails[] | null>(null);
     const [mode, setMode] = useState<'view' | 'edit'>('loading');
     const router = useRouter();
 
     const { toast } = useToast();
 
-    const fetchRepoDetails = async (includePublic?: boolean) => {
+    const fetchRepoDetails = async (includePublic?: boolean, showFiles?: boolean) => {
         setLoading(true);
         setTestStatus('testing');
         try {
@@ -75,7 +151,7 @@ export default function GitHubScmSettingsPage() {
                     if (githubConfig?._id) {
                         setFormState({ ...githubConfig, pat: '' });
                         setMode('view');
-                        fetchRepoDetails(githubConfig.includePublicRepos);
+                        fetchRepoDetails(githubConfig.includePublicRepos, githubConfig.showFiles);
                     } else {
                         setMode('edit');
                     }
@@ -90,10 +166,11 @@ export default function GitHubScmSettingsPage() {
             }
         }
         checkInitialConfig();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleTestConnection = async () => {
-        const fetched = await fetchRepoDetails(formState.includePublicRepos);
+        const fetched = await fetchRepoDetails(formState.includePublicRepos, formState.showFiles);
         if (fetched) {
             toast({ title: 'Connection Successful', description: 'Successfully connected and fetched repository details.' });
         }
@@ -127,7 +204,7 @@ export default function GitHubScmSettingsPage() {
         if (success) {
             toast({ title: "Success", description: "GitHub configuration saved." });
             setMode('view');
-            fetchRepoDetails(formState.includePublicRepos);
+            fetchRepoDetails(formState.includePublicRepos, formState.showFiles);
         }
     };
     
@@ -174,6 +251,14 @@ export default function GitHubScmSettingsPage() {
                                     />
                                     <Label htmlFor="includePublicRepos">Show Public Repositories</Label>
                                 </div>
+                                 <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="showFiles"
+                                        checked={formState.showFiles}
+                                        onCheckedChange={(checked) => setFormState(prev => ({...prev, showFiles: checked}))}
+                                    />
+                                    <Label htmlFor="showFiles">Show Files from Selected Branch</Label>
+                                </div>
                             </CardContent>
                             <CardFooter className="flex justify-between items-center">
                                <div className="flex gap-2">
@@ -207,6 +292,10 @@ export default function GitHubScmSettingsPage() {
                                     <Switch id="includePublicRepos-view" checked={formState.includePublicRepos} disabled />
                                     <Label htmlFor="includePublicRepos-view">Show Public Repositories</Label>
                                 </div>
+                                 <div className="flex items-center space-x-2">
+                                    <Switch id="showFiles-view" checked={formState.showFiles} disabled />
+                                    <Label htmlFor="showFiles-view">Show Files from Selected Branch</Label>
+                                </div>
                             </CardContent>
                             <CardFooter className="flex justify-between items-center">
                                 <div>
@@ -223,7 +312,7 @@ export default function GitHubScmSettingsPage() {
                                 </div>
                             </CardFooter>
                         </Card>
-                        {repoDetails && (
+                        {repoDetails && formState.showFiles && (
                             <Card className="mt-8">
                                 <CardHeader>
                                     <CardTitle>Accessible Repositories</CardTitle>
@@ -231,31 +320,8 @@ export default function GitHubScmSettingsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <Accordion type="single" collapsible className="w-full">
-                                        {repoDetails.map((repo, index) => (
-                                            <AccordionItem value={`item-${index}`} key={repo.name}>
-                                                <AccordionTrigger>{repo.name}</AccordionTrigger>
-                                                <AccordionContent>
-                                                    <p className="text-sm text-muted-foreground mb-4">{repo.description || 'No description.'}</p>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <div>
-                                                            <h4 className="font-semibold mb-2 flex items-center gap-2"><GitBranch/>Branches</h4>
-                                                            <ul className="list-disc pl-5 text-sm">
-                                                                {repo.branches.map(branch => <li key={branch.name}>{branch.name}</li>)}
-                                                            </ul>
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="font-semibold mb-2 flex items-center gap-2"><GitCommit/>Recent Commits</h4>
-                                                            <ul className="space-y-2 text-sm">
-                                                                {repo.commits.map(commit => (
-                                                                    <li key={commit.sha} className="font-mono text-xs truncate" title={commit.message}>
-                                                                        <span className="text-muted-foreground">{commit.sha.substring(0, 7)}</span> - {commit.message.split('\n')[0]}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </AccordionContent>
-                                            </AccordionItem>
+                                        {repoDetails.map((repo) => (
+                                            <RepoDetailView key={repo.name} repo={repo} />
                                         ))}
                                     </Accordion>
                                 </CardContent>
