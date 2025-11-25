@@ -44,6 +44,8 @@ export async function POST(req: NextRequest) {
 
         const { type, ...configData } = validatedData.data;
 
+        // Note: In a real production app, secrets like 'pat', 'accessToken', and 'appPassword'
+        // should be encrypted before being stored in the database.
         await db.collection(COLLECTION_NAME).updateOne(
             { type: type },
             { $set: configData },

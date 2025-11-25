@@ -5,12 +5,30 @@ import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
-const CicdContainerRegistrySchema = z.object({
-  type: z.string(),
-  url: z.string().optional(), // Not all have a specific URL (e.g. Docker Hub)
-  username: z.string(),
-  token: z.string(), // Could be password or PAT
-});
+const ContainerRegistrySchema = z.union([
+    z.object({
+        type: z.literal('docker-hub'),
+        username: z.string().min(1),
+        token: z.string().min(1)
+    }),
+    z.object({
+        type: z.literal('harbor'),
+        url: z.string().url(),
+        username: z.string().min(1),
+        password: z.string().min(1)
+    }),
+     z.object({
+        type: z.literal('gcr'),
+        serviceAccountJson: z.string().min(1)
+    }),
+     z.object({
+        type: z.literal('acr'),
+        registryName: z.string().min(1),
+        appId: z.string().min(1),
+        password: z.string().min(1),
+        tenant: z.string().min(1),
+    }),
+]);
 
 const COLLECTION_NAME = 'cicd_integrations';
 
@@ -22,7 +40,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const validatedData = CicdContainerRegistrySchema.safeParse(body);
+        const validatedData = ContainerRegistrySchema.safeParse(body);
 
         if (!validatedData.success) {
             return NextResponse.json({ message: 'Invalid data', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
@@ -51,5 +69,26 @@ export async function POST(req: NextRequest) {
     } catch (error) {
         console.error(error);
         return NextResponse.json({ message: 'An internal server error occurred' }, { status: 500 });
+    }
+}
+
+export async function GET(req: NextRequest) {
+    try {
+        const user = await getUser();
+        if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+
+        const types = ['docker-hub', 'harbor', 'gcr', 'acr'];
+        const client = await clientPromise;
+        const db = client.db();
+        const items = await db.collection(COLLECTION_NAME).find({ type: { $in: types } }).toArray();
+
+        const safeItems = items.map(item => {
+            const { token, password, serviceAccountJson, ...safeItem } = item;
+            return safeItem;
+        });
+
+        return NextResponse.json(safeItems, { status: 200 });
+    } catch (error) {
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }

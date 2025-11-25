@@ -5,12 +5,32 @@ import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
-const CicdCiSchema = z.object({
-  type: z.string(),
+// Define schemas for each CI tool you support
+const JenkinsSchema = z.object({
+  type: z.literal('jenkins'),
   instanceUrl: z.string().url(),
   username: z.string(),
   apiToken: z.string(),
 });
+
+const GitLabCiSchema = z.object({
+    type: z.literal('gitlab'),
+    // Assuming GitLab CI uses the same config as SCM for simplicity
+    instanceUrl: z.string().url(),
+    accessToken: z.string(),
+});
+
+const GitHubActionsSchema = z.object({
+    type: z.literal('github-actions'),
+    // PAT might be stored under the 'github' SCM config
+});
+
+const CircleCiSchema = z.object({
+    type: z.literal('circleci'),
+    apiToken: z.string(),
+});
+
+const CiConfigSchema = z.union([JenkinsSchema, GitLabCiSchema, GitHubActionsSchema, CircleCiSchema]);
 
 const COLLECTION_NAME = 'cicd_integrations';
 
@@ -22,7 +42,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const validatedData = CicdCiSchema.safeParse(body);
+        const validatedData = CiConfigSchema.safeParse(body);
 
         if (!validatedData.success) {
             return NextResponse.json({ message: 'Invalid data', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
@@ -60,12 +80,20 @@ export async function GET(req: NextRequest) {
         if (!user) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
+        
+        const ciTypes = ['jenkins', 'gitlab', 'github-actions', 'circleci'];
 
         const client = await clientPromise;
         const db = client.db();
-        const items = await db.collection(COLLECTION_NAME).find({}).toArray();
+        const items = await db.collection(COLLECTION_NAME).find({ type: { $in: ciTypes } }).toArray();
 
-        return NextResponse.json(items, { status: 200 });
+        // Omit sensitive fields
+        const safeItems = items.map(item => {
+            const { apiToken, accessToken, ...safeItem } = item;
+            return safeItem;
+        });
+
+        return NextResponse.json(safeItems, { status: 200 });
 
     } catch (error) {
         console.error(error);

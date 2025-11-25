@@ -7,7 +7,7 @@ import { getUser } from '@/lib/auth';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Settings, Info } from 'lucide-react';
+import { Settings, Info, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 const scmTools = [
@@ -41,19 +41,33 @@ const helmRegistries = [
 ];
 
 type Tool = { id: string, name: string; description: string };
+type IntegrationConfig = { type: string; [key: string]: any };
 
-function IntegrationCard({ tool, type }: { tool: Tool; type: string }) {
+function IntegrationCard({ tool, type, config }: { tool: Tool; type: string; config?: IntegrationConfig }) {
+    const isConfigured = !!config;
+
     return (
-        <Card>
+        <Card className={isConfigured ? 'border-green-500' : ''}>
             <CardHeader>
-                <CardTitle>{tool.name}</CardTitle>
+                <div className="flex justify-between items-start">
+                    <CardTitle>{tool.name}</CardTitle>
+                    {isConfigured && <CheckCircle className="h-5 w-5 text-green-500" />}
+                </div>
                 <CardDescription>{tool.description}</CardDescription>
             </CardHeader>
+            <CardContent>
+                {isConfigured && (
+                    <div className="text-sm text-muted-foreground">
+                        {config.instanceUrl && <p>URL: {config.instanceUrl}</p>}
+                        {config.username && <p>User: {config.username}</p>}
+                    </div>
+                )}
+            </CardContent>
             <CardFooter>
-                 <Button asChild variant="outline">
+                 <Button asChild variant="secondary">
                     <Link href={`/settings/cicd/${type}/${tool.id}`}>
                         <Settings className="mr-2 h-4 w-4" />
-                        Configure
+                        {isConfigured ? 'View / Edit' : 'Configure'}
                     </Link>
                 </Button>
             </CardFooter>
@@ -64,10 +78,38 @@ function IntegrationCard({ tool, type }: { tool: Tool; type: string }) {
 
 export default function CICDSettingsPage() {
     const [user, setUser] = useState<User | null>(null);
+    const [configurations, setConfigurations] = useState<Record<string, IntegrationConfig[]>>({});
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         getUser().then(setUser);
+        async function fetchConfigs() {
+            try {
+                const [scmRes, ciRes] = await Promise.all([
+                    fetch('/api/settings/cicd/scm'),
+                    fetch('/api/settings/cicd/ci')
+                ]);
+                
+                const scmData = scmRes.ok ? await scmRes.json() : [];
+                const ciData = ciRes.ok ? await ciRes.json() : [];
+
+                setConfigurations({
+                    scm: scmData,
+                    ci: ciData,
+                });
+
+            } catch (error) {
+                console.error("Failed to fetch configurations:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchConfigs();
     }, []);
+
+    const getConfig = (type: string, id: string) => {
+        return configurations[type]?.find(c => c.type === id);
+    };
 
     return (
         <DashboardLayout user={user}>
@@ -95,13 +137,13 @@ export default function CICDSettingsPage() {
                     <section>
                         <h2 className="text-2xl font-semibold mb-4">Git repo</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {scmTools.map(tool => <IntegrationCard key={tool.id} tool={tool} type="scm" />)}
+                            {scmTools.map(tool => <IntegrationCard key={tool.id} tool={tool} type="scm" config={getConfig('scm', tool.id)} />)}
                         </div>
                     </section>
                     <section>
                         <h2 className="text-2xl font-semibold mb-4">CI/CD Task Runners</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {ciTools.map(tool => <IntegrationCard key={tool.id} tool={tool} type="ci" />)}
+                            {ciTools.map(tool => <IntegrationCard key={tool.id} tool={tool} type="ci" config={getConfig('ci', tool.id)} />)}
                         </div>
                     </section>
                      <section>
