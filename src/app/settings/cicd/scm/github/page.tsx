@@ -31,12 +31,12 @@ export default function GitHubScmSettingsPage() {
         setTestStatus('testing');
         // In a real app, this would make an API call to a backend that proxies the test
         setTimeout(() => {
-            if (formState.pat.startsWith('ghp_')) {
+            if (formState.pat.startsWith('github_pat_')) {
                 setTestStatus('success');
                 toast({ title: 'Connection Successful', description: 'Successfully connected to GitHub API.' });
             } else {
                 setTestStatus('failed');
-                toast({ variant: 'destructive', title: 'Connection Failed', description: 'Invalid token format.' });
+                toast({ variant: 'destructive', title: 'Connection Failed', description: 'Invalid token format. Please use a Fine-Grained Personal Access Token.' });
             }
         }, 1500);
     };
@@ -74,13 +74,16 @@ export default function GitHubScmSettingsPage() {
                         <CardHeader>
                             <CardTitle>API Settings</CardTitle>
                             <CardDescription>
-                                Enter a Personal Access Token (classic) with `repo` scope.
+                                Create and enter a Fine-Grained Personal Access Token. This is more secure than a classic PAT. Ensure it has read/write access to `actions`, `contents`, and `workflows`.
+                                <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-2">
+                                    Create a new token here.
+                                </a>
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="pat">Personal Access Token (PAT)</Label>
-                                <Input id="pat" type="password" value={formState.pat} onChange={(e) => setFormState({...formState, pat: e.target.value})} />
+                                <Label htmlFor="pat">Fine-Grained Personal Access Token</Label>
+                                <Input id="pat" type="password" placeholder="ghp_..." value={formState.pat} onChange={(e) => setFormState({...formState, pat: e.target.value})} />
                             </div>
                         </CardContent>
                         <CardFooter className="flex justify-between items-center">
