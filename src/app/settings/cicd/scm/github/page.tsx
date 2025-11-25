@@ -12,6 +12,7 @@ import { getUser } from '@/lib/auth';
 import { Loader2, CheckCircle, XCircle, GitBranch, GitCommit, Edit, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Switch } from '@/components/ui/switch';
 
 interface RepoDetails {
     name: string;
@@ -25,7 +26,7 @@ export default function GitHubScmSettingsPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
     const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'failed'>('idle');
-    const [formState, setFormState] = useState({ type: 'github', pat: '' });
+    const [formState, setFormState] = useState({ type: 'github', pat: '', includePublicRepos: false });
     const [repoDetails, setRepoDetails] = useState<RepoDetails[] | null>(null);
     const [mode, setMode] = useState<'view' | 'edit'>('loading');
 
@@ -41,10 +42,10 @@ export default function GitHubScmSettingsPage() {
                 if (response.ok) {
                     const configs = await response.json();
                     const githubConfig = configs.find((c: any) => c.type === 'github');
-                    if (githubConfig) {
-                        setFormState(githubConfig);
+                    if (githubConfig?._id) { // Check if it's a real config
+                        setFormState({ ...githubConfig, pat: '' }); // Don't load PAT into state
                         setMode('view');
-                        fetchRepoDetails(); 
+                        fetchRepoDetails(githubConfig.includePublicRepos);
                     } else {
                         setMode('edit');
                     }
@@ -61,11 +62,12 @@ export default function GitHubScmSettingsPage() {
         checkInitialConfig();
     }, []);
 
-    const fetchRepoDetails = async () => {
+    const fetchRepoDetails = async (includePublic?: boolean) => {
         setLoading(true);
         setTestStatus('testing');
         try {
-            const response = await fetch('/api/scm/github/details');
+            const visibility = includePublic ? 'all' : 'private';
+            const response = await fetch(`/api/scm/github/details?visibility=${visibility}`);
             if (response.ok) {
                 const data = await response.json();
                 setRepoDetails(data);
@@ -89,14 +91,14 @@ export default function GitHubScmSettingsPage() {
     };
 
     const handleTestConnection = async () => {
-        const fetched = await fetchRepoDetails();
+        const fetched = await fetchRepoDetails(formState.includePublicRepos);
         if (fetched) {
             toast({ title: 'Connection Successful', description: 'Successfully connected and fetched repository details.' });
         }
     };
     
     const saveConfiguration = async () => {
-         setLoading(true);
+        setLoading(true);
         try {
             const response = await fetch('/api/settings/cicd/scm', {
                 method: 'POST',
@@ -123,7 +125,7 @@ export default function GitHubScmSettingsPage() {
         if (success) {
             toast({ title: "Success", description: "GitHub configuration saved." });
             setMode('view');
-            fetchRepoDetails();
+            fetchRepoDetails(formState.includePublicRepos);
         }
     };
     
@@ -162,6 +164,14 @@ export default function GitHubScmSettingsPage() {
                                     <Label htmlFor="pat">Fine-Grained Personal Access Token</Label>
                                     <Input id="pat" type="password" placeholder="ghp_..." value={formState.pat} onChange={(e) => setFormState({...formState, pat: e.target.value})} />
                                 </div>
+                                <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="includePublicRepos"
+                                        checked={formState.includePublicRepos}
+                                        onCheckedChange={(checked) => setFormState(prev => ({...prev, includePublicRepos: checked}))}
+                                    />
+                                    <Label htmlFor="includePublicRepos">Show Public Repositories</Label>
+                                </div>
                             </CardContent>
                             <CardFooter className="flex justify-between items-center">
                                <div className="flex gap-2">
@@ -186,13 +196,19 @@ export default function GitHubScmSettingsPage() {
                                 <CardTitle>Current Configuration</CardTitle>
                                 <CardDescription>Connection is configured. You can test or update the credentials.</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <Label>Personal Access Token</Label>
-                                <Input type="password" value="****************************************" disabled />
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <Label>Personal Access Token</Label>
+                                    <Input type="password" value="****************************************" disabled />
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Switch id="includePublicRepos-view" checked={formState.includePublicRepos} disabled />
+                                    <Label htmlFor="includePublicRepos-view">Show Public Repositories</Label>
+                                </div>
                             </CardContent>
                             <CardFooter className="flex justify-between items-center">
                                 <div>
-                                    <Button type="button" variant="secondary" onClick={handleTestConnection} disabled={testStatus === 'testing' || loading}>
+                                    <Button type="button" variant="secondary" onClick={() => handleTestConnection()} disabled={testStatus === 'testing' || loading}>
                                         {testStatus === 'testing' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                                         Test Connection
                                     </Button>

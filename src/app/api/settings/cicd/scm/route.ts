@@ -8,7 +8,8 @@ import { logAuditEvent } from '@/lib/audit';
 const SCMConfigSchema = z.union([
     z.object({
         type: z.literal('github'),
-        pat: z.string().min(1)
+        pat: z.string().min(1),
+        includePublicRepos: z.boolean().default(false),
     }),
     z.object({
         type: z.literal('gitlab'),

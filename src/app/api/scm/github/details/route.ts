@@ -5,12 +5,12 @@ import { getUser } from '@/lib/auth';
 
 const COLLECTION_NAME = 'cicd_integrations';
 
-async function getGitHubToken(): Promise<string | null> {
+async function getGitHubToken(): Promise<{token: string | null, includePublic: boolean}> {
     const client = await clientPromise;
     const db = client.db();
     const config = await db.collection(COLLECTION_NAME).findOne({ type: 'github' });
     // In a real app, this should be decrypted.
-    return config?.pat || null;
+    return { token: config?.pat || null, includePublic: config?.includePublicRepos || false };
 }
 
 export async function GET(req: NextRequest) {
@@ -19,14 +19,27 @@ export async function GET(req: NextRequest) {
         if (!user) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
+        const { searchParams } = new URL(req.url);
+        const visibilityParam = searchParams.get('visibility');
 
-        const token = await getGitHubToken();
+
+        const { token, includePublic } = await getGitHubToken();
+        
+        let visibility;
+        if (visibilityParam) {
+            visibility = visibilityParam === 'all' ? 'all' : 'private';
+        } else {
+            visibility = includePublic ? 'all' : 'private';
+        }
+        
         if (!token) {
             return NextResponse.json({ message: 'GitHub Personal Access Token not configured.' }, { status: 404 });
         }
         
+        const apiUrl = `https://api.github.com/user/repos?visibility=${visibility}&per_page=10&sort=updated`;
+
         // Fetch repositories from GitHub API
-        const reposResponse = await fetch('https://api.github.com/user/repos?per_page=5&sort=updated', {
+        const reposResponse = await fetch(apiUrl, {
             headers: {
                 'Authorization': `token ${token}`,
                 'Accept': 'application/vnd.github.v3+json',
