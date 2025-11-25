@@ -9,6 +9,7 @@ async function getGitHubToken(): Promise<string | null> {
     const client = await clientPromise;
     const db = client.db();
     const config = await db.collection(COLLECTION_NAME).findOne({ type: 'github' });
+    // In a real app, this should be decrypted.
     return config?.pat || null;
 }
 
@@ -21,41 +22,48 @@ export async function GET(req: NextRequest) {
 
         const token = await getGitHubToken();
         if (!token) {
-            return NextResponse.json({ message: 'GitHub PAT not configured.' }, { status: 404 });
+            return NextResponse.json({ message: 'GitHub Personal Access Token not configured.' }, { status: 404 });
         }
         
-        // This is a placeholder for a real API call. In a production scenario,
-        // you would use a library like Octokit to interact with the GitHub API.
-        // For this example, we return mock data.
-        
-        const mockRepos = [
-            {
-                name: 'release-hub-platfrom',
-                description: 'The main platform repository for ReleaseHub.',
-                private: true,
-                branches: [{ name: 'main' }, { name: 'develop' }, { name: 'feature/new-ui' }],
-                commits: [
-                    { sha: 'a1b2c3d4', message: 'feat: Add dashboard widgets' },
-                    { sha: 'e5f6g7h8', message: 'fix: Correct login redirect' },
-                    { sha: 'i9j0k1l2', message: 'docs: Update README' },
-                ]
-            },
-            {
-                name: 'microservice-auth',
-                description: 'Authentication and Authorization service.',
-                private: true,
-                branches: [{ name: 'main' }, { name: 'release/v2.1' }],
-                commits: [
-                    { sha: 'm3n4o5p6', message: 'refactor: Improve token validation' },
-                    { sha: 'q7r8s9t0', message: 'chore: Update dependencies' },
-                ]
+        // Fetch repositories from GitHub API
+        const reposResponse = await fetch('https://api.github.com/user/repos?per_page=5&sort=updated', {
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'X-GitHub-Api-Version': '2022-11-28',
             }
-        ];
+        });
 
-        return NextResponse.json(mockRepos, { status: 200 });
+        if (!reposResponse.ok) {
+            const errorData = await reposResponse.json();
+            return NextResponse.json({ message: `GitHub API error: ${errorData.message}` }, { status: reposResponse.status });
+        }
+        
+        const repos = await reposResponse.json();
+        
+        // For each repo, fetch branches and commits
+        const detailedRepos = await Promise.all(repos.map(async (repo: any) => {
+            const [branchesRes, commitsRes] = await Promise.all([
+                fetch(repo.branches_url.replace('{/branch}', '?per_page=5'), { headers: { 'Authorization': `token ${token}` } }),
+                fetch(repo.commits_url.replace('{/sha}', '?per_page=3'), { headers: { 'Authorization': `token ${token}` } })
+            ]);
 
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
+            const branches = branchesRes.ok ? await branchesRes.json() : [];
+            const commits = commitsRes.ok ? await commitsRes.json() : [];
+
+            return {
+                name: repo.name,
+                description: repo.description,
+                private: repo.private,
+                branches: branches.map((b: any) => ({ name: b.name })),
+                commits: commits.map((c: any) => ({ sha: c.sha, message: c.commit.message }))
+            };
+        }));
+
+        return NextResponse.json(detailedRepos, { status: 200 });
+
+    } catch (error: any) {
+        console.error('Error in GitHub details endpoint:', error);
+        return NextResponse.json({ message: 'An internal server error occurred.', error: error.message }, { status: 500 });
     }
 }

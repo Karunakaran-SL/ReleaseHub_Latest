@@ -9,9 +9,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2, CheckCircle, XCircle, GitBranch, GitCommit, FileCode } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, GitBranch, GitCommit } from 'lucide-react';
 import Link from 'next/link';
-import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface RepoDetails {
@@ -45,12 +44,18 @@ export default function GitHubScmSettingsPage() {
             if (response.ok) {
                 const data = await response.json();
                 setRepoDetails(data);
+                return true;
             } else {
                 console.error("Failed to fetch repo details");
+                const errorData = await response.json();
                 setRepoDetails(null);
+                toast({ variant: 'destructive', title: 'Failed to fetch details', description: errorData.message || 'Could not retrieve repository information.' });
+                return false;
             }
         } catch (error) {
             console.error("Error fetching repo details", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'An unexpected error occurred while fetching repository details.' });
+            return false;
         } finally {
             setLoading(false);
         }
@@ -60,37 +65,49 @@ export default function GitHubScmSettingsPage() {
     const handleTestConnection = async () => {
         setTestStatus('testing');
         setRepoDetails(null);
-        // This is a placeholder for a real API call to a backend proxy
-        setTimeout(async () => {
-            if (formState.pat.startsWith('github_pat_')) {
+        
+        // First, save the config to make it available to the details endpoint
+        const saved = await saveConfiguration();
+        if (saved) {
+            const fetched = await fetchRepoDetails();
+            if (fetched) {
                 setTestStatus('success');
-                toast({ title: 'Connection Successful', description: 'Successfully connected to GitHub API.' });
-                await fetchRepoDetails();
+                toast({ title: 'Connection Successful', description: 'Successfully connected and fetched repository details.' });
             } else {
                 setTestStatus('failed');
-                toast({ variant: 'destructive', title: 'Connection Failed', description: 'Invalid token format. Please use a Fine-Grained Personal Access Token.' });
             }
-        }, 1500);
+        } else {
+            setTestStatus('failed');
+        }
     };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        toast({ title: "Saving Configuration...", description: "Please wait." });
-        
+    
+    const saveConfiguration = async () => {
+         setLoading(true);
         try {
             const response = await fetch('/api/settings/cicd/scm', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formState),
             });
-            if (!response.ok) throw new Error('Failed to save configuration');
-            toast({ title: "Success", description: "GitHub configuration saved." });
-            await handleTestConnection();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to save configuration');
+            }
+            return true;
         } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Error', description: error.message });
+            toast({ variant: 'destructive', title: 'Error Saving', description: error.message });
+            return false;
         } finally {
             setLoading(false);
+        }
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        toast({ title: "Saving Configuration...", description: "Please wait." });
+        const success = await saveConfiguration();
+        if (success) {
+            toast({ title: "Success", description: "GitHub configuration saved." });
         }
     };
 
@@ -107,7 +124,7 @@ export default function GitHubScmSettingsPage() {
                         <CardHeader>
                             <CardTitle>API Settings</CardTitle>
                             <CardDescription>
-                                Create and enter a Fine-Grained Personal Access Token. This is more secure than a classic PAT. Ensure it has read/write access to `actions`, `contents`, and `workflows`.
+                                Create and enter a Fine-Grained Personal Access Token with read-only access to repository contents and metadata.
                                 <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-2">
                                     Create a new token here.
                                 </a>
@@ -121,7 +138,7 @@ export default function GitHubScmSettingsPage() {
                         </CardContent>
                         <CardFooter className="flex justify-between items-center">
                             <div>
-                                <Button type="button" variant="secondary" onClick={handleTestConnection} disabled={testStatus === 'testing'}>
+                                <Button type="button" variant="secondary" onClick={handleTestConnection} disabled={testStatus === 'testing' || loading}>
                                     {testStatus === 'testing' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                                     Test Connection
                                 </Button>
