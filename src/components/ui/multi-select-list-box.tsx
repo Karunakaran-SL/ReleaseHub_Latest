@@ -87,7 +87,7 @@ export function MultiSelectListBox({
           <ScrollArea className="h-40">
             <div className="p-2 space-y-1">
               {available.map(option => (
-                <div key={option.id} className="flex items-center space-x-2 p-1 rounded-md hover:bg-accent">
+                <div key={`available-${option.id}`} className="flex items-center space-x-2 p-1 rounded-md hover:bg-accent">
                   <Checkbox
                     id={`available-${option.id}`}
                     checked={selectedAvailable.has(option.id)}
@@ -127,7 +127,7 @@ export function MultiSelectListBox({
           <ScrollArea className="h-40">
             <div className="p-2 space-y-1">
              {chosen.map(option => (
-                <div key={option.id} className="flex items-center space-x-2 p-1 rounded-md hover:bg-accent">
+                <div key={`chosen-${option.id}`} className="flex items-center space-x-2 p-1 rounded-md hover:bg-accent">
                    <Checkbox
                     id={`chosen-${option.id}`}
                     checked={selectedChosen.has(option.id)}
