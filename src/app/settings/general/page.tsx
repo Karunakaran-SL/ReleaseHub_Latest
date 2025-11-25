@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -18,10 +19,13 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 export default function GeneralSettingsPage() {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [n8nUrl, setN8nUrl] = useState('http://localhost:5678');
     const { toast } = useToast();
 
     useEffect(() => {
@@ -52,11 +56,29 @@ export default function GeneralSettingsPage() {
 
     return (
         <DashboardLayout user={user}>
-            <main className="flex-1 p-6 md:p-10">
+            <main className="flex-1 p-6 md:p-10 space-y-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold">General Settings</h1>
-                    <p className="text-muted-foreground">Manage general application settings.</p>
+                    <p className="text-muted-foreground">Manage general application and development settings.</p>
                 </div>
+
+                <Card className="max-w-2xl">
+                    <CardHeader>
+                        <CardTitle>Workflow Engine (n8n)</CardTitle>
+                        <CardDescription>
+                            Configure the connection to your n8n workflow engine instance.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                            <Label htmlFor="n8n-url">n8n Instance URL</Label>
+                            <Input id="n8n-url" value={n8nUrl} onChange={e => setN8nUrl(e.target.value)} />
+                        </div>
+                    </CardContent>
+                     <CardFooter>
+                        <Button disabled={isLoading}>Save n8n Configuration</Button>
+                    </CardFooter>
+                </Card>
 
                 <Card className="max-w-2xl">
                     <CardHeader>

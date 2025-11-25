@@ -6,13 +6,14 @@ import { getUser } from '@/lib/auth';
 import type { User } from '@/lib/definitions';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { SlidersHorizontal, Settings2, GanttChartSquare, DatabaseZap, HardDrive, CheckSquare, Info } from 'lucide-react';
+import { SlidersHorizontal, Settings2, GanttChartSquare, DatabaseZap, HardDrive, CheckSquare, Info, GitBranch } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const settingsLinks = [
   { name: 'General', href: '/settings/general', icon: Settings2 },
   { name: 'Onboarding', href: '/settings/onboarding', icon: SlidersHorizontal },
   { name: 'Approval', href: '/settings/approval', icon: CheckSquare },
+  { name: 'CI/CD', href: '/settings/cicd', icon: GitBranch },
   { name: 'Specifications', href: '/settings/specifications', icon: HardDrive },
   { name: 'CMDB', href: '/settings/cmdb', icon: DatabaseZap },
   { name: 'Baseline', href: '/settings/baseline', icon: GanttChartSquare },

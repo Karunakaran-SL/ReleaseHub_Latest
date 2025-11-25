@@ -598,6 +598,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/workflows/n8n-ui" isActive={pathname.startsWith('/workflows/n8n-ui')}>
+                                <WorkflowIcon className="mr-2"/> n8n UI
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/workflows/integration" isActive={pathname.startsWith('/workflows/integration')}>
                             <DatabaseZap className="mr-2"/> Integration
@@ -659,7 +664,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                       <SidebarMenuSub>
                          <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/general" isActive={pathname.startsWith('/settings/general')}>
-                             <DatabaseZap className="mr-2"/> Development
+                             <Settings2 className="mr-2"/> General
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
