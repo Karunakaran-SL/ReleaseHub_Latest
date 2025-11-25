@@ -33,6 +33,7 @@ import {
   Puzzle,
   Search,
   Settings,
+  Settings2,
   ShieldCheck,
   Users,
   Warehouse,
