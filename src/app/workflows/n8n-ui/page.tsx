@@ -20,7 +20,7 @@ export default function N8nUiPage() {
 
     return (
         <DashboardLayout user={user}>
-            <main className="flex-1 flex flex-col p-2 bg-muted/40">
+            <main className="flex-1 flex flex-col bg-muted/40">
                 {loading ? (
                     <div className="flex-1 flex items-center justify-center">
                         <Loader2 className="h-8 w-8 animate-spin" />
