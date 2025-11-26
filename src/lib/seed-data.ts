@@ -1654,6 +1654,7 @@ const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
     "approval_needed": true,
     "default_workflow": { "id": "StandardApproval", "name": "Standard Approval" },
     "custom_workflows": [],
+    "cmdb": { "id": "cmdb1", "name": "CMDB 1" },
     "compliance_checks": [{ "id": "SOC2", "name": "SOC2" }, { "id": "GDPR", "name": "GDPR" }],
     "deployment_type": { "id": "Cloud", "name": "Cloud" },
     "git_repo": "http://git.example.com/platform/oss-portal",
@@ -1684,6 +1685,15 @@ const initialServiceContracts = [
     { id: 'ServiceContract_Foundation_Care', name: 'Foundation Care', description: 'Basic hardware support.'},
     { id: 'CommunitySupport', name: 'Community Support', description: 'Community-based support for open-source software.'}
 ];
+
+const initialSpecVendors = [ { _id: 'Dell EMC', name: 'Dell EMC' }, { _id: 'HPE', name: 'HPE' }, { _id: 'Lenovo', name: 'Lenovo' }, { _id: 'Cisco', name: 'Cisco' }, { _id: 'CNCF', name: 'CNCF' }, { _id: 'OpenID', name: 'OpenID' }];
+const initialSpecHwTypes = [ { _id: 'Rack', name: 'Rack' }, { _id: 'Blade', name: 'Blade' }, { _id: 'Virtual', name: 'Virtual' }];
+const initialSpecHypervisors = [{ _id: 'VMWare ESXi', name: 'VMWare ESXi' }, { _id: 'KVM', name: 'KVM' }, { _id: 'Hyper-V', name: 'Hyper-V' }];
+const initialSpecNetworkCards = [{ _id: 'Ethernet_1G_RJ45', name: 'Ethernet_1G_RJ45' }, { _id: 'Ethernet_10G_SFP+', name: 'Ethernet_10G_SFP+' }, { _id: 'Ethernet_40G_QSFP+', name: 'Ethernet_40G_QSFP+' }];
+const initialSpecPlugPowerCords = [{ _id: 'C13/C14', name: 'C13/C14' }, { _id: 'C19/C20', name: 'C19/C20' }];
+const initialSpecCpuTypes = [{ _id: 'Intel Xeon Scalable', name: 'Intel Xeon Scalable' }, { _id: 'AMD EPYC 7002', name: 'AMD EPYC 7002' }, { _id: 'AMD Ryzen 9', name: 'AMD Ryzen 9' }];
+const initialSpecGpuTypes = [{ _id: 'NVIDIA A100', name: 'NVIDIA A100' }, { _id: 'NVIDIA H100', name: 'NVIDIA H100' }, { _id: 'NVIDIA GeForce RTX 4080', name: 'NVIDIA GeForce RTX 4080' }];
+const initialSpecDiskTypes = [{ _id: 'SSD_SATA_2.5inch', name: 'SSD_SATA_2.5inch' }, { _id: 'SSD_NVMe_U2_PCIeGen4', name: 'SSD_NVMe_U2_PCIeGen4' }, { _id: 'HDD_3.5inch_SAS_15KRPM', name: 'HDD_3.5inch_SAS_15KRPM' }];
 
 const fullSpecifications: Omit<Specification, '_id'>[] = [
     {
@@ -1816,7 +1826,7 @@ const initialComponents: Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'
 const initialApplications: Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at'>[] = [
     { id: 'UserProfileApp', name: 'User Profile App', version: '1.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}, {id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: [] },
     { id: 'AnalyticsDashboard', name: 'Analytics Dashboard', version: '2.1.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
-    { id: 'RetailStorefront', name: 'Retail Storefront', version: '3.2.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}, {id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'ProcessPaymentAPI'}], phases: [] },
+    { id: 'RetailStorefront', name: 'Retail Storefront', version: '3.2.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}, {id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
     { id: 'WarehouseManager', name: 'Warehouse Manager', version: '1.8.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: [] },
     { id: 'MarketingCampaignDashboard', name: 'Marketing Campaign Dashboard', version: '1.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}, {id: 'SendPushAPI', name: 'Send Push API'}], phases: [] },
     { id: 'FraudAnalystConsole', name: 'Fraud Analyst Console', version: '2.4.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: [] },
@@ -2046,6 +2056,18 @@ const initialTestEnvironments: Omit<TestEnvironment, '_id'>[] = [
     { name: 'Q3 Performance Run', productId: 'UnifiedDataFabric', productName: 'Unified Data Fabric', specificationId: 'CiscoUCSB200M7Blade', specName: 'Cisco UCS B200 M7 Blade', baselineId: 'UnifiedDataFabric_1.1.0', createdAt: '2024-05-20T10:00:00.000Z', createdBy: 'qa-user-1', status: 'READY', estimatedCost: 50.00, resourceUsage: { cpu: '32 vCPU', memory: '128 GB', storage: '1TB' } },
     { name: 'Retail E2E Testbed', productId: 'OneStopShopPortal', productName: 'OneStopShop Portal', specificationId: 'HPEProLiantDL380Gen11', specName: 'HPE ProLiant DL380 Gen11', baselineId: undefined, tenantIds: ['RetailOperations', 'SupplyChainLogistics'], createdAt: '2024-06-10T11:00:00.000Z', createdBy: 'qa-user-2', status: 'ERROR', estimatedCost: 50.00, resourceUsage: { cpu: '32 vCPU', memory: '128 GB', storage: '1TB' } },
 ];
+
+const initialSimulators: Omit<Simulator, '_id'>[] = [
+    { name: 'High-Latency WAN Simulator', dockerImage: 'slowwan/slowwan:latest', helmChartUrl: 'oci://ghcr.io/slowwan/helm-charts/slowwan' },
+    { name: 'GPS Data Feeder', dockerImage: 'gps-feed/faker:1.2', registryUrl: 'https://registry.internal.corp' },
+    { name: 'CPU Stress Test Simulator', dockerImage: 'progrium/stress:latest' }
+];
+
+const initialEmulators: Omit<Emulator, '_id'>[] = [
+    { name: 'Raspberry Pi 4 (QEMU)', dockerImage: 'qemu/rpi4:latest' },
+    { name: 'ARMv7 Generic (QEMU)', dockerImage: 'qemu/arm:latest' }
+];
+
 
 const initialSdkApps: Omit<SdkApp, '_id'| 'createdAt'>[] = [
     {
@@ -2295,3 +2317,39 @@ export async function seedDatabase() {
     return { seededCount, skippedCount };
 }
 
+const initialTenantOnboarding: Omit<OnboardingConfiguration, '_id'> = {
+    name: "Default Tenant Onboarding",
+    version: 1,
+    phases: [
+        { id: 'data-privacy', name: 'Data Privacy', ownerName: 'Security Team', ownerEmail: 'security@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Done'], fields: [ { type: 'Checkbox', name: 'pii-review', label: 'PII/Data Privacy Review Completed' }, { type: 'Link', name: 'privacy-doc', label: 'Link to Privacy Documentation', proof: true } ]},
+        { id: 'security-review', name: 'Security Review', ownerName: 'Security Team', ownerEmail: 'security@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Done', 'Skipped'], fields: [ { type: 'Checkbox', name: 'threat-model', label: 'Threat Model Documented' }, { type: 'Link', name: 'threat-model-link', label: 'Link to Threat Model', proof: true } ]},
+        { id: 'resource-alloc', name: 'Resource Allocation', ownerName: 'Platform Team', ownerEmail: 'platform@example.com', sendEmailOnComplete: false, statusOptions: ['Not Started', 'In Progress', 'Done'], fields: [ { type: 'TextField', name: 'jira-ticket', label: 'Resource Jira Ticket' } ]},
+    ]
+};
+const initialComponentOnboarding = initialTenantOnboarding;
+const initialApplicationOnboarding = initialTenantOnboarding;
+
+const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
+    name: "Default Baseline Validation",
+    version: 1,
+    phases: [
+        { id: 'unit-testing', name: 'Unit Testing', ownerName: 'QA Team', ownerEmail: 'qa@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Passed', 'Failed'], fields: [ {type: 'TextField', name: 'coverage', label: 'Code Coverage %'}, {type: 'Link', name: 'test-report', label: 'Unit Test Report', proof: true} ]},
+        { id: 'integration-testing', name: 'Integration Testing', ownerName: 'QA Team', ownerEmail: 'qa@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Passed', 'Failed'], fields: [ {type: 'Link', name: 'integration-report', label: 'Integration Test Report', proof: true} ]},
+        { id: 'performance-testing', name: 'Performance Testing', ownerName: 'Performance Team', ownerEmail: 'perf@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Passed', 'Failed'], fields: [ {type: 'TextField', name: 'tps', label: 'Transactions per Second'}, {type: 'Link', name: 'perf-report', label: 'Performance Report', proof: true} ]},
+        { id: 'security-scan', name: 'Security Scans', ownerName: 'Security Team', ownerEmail: 'security@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Passed', 'Failed'], fields: [ {type: 'TextField', name: 'vulnerabilities', label: 'Critical Vulnerabilities Found'}, {type: 'Link', name: 'scan-report', label: 'Security Scan Report', proof: true} ]},
+    ]
+};
+
+const initialApprovalConfigs = approvalTypes.map(type => ({
+    collectionName: `settings_approval_${type.key.replace(/-/g, '_')}`,
+    data: [{
+        name: `Default ${type.name} Approval`,
+        version: 1,
+        phases: [
+            { id: 'peer-review', name: 'Peer Review', ownerName: 'Team Lead', ownerEmail: 'lead@example.com', sendEmailOnComplete: false, statusOptions: ['Pending', 'Approved', 'Rejected'], fields: [ { type: 'Checkbox', name: 'peer-approved', label: 'Peer Approved' } ] },
+            { id: 'manager-approval', name: 'Manager Approval', ownerName: 'Engineering Manager', ownerEmail: 'manager@example.com', sendEmailOnComplete: false, statusOptions: ['Pending', 'Approved', 'Rejected'], fields: [ { type: 'Checkbox', name: 'manager-approved', label: 'Manager Approved' } ] },
+            { id: 'final-signoff', name: 'Final Sign-off', ownerName: 'Release Manager', ownerEmail: 'release@example.com', sendEmailOnComplete: true, statusOptions: ['Pending', 'Signed-off'], fields: [ { type: 'Checkbox', name: 'final-signoff', label: 'Final Sign-off Complete' } ] }
+        ]
+    }]
+}));
+```
