@@ -185,6 +185,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isWorkflowPage = pathname.startsWith('/workflows');
     const isPlatformEngineeringPage = pathname.startsWith('/platform-engineering');
     const isCicdPage = pathname.startsWith('/cicd');
+    const isJobsMonitoringPage = pathname.startsWith('/jobs-monitoring');
 
 
   return (
@@ -195,11 +196,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isCmdbPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isCmdbPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isJobsMonitoringPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage}
+                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isJobsMonitoringPage}
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -233,17 +234,12 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/dashboards/jobs-monitoring">
-                            Jobs Monitoring
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/dashboards/security-monitoring">
+                          <SidebarMenuSubButton href="/dashboard/security-monitoring">
                             Security Monitoring
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/dashboards/compliance-monitoring">
+                          <SidebarMenuSubButton href="/dashboard/compliance-monitoring">
                             Compliance Monitoring
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -615,10 +611,12 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                 </Collapsible>
 
                 <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Jobs' }}>
-                    <ClipboardList />
-                    Jobs
-                  </SidebarMenuButton>
+                    <SidebarMenuButton tooltip={{ children: 'Jobs Monitoring' }} isActive={isJobsMonitoringPage}>
+                        <Link href="/jobs-monitoring" className='flex items-center gap-2 w-full'>
+                            <ClipboardList />
+                            Jobs Monitoring
+                        </Link>
+                    </SidebarMenuButton>
                 </SidebarMenuItem>
 
                 <Collapsible asChild defaultOpen={isAuditPage}>
