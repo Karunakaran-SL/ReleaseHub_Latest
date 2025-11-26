@@ -601,7 +601,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                       <SidebarMenuSub>
                           <SidebarMenuSubItem>
                             <SidebarMenuSubButton href="/workflows/n8n-ui" isActive={pathname.startsWith('/workflows/n8n-ui')}>
-                                <WorkflowIcon className="mr-2"/> n8n UI
+                                <WorkflowIcon className="mr-2"/> Default
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         <SidebarMenuSubItem>

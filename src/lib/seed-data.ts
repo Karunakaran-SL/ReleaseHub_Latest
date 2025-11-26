@@ -2250,21 +2250,7 @@ const generatePhases = (config: OnboardingConfiguration) => {
   });
 };
 
-const initialSpecHypervisors = [{ name: 'VMWare ESXi' }, { name: 'Microsoft Hyper-V' }, { name: 'KVM' }, { name: 'Harvester' }];
 
-const initialSimulators: Omit<Simulator, '_id'>[] = [
-  { name: 'High-Latency WAN Simulator', dockerImage: 'slow-network/wan-sim:latest', helmChartUrl: 'charts/wan-simulator' },
-  { name: 'Packet-Loss Network Simulator (5%)', dockerImage: 'fault-injector/packet-loss:5.0' },
-  { name: 'CPU Stress Test Simulator', dockerImage: 'stress-ng/cpu-burner:latest' },
-  { name: 'Disk I/O Bottleneck Simulator', dockerImage: 'fio/io-simulator:latest' },
-];
-
-const initialEmulators: Omit<Emulator, '_id'>[] = [
-  { name: 'Raspberry Pi 4 (QEMU)', dockerImage: 'qemu/raspi4-emulator:latest', registryUrl: 'docker.io', helmChartUrl: '' },
-  { name: 'HPE ProLiant DL380 Gen11', dockerImage: 'hpe-sim/dl380-g11:latest', registryUrl: 'registry.hpe.com' },
-  { name: 'Cisco Nexus 9000v Switch', dockerImage: 'cisco/nexus9000v:latest', registryUrl: 'registry.cisco.com' },
-  { name: 'Android 14 Emulator', dockerImage: 'google/android-emulator:14.0', registryUrl: 'gcr.io' },
-];
 
 
 export async function seedDatabase() {
