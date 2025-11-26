@@ -866,7 +866,7 @@ const appCatalogData = [
     "name": "EJBCA Community",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/ejbca-community.svg",
     "website": "https://www.ejbca.org/",
-    "description": "Issue certificates for all your Kubernetes workloads with the open-source public key infrastructure (PKI) and certificate authority (CA) software EJBCA."
+    "description": "Issue certificates for all your Kubernetes workloads with the open-source public key infrastructure (PKI) and certificate authority (CA) software EJBCA. "
   },
   {
     "category": "Provisioning",
@@ -1646,710 +1646,81 @@ const appCatalogData = [
   }
 ];
 
-const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
-  {
-    "name": "OneStopShop Portal",
-    "owner": "Platform Engineering", "owner_email": "platform@example.com",
-    "product_image": "https://picsum.photos/seed/product1/400/400",
-    "approval_needed": true,
-    "default_workflow": { "id": "StandardApproval", "name": "Standard Approval" },
-    "custom_workflows": [],
-    "cmdb": { "id": "cmdb1", "name": "CMDB 1" },
-    "compliance_checks": [{ "id": "SOC2", "name": "SOC2" }, { "id": "GDPR", "name": "GDPR" }],
-    "deployment_type": { "id": "Cloud", "name": "Cloud" },
-    "git_repo": "http://git.example.com/platform/oss-portal",
-    "artifacts_repo": "http://artifacts.example.com/oss-portal",
-    "pipeline": "http://cicd.example.com/oss-portal",
-    "specifications": [{ "id": "ArgoCDSyncSpec", "name": "ArgoCD Sync Spec" }, { "id": "SingleSignOnSpec", "name": "Single Sign-On Spec" }],
-    "version": "1.0.0",
-  },
-  {
-    "name": "Unified Data Fabric",
-    "owner": "Data Platform Team", "owner_email": "data-platform@example.com",
-    "product_image": "https://picsum.photos/seed/product2/400/400",
-    "approval_needed": true,
-    "default_workflow": { "id": "DataGovernanceReview", "name": "Data Governance Review" },
-    "custom_workflows": [],
-    "compliance_checks": [{ "id": "HIPAA", "name": "HIPAA" }],
-    "deployment_type": { "id": "Cloud", "name": "Cloud" },
-    "git_repo": "http://git.example.com/platform/data-fabric",
-    "artifacts_repo": "http://artifacts.example.com/data-fabric",
-    "pipeline": "http://cicd.example.com/data-fabric",
-    "specifications": [{ "id": "DellPowerEdgeR760", "name": "Dell PowerEdge R760" }],
-    "version": "1.1.0",
-  }
-];
+const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [];
+const initialTenants: Omit<CmdbTenant, '_id' | 'created_at' | 'updated_at' | 'phases'>[] = [];
+const initialComponents: Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at' | 'phases'>[] = [];
+const initialApplications: Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at' | 'phases'>[] = [];
+const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [];
+const initialInterfaces: Omit<CmdbInterface, '_id' | 'created_at' | 'updated_at'>[] = [];
+const initialWorkflows: { name: string; description: string }[] = [];
+const initialComplianceChecks: { name: string; description: string }[] = [];
+const initialDeploymentTypes: { name: string; description: string }[] = [];
+const initialServiceContracts: Omit<any, '_id'>[] = [];
+const initialSpecVendors: { name: string; description?: string }[] = [];
+const initialSpecHwTypes: { name: string; description?: string }[] = [];
+const initialSpecNetworkCards: { name: string; description?: string }[] = [];
+const initialSpecPlugPowerCords: { name: string; description?: string }[] = [];
+const initialSpecCpuTypes: { name: string; description?: string }[] = [];
+const initialSpecGpuTypes: { name: string; description?: string }[] = [];
+const initialSpecDiskTypes: { name: string; description?: string }[] = [];
+const initialLicenses: Omit<License, '_id'>[] = [];
+const initialProductLicensing: Omit<ProductLicensing, '_id'>[] = [];
+const fullSpecifications: Omit<Specification, '_id'>[] = [];
+const initialPlatformFoundations: any[] = [];
+const initialDevEnvironments: Omit<DevelopmentEnvironment, '_id' | 'createdAt' | 'createdBy' | 'status'>[] = [];
+const initialTestEnvironments: Omit<TestEnvironment, '_id' | 'createdAt' | 'createdBy' | 'status'>[] = [];
+const initialSimulators: Omit<Simulator, '_id'>[] = [];
+const initialEmulators: Omit<Emulator, '_id'>[] = [];
+const initialSdkApps: Omit<SdkApp, '_id' | 'createdAt' | 'createdBy' | 'status'>[] = [];
+const initialBaselines: Omit<Baseline, '_id'>[] = [];
+const initialDeployments: Omit<Deployment, '_id'>[] = [];
 
-const initialServiceContracts = [
-    { id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus', description: '24/7 premium hardware and software support.'},
-    { id: 'ServiceContract_Foundation_Care', name: 'Foundation Care', description: 'Basic hardware support.'},
-    { id: 'CommunitySupport', name: 'Community Support', description: 'Community-based support for open-source software.'}
-];
+const generatePhases = (config: OnboardingConfiguration): CmdbPhase[] => {
+    return config.phases.map(phase => ({
+        id: phase.id,
+        name: phase.name,
+        version: config.version.toString(),
+        status: 'Not Started',
+        fields: phase.fields.map(field => ({
+            name: field.name,
+            value: '',
+            proof: {}
+        }))
+    }));
+};
 
-const initialSpecVendors = [ { _id: 'Dell EMC', name: 'Dell EMC' }, { _id: 'HPE', name: 'HPE' }, { _id: 'Lenovo', name: 'Lenovo' }, { _id: 'Cisco', name: 'Cisco' }, { _id: 'CNCF', name: 'CNCF' }, { _id: 'OpenID', name: 'OpenID' }];
-const initialSpecHwTypes = [ { _id: 'Rack', name: 'Rack' }, { _id: 'Blade', name: 'Blade' }, { _id: 'Virtual', name: 'Virtual' }];
-const initialSpecHypervisors = [{ _id: 'VMWare ESXi', name: 'VMWare ESXi' }, { _id: 'KVM', name: 'KVM' }, { _id: 'Hyper-V', name: 'Hyper-V' }];
-const initialSpecNetworkCards = [{ _id: 'Ethernet_1G_RJ45', name: 'Ethernet_1G_RJ45' }, { _id: 'Ethernet_10G_SFP+', name: 'Ethernet_10G_SFP+' }, { _id: 'Ethernet_40G_QSFP+', name: 'Ethernet_40G_QSFP+' }];
-const initialSpecPlugPowerCords = [{ _id: 'C13/C14', name: 'C13/C14' }, { _id: 'C19/C20', name: 'C19/C20' }];
-const initialSpecCpuTypes = [{ _id: 'Intel Xeon Scalable', name: 'Intel Xeon Scalable' }, { _id: 'AMD EPYC 7002', name: 'AMD EPYC 7002' }, { _id: 'AMD Ryzen 9', name: 'AMD Ryzen 9' }];
-const initialSpecGpuTypes = [{ _id: 'NVIDIA A100', name: 'NVIDIA A100' }, { _id: 'NVIDIA H100', name: 'NVIDIA H100' }, { _id: 'NVIDIA GeForce RTX 4080', name: 'NVIDIA GeForce RTX 4080' }];
-const initialSpecDiskTypes = [{ _id: 'SSD_SATA_2.5inch', name: 'SSD_SATA_2.5inch' }, { _id: 'SSD_NVMe_U2_PCIeGen4', name: 'SSD_NVMe_U2_PCIeGen4' }, { _id: 'HDD_3.5inch_SAS_15KRPM', name: 'HDD_3.5inch_SAS_15KRPM' }];
+const initialSpecHypervisors: { name: string; description?: string }[] = [];
 
-const fullSpecifications: Omit<Specification, '_id'>[] = [
-    {
-        name: 'ArgoCD Sync Spec', vendor: 'CNCF', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'KVM', name: 'KVM'}, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' },
-        clusterName: 'ArgoCD Management Cluster',
-        nodeCount: { controlPlane: 3, worker: 5 },
-        image: 'https://picsum.photos/seed/spec1/400/400',
-        nodes: [
-            ...Array.from({ length: 3 }, (_, i) => ({
-                vmName: `argo-cp-${i+1}`,
-                role: 'Control Plane' as const,
-                cpuCores: 8, memory: 32, diskSize: 200, osType: 'Ubuntu 22.04 LTS',
-                networkInterface: 'Virtual_VLAN_802.1Q', connectivity: 'Private' as const, dns: 'internal.corp',
-                ssh: { username: 'admin', sshKey: 'ssh-rsa AAAAB3Nza... controlplane-key' }
-            })),
-            ...Array.from({ length: 5 }, (_, i) => ({
-                vmName: `argo-worker-${i+1}`,
-                role: 'Worker' as const,
-                cpuCores: 16, memory: 64, diskSize: 500, osType: 'Ubuntu 22.04 LTS',
-                networkInterface: 'Virtual_VXLAN', connectivity: 'Private' as const, dns: 'internal.corp',
-                ssh: { username: 'admin', sshKey: 'ssh-rsa AAAAB3NzaC... worker-key' }
-            }))
-        ],
-    },
-    {
-        name: 'Single Sign-On Spec', vendor: 'OpenID', hw_type: { id: 'Virtual', name: 'Virtual' }, hypervisor: { id: 'VMWare ESXi', name: 'VMWare ESXi' }, service_contract_type: { id: 'CommunitySupport', name: 'Community Support' },
-        clusterName: 'SSO Authentication Service',
-        image: 'https://picsum.photos/seed/spec2/400/400',
-        nodeCount: { controlPlane: 2, worker: 3 },
-        nodes: [
-            ...Array.from({ length: 2 }, (_, i) => ({
-                vmName: `sso-cp-${i+1}`, role: 'Control Plane' as const, cpuCores: 4, memory: 16, diskSize: 100, osType: 'RHEL 9',
-                networkInterface: 'Virtual_VLAN_802.1Q', connectivity: 'Private' as const, dns: 'auth.corp',
-                ssh: { username: 'sso_admin', sshKey: 'ssh-rsa AAAAB3NzaC... sso-cp-key' }
-            })),
-            ...Array.from({ length: 3 }, (_, i) => ({
-                vmName: `sso-worker-${i+1}`, role: 'Worker' as const, cpuCores: 8, memory: 32, diskSize: 250, osType: 'RHEL 9',
-                networkInterface: 'Virtual_VLAN_802.1Q', connectivity: 'Private' as const, dns: 'auth.corp',
-                ssh: { username: 'sso_admin', sshKey: 'ssh-rsa AAAAB3NzaC... sso-worker-key' }
-            }))
-        ],
-    },
-    {
-        name: 'Dell PowerEdge R760', vendor: 'Dell EMC', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'},
-        total_cpu: 64, memory_gb: 256, storage_gb: 4096, image: 'https://picsum.photos/seed/spec3/400/400',
-        network_cards: [{id: 'Ethernet_10G_SFP+', name: 'Ethernet_10G_SFP+'}], plug_power_cords: [{id: 'C13/C14', name: 'C13/C14'}],
-        hypervisor: { id: 'VMWare ESXi', name: 'VMWare ESXi' }, biosVersion: "2.10.1", firmwareVersion: "7.00.10.00 (iDRAC 9)", cpuArchitecture: "x86_64", virtualizationSupport: true,
-        iloCredentials: { username: 'root', password: 'password123' }, timeSync: 'ntp.dell.com', raidConfiguration: 'RAID 1 (OS), RAID 5 (Data)',
-        diskLayout: { osDisk: '2x 480GB SSD', dataDisk: '8x 2TB SAS HDD' }, sshKeys: 'ssh-rsa AAAAB3NzaC... r760-admin-key'
-    },
-    {
-        name: 'HPE ProLiant DL380 Gen11', vendor: 'HPE', hw_type: { id: 'Rack', name: 'Rack' }, service_contract_type: {id: 'ServiceContract_Foundation_Care', name: 'Foundation Care'},
-        total_cpu: 48, memory_gb: 192, storage_gb: 2048, image: 'https://picsum.photos/seed/spec4/400/400',
-        biosVersion: "U52 v1.50", firmwareVersion: "3.01 (iLO 6)", cpuArchitecture: "x86_64", virtualizationSupport: true,
-        iloCredentials: { username: 'admin', password: 'password' }, timeSync: 'time.nist.gov', raidConfiguration: 'RAID 1 (OS), RAID 6 (Data)',
-        diskLayout: { osDisk: '2x 480GB SSD', dataDisk: '6x 1.2TB SAS HDD' }
-    },
-    {
-        name: 'Cisco UCS B200 M7 Blade', vendor: 'Cisco', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'},
-        image: 'https://picsum.photos/seed/spec5/400/400',
-        symmetric: true, bladeCount: 8,
-        blades: [{
-            name: 'Blade Template', cpuType: 'Intel Xeon Scalable', cpuCores: 24, memory: 128, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 1024, hasGpu: true, gpuType: 'NVIDIA A100', gpuCores: 108,
-            networkInterfaces: [{name: 'vic1520', type: 'Ethernet_40G_QSFP+', speed: '40Gbps'}]
-        }],
-        biosVersion: "S52.4.1.0.1", firmwareVersion: "5.0(2)", virtualizationSupport: true
-    },
-    {
-        name: 'Asymmetric Blade Server', vendor: 'Lenovo', hw_type: { id: 'Blade', name: 'Blade'}, service_contract_type: {id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus'},
-        image: 'https://picsum.photos/seed/spec6/400/400',
-        symmetric: false, bladeCount: 4,
-        blades: [
-            { name: 'Compute-Blade-1', cpuType: 'AMD EPYC 7002', cpuCores: 32, memory: 256, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 2048, hasGpu: false },
-            { name: 'Compute-Blade-2', cpuType: 'AMD EPYC 7002', cpuCores: 32, memory: 256, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 2048, hasGpu: false },
-            { name: 'Storage-Blade-1', cpuType: 'Intel Xeon Scalable', cpuCores: 16, memory: 128, diskType: 'HDD_3.5inch_SAS_15KRPM', diskCapacity: 16384, hasGpu: false },
-            { name: 'GPU-Blade-1', cpuType: 'Intel Xeon Scalable', cpuCores: 52, memory: 512, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 4096, hasGpu: true, gpuType: 'NVIDIA H100', gpuCores: 108 }
-        ]
-    },
-    {
-      "name": "Spec-hardware-Blade-1763392192219",
-      "hw_type": { "id": "Blade", "name": "Blade"},
-      "image": "https://picsum.photos/seed/spec7/400/400",
-      "symmetric": false,
-      "bladeCount": 1,
-      "blades": [
-        {
-          "name": "Blade 1", "cpuType": "AMD Ryzen 9", "cpuCores": 12, "memory": 64, "diskType": "SSD_SATA_2.5inch", "diskCapacity": 2048,
-          "hasGpu": true, "gpuType": 'NVIDIA GeForce RTX 4080', "gpuCores": 9728
-        }
-      ]
-    }
-];
+export { 
+    initialProducts, 
+    initialTenants,
+    initialComponents,
+    initialApplications,
+    initialInterfaceTypes,
+    initialInterfaces,
+    initialWorkflows,
+    initialComplianceChecks,
+    initialDeploymentTypes,
+    initialServiceContracts,
+    initialSpecVendors,
+    initialSpecHwTypes,
+    initialSpecNetworkCards,
+    initialSpecPlugPowerCords,
+    initialSpecCpuTypes,
+    initialSpecGpuTypes,
+    initialSpecDiskTypes,
+    initialSpecHypervisors,
+    initialLicenses,
+    initialProductLicensing,
+    fullSpecifications,
+    initialPlatformFoundations,
+    initialDevEnvironments,
+    initialTestEnvironments,
+    initialSimulators,
+    initialEmulators,
+    initialSdkApps,
+    initialBaselines,
+    initialDeployments
+};
 
-const initialTenants: Omit<CmdbTenant, '_id'| 'created_at' | 'updated_at'>[] = [
-    { id: 'CorePlatformServices', name: 'Core Platform Services', description: 'Holds core infrastructure components.', version: '2.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, {id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}] },
-    { id: 'CustomerAnalytics', name: 'Customer Analytics', description: 'Tenant for customer-facing analytics dashboards.', version: '1.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified DataFabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
-    { id: 'RetailOperations', name: 'Retail Operations', description: 'Manages retail and e-commerce services.', version: '1.2.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
-    { id: 'SupplyChainLogistics', name: 'Supply Chain Logistics', description: 'Tenant for SCM and logistics.', version: '3.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'RetailOperations', name: 'Retail Operations', version: '1.2.0'}] },
-    { id: 'MarketingAutomation', name: 'Marketing Automation', description: 'Handles marketing campaigns and user outreach.', version: '1.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}] },
-    { id: 'FraudDetection', name: 'Fraud Detection', description: 'Real-time fraud detection services.', version: '2.1.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
-    { id: 'BillingAndPayments', name: 'Billing and Payments', description: 'Handles all financial transactions.', version: '4.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
-    { id: 'HumanResources', name: 'Human Resources', description: 'Internal HR systems.', version: '1.8.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}] },
-    { id: 'DataScienceWorkbench', name: 'Data Science Workbench', description: 'Environment for data scientists.', version: '1.3.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}] },
-    { id: 'IoTPlatform', name: 'IoT Platform', description: 'Platform for managing IoT devices.', version: '2.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
-];
-
-const initialComponents: Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'>[] = [
-    { id: 'AuthNService', name: 'AuthN Service', version: '3.1.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}], phases: [] },
-    { id: 'AuthZService', name: 'AuthZ Service', version: '2.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}], phases: [] },
-    { id: 'DataIngestor', name: 'Data Ingestor', version: '1.8.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], phases: [] },
-    { id: 'DataProcessor', name: 'Data Processor', version: '2.2.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], provided_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
-    { id: 'ProductCatalog', name: 'Product Catalog', version: '4.0.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], provided_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}], phases: [] },
-    { id: 'InventoryService', name: 'Inventory Service', version: '3.5.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}], provided_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}], phases: [] },
-    { id: 'ShippingCalculator', name: 'Shipping Calculator', version: '1.2.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], provided_interfaces: [{id: 'ShippingRateAPI', name: 'Shipping Rate API'}], phases: [] },
-    { id: 'ShipmentTracker', name: 'Shipment Tracker', version: '2.0.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], provided_interfaces: [{id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: [] },
-    { id: 'EmailService', name: 'Email Service', version: '5.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], provided_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}], phases: [] },
-    { id: 'PushNotificationService', name: 'Push Notification Service', version: '2.3.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], provided_interfaces: [{id: 'SendPushAPI', name: 'Send Push API'}], phases: [] },
-    { id: 'RiskEngine', name: 'Risk Engine', version: '3.0.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], provided_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: [] },
-    { id: 'PaymentGateway', name: 'Payment Gateway', version: '6.2.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], provided_interfaces: [{id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
-    { id: 'InvoiceGenerator', name: 'Invoice Generator', version: '2.8.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], provided_interfaces: [{id: 'InvoiceAPI', name: 'Invoice API'}], phases: [] },
-    { id: 'PayrollProcessor', name: 'Payroll Processor', version: '4.1.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], phases: [] },
-    { id: 'BenefitsManager', name: 'Benefits Manager', version: '1.5.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], phases: [] },
-    { id: 'JupyterHub', name: 'Jupyter Hub', version: '2.0.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], phases: [] },
-    { id: 'MLModelServing', name: 'ML Model Serving', version: '1.7.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
-    { id: 'DeviceRegistry', name: 'Device Registry', version: '3.2.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], provided_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: [] },
-    { id: 'MQTTBroker', name: 'MQTT Broker', version: '5.0.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: [] },
-    { id: 'TimeSeriesDB', name: 'Time Series DB', version: '2.9.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], phases: [] },
-];
-
-const initialApplications: Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at'>[] = [
-    { id: 'UserProfileApp', name: 'User Profile App', version: '1.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}, {id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: [] },
-    { id: 'AnalyticsDashboard', name: 'Analytics Dashboard', version: '2.1.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
-    { id: 'RetailStorefront', name: 'Retail Storefront', version: '3.2.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}, {id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
-    { id: 'WarehouseManager', name: 'Warehouse Manager', version: '1.8.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: [] },
-    { id: 'MarketingCampaignDashboard', name: 'Marketing Campaign Dashboard', version: '1.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}, {id: 'SendPushAPI', name: 'Send Push API'}], phases: [] },
-    { id: 'FraudAnalystConsole', name: 'Fraud Analyst Console', version: '2.4.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: [] },
-    { id: 'BillingDashboard', name: 'Billing Dashboard', version: '3.0.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], dependent_interfaces: [{id: 'InvoiceAPI', name: 'Invoice API'}], phases: [] },
-    { id: 'EmployeePortal', name: 'Employee Portal', version: '2.5.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], dependent_interfaces: [], phases: [] },
-    { id: 'DSModelBuilder', name: 'DS Model Builder', version: '1.9.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [], phases: [] },
-    { id: 'DeviceProvisioner', name: 'Device Provisioner', version: '2.2.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: [] },
-    { id: 'AdminConsole', name: 'Admin Console', version: '1.0.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: [] },
-    { id: 'ReportGeneratorApp', name: 'Report Generator App', version: '1.2.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
-    { id: 'ShoppingCartApp', name: 'Shopping Cart App', version: '2.5.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
-    { id: 'FleetManagementApp', name: 'Fleet Management App', version: '1.4.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: [] },
-    { id: 'ABTestingApp', name: 'A/B Testing App', version: '1.0.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [], phases: [] },
-    { id: 'TransactionMonitor', name: 'Transaction Monitor', version: '3.1.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: [] },
-    { id: 'SubscriptionManager', name: 'Subscription Manager', version: '2.0.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], dependent_interfaces: [{id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
-    { id: 'TimeOffManager', name: 'Time Off Manager', version: '1.3.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], dependent_interfaces: [], phases: [] },
-    { id: 'FeatureStoreApp', name: 'Feature Store App', version: '1.1.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [], phases: [] },
-    { id: 'DeviceMonitorDashboard', name: 'Device Monitor Dashboard', version: '2.0.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [], phases: [] },
-];
-
-const initialInterfaces: Omit<CmdbInterface, '_id' | 'created_at' | 'updated_at'>[] = [
-    { id: 'AuthNTokenAPI', name: 'AuthN Token API', type: { id: 'REST', name: 'REST API' }, version: 'v3', owner_name: 'Auth Team', owner_email: 'auth@example.com', source: { id: 'AuthNService', name: 'AuthN Service' }, security: { internal: { secure: true, authentication: false }, external: { secure: false, authentication: false } } },
-    { id: 'AuthZCheckAPI', name: 'AuthZ Check API', type: { id: 'gRPC', name: 'gRPC Service' }, version: 'v2', owner_name: 'Auth Team', owner_email: 'auth@example.com', source: { id: 'AuthZService', name: 'AuthZ Service' }, security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } } },
-    { id: 'DataIngestTopic', name: 'Data Ingest Topic', type: { id: 'KafkaTopic', name: 'Kafka Topic' }, version: 'v1', owner_name: 'Data Platform', owner_email: 'data-platform@example.com', source: { id: 'DataIngestor', name: 'Data Ingestor' }, security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } } },
-    { id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic', type: { id: 'KafkaTopic', name: 'Kafka Topic' }, version: 'v1', owner_name: 'Analytics Team', owner_email: 'analytics@example.com', source: { id: 'DataProcessor', name: 'Data Processor' }, security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } } },
-    { id: 'ProductCatalogDB', name: 'Product Catalog DB', type: { id: 'DatabaseConnection', name: 'Database Connection' }, version: 'v1', owner_name: 'Retail Team', owner_email: 'retail@example.com', source: { id: 'ProductCatalog', name: 'Product Catalog' }, security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } } },
-    { id: 'InventoryCheckAPI', name: 'Inventory Check API', type: { id: 'REST', name: 'REST API' }, version: 'v2', owner_name: 'Retail Team', owner_email: 'retail@example.com', source: { id: 'InventoryService', name: 'Inventory Service' }, security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } } },
-    { id: 'ShippingRateAPI', name: 'Shipping Rate API', type: { id: 'GraphQL', name: 'GraphQL API' }, version: 'v1', owner_name: 'Logistics Team', owner_email: 'logistics@example.com', source: { id: 'ShippingCalculator', name: 'Shipping Calculator' }, security: { internal: { secure: true, authentication: true }, external: { secure: true, authentication: true } } },
-    { id: 'ShipmentStatusAPI', name: 'Shipment Status API', type: { id: 'REST', name: 'REST API' }, version: 'v3', owner_name: 'Logistics Team', owner_email: 'logistics@example.com', source: { id: 'ShipmentTracker', name: 'Shipment Tracker' }, security: { internal: { secure: true, authentication: true }, external: { secure: true, authentication: true } } },
-    { id: 'SendEmailAPI', name: 'Send Email API', type: { id: 'REST', name: 'REST API' }, version: 'v4', owner_name: 'Marketing Team', owner_email: 'marketing@example.com', source: { id: 'EmailService', name: 'Email Service' }, security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } } },
-    { id: 'SendPushAPI', name: 'Send Push API', type: { id: 'REST', name: 'REST API' }, version: 'v2', owner_name: 'Marketing Team', owner_email: 'marketing@example.com', source: { id: 'PushNotificationService', name: 'Push Notification Service' }, security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } } },
-    { id: 'FraudScoreAPI', name: 'Fraud Score API', type: { id: 'gRPC', name: 'gRPC Service' }, version: 'v3', owner_name: 'Security Team', owner_email: 'security@example.com', source: { id: 'RiskEngine', name: 'Risk Engine' }, security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } } },
-    { id: 'ProcessPaymentAPI', name: 'Process Payment API', type: { id: 'REST', name: 'REST API' }, version: 'v5', owner_name: 'Billing Team', owner_email: 'billing@example.com', source: { id: 'PaymentGateway', name: 'Payment Gateway' }, security: { internal: { secure: true, authentication: true }, external: { secure: true, authentication: true } } },
-    { id: 'InvoiceAPI', name: 'Invoice API', type: { id: 'GraphQL', name: 'GraphQL API' }, version: 'v2', owner_name: 'Billing Team', owner_email: 'billing@example.com', source: { id: 'InvoiceGenerator', name: 'Invoice Generator' }, security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } } },
-    { id: 'DeviceRegistryAPI', name: 'Device Registry API', type: { id: 'REST', name: 'REST API' }, version: 'v1', owner_name: 'IoT Team', owner_email: 'iot@example.com', source: { id: 'DeviceRegistry', name: 'Device Registry' }, security: { internal: { secure: true, authentication: true }, external: { secure: false, authentication: false } } },
-    ...Array.from({ length: 36 }, (_, i) => ({
-        id: `ExternalInterface${i + 1}`,
-        name: `External Interface ${i + 1}`,
-        type: { id: i % 2 === 0 ? 'GraphQL' : 'REST', name: i % 2 === 0 ? 'GraphQL API' : 'REST API' },
-        version: `v1`,
-        owner_name: `Partner Team ${i + 1}`,
-        owner_email: `partner${i + 1}@example.com`,
-        source: { id: `Application${(i % 20) + 1}`, name: `Application ${(i % 20) + 1}` },
-        security: { internal: { secure: true, authentication: true }, external: { secure: true, authentication: true } },
-    })),
-];
-
-const generateInitialLicenses = (): Omit<License, '_id'>[] => {
-    const licenseTemplates = [
-        { name: 'MIT', type: 'open-source', owner: 'MIT' },
-        { name: 'Apache 2.0', type: 'open-source', owner: 'Apache Foundation' },
-        { name: 'GPLv3', type: 'open-source', owner: 'FSF' },
-        { name: 'BSD-3-Clause', type: 'open-source', owner: 'Various' },
-        { name: 'React', type: 'open-source', owner: 'Facebook' },
-        { name: 'Angular', type: 'open-source', owner: 'Google' },
-        { name: 'Vue', type: 'open-source', owner: 'Evan You' },
-        { name: 'MongoDB SSPL', type: 'proprietary', owner: 'MongoDB Inc.' },
-        { name: 'Elastic License 2.0', type: 'proprietary', owner: 'Elastic' },
-        { name: 'Confluent Community License', type: 'proprietary', owner: 'Confluent' },
-        { name: 'Oracle Java SE', type: 'proprietary', owner: 'Oracle' },
-        { name: 'Microsoft EULA', type: 'proprietary', owner: 'Microsoft' },
-        { name: 'Datadog Subscription', type: 'subscription', owner: 'Datadog' },
-        { name: 'Okta Identity', type: 'subscription', owner: 'Okta' },
-        { name: 'JetBrains All-Products', type: 'subscription', owner: 'JetBrains' },
-        { name: 'Windows Server 2022', type: 'perpetual', owner: 'Microsoft' },
-        { name: 'VMware vSphere', type: 'perpetual', owner: 'VMware' },
-    ];
-
-    const allEntities = [...initialComponents, ...initialApplications];
-    const licenses: Omit<License, '_id'>[] = [];
-    let licenseCount = 0;
-
-    licenseTemplates.forEach(template => {
-        const licenseId = template.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        licenses.push({
-            id: licenseId,
-            name: template.name,
-            type: template.type as any,
-            owner: template.owner,
-            status: 'active'
-        });
-        licenseCount++;
-    });
-
-    allEntities.forEach(entity => {
-        const numLicenses = Math.floor(Math.random() * 3) + 1; // 1 to 3 licenses per entity
-        for (let i = 0; i < numLicenses; i++) {
-            const template = licenseTemplates[Math.floor(Math.random() * licenseTemplates.length)];
-            const status = ['active', 'active', 'active', 'expired', 'deprecated'][Math.floor(Math.random() * 5)];
-            const licenseId = `${template.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${entity.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-            
-            const existing = licenses.find(l => l.id === licenseId);
-            if (existing) continue;
-
-            const newLicense: Omit<License, '_id'> = {
-                id: licenseId,
-                name: `${template.name} for ${entity.name}`,
-                type: template.type as any,
-                owner: template.owner,
-                status: status as any,
-                versions: [entity.version], // Link to a specific version
-            };
-            
-            if ('tenants' in entity && entity.tenants) {
-                newLicense.tenants = entity.tenants.map(t => t.id);
-            }
-
-            if ('dependent_components' in entity) { // It's a component or app
-                 newLicense.components = [entity.id];
-            } else {
-                 newLicense.apps = [entity.id];
-            }
-
-            licenses.push(newLicense);
-            licenseCount++;
-        }
-    });
-
-    // Add some more generic ones to reach 100+
-    while (licenseCount < 100) {
-        const template = licenseTemplates[Math.floor(Math.random() * licenseTemplates.length)];
-        const status = ['active', 'expired', 'deprecated'][Math.floor(Math.random() * 3)];
-        const id = `${template.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-gen-${licenseCount}`;
-         licenses.push({
-            id: id,
-            name: `${template.name} - General Purpose`,
-            type: template.type as any,
-            owner: template.owner,
-            status: status as any
-        });
-        licenseCount++;
-    }
-
-    return licenses;
-}
-
-const initialLicenses = generateInitialLicenses();
-
-
-const initialProductLicensing: Omit<ProductLicensing, '_id'>[] = [
-    { id: 'pl-oss-portal', product_id: 'OneStopShopPortal', license_model: 'hybrid', entitlements: ['feature-sso', 'feature-dashboard'], package_included: true, validity: 'perpetual', compliance: 'ISO 27001' },
-    { id: 'pl-data-fabric', product_id: 'UnifiedDataFabric', license_model: 'online', entitlements: ['feature-streaming', 'feature-batch'], package_included: false, validity: '2025-12-31', compliance: 'SOC 2 Type II' }
-];
-
-const initialPlatformFoundations: any[] = [
-    ...initialSpecHypervisors.map(hypervisor => ({
-        _id: `DellR760-${hypervisor.name.replace(/[^a-zA-Z0-9]/g, '')}`,
-        name: `Dell R760 with ${hypervisor.name}`,
-        createdAt: new Date().toISOString(),
-        createdBy: 'seed',
-        specification: fullSpecifications.find(s => s.name === 'Dell PowerEdge R760'),
-        hypervisor: { id: hypervisor._id, name: hypervisor.name },
-        virtual_machines: [
-            ...Array.from({ length: 3 }, (_, i) => ({ vmName: `dell-cp-${i+1}`, role: 'Control Plane', cpuCores: 8, memory: 32, diskSize: 200, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_10G_SFP+', connectivity: 'Private', dns: 'dell.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }})),
-            ...Array.from({ length: 10 }, (_, i) => ({ vmName: `dell-w-${i+1}`, role: 'Worker', cpuCores: 16, memory: 64, diskSize: 500, osType: 'Ubuntu 22.04 LTS', networkInterface: 'Ethernet_10G_SFP+', connectivity: 'Private', dns: 'dell.internal', ssh: { username: 'ubuntu', sshKey: 'ssh-rsa...' }})),
-        ],
-        kubernetes: {
-            distribution: 'rke2',
-            cniPlugin: 'cilium',
-            controlPlaneNodes: Array.from({ length: 3 }, (_, i) => ({ id: `dell-cp-${i+1}`, label: `dell-cp-${i+1}` })),
-            workerNodes: Array.from({ length: 10 }, (_, i) => ({ id: `dell-w-${i+1}`, label: `dell-w-${i+1}` })),
-        }
-    })),
-    ...initialSpecHypervisors.map(hypervisor => ({
-        _id: `CiscoBlade-${hypervisor.name.replace(/[^a-zA-Z0-9]/g, '')}`,
-        name: `Cisco Blade Cluster on ${hypervisor.name}`,
-        createdAt: new Date().toISOString(),
-        createdBy: 'seed',
-        specification: fullSpecifications.find(s => s.name === 'Cisco UCS B200 M7 Blade'),
-        hypervisor: { id: hypervisor._id, name: hypervisor.name },
-        virtual_machines: [
-            ...Array.from({ length: 3 }, (_, i) => ({ vmName: `cisco-cp-${i+1}`, role: 'Control Plane', cpuCores: 4, memory: 16, diskSize: 100, osType: 'RHEL 9', networkInterface: 'Ethernet_40G_QSFP+', connectivity: 'Private', dns: 'cisco.internal', ssh: { username: 'ec2-user', sshKey: 'ssh-rsa...' }})),
-            ...Array.from({ length: 5 }, (_, i) => ({ vmName: `cisco-w-${i+1}`, role: 'Worker', cpuCores: 8, memory: 32, diskSize: 200, osType: 'RHEL 9', networkInterface: 'Ethernet_40G_QSFP+', connectivity: 'Private', dns: 'cisco.internal', ssh: { username: 'ec2-user', sshKey: 'ssh-rsa...' }})),
-        ],
-        kubernetes: {
-            distribution: 'k3s',
-            cniPlugin: 'calico',
-            controlPlaneNodes: Array.from({ length: 3 }, (_, i) => ({ id: `cisco-cp-${i+1}`, label: `cisco-cp-${i+1}` })),
-            workerNodes: Array.from({ length: 5 }, (_, i) => ({ id: `cisco-w-${i+1}`, label: `cisco-w-${i+1}` })),
-        }
-    })),
-    {
-        _id: `ArgoCD-VirtualFoundation`,
-        name: `ArgoCD Virtual Foundation`,
-        createdAt: new Date().toISOString(),
-        createdBy: 'seed',
-        specification: fullSpecifications.find(s => s.name === 'ArgoCD Sync Spec'),
-        hypervisor: { id: 'KVM', name: 'KVM' },
-        virtual_machines: fullSpecifications.find(s => s.name === 'ArgoCD Sync Spec')?.nodes,
-        kubernetes: {
-            distribution: 'rke2',
-            clusterCidr: '10.42.0.0/16',
-            serviceCidr: '10.43.0.0/16',
-            dnsDomain: 'argo.cluster.local',
-            cniPlugin: 'canal',
-            useCustomCerts: false,
-            controlPlaneNodes: fullSpecifications.find(s => s.name === 'ArgoCD Sync Spec')?.nodes?.filter(n => n.role === 'Control Plane').map(n => ({ id: n.vmName, label: n.vmName })),
-            workerNodes: fullSpecifications.find(s => s.name === 'ArgoCD Sync Spec')?.nodes?.filter(n => n.role === 'Worker').map(n => ({ id: n.vmName, label: n.vmName })),
-        }
-    },
-    {
-        _id: `SSO-VirtualFoundation`,
-        name: `SSO Virtual Foundation`,
-        createdAt: new Date().toISOString(),
-        createdBy: 'seed',
-        specification: fullSpecifications.find(s => s.name === 'Single Sign-On Spec'),
-        hypervisor: { id: 'VMWare ESXi', name: 'VMWare ESXi' },
-        virtual_machines: fullSpecifications.find(s => s.name === 'Single Sign-On Spec')?.nodes,
-        kubernetes: {
-            distribution: 'k3s',
-            clusterCidr: '10.62.0.0/16',
-            serviceCidr: '10.63.0.0/16',
-            dnsDomain: 'sso.cluster.local',
-            cniPlugin: 'calico',
-            useCustomCerts: true,
-            controlPlaneNodes: fullSpecifications.find(s => s.name === 'Single Sign-On Spec')?.nodes?.filter(n => n.role === 'Control Plane').map(n => ({ id: n.vmName, label: n.vmName })),
-            workerNodes: fullSpecifications.find(s => s.name === 'Single Sign-On Spec')?.nodes?.filter(n => n.role === 'Worker').map(n => ({ id: n.vmName, label: n.vmName })),
-        }
-    }
-];
-
-const initialDevEnvironments: Omit<DevelopmentEnvironment, '_id'>[] = [
-    { name: 'Feature Branch - SSO', productId: 'OneStopShopPortal', productName: 'OneStopShop Portal', specificationId: 'ArgoCDSyncSpec', specName: 'ArgoCD Sync Spec', baselineId: 'OneStopShopPortal_1.0.0', tenantIds: [], createdAt: '2024-06-01T10:00:00.000Z', createdBy: 'dev-user-1', status: 'READY', estimatedCost: 15.50, resourceUsage: { cpu: '8 vCPU', memory: '32 GB', storage: '200 GB' } },
-    { name: 'Analytics Hotfix', productId: 'UnifiedDataFabric', productName: 'Unified Data Fabric', specificationId: 'DellPowerEdgeR760', specName: 'Dell PowerEdge R760', baselineId: undefined, tenantIds: ['CustomerAnalytics'], createdAt: '2024-06-05T14:30:00.000Z', createdBy: 'dev-user-2', status: 'PROVISIONING', estimatedCost: 25.00, resourceUsage: { cpu: '16 vCPU', memory: '64 GB', storage: '500 GB' } },
-];
-
-const initialTestEnvironments: Omit<TestEnvironment, '_id'>[] = [
-    { name: 'Q3 Performance Run', productId: 'UnifiedDataFabric', productName: 'Unified Data Fabric', specificationId: 'CiscoUCSB200M7Blade', specName: 'Cisco UCS B200 M7 Blade', baselineId: 'UnifiedDataFabric_1.1.0', createdAt: '2024-05-20T10:00:00.000Z', createdBy: 'qa-user-1', status: 'READY', estimatedCost: 50.00, resourceUsage: { cpu: '32 vCPU', memory: '128 GB', storage: '1TB' } },
-    { name: 'Retail E2E Testbed', productId: 'OneStopShopPortal', productName: 'OneStopShop Portal', specificationId: 'HPEProLiantDL380Gen11', specName: 'HPE ProLiant DL380 Gen11', baselineId: undefined, tenantIds: ['RetailOperations', 'SupplyChainLogistics'], createdAt: '2024-06-10T11:00:00.000Z', createdBy: 'qa-user-2', status: 'ERROR', estimatedCost: 50.00, resourceUsage: { cpu: '32 vCPU', memory: '128 GB', storage: '1TB' } },
-];
-
-const initialSimulators: Omit<Simulator, '_id'>[] = [
-    { name: 'High-Latency WAN Simulator', dockerImage: 'slowwan/slowwan:latest', helmChartUrl: 'oci://ghcr.io/slowwan/helm-charts/slowwan' },
-    { name: 'GPS Data Feeder', dockerImage: 'gps-feed/faker:1.2', registryUrl: 'https://registry.internal.corp' },
-    { name: 'CPU Stress Test Simulator', dockerImage: 'progrium/stress:latest' }
-];
-
-const initialEmulators: Omit<Emulator, '_id'>[] = [
-    { name: 'Raspberry Pi 4 (QEMU)', dockerImage: 'qemu/rpi4:latest' },
-    { name: 'ARMv7 Generic (QEMU)', dockerImage: 'qemu/arm:latest' }
-];
-
-
-const initialSdkApps: Omit<SdkApp, '_id'| 'createdAt'>[] = [
-    {
-        projectName: 'supply-chain-logistics-app',
-        group: 'com.example.supplychain',
-        dependencies: [
-            { id: 'sql-postgres', name: 'SQL Database (PostgreSQL)', description: 'Adds JDBC driver and configuration for PostgreSQL.', group: 'Databases' },
-            { id: 'messaging-kafka', name: 'Messaging (Kafka)', description: 'Adds Spring for Kafka for producing/consuming messages.', group: 'Messaging' },
-            { id: 'web-react', name: 'Web Portal (React)', description: 'Generates a React frontend structure.', group: 'Web' },
-        ],
-        repoUrl: 'https://github.com/example/supply-chain-app.git',
-        pipelineType: 'gitlab',
-        environmentType: 'development',
-        environmentId: initialDevEnvironments.find(e => e.name === 'Feature Branch - SSO')?._id, // This will be assigned dynamically later if needed
-        tenantId: 'SupplyChainLogistics',
-        status: 'READY',
-        version: '1.0.0',
-        createdBy: 'seed-user',
-        simulators: [
-            {
-                id: initialSimulators.find(s => s.name === 'High-Latency WAN Simulator')!._id,
-                name: 'High-Latency WAN Simulator',
-                instanceCount: 2,
-                instances: [
-                    { name: 'wan-sim-us', ip: '10.1.1.5', user: 'admin', pass: 'pass' },
-                    { name: 'wan-sim-eu', ip: '10.2.1.5', user: 'admin', pass: 'pass' },
-                ]
-            }
-        ],
-        emulators: [
-             {
-                id: initialEmulators.find(s => s.name === 'Raspberry Pi 4 (QEMU)')!._id,
-                name: 'Raspberry Pi 4 (QEMU)',
-                instanceCount: 1,
-                instances: [
-                    { name: 'rpi-sensor-1', ip: '192.168.1.101', user: 'pi', pass: 'raspberry' }
-                ]
-            }
-        ]
-    },
-    {
-        projectName: 'analytics-dashboard-v2',
-        group: 'com.example.analytics',
-        dependencies: [
-            { id: 'nosql-mongodb', name: 'NoSQL Database (MongoDB)', description: 'Adds MongoDB driver and Spring Data MongoDB.', group: 'Databases' },
-            { id: 'web-angular', name: 'Web Portal (Angular)', description: 'Generates an Angular frontend structure.', group: 'Web' },
-            { id: 'monitoring-prometheus', name: 'Monitoring (Prometheus)', description: 'Exposes application metrics for Prometheus scraping.', group: 'Observability' },
-        ],
-        repoUrl: 'https://github.com/example/analytics-dashboard.git',
-        pipelineType: 'github',
-        environmentType: 'test',
-        environmentId: initialTestEnvironments.find(e => e.name === 'Q3 Performance Run')?._id,
-        tenantId: 'CustomerAnalytics',
-        status: 'PROVISIONING',
-        version: '2.0.0',
-        createdBy: 'seed-user',
-        simulators: [
-            {
-                id: initialSimulators.find(s => s.name === 'CPU Stress Test Simulator')!._id,
-                name: 'CPU Stress Test Simulator',
-                instanceCount: 3,
-                instances: [
-                    { name: 'cpu-stress-1', ip: '10.3.1.1', user: 'root', pass: '' },
-                    { name: 'cpu-stress-2', ip: '10.3.1.2', user: 'root', pass: '' },
-                    { name: 'cpu-stress-3', ip: '10.3.1.3', user: 'root', pass: '' },
-                ]
-            }
-        ],
-        emulators: []
-    }
-];
-
-const initialBaselines: Omit<Baseline, '_id'>[] = [
-    {
-        product: { id: "OneStopShopPortal", name: "OneStopShop Portal", version: "1.0.0" },
-        specifications: [{ id: "ArgoCDSyncSpec", name: "ArgoCD Sync Spec", version: "1.0.0" }],
-        tenants: initialTenants.filter(t => t.products?.some(p => p.id === 'OneStopShopPortal')),
-        status: 'RELEASED',
-        created_at: new Date('2023-10-26T10:00:00Z').toISOString(),
-        updated_at: new Date('2023-11-01T12:00:00Z').toISOString(),
-        created_by: 'release-manager',
-        artifacts: [{ name: 'onestopshop-1.0.0.zip', url: '#', size: '128 MB' }],
-        package_properties: { location: 's3://releases/onestopshop/1.0.0', checksum_md5: 'mock-md5-sum', checksum_sha256: 'mock-sha256-sum' }
-    },
-    {
-        product: { id: "UnifiedDataFabric", name: "Unified Data Fabric", version: "1.1.0" },
-        specifications: [{ id: "DellPowerEdgeR760", name: "Dell PowerEdge R760", version: "1.0.0" }],
-        tenants: initialTenants.filter(t => t.products?.some(p => p.id === 'UnifiedDataFabric')),
-        status: 'RELEASED',
-        created_at: new Date('2024-01-15T10:00:00Z').toISOString(),
-        updated_at: new Date('2024-01-20T12:00:00Z').toISOString(),
-        created_by: 'release-manager',
-        artifacts: [{ name: 'datafabric-1.1.0.zip', url: '#', size: '256 MB' }],
-        package_properties: { location: 's3://releases/datafabric/1.1.0', checksum_md5: 'mock-md5-sum', checksum_sha256: 'mock-sha256-sum' }
-    },
-     {
-        product: { id: "UnifiedDataFabric", name: "Unified Data Fabric", version: "1.2.0-draft" },
-        specifications: [{ id: "DellPowerEdgeR760", name: "Dell PowerEdge R760", version: "1.0.0" }],
-        tenants: initialTenants.filter(t => t.products?.some(p => p.id === 'UnifiedDataFabric')),
-        status: 'DRAFT',
-        created_at: new Date('2024-06-15T10:00:00Z').toISOString(),
-        updated_at: new Date('2024-06-15T12:00:00Z').toISOString(),
-        created_by: 'dev-user',
-        artifacts: [{ name: 'datafabric-1.2.0-draft.zip', url: '#', size: '260 MB' }],
-        package_properties: { location: 's3://releases/datafabric/1.2.0-draft', checksum_md5: 'mock-md5-sum', checksum_sha256: 'mock-sha256-sum' }
-    }
-];
-
-const generateDeployments = (): Omit<Deployment, '_id'>[] => {
-    const data: Omit<Deployment, '_id'>[] = [];
-    const customers = ['Innovate Inc.', 'Solutions Corp', 'Synergy LLC', 'Quantum Enterprises', 'Apex Industries', 'Starlight Logistics'];
-    const countries = ['United States', 'Germany', 'Japan', 'Brazil', 'Australia', 'South Africa', 'United Kingdom', 'France', 'India', 'Canada'];
-    const statuses: Deployment['status'][] = ['ACTIVE', 'PROVISIONING', 'UPGRADING', 'FAILED', 'UPGRADE_APPROVAL', 'ACTIVE', 'ACTIVE'];
     
-    for (let i = 0; i < 50; i++) {
-        const product = initialProducts[i % initialProducts.length];
-        const spec = fullSpecifications[i % fullSpecifications.length];
-        const customer = customers[i % customers.length];
-        const country = countries[i % countries.length];
-        const status = statuses[i % statuses.length];
-        const date = new Date(2024, i % 12, (i % 28) + 1);
-
-        data.push({
-            productId: product.name.replace(/[^a-zA-Z0-9]/g, ''),
-            specificationId: spec.name.replace(/[^a-zA-Z0-9]/g, ''),
-            hypervisorId: 'KVM',
-            foundationComponentIds: [],
-            security: {},
-            details: {
-                deploymentId: `DEP-${(2000 + i).toString()}`,
-                customer: customer,
-                country: country,
-                region: 'Americas' // Simplified for example
-            },
-            createdBy: 'seed-user',
-            createdAt: date.toISOString(),
-            status: status
-        });
-    }
-    return data;
-};
-
-const initialDeployments = generateDeployments();
-
-
-const initialWorkflows: { _id: string; id: string; name: string; description: string }[] = [
-    { _id: 'StandardApproval', id: 'StandardApproval', name: 'Standard Approval', description: 'Default workflow with a single approval step.' },
-    { _id: 'DataGovernanceReview', id: 'DataGovernanceReview', name: 'Data Governance Review', description: 'Workflow for data-sensitive products requiring governance review.' },
-];
-
-const initialComplianceChecks: { _id: string; id: string; name: string; description: string }[] = [
-    { _id: 'SOC2', id: 'SOC2', name: 'SOC 2', description: 'Checks for SOC 2 compliance.' },
-    { _id: 'GDPR', id: 'GDPR', name: 'GDPR', description: 'Checks for GDPR compliance.' },
-    { _id: 'HIPAA', id: 'HIPAA', name: 'HIPAA', description: 'Checks for HIPAA compliance.' },
-];
-
-const initialDeploymentTypes: { _id: string; id: string; name: string; description: string }[] = [
-    { _id: 'Cloud', id: 'Cloud', name: 'Cloud', description: 'Standard cloud deployment.' },
-    { _id: 'Airgapped', id: 'Airgapped', name: 'Airgapped', description: 'Deployment in an environment with no external network access.' },
-    { _id: 'OnPremise', id: 'OnPremise', name: 'On-Premise', description: 'Deployment on customer-managed hardware.' },
-];
-
-const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
-  { id: 'REST', name: 'REST API', description: 'A standard RESTful API endpoint.' },
-  { id: 'gRPC', name: 'gRPC Service', description: 'A high-performance RPC service.' },
-  { id: 'KafkaTopic', name: 'Kafka Topic', description: 'A topic for asynchronous messaging.' },
-  { id: 'DatabaseConnection', name: 'Database Connection', description: 'A direct database connection string or interface.' },
-  { id: 'GraphQL', name: 'GraphQL API', description: 'A GraphQL API endpoint.' },
-];
-
-const generatePhases = (config: OnboardingConfiguration) => {
-  return config.phases.map(phaseConfig => {
-      const statuses = phaseConfig.statusOptions;
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      return {
-          id: phaseConfig.id,
-          name: phaseConfig.name,
-          version: "1.0",
-          status: randomStatus,
-          fields: phaseConfig.fields.map(fieldConfig => ({
-              name: fieldConfig.name,
-              value: `Dummy value for ${fieldConfig.label}`,
-              proof: { link: fieldConfig.proof ? `http://example.com/proof/${phaseConfig.id}/${fieldConfig.name}` : '' },
-          })),
-      };
-  });
-};
-
-export async function seedDatabase() {
-    const client = await clientPromise;
-    const db = client.db();
-
-    const collectionsToSeed = [
-        { name: 'products', data: initialProducts.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, ''), created_at: new Date().toISOString(), updated_at: new Date().toISOString()})) },
-        { name: 'specifications', data: fullSpecifications.map(s => ({...s, _id: s.name.replace(/[^a-zA-Z0-9]/g, '') })) },
-        { name: 'deployment_types', data: initialDeploymentTypes },
-        { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
-        { name: 'compliance_checks', data: initialComplianceChecks.map(c => ({...c, _id: c.name.replace(/[^a-zA-Z0-9]/g, '')})) },
-        { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) })) },
-        { name: 'cmdb_components', data: initialComponents.map(c => ({ ...c, _id: c.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) })) },
-        { name: 'cmdb_applications', data: initialApplications.map(a => ({ ...a, _id: a.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) })) },
-        { name: 'cmdb_interface_types', data: initialInterfaceTypes.map(i => ({ ...i, _id: i.id })) },
-        { name: 'cmdb_interfaces', data: initialInterfaces.map(i => ({ ...i, _id: i.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
-        { name: 'settings_application_onboarding', data: [initialApplicationOnboarding] },
-        { name: 'settings_component_onboarding', data: [initialComponentOnboarding] },
-        { name: 'settings_tenant_onboarding', data: [initialTenantOnboarding] },
-        { name: 'settings_baseline_onboarding', data: [initialBaselineConfig] },
-        { name: 'service_contracts', data: initialServiceContracts.map(s => ({...s, _id: s.id})) },
-        { name: 'specification_vendors', data: initialSpecVendors },
-        { name: 'specification_hw_types', data: initialSpecHwTypes },
-        { name: 'specification_hypervisors', data: initialSpecHypervisors },
-        { name: 'specification_network_cards', data: initialSpecNetworkCards },
-        { name: 'specification_plug_power_cords', data: initialSpecPlugPowerCords },
-        { name: 'specification_cpu_types', data: initialSpecCpuTypes },
-        { name: 'specification_gpu_types', data: initialSpecGpuTypes },
-        { name: 'specification_disk_types', data: initialSpecDiskTypes },
-        ...initialApprovalConfigs,
-        { name: 'licenses', data: initialLicenses.map(l => ({ ...l, _id: l.id })) },
-        { name: 'product_licensing', data: initialProductLicensing.map(pl => ({ ...pl, _id: pl.id })) },
-        { name: 'platform_foundations', data: initialPlatformFoundations },
-        { name: 'development_environments', data: initialDevEnvironments },
-        { name: 'test_environments', data: initialTestEnvironments },
-        { name: 'simulators', data: initialSimulators },
-        { name: 'emulators', data: initialEmulators },
-        { name: 'sdk_apps', data: initialSdkApps.map(app => ({ ...app, createdAt: new Date().toISOString(), createdBy: 'seed-user' })) },
-        { name: 'baselines', data: initialBaselines.map(b => ({ ...b, _id: `${b.product.id}_${b.product.version}` })) },
-        { name: 'deployments', data: initialDeployments.map(d => ({ ...d, _id: d.details.deploymentId })) },
-        { name: 'app_catalog', data: appCatalogData },
-    ];
-    
-    let seededCount = 0;
-    let skippedCount = 0;
-
-    for (const collection of collectionsToSeed) {
-        const collectionName = 'collectionName' in collection ? collection.collectionName : collection.name;
-        const count = await db.collection(collectionName).countDocuments();
-        if (count === 0) {
-            await db.collection(collectionName).insertMany(collection.data as any[]);
-            seededCount++;
-        } else {
-            skippedCount++;
-        }
-    }
-    
-    await generateAndStoreAllProductTrees();
-
-    return { seededCount, skippedCount };
-}
-
-const initialTenantOnboarding: Omit<OnboardingConfiguration, '_id'> = {
-    name: "Default Tenant Onboarding",
-    version: 1,
-    phases: [
-        { id: 'data-privacy', name: 'Data Privacy', ownerName: 'Security Team', ownerEmail: 'security@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Done'], fields: [ { type: 'Checkbox', name: 'pii-review', label: 'PII/Data Privacy Review Completed' }, { type: 'Link', name: 'privacy-doc', label: 'Link to Privacy Documentation', proof: true } ]},
-        { id: 'security-review', name: 'Security Review', ownerName: 'Security Team', ownerEmail: 'security@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Done', 'Skipped'], fields: [ { type: 'Checkbox', name: 'threat-model', label: 'Threat Model Documented' }, { type: 'Link', name: 'threat-model-link', label: 'Link to Threat Model', proof: true } ]},
-        { id: 'resource-alloc', name: 'Resource Allocation', ownerName: 'Platform Team', ownerEmail: 'platform@example.com', sendEmailOnComplete: false, statusOptions: ['Not Started', 'In Progress', 'Done'], fields: [ { type: 'TextField', name: 'jira-ticket', label: 'Resource Jira Ticket' } ]},
-    ]
-};
-const initialComponentOnboarding = initialTenantOnboarding;
-const initialApplicationOnboarding = initialTenantOnboarding;
-
-const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
-    name: "Default Baseline Validation",
-    version: 1,
-    phases: [
-        { id: 'unit-testing', name: 'Unit Testing', ownerName: 'QA Team', ownerEmail: 'qa@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Passed', 'Failed'], fields: [ {type: 'TextField', name: 'coverage', label: 'Code Coverage %'}, {type: 'Link', name: 'test-report', label: 'Unit Test Report', proof: true} ]},
-        { id: 'integration-testing', name: 'Integration Testing', ownerName: 'QA Team', ownerEmail: 'qa@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Passed', 'Failed'], fields: [ {type: 'Link', name: 'integration-report', label: 'Integration Test Report', proof: true} ]},
-        { id: 'performance-testing', name: 'Performance Testing', ownerName: 'Performance Team', ownerEmail: 'perf@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Passed', 'Failed'], fields: [ {type: 'TextField', name: 'tps', label: 'Transactions per Second'}, {type: 'Link', name: 'perf-report', label: 'Performance Report', proof: true} ]},
-        { id: 'security-scan', name: 'Security Scans', ownerName: 'Security Team', ownerEmail: 'security@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Passed', 'Failed'], fields: [ {type: 'TextField', name: 'vulnerabilities', label: 'Critical Vulnerabilities Found'}, {type: 'Link', name: 'scan-report', label: 'Security Scan Report', proof: true} ]},
-    ]
-};
-
-const initialApprovalConfigs = approvalTypes.map(type => ({
-    collectionName: `settings_approval_${type.key.replace(/-/g, '_')}`,
-    data: [{
-        name: `Default ${type.name} Approval`,
-        version: 1,
-        phases: [
-            { id: 'peer-review', name: 'Peer Review', ownerName: 'Team Lead', ownerEmail: 'lead@example.com', sendEmailOnComplete: false, statusOptions: ['Pending', 'Approved', 'Rejected'], fields: [ { type: 'Checkbox', name: 'peer-approved', label: 'Peer Approved' } ] },
-            { id: 'manager-approval', name: 'Manager Approval', ownerName: 'Engineering Manager', ownerEmail: 'manager@example.com', sendEmailOnComplete: false, statusOptions: ['Pending', 'Approved', 'Rejected'], fields: [ { type: 'Checkbox', name: 'manager-approved', label: 'Manager Approved' } ] },
-            { id: 'final-signoff', name: 'Final Sign-off', ownerName: 'Release Manager', ownerEmail: 'release@example.com', sendEmailOnComplete: true, statusOptions: ['Pending', 'Signed-off'], fields: [ { type: 'Checkbox', name: 'final-signoff', label: 'Final Sign-off Complete' } ] }
-        ]
-    }]
-}));
-```
