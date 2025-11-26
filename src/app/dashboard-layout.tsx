@@ -223,12 +223,12 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/dashboards/fleet">
+                          <SidebarMenuSubButton href="/dashboard/fleet">
                             Fleet Mgmt
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/dashboards/workflow">
+                          <SidebarMenuSubButton href="/dashboard/workflow">
                             Workflow Mgmt
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
