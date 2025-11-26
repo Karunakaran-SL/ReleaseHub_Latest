@@ -213,37 +213,37 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboard/data-flow" isActive={pathname.startsWith('/dashboard/data-flow')}>
                             Data Flow Mgmt
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboard/release-baseline">
                             Release & Baseline Mgmt
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboards/fleet">
                             Fleet Mgmt
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboards/workflow">
                             Workflow Mgmt
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboards/jobs-monitoring">
                             Jobs Monitoring
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboards/security-monitoring">
                             Security Monitoring
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboards/compliance-monitoring">
                             Compliance Monitoring
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
