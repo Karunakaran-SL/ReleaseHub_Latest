@@ -1646,81 +1646,116 @@ const appCatalogData = [
   }
 ];
 
-const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [];
-const initialTenants: Omit<CmdbTenant, '_id' | 'created_at' | 'updated_at' | 'phases'>[] = [];
-const initialComponents: Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at' | 'phases'>[] = [];
-const initialApplications: Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at' | 'phases'>[] = [];
-const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [];
-const initialInterfaces: Omit<CmdbInterface, '_id' | 'created_at' | 'updated_at'>[] = [];
-const initialWorkflows: { name: string; description: string }[] = [];
-const initialComplianceChecks: { name: string; description: string }[] = [];
-const initialDeploymentTypes: { name: string; description: string }[] = [];
-const initialServiceContracts: Omit<any, '_id'>[] = [];
-const initialSpecVendors: { name: string; description?: string }[] = [];
-const initialSpecHwTypes: { name: string; description?: string }[] = [];
-const initialSpecNetworkCards: { name: string; description?: string }[] = [];
-const initialSpecPlugPowerCords: { name: string; description?: string }[] = [];
-const initialSpecCpuTypes: { name: string; description?: string }[] = [];
-const initialSpecGpuTypes: { name: string; description?: string }[] = [];
-const initialSpecDiskTypes: { name: string; description?: string }[] = [];
-const initialLicenses: Omit<License, '_id'>[] = [];
-const initialProductLicensing: Omit<ProductLicensing, '_id'>[] = [];
-const fullSpecifications: Omit<Specification, '_id'>[] = [];
-const initialPlatformFoundations: any[] = [];
-const initialDevEnvironments: Omit<DevelopmentEnvironment, '_id' | 'createdAt' | 'createdBy' | 'status'>[] = [];
-const initialTestEnvironments: Omit<TestEnvironment, '_id' | 'createdAt' | 'createdBy' | 'status'>[] = [];
-const initialSimulators: Omit<Simulator, '_id'>[] = [];
-const initialEmulators: Omit<Emulator, '_id'>[] = [];
-const initialSdkApps: Omit<SdkApp, '_id' | 'createdAt' | 'createdBy' | 'status'>[] = [];
-const initialBaselines: Omit<Baseline, '_id'>[] = [];
-const initialDeployments: Omit<Deployment, '_id'>[] = [];
-
-const generatePhases = (config: OnboardingConfiguration): CmdbPhase[] => {
-    return config.phases.map(phase => ({
-        id: phase.id,
-        name: phase.name,
-        version: config.version.toString(),
-        status: 'Not Started',
-        fields: phase.fields.map(field => ({
-            name: field.name,
-            value: '',
-            proof: {}
-        }))
-    }));
+const initialOnboardingConfig = {
+    _id: "default_tenant_onboarding_v1",
+    name: 'Tenant Onboarding',
+    version: 1,
+    phases: [{
+        id: 'phase1', name: 'Information Gathering', ownerName: 'John Doe', ownerEmail: 'john.doe@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Done'],
+        fields: [{ type: 'TextField', name: 'tenantName', label: 'Tenant Name', helpText: 'The official name of the tenant' }]
+    }]
 };
 
-const initialSpecHypervisors: { name: string; description?: string }[] = [];
-
-export { 
-    initialProducts, 
-    initialTenants,
-    initialComponents,
-    initialApplications,
-    initialInterfaceTypes,
-    initialInterfaces,
-    initialWorkflows,
-    initialComplianceChecks,
-    initialDeploymentTypes,
-    initialServiceContracts,
-    initialSpecVendors,
-    initialSpecHwTypes,
-    initialSpecNetworkCards,
-    initialSpecPlugPowerCords,
-    initialSpecCpuTypes,
-    initialSpecGpuTypes,
-    initialSpecDiskTypes,
-    initialSpecHypervisors,
-    initialLicenses,
-    initialProductLicensing,
-    fullSpecifications,
-    initialPlatformFoundations,
-    initialDevEnvironments,
-    initialTestEnvironments,
-    initialSimulators,
-    initialEmulators,
-    initialSdkApps,
-    initialBaselines,
-    initialDeployments
+const defaultApprovalConfig = {
+    _id: "default_approval_v1",
+    name: "Default Approval",
+    version: 1,
+    phases: [{
+        id: 'approval1', name: 'Standard Approval', ownerName: 'Release Manager', ownerEmail: 'release@example.com', sendEmailOnComplete: true, statusOptions: ['Pending', 'Approved', 'Rejected'],
+        fields: [{ type: 'Checkbox', name: 'approved', label: 'I approve this request', proof: true }]
+    }]
 };
 
-    
+export async function seedDatabase() {
+  const client = await clientPromise;
+  const db = client.db();
+  
+  let seededCount = 0;
+  let skippedCount = 0;
+
+  const seedCollection = async (collectionName: string, data: any[]) => {
+    const collection = db.collection(collectionName);
+    const count = await collection.countDocuments();
+    if (count === 0 && data.length > 0) {
+      if (collectionName === 'products') {
+        const productsWithId = data.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, '')}));
+        await collection.insertMany(productsWithId);
+      } else if (collectionName === 'cmdb_tenants' || collectionName === 'cmdb_components' || collectionName === 'cmdb_applications' || collectionName === 'cmdb_interfaces') {
+         await collection.insertMany(data.map(d => ({ ...d, _id: d.id })));
+      } else {
+        await collection.insertMany(data);
+      }
+      seededCount++;
+      console.log(`Seeded ${collectionName} with ${data.length} documents.`);
+    } else {
+      skippedCount++;
+      console.log(`Skipped seeding ${collectionName}: collection is not empty or no data to seed.`);
+    }
+  };
+  
+  await seedCollection('app_catalog', appCatalogData);
+  await seedCollection('products', initialProducts);
+  await seedCollection('cmdb_tenants', initialTenants);
+  await seedCollection('cmdb_components', initialComponents);
+  await seedCollection('cmdb_applications', initialApplications);
+  await seedCollection('cmdb_interface_types', initialInterfaceTypes);
+  await seedCollection('cmdb_interfaces', initialInterfaces);
+  await seedCollection('workflows', initialWorkflows);
+  await seedCollection('compliance_checks', initialComplianceChecks);
+  await seedCollection('deployment_types', initialDeploymentTypes);
+  await seedCollection('service_contracts', initialServiceContracts);
+  await seedCollection('specification_vendors', initialSpecVendors);
+  await seedCollection('specification_hw_types', initialSpecHwTypes);
+  await seedCollection('specification_network_cards', initialSpecNetworkCards);
+  await seedCollection('specification_plug_power_cords', initialSpecPlugPowerCords);
+  await seedCollection('specification_cpu_types', initialSpecCpuTypes);
+  await seedCollection('specification_gpu_types', initialSpecGpuTypes);
+  await seedCollection('specification_disk_types', initialSpecDiskTypes);
+  await seedCollection('specification_hypervisors', initialSpecHypervisors);
+  await seedCollection('licenses', initialLicenses);
+  await seedCollection('product_licensing', initialProductLicensing);
+  await seedCollection('specifications', fullSpecifications);
+  await seedCollection('platform_foundations', initialPlatformFoundations);
+  await seedCollection('development_environments', initialDevEnvironments);
+  await seedCollection('test_environments', initialTestEnvironments);
+  await seedCollection('simulators', initialSimulators);
+  await seedCollection('emulators', initialEmulators);
+  await seedCollection('sdk_apps', initialSdkApps);
+  await seedCollection('baselines', initialBaselines);
+  await seedCollection('deployments', initialDeployments);
+
+  // Seed settings collections
+  await seedCollection('settings_tenant_onboarding', [initialOnboardingConfig]);
+  await seedCollection('settings_component_onboarding', [{ ...initialOnboardingConfig, _id: 'default_component_onboarding_v1', name: 'Component Onboarding'}]);
+  await seedCollection('settings_application_onboarding', [{ ...initialOnboardingConfig, _id: 'default_application_onboarding_v1', name: 'Application Onboarding'}]);
+  await seedCollection('settings_baseline_onboarding', [{ ...initialOnboardingConfig, _id: 'default_baseline_validation_v1', name: 'Baseline Validation'}]);
+  
+  const approvalTypes = [
+    'product_onboarding',
+    'tenant_approval',
+    'components_approval',
+    'application_approval',
+    'interface_approval',
+    'baseline_approval',
+    'deployment_approval',
+    'upgrade_approval',
+    'migration_approval',
+    'decommission_approval',
+    'license_approval',
+    'export_control_approval',
+    'security_approval',
+  ];
+  
+  for (const type of approvalTypes) {
+      await seedCollection(`settings_approval_${type}`, [{
+          ...defaultApprovalConfig,
+          _id: `default_${type}_v1`,
+          name: `${type.replace(/_/g, ' ')} Approval`
+      }]);
+  }
+
+  // After seeding, generate dependency trees
+  await generateAndStoreAllProductTrees();
+  
+  return { seededCount, skippedCount };
+}
