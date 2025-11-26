@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
@@ -35,9 +36,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'User created and logged in successfully' }, { status: 201 });
     }
 
-    // Case 2: User exists, but password is not a string (e.g. not hashed). Hash and update it.
-    if (typeof user.password !== 'string' || !user.password.startsWith('$2a$') && !user.password.startsWith('$2b$')) {
-        const hashedPassword = await bcrypt.hash(password, 10); // FIX: use 'password' from input, not 'user.password'
+    // User exists. Check the password.
+    const isPasswordHashed = typeof user.password === 'string' && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'));
+
+    if (isPasswordHashed) {
+        // Case 2: User exists and password is a hash. Compare it.
+        const passwordsMatch = await bcrypt.compare(password, user.password);
+        if (passwordsMatch) {
+            await createSession(user._id.toString(), user.username);
+            return NextResponse.json({ message: 'Logged in successfully' }, { status: 200 });
+        }
+    } else {
+        // Case 3: User exists, but password is not hashed. This is a fallback/migration case.
+        // We hash the provided password, update the DB, and log them in.
+        const hashedPassword = await bcrypt.hash(password, 10);
         await usersCollection.updateOne(
           { _id: user._id },
           { $set: { password: hashedPassword } }
@@ -47,16 +59,8 @@ export async function POST(req: NextRequest) {
         
         return NextResponse.json({ message: 'Password updated and logged in successfully' }, { status: 200 });
     }
-
-    // Case 3: User exists and password is a hash. Compare it.
-    const passwordsMatch = await bcrypt.compare(password, user.password);
-
-    if (passwordsMatch) {
-      await createSession(user._id.toString(), user.username);
-      return NextResponse.json({ message: 'Logged in successfully' }, { status: 200 });
-    }
     
-    // If passwords do not match, return an error.
+    // If we've reached here, it means the password hash comparison failed.
     return NextResponse.json({ message: 'Invalid username or password.' }, { status: 401 });
 
   } catch (error) {
