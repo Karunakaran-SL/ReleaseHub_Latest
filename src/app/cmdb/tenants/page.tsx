@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Loader2, Trash2, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { User, CmdbTenant } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
@@ -32,6 +32,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 function DeleteTenantDialog({ tenantId, tenantName, onTenantDeleted }: { tenantId: string, tenantName: string, onTenantDeleted: () => void}) {
     const [deleteComment, setDeleteComment] = useState('');
@@ -166,6 +167,19 @@ export default function TenantsPage() {
             <Link href="/cmdb/tenants/create">ONBOARD TENANT</Link>
           </Button>
         </div>
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This section is for managing tenants within the CMDB. A tenant represents a logical grouping of components and applications, often corresponding to a business unit, customer, or environment. Here you can onboard new tenants through a guided workflow, view existing tenants, update their configurations, and manage their lifecycle.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
 
         <Card>
           <CardContent className="p-0">

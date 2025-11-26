@@ -1,5 +1,4 @@
 
-
 'use client';
 import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
@@ -34,6 +33,7 @@ import {
   Puzzle,
   Search,
   Settings,
+  Settings2,
   ShieldCheck,
   Users,
   Warehouse,
@@ -420,7 +420,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/workflows/integration" isActive={pathname.startsWith('/workflows/integration')}>
+                          <SidebarMenuSubButton href="/cicd/integration" isActive={pathname.startsWith('/cicd/integration')}>
                             <DatabaseZap className="mr-2"/> Integration
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -599,6 +599,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/workflows/n8n-ui" isActive={pathname.startsWith('/workflows/n8n-ui')}>
+                                <WorkflowIcon className="mr-2"/> n8n UI
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/workflows/integration" isActive={pathname.startsWith('/workflows/integration')}>
                             <DatabaseZap className="mr-2"/> Integration
@@ -660,7 +665,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                       <SidebarMenuSub>
                          <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/general" isActive={pathname.startsWith('/settings/general')}>
-                             <DatabaseZap className="mr-2"/> Development
+                             <Settings2 className="mr-2"/> General
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
@@ -671,6 +676,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/approval" isActive={pathname.startsWith('/settings/approval')}>
                             <CheckSquare className="mr-2"/> Approval
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                         <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/settings/cicd" isActive={pathname.startsWith('/settings/cicd')}>
+                            <GitBranch className="mr-2"/> CICD
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>

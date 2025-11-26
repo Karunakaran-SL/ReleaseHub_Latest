@@ -11,13 +11,14 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import DashboardLayout from '@/app/dashboard-layout';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface ServiceContract {
     _id: string;
@@ -71,6 +72,20 @@ export default function ServiceContractsPage() {
             <Link href="/documents/service-contracts/create">CREATE CONTRACT</Link>
           </Button>
         </div>
+
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This section provides a centralized repository for managing all service contracts related to hardware and software assets. You can create, view, and manage contracts to ensure compliance, track renewal dates, and maintain vendor agreements efficiently. Each entry can link to the official contract document for easy reference.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
 
         <Card>
           <CardContent className="p-0">

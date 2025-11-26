@@ -1,15 +1,17 @@
+
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Product, DependencyTree, AnyCmdbEntity } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { DependencyTreeSidebar } from './_components/dependency-tree';
 import { DependencyGraph } from './_components/dependency-graph';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function DependencyMetricsPage() {
     const [user, setUser] = useState<User | null>(null);
@@ -155,6 +157,19 @@ export default function DependencyMetricsPage() {
                         Update All Metrics
                     </Button>
                 </header>
+                <Accordion type="single" collapsible defaultValue="item-1" className="m-4">
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger className="text-lg font-semibold">
+                            <div className="flex items-center gap-2">
+                                <Info className="h-5 w-5" />
+                                Introduction
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground">
+                            This page provides tools to visualize and understand the complex relationships between different entities in your CMDB. Use the sidebar to navigate the hierarchical dependency tree for a selected product. Click on any item in the tree to view its direct upstream (dependencies) and downstream (dependents) relationships in the main graph view.
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
 
                 <main className="flex-1 flex overflow-hidden">
                     <DependencyTreeSidebar tree={productTree} isLoading={loadingTree} onNodeSelect={handleNodeSelect} />

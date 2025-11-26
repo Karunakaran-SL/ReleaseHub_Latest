@@ -30,7 +30,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
-  Loader2
+  Loader2,
+  Info
 } from 'lucide-react';
 import {
   Select,
@@ -49,6 +50,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 function DeleteProductDialog({ product, onProductDeleted }: { product: Product, onProductDeleted: () => void}) {
@@ -200,6 +202,20 @@ export default function ProductsPage() {
             <Link href="/products/create">CREATE PRODUCT</Link>
           </Button>
         </div>
+
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This page lists all the products your organization manages. A "Product" is a deployable entity that can be versioned and released. Each product is linked to its own CI/CD pipeline, artifact repositories, compliance checks, and approval workflows. From here, you can create new products or view and update existing ones.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
 
         <Card>
           <CardContent className="p-0">

@@ -7,10 +7,11 @@ import { getUser } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function ProductLicensingPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -55,6 +56,21 @@ export default function ProductLicensingPage() {
                 <Link href="/license/product-licensing/create">Create Product License</Link>
             </Button>
         </div>
+
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This section defines the specific licensing models associated with each product. It dictates how a product's license is managed, such as whether it's an online or offline model, what entitlements are included, and its validity period. This configuration is critical for ensuring compliance and correct feature enablement in deployments.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
+
         <Card>
           <CardHeader>
             <CardTitle>Product Licensing Configurations</CardTitle>

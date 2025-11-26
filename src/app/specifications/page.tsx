@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -31,7 +30,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
-  Loader2
+  Loader2,
+  Info
 } from 'lucide-react';
 import {
   Select,
@@ -50,6 +50,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 function DeleteSpecificationDialog({ specification, onSpecificationDeleted }: { specification: Specification, onSpecificationDeleted: () => void}) {
@@ -202,6 +203,20 @@ export default function SpecificationsPage() {
             <Link href="/specifications/builder">CREATE SPECIFICATION</Link>
           </Button>
         </div>
+
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This page lists all hardware and virtual specifications, which serve as blueprints for your deployments. Specifications define the exact configuration of a server, blade, or virtual cluster. You can create new specifications using the builder, or view and manage existing ones from this table.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
 
         <Card>
           <CardContent className="p-0">

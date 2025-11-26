@@ -1,7 +1,7 @@
 
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
-import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp, Baseline } from './definitions';
+import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, OnboardingPhase, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp, Baseline } from './definitions';
 
 const appCatalogData = [
   {
@@ -162,7 +162,7 @@ const appCatalogData = [
     "name": "Idem Project",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/idem-project.svg",
     "website": "https://www.idemproject.io",
-    "description": "Idem reduces your cloud configuration to data – for you! Instead of Infrastructure as Code, Idem delivers Infrastructure as Data. The cloud\nbecomes simplified, easier to maintain, easier to discover, and easier to use."
+    "description": "Idem reduces your cloud configuration to data – for you! Instead of Infrastructure as Code, Idem delivers Infrastructure as Data. The cloud becomes simplified, easier to maintain, easier to discover, and easier to use."
   },
   {
     "category": "Provisioning",
@@ -226,7 +226,7 @@ const appCatalogData = [
     "name": "Kosko",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kosko.svg",
     "website": "https://kosko.dev",
-    "description": "Kosko can help you organize your Kubernetes manifests in TypeScript, manage multiple environments,\nensure type safety using OpenAPI schema, and find issues in your manifests."
+    "description": "Kosko can help you organize your Kubernetes manifests in TypeScript, manage multiple environments, ensure type safety using OpenAPI schema, and find issues in your manifests."
   },
   {
     "category": "Provisioning",
@@ -458,7 +458,7 @@ const appCatalogData = [
     "name": "Terranetes",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/terranetes.svg",
     "website": "https://www.appvia.io/terranetes",
-    "description": "The Appvia Terranetes Controller manages the life-cycle of Terraform and OpenTofu resources defined and built inside Kubernetes. This allows teams\nrunning workloads inside the cluster to self-serve application dependencies and reuse the wealth of Terraform modules already written."
+    "description": "The Appvia Terranetes Controller manages the life-cycle of Terraform and OpenTofu resources defined and built inside Kubernetes. This allows teams running workloads inside the cluster to self-serve application dependencies and reuse the wealth of Terraform modules already written."
   },
   {
     "category": "Provisioning",
@@ -482,7 +482,7 @@ const appCatalogData = [
     "name": "VMware vSphere",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/vmware-vsphere.svg",
     "website": "https://www.vmware.com/products/vsphere.html",
-    "description": "vSphere is the industry-leading server virtualization software and the heart of a modern SDDC, helping you run, manage, connect, and secure your\napplications in a common operating environment across clouds."
+    "description": "vSphere is the industry-leading server virtualization software and the heart of a modern SDDC, helping you run, manage, connect, and secure your applications in a common operating environment across clouds."
   },
   {
     "category": "Provisioning",
@@ -498,7 +498,7 @@ const appCatalogData = [
     "name": "Alibaba Cloud Container Registry (ACR)",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/alibaba-cloud-container-registry.svg",
     "website": "https://www.alibabacloud.com/zh/product/container-registry",
-    "description": "Alibaba Cloud Container Registry (ACR) is a cloud-native artifacts management platform that helps your team build, manage, and ship containerized\napplications,\n also provides vulnerability analysis, global synchronization, content trust, and more functionalities out of the box."
+    "description": "Alibaba Cloud Container Registry (ACR) is a cloud-native artifacts management platform that helps your team build, manage, and ship containerized applications, also provides vulnerability analysis, global synchronization, content trust, and more functionalities out of the box."
   },
   {
     "category": "Provisioning",
@@ -506,7 +506,7 @@ const appCatalogData = [
     "name": "Amazon Elastic Container Registry (ECR)",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/amazon-ecr.svg",
     "website": "https://aws.amazon.com/ecr/",
-    "description": "Amazon Elastic Container Registry (ECR) is a fully-managed Docker container registry that makes it easy for developers to store, manage, and\ndeploy Docker container images."
+    "description": "Amazon Elastic Container Registry (ECR) is a fully-managed Docker container registry that makes it easy for developers to store, manage, and deploy Docker container images."
   },
   {
     "category": "Provisioning",
@@ -514,7 +514,7 @@ const appCatalogData = [
     "name": "Azure Registry",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/azure-registry.svg",
     "website": "https://azure.microsoft.com/en-us/services/container-registry/",
-    "description": "Azure Container Registry allows you to store images for all types of container deployments including DC/OS, Docker Swarm, Kubernetes, and Azure\nservices such as App Service, Batch, Service Fabric, and others."
+    "description": "Azure Container Registry allows you to store images for all types of container deployments including DC/OS, Docker Swarm, Kubernetes, and Azure services such as App Service, Batch, Service Fabric, and others."
   },
   {
     "category": "Provisioning",
@@ -538,7 +538,7 @@ const appCatalogData = [
     "name": "Google Container Registry",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/google-container-registry.svg",
     "website": "https://cloud.google.com/container-registry/",
-    "description": "Container Registry is a single place for your team to manage Docker images, perform vulnerability analysis, and decide who can access what with\nfine-grained access control."
+    "description": "Container Registry is a single place for your team to manage Docker images, perform vulnerability analysis, and decide who can access what with fine-grained access control."
   },
   {
     "category": "Provisioning",
@@ -570,7 +570,7 @@ const appCatalogData = [
     "name": "JFrog Artifactory",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/j-frog-artifactory.svg",
     "website": "https://jfrog.com/artifactory/",
-    "description": "Shipping updates continuously and automatically has become a critical element of any successful operation. JFrog is revolutionizing the software\nworld with the practice of Continuous Update, with a speed and continuity that forever changes the way organizations manage and release software."
+    "description": "Shipping updates continuously and automatically has become a critical element of any successful operation. JFrog is revolutionizing the software world with the practice of Continuous Update, with a speed and continuity that forever changes the way organizations manage and release software."
   },
   {
     "category": "Provisioning",
@@ -594,7 +594,7 @@ const appCatalogData = [
     "name": "Spegel",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/spegel.svg",
     "website": "https://spegel.dev/",
-    "description": "Stateless cluster local OCI registry mirror. Spegel enables each node in a Kubernetes cluster to act as a local registry mirror,\nallowing nodes to share images between themselves. Any image already pulled by a node will be available for any other node in the cluster to pull."
+    "description": "Stateless cluster local OCI registry mirror. Spegel enables each node in a Kubernetes cluster to act as a local registry mirror, allowing nodes to share images between themselves. Any image already pulled by a node will be available for any other node in the cluster to pull."
   },
   {
     "category": "Provisioning",
@@ -626,7 +626,7 @@ const appCatalogData = [
     "name": "APIClarity",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/APIClarity.svg",
     "website": "https://openclarity.io/",
-    "description": "APIClarity is a cloud API observability open-source project that provides functionality to discover and monitor any API traffic that interacts\nwith modern applications and report suspected security weaknesses or possible abuses. Once an OpenAPI spec is either uploaded or reconstructed by\nAPIClarity, it monitors for shadow and zombie APIs, Broken Functional-Level Authorization (BFLA), Broken Object-Level Authorization (BOLA), weak\nauthentication, sensitive data leaks and data injection risks."
+    "description": "APIClarity is a cloud API observability open-source project that provides functionality to discover and monitor any API traffic that interacts with modern applications and report suspected security weaknesses or possible abuses. Once an OpenAPI spec is either uploaded or reconstructed by APIClarity, it monitors for shadow and zombie APIs, Broken Functional-Level Authorization (BFLA), Broken Object-Level Authorization (BOLA), weak authentication, sensitive data leaks and data injection risks."
   },
   {
     "category": "Provisioning",
@@ -634,7 +634,7 @@ const appCatalogData = [
     "name": "Apolicy",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/apolicy.svg",
     "website": "https://www.apolicy.io/",
-    "description": "Apolicy fuses security and compliance into your cloud native development pipeline. Using policy-as-code,  we automate risk, policy and remediation\nfrom source to production"
+    "description": "Apolicy fuses security and compliance into your cloud native development pipeline. Using policy-as-code,  we automate risk, policy and remediation from source to production"
   },
   {
     "category": "Provisioning",
@@ -658,7 +658,7 @@ const appCatalogData = [
     "name": "Aserto",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/aserto.svg",
     "website": "https://www.aserto.com",
-    "description": "Fine-grained, policy-based, real-time authorization for APIs and microservices. Aserto is the maintainer of the Topaz and Open Policy Containers\nOSS projects."
+    "description": "Fine-grained, policy-based, real-time authorization for APIs and microservices. Aserto is the maintainer of the Topaz and Open Policy Containers OSS projects."
   },
   {
     "category": "Provisioning",
@@ -674,7 +674,7 @@ const appCatalogData = [
     "name": "Bank-Vaults",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/bank-vaults.svg",
     "website": "https://bank-vaults.dev/",
-    "description": "Bank-Vaults is a Vault swiss-army knife: a K8s operator, Go client with automatic token renewal, automatic configuration, multiple unseal options\nand more. A CLI tool to init, unseal and configure Vault (auth methods, secret engines). Direct secret injection into Pods."
+    "description": "Bank-Vaults is a Vault swiss-army knife: a K8s operator, Go client with automatic token renewal, automatic configuration, multiple unseal options and more. A CLI tool to init, unseal and configure Vault (auth methods, secret engines). Direct secret injection into Pods."
   },
   {
     "category": "Provisioning",
@@ -682,7 +682,7 @@ const appCatalogData = [
     "name": "Black Duck",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/blackduck.svg",
     "website": "https://www.synopsys.com/software-integrity/security-testing/software-composition-analysis.html",
-    "description": "Black Duck provides a comprehensive software composition analysis (SCA) solution for managing security, quality, and license compliance risk that\ncomes from the use of open source and third-party code in applications and containers."
+    "description": "Black Duck provides a comprehensive software composition analysis (SCA) solution for managing security, quality, and license compliance risk that comes from the use of open source and third-party code in applications and containers."
   },
   {
     "category": "Provisioning",
@@ -690,7 +690,7 @@ const appCatalogData = [
     "name": "Bloombase",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/bloombase.svg",
     "website": "https://www.bloombase.com",
-    "description": "Bloombase is an intelligent storage firewall company providing AI-accelerated security and PQC encryption of high-bandwidth, low-latency data cloud\nfrom edge computing, physical/virtual datacenters, through HCI and CDI, to the cloud."
+    "description": "Bloombase is an intelligent storage firewall company providing AI-accelerated security and PQC encryption of high-bandwidth, low-latency data cloud from edge computing, physical/virtual datacenters, through HCI and CDI, to the cloud."
   },
   {
     "category": "Provisioning",
@@ -698,7 +698,7 @@ const appCatalogData = [
     "name": "Bouncy Castle",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/community-bouncy-castle.svg",
     "website": "https://www.bouncycastle.org/",
-    "description": "Bouncy Castle is one of the most widely used FIPS-certified open-source cryptographic APIs for Java and C#, allowing developers to easily\nintegrate  PKI security into their applications."
+    "description": "Bouncy Castle is one of the most widely used FIPS-certified open-source cryptographic APIs for Java and C#, allowing developers to easily integrate  PKI security into their applications."
   },
   {
     "category": "Provisioning",
@@ -762,7 +762,7 @@ const appCatalogData = [
     "name": "Check Point",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/checkpoint.svg",
     "website": "https://www.checkpoint.com",
-    "description": "Check Point Software Technologies Ltd. is a leading provider of cyber security solutions to corporate enterprises and governments globally. Check\nPoint protects over 100,000 organizations of all sizes."
+    "description": "Check Point Software Technologies Ltd. is a leading provider of cyber security solutions to corporate enterprises and governments globally. Check Point protects over 100,000 organizations of all sizes."
   },
   {
     "category": "Provisioning",
@@ -770,7 +770,7 @@ const appCatalogData = [
     "name": "Checkov",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/checkov.svg",
     "website": "https://www.checkov.io/",
-    "description": "Checkov scans cloud infrastructure configurations to find misconfigurations before they are deployed. Checkov manages and analyzes infrastructure\nas code (IaC) scan results across platforms such as Terraform, CloudFormation, Kubernetes, Helm, ARM Templates and Serverless framework."
+    "description": "Checkov scans cloud infrastructure configurations to find misconfigurations before they are deployed. Checkov manages and analyzes infrastructure as code (IaC) scan results across platforms such as Terraform, CloudFormation, Kubernetes, Helm, ARM Templates and Serverless framework."
   },
   {
     "category": "Provisioning",
@@ -794,7 +794,7 @@ const appCatalogData = [
     "name": "CloudMatos",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/cloudmatos.svg",
     "website": "https://www.cloudmatos.com",
-    "description": "Pioneering the world of self-healing, self-aware, self-sustaining, self-resilient, self-secure and intelligent remediation, MatosSphere brings a\ncomplete cloud security and governance solution for your cloud infrastructure."
+    "description": "Pioneering the world of self-healing, self-aware, self-sustaining, self-resilient, self-secure and intelligent remediation, MatosSphere brings a complete cloud security and governance solution for your cloud infrastructure."
   },
   {
     "category": "Provisioning",
@@ -802,7 +802,7 @@ const appCatalogData = [
     "name": "Confidential Containers",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/confidential-containers.svg",
     "website": "https://confidentialcontainers.org/",
-    "description": "Confidential Containers is an open source community working to enable cloud native  confidential computing by leveraging Trusted Execution\nEnvironments to protect  containers and data."
+    "description": "Confidential Containers is an open source community working to enable cloud native  confidential computing by leveraging Trusted Execution Environments to protect  containers and data."
   },
   {
     "category": "Provisioning",
@@ -810,7 +810,7 @@ const appCatalogData = [
     "name": "ContainerSSH",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/containerssh.svg",
     "website": "https://containerssh.io",
-    "description": "ContainerSSH launches a new container for each SSH connection in Kubernetes, Podman or Docker. The user is transparently dropped in the container\nand the container is removed when the user disconnects. Authentication and container configuration are dynamic using webhooks, no system users\nrequired."
+    "description": "ContainerSSH launches a new container for each SSH connection in Kubernetes, Podman or Docker. The user is transparently dropped in the container and the container is removed when the user disconnects. Authentication and container configuration are dynamic using webhooks, no system users required."
   },
   {
     "category": "Provisioning",
@@ -834,7 +834,7 @@ const appCatalogData = [
     "name": "China Mobile Cloud Cloud-native Application Security",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/china-mobile-cloud-cas.svg",
     "website": "https://ecloud.10086.cn/portal/product/cnappsec",
-    "description": "China Mobile Cloud Cloud-native Application Security is an application protection platform based on container technology,\nproviding comprehensive security detection and protection capabilities for cloud-native environments."
+    "description": "China Mobile Cloud Cloud-native Application Security is an application protection platform based on container technology, providing comprehensive security detection and protection capabilities for cloud-native environments."
   },
   {
     "category": "Provisioning",
@@ -914,7 +914,7 @@ const appCatalogData = [
     "name": "Fugue",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/fugue.svg",
     "website": "https://www.fugue.co",
-    "description": "Fugue empowers cloud engineering and security teams to move faster with confidence in their cloud security. Use Fugue to secure the entire\ndevelopment lifecycle—from infrastructure as code through CI/CD and runtime—using a unified policy engine powered by the Open Policy Agent (OPA),\nthe open source standard for policy as code."
+    "description": "Fugue empowers cloud engineering and security teams to move faster with confidence in their cloud security. Use Fugue to secure the entire development lifecycle—from infrastructure as code through CI/CD and runtime—using a unified policy engine powered by the Open Policy Agent (OPA), the open source standard for policy as code."
   },
   {
     "category": "Provisioning",
@@ -922,7 +922,7 @@ const appCatalogData = [
     "name": "GitGuardian",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/gitguardian.svg",
     "website": "https://www.gitguardian.com/",
-    "description": "GitGuardian is the code security platform for the DevOps generation that offers automated Secrets Detection, Infra as Code Security,  and\nHoneytoken capabilities, facilitating a Secure Software Development Lifecycle for Dev, Sec, and Ops teams."
+    "description": "GitGuardian is the code security platform for the DevOps generation that offers automated Secrets Detection, Infra as Code Security,  and Honeytoken capabilities, facilitating a Secure Software Development Lifecycle for Dev, Sec, and Ops teams."
   },
   {
     "category": "Provisioning",
@@ -970,7 +970,7 @@ const appCatalogData = [
     "name": "Keycloak",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/keycloak.svg",
     "website": "https://www.keycloak.org/",
-    "description": "Keycloak is an open-source identity and access management solution for modern applications and services,  built on top of industry security\nstandard protocols."
+    "description": "Keycloak is an open-source identity and access management solution for modern applications and services,  built on top of industry security standard protocols."
   },
   {
     "category": "Provisioning",
@@ -986,7 +986,7 @@ const appCatalogData = [
     "name": "KICS",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kics.svg",
     "website": "https://kics.io/",
-    "description": "Find security vulnerabilities, compliance issues, and infrastructure misconfigurations early in the development cycle of your\ninfrastructure-as-code with KICS by Checkmarx."
+    "description": "Find security vulnerabilities, compliance issues, and infrastructure misconfigurations early in the development cycle of your infrastructure-as-code with KICS by Checkmarx."
   },
   {
     "category": "Provisioning",
@@ -1010,7 +1010,7 @@ const appCatalogData = [
     "name": "KubeArmor",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kubearmor.svg",
     "website": "https://kubearmor.io/",
-    "description": "Runtime protection for Kubernetes & other cloud Workloads. Kubearmor provides a observability and policy enforcement system to restrict any\nunwanted, malicious behaviour of cloud-native workloads at runtime."
+    "description": "Runtime protection for Kubernetes & other cloud Workloads. Kubearmor provides a observability and policy enforcement system to restrict any unwanted, malicious behaviour of cloud-native workloads at runtime."
   },
   {
     "category": "Provisioning",
@@ -1018,7 +1018,7 @@ const appCatalogData = [
     "name": "KubeLinter",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kubelinter.svg",
     "website": "https://docs.kubelinter.io/",
-    "description": "KubeLinter analyzes Kubernetes YAML files and Helm charts, and checks them against a variety of best practices, with a focus on production\nreadiness and security."
+    "description": "KubeLinter analyzes Kubernetes YAML files and Helm charts, and checks them against a variety of best practices, with a focus on production readiness and security."
   },
   {
     "category": "Provisioning",
@@ -1026,7 +1026,7 @@ const appCatalogData = [
     "name": "Kubescape",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kubescape.svg",
     "website": "https://kubescape.io/",
-    "description": "Kubescape is an open source security and compliance platform that scans clusters, Kubernetes manifest files (YAML files, and Helm charts), code\nrepositories, container registries and images. It detects misconfigurations according to frameworks such as the NSA-CISA,  MITRE ATT&CK® and CIS,\nas well as software vulnerabilities, and calculates risk scores."
+    "description": "Kubescape is an open source security and compliance platform that scans clusters, Kubernetes manifest files (YAML files, and Helm charts), code repositories, container registries and images. It detects misconfigurations according to frameworks such as the NSA-CISA,  MITRE ATT&CK® and CIS, as well as software vulnerabilities, and calculates risk scores."
   },
   {
     "category": "Provisioning",
@@ -1034,7 +1034,7 @@ const appCatalogData = [
     "name": "Kubewarden",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/kubewarden.svg",
     "website": "https://www.kubewarden.io",
-    "description": "Kubewarden is a Policy Engine powered by WebAssembly policies. Its policies can be written in CEL, Rego (OPA & Gatekeeper flavours), Rust, Go, YAML,\nand others. Kubewarden simplifies Policy-As-Code by allowing policy authors and consumers to use their preferred tooling and stack, develop and\ntest policies out of cluster."
+    "description": "Kubewarden is a Policy Engine powered by WebAssembly policies. Its policies can be written in CEL, Rego (OPA & Gatekeeper flavours), Rust, Go, YAML, and others. Kubewarden simplifies Policy-As-Code by allowing policy authors and consumers to use their preferred tooling and stack, develop and test policies out of cluster. "
   },
   {
     "category": "Provisioning",
@@ -1074,7 +1074,7 @@ const appCatalogData = [
     "name": "MoreSec",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/moresec logo.svg",
     "website": "https://www.moresec.cn/",
-    "description": "Moresec Shangfu Cloud Native Protection Platform is a security protection model based on the concept of cloud native. In view of the\ncharacteristics  of cloud native application life-cycle, it involves in many stages of security protection, including R&D construction, security\ntesting, image  control, container deployment, container operation, etc. Shangfu also integrates security with development which means providing\nfeedback of the  application security condition through correlating operation asset, and promoting the iteration and upgrade of application.\nWhereupon, a closed  loop of efficient cloud native application security risk is created, covering the whole stages of DevSecOps."
+    "description": "Moresec Shangfu Cloud Native Protection Platform is a security protection model based on the concept of cloud native. In view of the characteristics  of cloud native application life-cycle, it involves in many stages of security protection, including R&D construction, security testing, image  control, container deployment, container operation, etc. Shangfu also integrates security with development which means providing feedback of the  application security condition through correlating operation asset, and promoting the iteration and upgrade of application. Whereupon, a closed  loop of efficient cloud native application security risk is created, covering the whole stages of DevSecOps."
   },
   {
     "category": "Provisioning",
@@ -1082,7 +1082,7 @@ const appCatalogData = [
     "name": "NeuVector",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/neuvector.svg",
     "website": "https://neuvector.com/",
-    "description": "NeuVector Full Lifecycle Container Security Platform delivers the only cloud-native security with uncompromising end-to-end protection from DevOps\nvulnerability protection to automated run-time security, and featuring a true Layer 7 container firewall."
+    "description": "NeuVector Full Lifecycle Container Security Platform delivers the only cloud-native security with uncompromising end-to-end protection from DevOps vulnerability protection to automated run-time security, and featuring a true Layer 7 container firewall."
   },
   {
     "category": "Provisioning",
@@ -1090,7 +1090,7 @@ const appCatalogData = [
     "name": "Nirmata Cloud Native Policy Manager",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/nirmata.svg",
     "website": "https://www.nirmata.com/",
-    "description": "The solution enables DevSecOps teams to ensure the security, compliance, and operational readiness of their Kubernetes workloads and clusters. By\nautomating the creation, deployment, and lifecycle management of policy-based Intelligent Guardrails, customers can gain insights, alerts, and\nreports, and enable effective collaboration across development and operations teams."
+    "description": "The solution enables DevSecOps teams to ensure the security, compliance, and operational readiness of their Kubernetes workloads and clusters. By automating the creation, deployment, and lifecycle management of policy-based Intelligent Guardrails, customers can gain insights, alerts, and reports, and enable effective collaboration across development and operations teams."
   },
   {
     "category": "Provisioning",
@@ -1154,7 +1154,7 @@ const appCatalogData = [
     "name": "OSCAL-COMPASS",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/oscal-compass-color-stacked.svg",
     "website": "https://github.com/oscal-compass/community",
-    "description": "The OSCAL COMPASS project is set of tools that enable the creation, validation, and governance of documentation artifacts for compliance needs.\nIt leverages NIST's OSCAL (Open Security Controls Assessment Language) as a standard data format for interchange between tools and people,\nand provides an opinionated approach to OSCAL SDK and adoption by policy engines."
+    "description": "The OSCAL COMPASS project is set of tools that enable the creation, validation, and governance of documentation artifacts for compliance needs. It leverages NIST's OSCAL (Open Security Controls Assessment Language) as a standard data format for interchange between tools and people, and provides an opinionated approach to OSCAL SDK and adoption by policy engines."
   },
   {
     "category": "Provisioning",
@@ -1186,7 +1186,7 @@ const appCatalogData = [
     "name": "Paralus",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/paralus.svg",
     "website": "https://www.paralus.io/",
-    "description": "Paralus is a free, open source tool that enables controlled, audited access to Kubernetes infrastructure and Zero trust Kubernetes with zero\nfriction."
+    "description": "Paralus is a free, open source tool that enables controlled, audited access to Kubernetes infrastructure and Zero trust Kubernetes with zero friction."
   },
   {
     "category": "Provisioning",
@@ -1218,7 +1218,7 @@ const appCatalogData = [
     "name": "Permit.io",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/permit.io.svg",
     "website": "https://www.permit.io",
-    "description": "Permit.io provides fine-grained authorization as a service (Policy-as-Code,  APIs, and customer facing UI), so developers can check this as done\nand focus on their core product. Permit.io is the maintainer of the OPAL (Open Policy Administration Layer) project."
+    "description": "Permit.io provides fine-grained authorization as a service (Policy-as-Code,  APIs, and customer facing UI), so developers can check this as done and focus on their core product. Permit.io is the maintainer of the OPAL (Open Policy Administration Layer) project."
   },
   {
     "category": "Provisioning",
@@ -1242,7 +1242,7 @@ const appCatalogData = [
     "name": "Pomerium",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/pomerium.svg",
     "website": "https://www.pomerium.com/",
-    "description": "Pomerium is an identity-aware access proxy that enables teams to implement true zero-trust security, eliminating the need for a VPN. Pomerium\nensures that every single call is authenticated and authorized, providing a secure and seamless user experience."
+    "description": "Pomerium is an identity-aware access proxy that enables teams to implement true zero-trust security, eliminating the need for a VPN. Pomerium ensures that every single call is authenticated and authorized, providing a secure and seamless user experience."
   },
   {
     "category": "Provisioning",
@@ -1266,7 +1266,7 @@ const appCatalogData = [
     "name": "Qingteng",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/qingteng.svg",
     "website": "https://qingteng.cn/",
-    "description": "Qingteng Honeycomb · Container Security Platform can display risk scenarios visually for enterprises through continuous monitoring and analysis of\nthe container security status, and protects the container environment during the entire life cycle (build, ship, and run) of the container."
+    "description": "Qingteng Honeycomb · Container Security Platform can display risk scenarios visually for enterprises through continuous monitoring and analysis of the container security status, and protects the container environment during the entire life cycle (build, ship, and run) of the container."
   },
   {
     "category": "Provisioning",
@@ -1274,7 +1274,7 @@ const appCatalogData = [
     "name": "RAD Security",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/rad-security.svg",
     "website": "https://rad.security/",
-    "description": "RAD Security maps a broad set of cluster components across the Kubernetes lifecycle  using a real-time graph,\ncutting noise in half through contextualized risks, highest impact remediations and Kubernetes-first  incident response."
+    "description": "RAD Security maps a broad set of cluster components across the Kubernetes lifecycle  using a real-time graph, cutting noise in half through contextualized risks, highest impact remediations and Kubernetes-first  incident response."
   },
   {
     "category": "Provisioning",
@@ -1322,7 +1322,7 @@ const appCatalogData = [
     "name": "secureCodeBox",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/secureCodeBox.svg",
     "website": "https://www.securecodebox.io/",
-    "description": "secureCodeBox is an OWASP project providing an automated and scalable open source solution that integrates multiple security scanners with a\nsimple and lightweight interface – for continuous and automated security testing."
+    "description": "secureCodeBox is an OWASP project providing an automated and scalable open source solution that integrates multiple security scanners with a simple and lightweight interface – for continuous and automated security testing."
   },
   {
     "category": "Provisioning",
@@ -1362,7 +1362,7 @@ const appCatalogData = [
     "name": "Sonatype",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/sonatype.svg",
     "website": "https://www.sonatype.com",
-    "description": "Sonatype is the developer-friendly full-spectrum software supply, chain management platform helps organizations and software developers.\nOne of the Sonatype products includes the open source software repository manager Sonatype Nexus Repository."
+    "description": "Sonatype is the developer-friendly full-spectrum software supply, chain management platform helps organizations and software developers. One of the Sonatype products includes the open source software repository manager Sonatype Nexus Repository."
   },
   {
     "category": "Provisioning",
@@ -1378,7 +1378,7 @@ const appCatalogData = [
     "name": "SOPS",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/sops.svg",
     "website": "https://github.com/getsops",
-    "description": "sops is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault,\nage, and PGP."
+    "description": "sops is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault, age, and PGP."
   },
   {
     "category": "Provisioning",
@@ -1386,7 +1386,7 @@ const appCatalogData = [
     "name": "Spyderbat",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/spyderbat.svg",
     "website": "https://www.spyderbat.com/",
-    "description": "Spyderbat provides Linux runtime security, protecting dynamic environments by proactively tracking all user activities by their causal connections\nto detect and resolve external attacks, misconfigurations, and insider threats."
+    "description": "Spyderbat provides Linux runtime security, protecting dynamic environments by proactively tracking all user activities by their causal connections to detect and resolve external attacks, misconfigurations, and insider threats."
   },
   {
     "category": "Provisioning",
@@ -1426,7 +1426,7 @@ const appCatalogData = [
     "name": "Sysdig Secure",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/sysdig-secure.svg",
     "website": "https://sysdig.com/use-cases/kubernetes-security",
-    "description": "Sysdig Secure embeds security and compliance into the build, run and respond stages of the Kubernetes lifecycle.\\_"
+    "description": "Sysdig Secure embeds security and compliance into the build, run and respond stages of the Kubernetes lifecycle._"
   },
   {
     "category": "Provisioning",
@@ -1498,7 +1498,7 @@ const appCatalogData = [
     "name": "Tokenetes",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/tokenetes.svg",
     "website": "https://tokenetes.io/",
-    "description": "Tokenetes implements Transaction Tokens (TraTs) for microservices call chains.\nIt's a Kubernetes-native framework providing immutable identity and context in \nservice-to-service communication to prevent attacks like software supply chain \nor privileged user compromise."
+    "description": "Tokenetes implements Transaction Tokens (TraTs) for microservices call chains. It's a Kubernetes-native framework providing immutable identity and context in service-to-service communication to prevent attacks like software supply chain or privileged user compromise."
   },
   {
     "category": "Provisioning",
@@ -1538,7 +1538,7 @@ const appCatalogData = [
     "name": "vArmor",
     "logo": "https://raw.githubusercontent.com/cncf/landscape/master/hosted_logos/varmor.svg",
     "website": "https://varmor.org",
-    "description": "vArmor is a cloud-native container sandbox system. It leverages Linux's AppArmor LSM, BPF LSM and Seccomp technologies to implement enforcers. \nIt can be used to strengthen container isolation, reduce the kernel attack surface, and increase the difficulty and cost of container escape or \nlateral movement attacks. It includes multiple built-in protection rules that are ready to use out of the box."
+    "description": "vArmor is a cloud-native container sandbox system. It leverages Linux's AppArmor LSM, BPF LSM and Seccomp technologies to implement enforcers. It can be used to strengthen container isolation, reduce the kernel attack surface, and increase the difficulty and cost of container escape or lateral movement attacks. It includes multiple built-in protection rules that are ready to use out of the box."
   },
   {
     "category": "Provisioning",
@@ -1645,684 +1645,6 @@ const appCatalogData = [
     "description": ""
   }
 ];
-
-const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
-  name: 'Application Onboarding',
-  version: 1,
-  phases: [
-    {
-      id: "phase-1",
-      name: "Initiate Onboarding",
-      ownerName: "Sales Team",
-      ownerEmail: "sales@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
-        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
-        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
-        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
-      ],
-    },
-    {
-      id: "phase-2",
-      name: "Product Definitions",
-      ownerName: "Product Team",
-      ownerEmail: "product@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
-        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
-        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
-      ],
-    },
-    {
-        id: "phase-3",
-        name: "Detail Design",
-        ownerName: "Engineering Team",
-        ownerEmail: "eng@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
-          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
-          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
-          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
-        ],
-    },
-    {
-        id: "phase-4",
-        name: "Delivery",
-        ownerName: "QA Team",
-        ownerEmail: "qa@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
-            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
-            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
-            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
-        ]
-    },
-     {
-        id: "phase-5",
-        name: "Alpha Qualification",
-        ownerName: "Alpha Team",
-        ownerEmail: "alpha@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
-            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
-            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
-        ]
-    },
-    {
-        id: "phase-6",
-        name: "Prepare customer",
-        ownerName: "Support Team",
-        ownerEmail: "support@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
-            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
-        ]
-    },
-    {
-        id: "phase-7",
-        name: "Beta Qualification",
-        ownerName: "Beta Team",
-        ownerEmail: "beta@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
-            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
-            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
-        ]
-    },
-    {
-        id: "phase-8",
-        name: "Completed",
-        ownerName: "Release Team",
-        ownerEmail: "release@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
-        ]
-    }
-  ],
-};
-
-const initialComponentOnboarding: Omit<OnboardingConfiguration, '_id'> = {
-  name: 'Component Onboarding',
-  version: 1,
-  phases: [
-    {
-      id: "phase-1",
-      name: "Initiate Onboarding",
-      ownerName: "Sales Team",
-      ownerEmail: "sales@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
-        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
-        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
-        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
-      ],
-    },
-    {
-      id: "phase-2",
-      name: "Product Definitions",
-      ownerName: "Product Team",
-      ownerEmail: "product@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
-        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
-        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
-      ],
-    },
-    {
-        id: "phase-3",
-        name: "Detail Design",
-        ownerName: "Engineering Team",
-        ownerEmail: "eng@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
-          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
-          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
-          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
-        ],
-    },
-    {
-        id: "phase-4",
-        name: "Delivery",
-        ownerName: "QA Team",
-        ownerEmail: "qa@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
-            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
-            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
-            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
-        ]
-    },
-     {
-        id: "phase-5",
-        name: "Alpha Qualification",
-        ownerName: "Alpha Team",
-        ownerEmail: "alpha@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
-            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
-            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
-        ]
-    },
-    {
-        id: "phase-6",
-        name: "Prepare customer",
-        ownerName: "Support Team",
-        ownerEmail: "support@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
-            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
-        ]
-    },
-    {
-        id: "phase-7",
-        name: "Beta Qualification",
-        ownerName: "Beta Team",
-        ownerEmail: "beta@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
-            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
-            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
-        ]
-    },
-    {
-        id: "phase-8",
-        name: "Completed",
-        ownerName: "Release Team",
-        ownerEmail: "release@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
-        ]
-    }
-  ],
-};
-
-const initialTenantOnboarding: Omit<OnboardingConfiguration, '_id'> = {
-  name: 'Tenant Onboarding',
-  version: 1,
-  phases: [
-    {
-      id: "phase-1",
-      name: "Initiate Onboarding",
-      ownerName: "Sales Team",
-      ownerEmail: "sales@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
-        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
-        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
-        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
-      ],
-    },
-    {
-      id: "phase-2",
-      name: "Product Definitions",
-      ownerName: "Product Team",
-      ownerEmail: "product@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-      fields: [
-        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
-        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
-        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
-      ],
-    },
-    {
-        id: "phase-3",
-        name: "Detail Design",
-        ownerName: "Engineering Team",
-        ownerEmail: "eng@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
-          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
-          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
-          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
-        ],
-    },
-    {
-        id: "phase-4",
-        name: "Delivery",
-        ownerName: "QA Team",
-        ownerEmail: "qa@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
-            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
-            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
-            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
-            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
-        ]
-    },
-     {
-        id: "phase-5",
-        name: "Alpha Qualification",
-        ownerName: "Alpha Team",
-        ownerEmail: "alpha@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
-            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
-            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
-        ]
-    },
-    {
-        id: "phase-6",
-        name: "Prepare customer",
-        ownerName: "Support Team",
-        ownerEmail: "support@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
-            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
-        ]
-    },
-    {
-        id: "phase-7",
-        name: "Beta Qualification",
-        ownerName: "Beta Team",
-        ownerEmail: "beta@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
-            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
-            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
-        ]
-    },
-    {
-        id: "phase-8",
-        name: "Completed",
-        ownerName: "Release Team",
-        ownerEmail: "release@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
-        fields: [
-            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
-        ]
-    }
-  ],
-};
-
-const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
-  name: 'Baseline Onboarding',
-  version: 1,
-  phases: [
-    {
-      id: "phase-sanity-test",
-      name: "Sanity Test",
-      ownerName: "DevOps",
-      ownerEmail: "devops@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
-      fields: [
-        { type: "Link", name: "ciJobUrl", label: "CI Job URL", proof: true },
-        { type: "DropDown", name: "triggerMethod", label: "Trigger Method", options: ["manual", "auto"] },
-        { type: "TextField", name: "status", label: "Status" },
-        { type: "Link", name: "logsLink", label: "Logs Link", proof: true },
-      ],
-    },
-    {
-      id: "phase-static-analysis",
-      name: "Static Code Analysis",
-      ownerName: "Security Team",
-      ownerEmail: "security@example.com",
-      sendEmailOnComplete: true,
-      statusOptions: ["Not Started", "In Progress", "Completed", "Failed"],
-      fields: [
-        { type: "TextField", name: "toolUsed", label: "Tool Used", helpText: "e.g., SonarQube, ESLint" },
-        { type: "TextField", name: "score", label: "Score" },
-        { type: "TextField", name: "issuesSummary", label: "Issues Summary" },
-        { type: "Link", name: "reportUrl", label: "Report URL", proof: true },
-      ],
-    },
-    {
-        id: "phase-vulnerability-scan",
-        name: "Vulnerability / Malware Scan",
-        ownerName: "Security Team",
-        ownerEmail: "security@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Completed", "Failed"],
-        fields: [
-            { type: "TextField", name: "scannerTool", label: "Scanner Tool", helpText: "e.g., Snyk, Trivy" },
-            { type: "TextField", name: "cveList", label: "CVE List (comma-separated)"},
-            { type: "TextField", name: "severityBreakdown", label: "Severity Breakdown" },
-            { type: "Link", name: "reportUrl", label: "Report URL", proof: true },
-        ]
-    },
-    {
-        id: "phase-risk-scoping",
-        name: "Risk Scoping",
-        ownerName: "Risk Management",
-        ownerEmail: "risk@example.com",
-        sendEmailOnComplete: false,
-        statusOptions: ["Not Started", "In Progress", "Completed"],
-        fields: [
-            { type: "TextField", name: "riskCategories", label: "Risk Categories" },
-            { type: "DropDown", name: "impactLevel", label: "Impact Level", options: ["Low", "Medium", "High", "Critical"] },
-            { type: "TextField", name: "mitigationPlan", label: "Mitigation Plan", proof: true },
-            { type: "TextField", name: "owner", label: "Owner" },
-        ]
-    },
-    {
-        id: "phase-pen-testing",
-        name: "Penetration Testing",
-        ownerName: "External Security",
-        ownerEmail: "pentest@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Completed", "Failed"],
-        fields: [
-            { type: "TextField", name: "testScope", label: "Test Scope" },
-            { type: "RadioBox", name: "testType", label: "Test Type", options: ["External", "Internal"] },
-            { type: "TextField", name: "findings", label: "Findings Summary", proof: true },
-            { type: "DropDown", name: "remediationStatus", label: "Remediation Status", options: ["Pending", "In Progress", "Completed"] },
-        ]
-    },
-    {
-        id: "phase-functional-tests",
-        name: "Functional Tests",
-        ownerName: "QA Team",
-        ownerEmail: "qa@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
-        fields: [
-            { type: "TextField", name: "testSuiteName", label: "Test Suite Name" },
-            { type: "TextField", name: "coverage", label: "Coverage %" },
-            { type: "TextField", name: "passFailSummary", label: "Pass/Fail Summary" },
-            { type: "Link", name: "testResultsLink", label: "Link to Test Results", proof: true },
-        ]
-    },
-    {
-        id: "phase-non-functional-tests",
-        name: "Non-Functional Tests",
-        ownerName: "Performance Team",
-        ownerEmail: "performance@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
-        fields: [
-            { type: "DropDown", name: "testType", label: "Type", options: ["Load", "Stress", "Scalability"] },
-            { type: "TextField", name: "metrics", label: "Metrics (TPS, latency, etc.)" },
-            { type: "TextField", name: "thresholds", label: "Thresholds" },
-            { type: "TextField", name: "resultSummary", label: "Result Summary", proof: true },
-        ]
-    },
-    {
-        id: "phase-qa-report",
-        name: "QA Report",
-        ownerName: "QA Lead",
-        ownerEmail: "qalead@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"],
-        fields: [
-            { type: "TextField", name: "qaOwner", label: "QA Owner" },
-            { type: "TextField", name: "summary", label: "Summary", proof: true },
-            { type: "TextField", name: "issues", label: "Open Issues" },
-            { type: "DropDown", name: "finalVerdict", label: "Final Verdict", options: ["GO", "NO-GO"] },
-        ]
-    },
-    {
-        id: "phase-approvals",
-        name: "Approvals",
-        ownerName: "Management",
-        ownerEmail: "mgmt@example.com",
-        sendEmailOnComplete: false,
-        statusOptions: ["Pending", "Approved", "Rejected"],
-        fields: [
-            { type: "TextField", name: "approverList", label: "Approver List" },
-            { type: "TextField", name: "approvalStatus", label: "Approval Status" },
-            { type: "TextField", name: "comments", label: "Comments", proof: true },
-            { type: "TextField", name: "timestamp", label: "Timestamp" },
-        ]
-    },
-    {
-        id: "phase-uat",
-        name: "User Acceptance Test (UAT)",
-        ownerName: "Business Owner",
-        ownerEmail: "business@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Signed-off", "Rejected"],
-        fields: [
-            { type: "TextField", name: "testCases", label: "Test Cases" },
-            { type: "TextField", name: "businessOwner", label: "Business Owner" },
-            { type: "TextField", name: "feedback", label: "Feedback", proof: true },
-            { type: "DropDown", name: "signOffStatus", label: "Sign-off Status", options: ["Pending", "Approved", "Rejected"] },
-        ]
-    },
-    {
-        id: "phase-ux-approval",
-        name: "UX Approval",
-        ownerName: "UX Team",
-        ownerEmail: "ux@example.com",
-        sendEmailOnComplete: false,
-        statusOptions: ["Pending", "Approved", "Rejected"],
-        fields: [
-            { type: "TextField", name: "uxReviewer", label: "UX Reviewer" },
-            { type: "Link", name: "designChecklist", label: "Design Checklist", proof: true },
-            { type: "TextField", name: "accessibilityScore", label: "Accessibility Score" },
-            { type: "DropDown", name: "approvalStatus", label: "Approval Status", options: ["Pending", "Approved", "Rejected"] },
-        ]
-    },
-    {
-        id: "phase-export-compliance",
-        name: "Export Compliance",
-        ownerName: "Legal Team",
-        ownerEmail: "legal@example.com",
-        sendEmailOnComplete: false,
-        statusOptions: ["Pending", "Approved", "Rejected"],
-        fields: [
-            { type: "TextField", name: "region", label: "Region" },
-            { type: "Link", name: "complianceChecklist", label: "Compliance Checklist", proof: true },
-            { type: "DropDown", name: "legalReviewStatus", label: "Legal Review Status", options: ["Pending", "Approved", "Rejected"] },
-        ]
-    },
-    {
-        id: "phase-license-validations",
-        name: "License Validations",
-        ownerName: "Legal Team",
-        ownerEmail: "legal@example.com",
-        sendEmailOnComplete: false,
-        statusOptions: ["Pending", "Completed", "Failed"],
-        fields: [
-            { type: "TextField", name: "licenseTypes", label: "License Types" },
-            { type: "TextField", name: "compatibility", label: "Compatibility" },
-            { type: "TextField", name: "violations", label: "Violations", proof: true },
-            { type: "TextField", name: "legalNotes", label: "Legal Notes" },
-        ]
-    },
-    {
-        id: "phase-contract-testing",
-        name: "Contract Testing",
-        ownerName: "API Governance",
-        ownerEmail: "governance@example.com",
-        sendEmailOnComplete: true,
-        statusOptions: ["Not Started", "In Progress", "Passed", "Failed"],
-        fields: [
-            { type: "TextField", name: "consumerProviderServices", label: "Consumer/Provider Services" },
-            { type: "Link", name: "pactFileUrl", label: "Pact File URL", proof: true },
-            { type: "TextField", name: "testResult", label: "Test Result" },
-            { type: "TextField", name: "versionCompatibility", label: "Version Compatibility" },
-        ]
-    }
-  ],
-};
-
-const initialDefaultApprovalPhases: OnboardingPhase[] = [
-    { id: 'product-owner', name: 'Product Owner', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'product-manager', name: 'Product Manager', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'quality-assurance', name: 'Quality Assurance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'release-owner', name: 'Release Owner', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'export-control-board', name: 'Export Control Board', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'license-compliance-board', name: 'License Compliance Board', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'security-compliance', name: 'Security Compliance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'data-compliance', name: 'Data Compliance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'customer', name: 'Customer', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-    { id: 'field-engineer', name: 'Field Engineer', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
-];
-
-const initialApprovalConfigs = [
-    { name: 'Product Onboarding Approval', key: 'product-onboarding' },
-    { name: 'Tenant Approval', key: 'tenant-approval' },
-    { name: 'Components Approval', key: 'components-approval' },
-    { name: 'Application Approval', key: 'application-approval' },
-    { name: 'Interface Approval', key: 'interface-approval' },
-    { name: 'Baseline Approval', key: 'baseline-approval' },
-    { name: 'Deployment Approval', key: 'deployment-approval' },
-    { name: 'Upgrade Approval', key: 'upgrade-approval' },
-    { name: 'Migration Approval', key: 'migration-approval' },
-    { name: 'Decommission Approval', key: 'decommission-approval' },
-    { name: 'License Approval', key: 'license-approval' },
-    { name: 'Export Control Approval', key: 'export-control-approval' },
-    { name: 'Security Approval', key: 'security-approval' },
-].map(config => ({
-    name: config.name,
-    collectionName: `settings_approval_${config.key.replace(/-/g, '_')}`,
-    data: [{
-        name: config.name,
-        version: 1,
-        phases: initialDefaultApprovalPhases,
-    }]
-}));
-
-const initialSpecVendors = [{ name: 'Dell EMC' }, { name: 'HPE' }, { name: 'Cisco' }, { name: 'Lenovo' }, { name: 'CNCF' }, { name: 'OpenID' }, { name: 'Apache' }, { name: 'Facebook' }, { name: 'Google' }, { name: 'OASIS' }];
-const initialSpecHwTypes = [{ name: 'Rack' }, { name: 'Blade' }, { name: 'Virtual' }];
-const initialSpecHypervisors = [{ name: 'VMWare ESXi' }, { name: 'Microsoft Hyper-V' }, { name: 'KVM' }, { name: 'Harvester' }];
-
-const initialSpecNetworkCards = [
-    { "name": "Ethernet_1G_RJ45", "type": "Ethernet", "classification": { "speed": "1Gbps", "connector": "RJ-45" } },
-    { "name": "Ethernet_10G_RJ45", "type": "Ethernet", "classification": { "speed": "10Gbps", "connector": "RJ-45" } },
-    { "name": "Ethernet_10G_SFP+", "type": "Ethernet", "classification": { "speed": "10Gbps", "connector": "SFP+" } },
-    { "name": "Ethernet_25G_SFP28", "type": "Ethernet", "classification": { "speed": "25Gbps", "connector": "SFP28" } },
-    { "name": "Ethernet_40G_QSFP+", "type": "Ethernet", "classification": { "speed": "40Gbps", "connector": "QSFP+" } },
-    { "name": "Ethernet_100G_QSFP28", "type": "Ethernet", "classification": { "speed": "100Gbps", "connector": "QSFP28" } },
-    { "name": "FibreChannel_8Gb", "type": "Fibre Channel", "classification": { "speed": "8Gbps" } },
-    { "name": "FibreChannel_16Gb", "type": "Fibre Channel", "classification": { "speed": "16Gbps" } },
-    { "name": "FibreChannel_32Gb", "type": "Fibre Channel", "classification": { "speed": "32Gbps" } },
-    { "name": "InfiniBand_SDR_10Gb", "type": "InfiniBand", "classification": { "speed": "10Gbps", "mode": "SDR" } },
-    { "name": "InfiniBand_DDR_20Gb", "type": "InfiniBand", "classification": { "speed": "20Gbps", "mode": "DDR" } },
-    { "name": "InfiniBand_QDR_40Gb", "type": "InfiniBand", "classification": { "speed": "40Gbps", "mode": "QDR" } },
-    { "name": "InfiniBand_FDR_56Gb", "type": "InfiniBand", "classification": { "speed": "56Gbps", "mode": "FDR" } },
-    { "name": "InfiniBand_EDR_100Gb", "type": "InfiniBand", "classification": { "speed": "100Gbps", "mode": "EDR" } },
-    { "name": "Wireless_WiFi5_802.11ac", "type": "Wireless", "classification": { "standard": "802.11ac", "generation": "Wi-Fi 5" } },
-    { "name": "Wireless_WiFi6_802.11ax", "type": "Wireless", "classification": { "standard": "802.11ax", "generation": "Wi-Fi 6" } },
-    { "name": "Wireless_WiFi7_802.11be", "type": "Wireless", "classification": { "standard": "802.11be", "generation": "Wi-Fi 7" } },
-    { "name": "Virtual_VLAN_802.1Q", "type": "Virtual", "classification": { "protocol": "802.1Q", "description": "VLAN" } },
-    { "name": "Virtual_VXLAN", "type": "Virtual", "classification": { "protocol": "VXLAN" } },
-    { "name": "Virtual_GRE_Tunnel", "type": "Virtual", "classification": { "protocol": "GRE" } },
-    { "name": "Virtual_IPsec_Tunnel", "type": "Virtual", "classification": { "protocol": "IPsec" } },
-    { "name": "Virtual_SDN_OpenvSwitch", "type": "Virtual", "classification": { "platform": "Open vSwitch" } },
-    { "name": "Virtual_SDN_VMwareNSX", "type": "Virtual", "classification": { "platform": "VMware NSX" } },
-    { "name": "Specialized_RoCE", "type": "Specialized", "classification": { "protocol": "RDMA over Converged Ethernet" } },
-    { "name": "Specialized_iSCSI", "type": "Specialized", "classification": { "protocol": "iSCSI" } },
-    { "name": "Specialized_NVMeoF", "type": "Specialized", "classification": { "protocol": "NVMe over Fabrics" } },
-    { "name": "Management_IPMI", "type": "Management", "classification": { "protocol": "IPMI" } },
-    { "name": "Management_Redfish", "type": "Management", "classification": { "protocol": "Redfish" } },
-    { "name": "Management_SerialConsole", "type": "Management", "classification": { "protocol": "Serial" } }
-];
-
-const initialSpecPlugPowerCords = [{ name: 'Virtual Power' }, { name: 'NEMA 5-15P' }, { name: 'C13/C14' }];
-
-const initialSpecCpuTypes = [
-  { name: 'Intel Xeon Scalable'}, { name: 'Intel Xeon E-series'},
-  { name: 'AMD EPYC 7002'}, { name: 'AMD EPYC 9004 series'},
-  { name: 'IBM POWER9'}, { name: 'IBM POWER10'},
-  { name: 'Oracle SPARC'}, { name: 'Ampere Altra'}, { name: 'AWS Graviton'},
-  { name: 'Intel Core i3'}, { name: 'Intel Core i5'}, { name: 'Intel Core i7'}, { name: 'Intel Core i9'},
-  { name: 'AMD Ryzen 3'}, { name: 'AMD Ryzen 5'}, { name: 'AMD Ryzen 7'}, { name: 'AMD Ryzen 9'},
-  { name: 'Apple M1'}, { name: 'Apple M2'}, { name: 'Apple M3'},
-  { name: 'Intel Atom'}, { name: 'ARM Cortex'}
-];
-
-const initialSpecGpuTypes = [
-  { name: 'NVIDIA A100'}, { name: 'NVIDIA H100'},
-  { name: 'NVIDIA Tesla V100'}, { name: 'NVIDIA Tesla P100'},
-  { name: 'AMD Instinct MI100'}, { name: 'AMD Instinct MI250'},
-  { name: 'Intel Data Center GPU Flex Series'},
-  { name: 'NVIDIA RTX A6000'}, { name: 'NVIDIA RTX A5000'},
-  { name: 'AMD Radeon Pro Series'},
-  { name: 'NVIDIA GeForce RTX 4090'}, { name: 'NVIDIA GeForce RTX 4080'}, { name: 'NVIDIA GeForce RTX 4070'},
-  { name: 'AMD Radeon RX 7900'}, { name: 'AMD Radeon RX 6800'},
-  { name: 'Intel Iris Xe'}, { name: 'AMD Radeon Vega'}, { name: 'Apple GPU (in M-series chips)'}
-];
-
-const initialSpecDiskTypes = [
-    { "name": "HDD_3.5inch_SATA_5400RPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SATA", "speed": "5400 RPM" } },
-    { "name": "HDD_3.5inch_SATA_7200RPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SATA", "speed": "7200 RPM" } },
-    { "name": "HDD_3.5inch_SAS_10KRPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SAS", "speed": "10K RPM" } },
-    { "name": "HDD_3.5inch_SAS_15KRPM", "type": "HDD", "classification": { "form_factor": "3.5-inch", "interface": "SAS", "speed": "15K RPM" } },
-    { "name": "SSD_SATA_2.5inch", "type": "SSD", "classification": { "interface": "SATA", "form_factor": "2.5-inch" } },
-    { "name": "SSD_NVMe_M2_PCIeGen3", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "M.2", "generation": "PCIe Gen3" } },
-    { "name": "SSD_NVMe_M2_PCIeGen4", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "M.2", "generation": "PCIe Gen4" } },
-    { "name": "SSD_NVMe_U2_PCIeGen3", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "U.2", "generation": "PCIe Gen3" } },
-    { "name": "SSD_NVMe_U2_PCIeGen4", "type": "SSD", "classification": { "interface": "NVMe", "form_factor": "U.2", "generation": "PCIe Gen4" } },
-    { "name": "Hybrid_2.5inch_SATA", "type": "Hybrid", "classification": { "form_factor": "2.5-inch", "interface": "SATA" } },
-    { "name": "Hybrid_3.5inch_SATA", "type": "Hybrid", "classification": { "form_factor": "3.5-inch", "interface": "SATA" } },
-    { "name": "Enterprise_SAS_10KRPM", "type": "Enterprise", "classification": { "interface": "SAS", "speed": "10K RPM" } },
-    { "name": "Enterprise_SAS_15KRPM", "type": "Enterprise", "classification": { "interface": "SAS", "speed": "15K RPM" } },
-    { "name": "Enterprise_FibreChannel_HighSpeed", "type": "Enterprise", "classification": { "interface": "Fibre Channel", "speed": "High-Speed" } },
-    { "name": "Specialized_NVMeoF", "type": "Specialized", "classification": { "interface": "NVMe-oF", "description": "Network NVMe" } },
-    { "name": "Specialized_PersistentMemory_Optane", "type": "Specialized", "classification": { "interface": "Persistent Memory", "description": "Intel Optane" } },
-    { "name": "Virtual_VMDK_VMware", "type": "Virtual", "classification": { "format": "VMDK", "platform": "VMware" } },
-    { "name": "Virtual_VHDX_HyperV", "type": "Virtual", "classification": { "format": "VHD/VHDX", "platform": "Hyper-V" } },
-    { "name": "Virtual_QCOW2_KVM", "type": "Virtual", "classification": { "format": "QCOW2", "platform": "KVM" } },
-    { "name": "Cloud_Object_S3Compatible", "type": "Cloud", "classification": { "storage_type": "Object", "protocol": "S3-Compatible" } },
-    { "name": "Cloud_Block_EBS", "type": "Cloud", "classification": { "storage_type": "Block", "example": "EBS-Type" } }
-];
-
-const initialSimulators: Omit<Simulator, '_id'>[] = [
-    { name: 'High-Latency WAN Simulator', dockerImage: 'slow-network/wan-sim:latest', helmChartUrl: 'charts/wan-simulator' },
-    { name: 'Packet-Loss Network Simulator (5%)', dockerImage: 'fault-injector/packet-loss:5.0' },
-    { name: 'CPU Stress Test Simulator', dockerImage: 'stress-ng/cpu-burner:latest' },
-    { name: 'Disk I/O Bottleneck Simulator', dockerImage: 'fio/io-simulator:latest' },
-];
-
-const initialEmulators: Omit<Emulator, '_id'>[] = [
-    { name: 'Raspberry Pi 4 (QEMU)', dockerImage: 'qemu/raspi4-emulator:latest', registryUrl: 'docker.io', helmChartUrl: '' },
-    { name: 'HPE ProLiant DL380 Gen11', dockerImage: 'hpe-sim/dl380-g11:latest', registryUrl: 'registry.hpe.com' },
-    { name: 'Cisco Nexus 9000v Switch', dockerImage: 'cisco/nexus9000v:latest', registryUrl: 'registry.cisco.com' },
-    { name: 'Android 14 Emulator', dockerImage: 'google/android-emulator:14.0', registryUrl: 'gcr.io' },
-];
-
 
 const initialProducts: Omit<Product, '_id' | 'created_at' | 'updated_at'>[] = [
   {
@@ -2455,109 +1777,63 @@ const fullSpecifications: Omit<Specification, '_id'>[] = [
     }
 ];
 
-const initialDeploymentTypes = [
-    { _id: 'Airgapped', "name": "Airgapped", "description": "Deployment in an isolated, offline environment." },
-    { _id: 'Cloud', "name": "Cloud", "description": "Deployment to a public or private cloud." },
-    { _id: 'On-Prem', "name": "On-Prem", "description": "Deployment to on-premises servers." }
-];
-
-const initialWorkflows = [
-    { "name": "Standard Approval", "description": "Standard linear workflow." },
-    { "name": "Data Governance Review", "description": "Workflow with parallel approval steps." },
-    { "name": "Hardware Compatibility Review", "description": "Security review for hardware." },
-    { "name": "Peer Security Review", "description": "Mandatory security review for sensitive products." }
-];
-
-const initialComplianceChecks = [
-    { "name": "SOC2", "description": "SOC 2 Type II Compliance" },
-    { "name": "GDPR", "description": "General Data Protection Regulation" },
-    { "name": "HIPAA", "description": "Health Insurance Portability and Accountability Act" },
-    { "name": "PCI-DSS", "description": "Payment Card Industry Data Security Standard" },
-];
-
-const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
-    { id: 'REST', name: 'REST API' },
-    { id: 'GraphQL', name: 'GraphQL API' },
-    { id: 'gRPC', name: 'gRPC Service' },
-    { id: 'KafkaTopic', name: 'Kafka Topic' },
-    { id: 'DatabaseConnection', name: 'Database Connection' },
-];
-
-function generatePhases(config: OnboardingConfiguration) {
-    return config.phases.map(phaseConfig => {
-        const statuses = phaseConfig.statusOptions;
-        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-        return {
-            id: phaseConfig.id,
-            name: phaseConfig.name,
-            version: "1.0",
-            status: randomStatus,
-            fields: phaseConfig.fields.map(fieldConfig => ({
-                name: fieldConfig.name,
-                value: `Dummy value for ${fieldConfig.label}`,
-                proof: { link: fieldConfig.proof ? `http://example.com/proof/${phaseConfig.id}/${fieldConfig.name}` : '' },
-            })),
-        };
-    });
-}
-
 const initialTenants: Omit<CmdbTenant, '_id'| 'created_at' | 'updated_at'>[] = [
-    { id: 'CorePlatformServices', name: 'Core Platform Services', description: 'Holds core infrastructure components.', version: '2.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, {id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'CustomerAnalytics', name: 'Customer Analytics', description: 'Tenant for customer-facing analytics dashboards.', version: '1.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'RetailOperations', name: 'Retail Operations', description: 'Manages retail and e-commerce services.', version: '1.2.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'SupplyChainLogistics', name: 'Supply Chain Logistics', description: 'Tenant for SCM and logistics.', version: '3.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'RetailOperations', name: 'Retail Operations', version: '1.2.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'MarketingAutomation', name: 'Marketing Automation', description: 'Handles marketing campaigns and user outreach.', version: '1.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'FraudDetection', name: 'Fraud Detection', description: 'Real-time fraud detection services.', version: '2.1.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'BillingAndPayments', name: 'Billing and Payments', description: 'Handles all financial transactions.', version: '4.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'HumanResources', name: 'Human Resources', description: 'Internal HR systems.', version: '1.8.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'DataScienceWorkbench', name: 'Data Science Workbench', description: 'Environment for data scientists.', version: '1.3.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
-    { id: 'IoTPlatform', name: 'IoT Platform', description: 'Platform for managing IoT devices.', version: '2.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}], phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) },
+    { id: 'CorePlatformServices', name: 'Core Platform Services', description: 'Holds core infrastructure components.', version: '2.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}, {id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}] },
+    { id: 'CustomerAnalytics', name: 'Customer Analytics', description: 'Tenant for customer-facing analytics dashboards.', version: '1.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified DataFabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
+    { id: 'RetailOperations', name: 'Retail Operations', description: 'Manages retail and e-commerce services.', version: '1.2.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
+    { id: 'SupplyChainLogistics', name: 'Supply Chain Logistics', description: 'Tenant for SCM and logistics.', version: '3.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'RetailOperations', name: 'Retail Operations', version: '1.2.0'}] },
+    { id: 'MarketingAutomation', name: 'Marketing Automation', description: 'Handles marketing campaigns and user outreach.', version: '1.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}] },
+    { id: 'FraudDetection', name: 'Fraud Detection', description: 'Real-time fraud detection services.', version: '2.1.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
+    { id: 'BillingAndPayments', name: 'Billing and Payments', description: 'Handles all financial transactions.', version: '4.0.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
+    { id: 'HumanResources', name: 'Human Resources', description: 'Internal HR systems.', version: '1.8.0', products: [{id: 'OneStopShopPortal', name: 'OneStopShop Portal'}] },
+    { id: 'DataScienceWorkbench', name: 'Data Science Workbench', description: 'Environment for data scientists.', version: '1.3.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics', version: '1.5.0'}] },
+    { id: 'IoTPlatform', name: 'IoT Platform', description: 'Platform for managing IoT devices.', version: '2.5.0', products: [{id: 'UnifiedDataFabric', name: 'Unified Data Fabric'}], dependent_tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services', version: '2.0.0'}] },
 ];
 
 const initialComponents: Omit<CmdbComponent, '_id' | 'created_at' | 'updated_at'>[] = [
-    { id: 'AuthNService', name: 'AuthN Service', version: '3.1.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'AuthZService', name: 'AuthZ Service', version: '2.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'DataIngestor', name: 'Data Ingestor', version: '1.8.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'DataProcessor', name: 'Data Processor', version: '2.2.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], provided_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'ProductCatalog', name: 'Product Catalog', version: '4.0.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], provided_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'InventoryService', name: 'Inventory Service', version: '3.5.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}], provided_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'ShippingCalculator', name: 'Shipping Calculator', version: '1.2.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], provided_interfaces: [{id: 'ShippingRateAPI', name: 'Shipping Rate API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'ShipmentTracker', name: 'Shipment Tracker', version: '2.0.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], provided_interfaces: [{id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'EmailService', name: 'Email Service', version: '5.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], provided_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'PushNotificationService', name: 'Push Notification Service', version: '2.3.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], provided_interfaces: [{id: 'SendPushAPI', name: 'Send Push API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'RiskEngine', name: 'Risk Engine', version: '3.0.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], provided_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'PaymentGateway', name: 'Payment Gateway', version: '6.2.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], provided_interfaces: [{id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'InvoiceGenerator', name: 'Invoice Generator', version: '2.8.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], provided_interfaces: [{id: 'InvoiceAPI', name: 'Invoice API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'PayrollProcessor', name: 'Payroll Processor', version: '4.1.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'BenefitsManager', name: 'Benefits Manager', version: '1.5.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'JupyterHub', name: 'Jupyter Hub', version: '2.0.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'MLModelServing', name: 'ML Model Serving', version: '1.7.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'DeviceRegistry', name: 'Device Registry', version: '3.2.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], provided_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'MQTTBroker', name: 'MQTT Broker', version: '5.0.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
-    { id: 'TimeSeriesDB', name: 'Time Series DB', version: '2.9.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) },
+    { id: 'AuthNService', name: 'AuthN Service', version: '3.1.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}], phases: [] },
+    { id: 'AuthZService', name: 'AuthZ Service', version: '2.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}], phases: [] },
+    { id: 'DataIngestor', name: 'Data Ingestor', version: '1.8.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], provided_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], phases: [] },
+    { id: 'DataProcessor', name: 'Data Processor', version: '2.2.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], provided_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
+    { id: 'ProductCatalog', name: 'Product Catalog', version: '4.0.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], provided_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}], phases: [] },
+    { id: 'InventoryService', name: 'Inventory Service', version: '3.5.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}], provided_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}], phases: [] },
+    { id: 'ShippingCalculator', name: 'Shipping Calculator', version: '1.2.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], provided_interfaces: [{id: 'ShippingRateAPI', name: 'Shipping Rate API'}], phases: [] },
+    { id: 'ShipmentTracker', name: 'Shipment Tracker', version: '2.0.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], provided_interfaces: [{id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: [] },
+    { id: 'EmailService', name: 'Email Service', version: '5.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], provided_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}], phases: [] },
+    { id: 'PushNotificationService', name: 'Push Notification Service', version: '2.3.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], provided_interfaces: [{id: 'SendPushAPI', name: 'Send Push API'}], phases: [] },
+    { id: 'RiskEngine', name: 'Risk Engine', version: '3.0.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'DataIngestTopic', name: 'Data Ingest Topic'}], provided_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: [] },
+    { id: 'PaymentGateway', name: 'Payment Gateway', version: '6.2.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], provided_interfaces: [{id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
+    { id: 'InvoiceGenerator', name: 'Invoice Generator', version: '2.8.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], provided_interfaces: [{id: 'InvoiceAPI', name: 'Invoice API'}], phases: [] },
+    { id: 'PayrollProcessor', name: 'Payroll Processor', version: '4.1.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], phases: [] },
+    { id: 'BenefitsManager', name: 'Benefits Manager', version: '1.5.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], phases: [] },
+    { id: 'JupyterHub', name: 'Jupyter Hub', version: '2.0.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], phases: [] },
+    { id: 'MLModelServing', name: 'ML Model Serving', version: '1.7.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
+    { id: 'DeviceRegistry', name: 'Device Registry', version: '3.2.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], provided_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: [] },
+    { id: 'MQTTBroker', name: 'MQTT Broker', version: '5.0.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: [] },
+    { id: 'TimeSeriesDB', name: 'Time Series DB', version: '2.9.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], phases: [] },
 ];
 
 const initialApplications: Omit<CmdbApplication, '_id' | 'created_at' | 'updated_at'>[] = [
-    { id: 'UserProfileApp', name: 'User Profile App', version: '1.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}, {id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'AnalyticsDashboard', name: 'Analytics Dashboard', version: '2.1.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'RetailStorefront', name: 'Retail Storefront', version: '3.2.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}, {id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'WarehouseManager', name: 'Warehouse Manager', version: '1.8.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'MarketingCampaignDashboard', name: 'Marketing Campaign Dashboard', version: '1.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}, {id: 'SendPushAPI', name: 'Send Push API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'FraudAnalystConsole', name: 'Fraud Analyst Console', version: '2.4.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'BillingDashboard', name: 'Billing Dashboard', version: '3.0.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], dependent_interfaces: [{id: 'InvoiceAPI', name: 'Invoice API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'EmployeePortal', name: 'Employee Portal', version: '2.5.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'DSModelBuilder', name: 'DS Model Builder', version: '1.9.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'DeviceProvisioner', name: 'Device Provisioner', version: '2.2.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'AdminConsole', name: 'Admin Console', version: '1.0.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'ReportGeneratorApp', name: 'Report Generator App', version: '1.2.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'ShoppingCartApp', name: 'Shopping Cart App', version: '2.5.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'FleetManagementApp', name: 'Fleet Management App', version: '1.4.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'ABTestingApp', name: 'A/B Testing App', version: '1.0.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'TransactionMonitor', name: 'Transaction Monitor', version: '3.1.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'SubscriptionManager', name: 'Subscription Manager', version: '2.0.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], dependent_interfaces: [{id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'TimeOffManager', name: 'Time Off Manager', version: '1.3.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'FeatureStoreApp', name: 'Feature Store App', version: '1.1.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
-    { id: 'DeviceMonitorDashboard', name: 'Device Monitor Dashboard', version: '2.0.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [], phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) },
+    { id: 'UserProfileApp', name: 'User Profile App', version: '1.5.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthNTokenAPI', name: 'AuthN Token API'}, {id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: [] },
+    { id: 'AnalyticsDashboard', name: 'Analytics Dashboard', version: '2.1.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
+    { id: 'RetailStorefront', name: 'Retail Storefront', version: '3.2.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'ProductCatalogDB', name: 'Product Catalog DB'}, {id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'ProcessPaymentAPI'}], phases: [] },
+    { id: 'WarehouseManager', name: 'Warehouse Manager', version: '1.8.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: [] },
+    { id: 'MarketingCampaignDashboard', name: 'Marketing Campaign Dashboard', version: '1.1.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [{id: 'SendEmailAPI', name: 'Send Email API'}, {id: 'SendPushAPI', name: 'Send Push API'}], phases: [] },
+    { id: 'FraudAnalystConsole', name: 'Fraud Analyst Console', version: '2.4.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: [] },
+    { id: 'BillingDashboard', name: 'Billing Dashboard', version: '3.0.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], dependent_interfaces: [{id: 'InvoiceAPI', name: 'Invoice API'}], phases: [] },
+    { id: 'EmployeePortal', name: 'Employee Portal', version: '2.5.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], dependent_interfaces: [], phases: [] },
+    { id: 'DSModelBuilder', name: 'DS Model Builder', version: '1.9.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [], phases: [] },
+    { id: 'DeviceProvisioner', name: 'Device Provisioner', version: '2.2.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [{id: 'DeviceRegistryAPI', name: 'Device Registry API'}], phases: [] },
+    { id: 'AdminConsole', name: 'Admin Console', version: '1.0.0', tenants: [{id: 'CorePlatformServices', name: 'Core Platform Services'}], dependent_interfaces: [{id: 'AuthZCheckAPI', name: 'AuthZ Check API'}], phases: [] },
+    { id: 'ReportGeneratorApp', name: 'Report Generator App', version: '1.2.0', tenants: [{id: 'CustomerAnalytics', name: 'Customer Analytics'}], dependent_interfaces: [{id: 'ProcessedAnalyticsTopic', name: 'Processed Analytics Topic'}], phases: [] },
+    { id: 'ShoppingCartApp', name: 'Shopping Cart App', version: '2.5.0', tenants: [{id: 'RetailOperations', name: 'Retail Operations'}], dependent_interfaces: [{id: 'InventoryCheckAPI', name: 'Inventory Check API'}, {id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
+    { id: 'FleetManagementApp', name: 'Fleet Management App', version: '1.4.0', tenants: [{id: 'SupplyChainLogistics', name: 'Supply Chain Logistics'}], dependent_interfaces: [{id: 'ShipmentStatusAPI', name: 'Shipment Status API'}], phases: [] },
+    { id: 'ABTestingApp', name: 'A/B Testing App', version: '1.0.0', tenants: [{id: 'MarketingAutomation', name: 'Marketing Automation'}], dependent_interfaces: [], phases: [] },
+    { id: 'TransactionMonitor', name: 'Transaction Monitor', version: '3.1.0', tenants: [{id: 'FraudDetection', name: 'Fraud Detection'}], dependent_interfaces: [{id: 'FraudScoreAPI', name: 'Fraud Score API'}], phases: [] },
+    { id: 'SubscriptionManager', name: 'Subscription Manager', version: '2.0.0', tenants: [{id: 'BillingAndPayments', name: 'Billing and Payments'}], dependent_interfaces: [{id: 'ProcessPaymentAPI', name: 'Process Payment API'}], phases: [] },
+    { id: 'TimeOffManager', name: 'Time Off Manager', version: '1.3.0', tenants: [{id: 'HumanResources', name: 'Human Resources'}], dependent_interfaces: [], phases: [] },
+    { id: 'FeatureStoreApp', name: 'Feature Store App', version: '1.1.0', tenants: [{id: 'DataScienceWorkbench', name: 'Data Science Workbench'}], dependent_interfaces: [], phases: [] },
+    { id: 'DeviceMonitorDashboard', name: 'Device Monitor Dashboard', version: '2.0.0', tenants: [{id: 'IoTPlatform', name: 'IoT Platform'}], dependent_interfaces: [], phases: [] },
 ];
 
 const initialInterfaces: Omit<CmdbInterface, '_id' | 'created_at' | 'updated_at'>[] = [
@@ -2915,6 +2191,49 @@ const generateDeployments = (): Omit<Deployment, '_id'>[] => {
 const initialDeployments = generateDeployments();
 
 
+const initialWorkflows: { _id: string; id: string; name: string; description: string }[] = [
+    { _id: 'StandardApproval', id: 'StandardApproval', name: 'Standard Approval', description: 'Default workflow with a single approval step.' },
+    { _id: 'DataGovernanceReview', id: 'DataGovernanceReview', name: 'Data Governance Review', description: 'Workflow for data-sensitive products requiring governance review.' },
+];
+
+const initialComplianceChecks: { _id: string; id: string; name: string; description: string }[] = [
+    { _id: 'SOC2', id: 'SOC2', name: 'SOC 2', description: 'Checks for SOC 2 compliance.' },
+    { _id: 'GDPR', id: 'GDPR', name: 'GDPR', description: 'Checks for GDPR compliance.' },
+    { _id: 'HIPAA', id: 'HIPAA', name: 'HIPAA', description: 'Checks for HIPAA compliance.' },
+];
+
+const initialDeploymentTypes: { _id: string; id: string; name: string; description: string }[] = [
+    { _id: 'Cloud', id: 'Cloud', name: 'Cloud', description: 'Standard cloud deployment.' },
+    { _id: 'Airgapped', id: 'Airgapped', name: 'Airgapped', description: 'Deployment in an environment with no external network access.' },
+    { _id: 'OnPremise', id: 'OnPremise', name: 'On-Premise', description: 'Deployment on customer-managed hardware.' },
+];
+
+const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
+  { id: 'REST', name: 'REST API', description: 'A standard RESTful API endpoint.' },
+  { id: 'gRPC', name: 'gRPC Service', description: 'A high-performance RPC service.' },
+  { id: 'KafkaTopic', name: 'Kafka Topic', description: 'A topic for asynchronous messaging.' },
+  { id: 'DatabaseConnection', name: 'Database Connection', description: 'A direct database connection string or interface.' },
+  { id: 'GraphQL', name: 'GraphQL API', description: 'A GraphQL API endpoint.' },
+];
+
+const generatePhases = (config: OnboardingConfiguration) => {
+  return config.phases.map(phaseConfig => {
+      const statuses = phaseConfig.statusOptions;
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      return {
+          id: phaseConfig.id,
+          name: phaseConfig.name,
+          version: "1.0",
+          status: randomStatus,
+          fields: phaseConfig.fields.map(fieldConfig => ({
+              name: fieldConfig.name,
+              value: `Dummy value for ${fieldConfig.label}`,
+              proof: { link: fieldConfig.proof ? `http://example.com/proof/${phaseConfig.id}/${fieldConfig.name}` : '' },
+          })),
+      };
+  });
+};
+
 export async function seedDatabase() {
     const client = await clientPromise;
     const db = client.db();
@@ -2925,9 +2244,9 @@ export async function seedDatabase() {
         { name: 'deployment_types', data: initialDeploymentTypes },
         { name: 'workflows', data: initialWorkflows.map(w => ({ ...w, _id: w.name.replace(/[^a-zA-Z0-9]/g, '') })) },
         { name: 'compliance_checks', data: initialComplianceChecks.map(c => ({...c, _id: c.name.replace(/[^a-zA-Z0-9]/g, '')})) },
-        { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
-        { name: 'cmdb_components', data: initialComponents.map(c => ({ ...c, _id: c.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
-        { name: 'cmdb_applications', data: initialApplications.map(a => ({ ...a, _id: a.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
+        { name: 'cmdb_tenants', data: initialTenants.map(t => ({ ...t, _id: t.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), phases: generatePhases(initialTenantOnboarding as OnboardingConfiguration) })) },
+        { name: 'cmdb_components', data: initialComponents.map(c => ({ ...c, _id: c.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), phases: generatePhases(initialComponentOnboarding as OnboardingConfiguration) })) },
+        { name: 'cmdb_applications', data: initialApplications.map(a => ({ ...a, _id: a.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), phases: generatePhases(initialApplicationOnboarding as OnboardingConfiguration) })) },
         { name: 'cmdb_interface_types', data: initialInterfaceTypes.map(i => ({ ...i, _id: i.id })) },
         { name: 'cmdb_interfaces', data: initialInterfaces.map(i => ({ ...i, _id: i.id, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })) },
         { name: 'settings_application_onboarding', data: [initialApplicationOnboarding] },
@@ -2975,3 +2294,4 @@ export async function seedDatabase() {
 
     return { seededCount, skippedCount };
 }
+

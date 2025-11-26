@@ -48,10 +48,6 @@ const ProductSchema = z.object({
     id: z.string(),
     name: z.string(),
   })),
-  cmdb: z.object({
-    id: z.string(),
-    name: z.string(),
-  }),
   compliance_checks: z.array(z.object({
     id: z.string(),
     name: z.string(),

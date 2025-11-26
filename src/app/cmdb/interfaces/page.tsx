@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { User, CmdbInterface } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
@@ -19,6 +19,7 @@ import DashboardLayout from '@/app/dashboard-layout';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function InterfacesPage() {
   const [items, setItems] = useState<CmdbInterface[]>([]);
@@ -64,6 +65,20 @@ export default function InterfacesPage() {
             <Link href="/cmdb/interfaces/create">Register Interface</Link>
           </Button>
         </div>
+
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This page lists all the defined service interfaces in the CMDB. Interfaces are the contracts that define how different components and applications communicate with each other. Proper interface management is key to understanding dependencies and ensuring system integrity. You can register new interfaces or view details of existing ones.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
 
         <Card>
           <CardContent className="p-0">

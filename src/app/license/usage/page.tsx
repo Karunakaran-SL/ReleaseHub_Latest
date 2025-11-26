@@ -7,11 +7,12 @@ import { getUser } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const statusColors: Record<string, string> = {
   active: 'bg-green-200 text-green-800',
@@ -52,6 +53,21 @@ export default function LicenseUsagePage() {
                 <Link href="/license/usage/create">Create License</Link>
             </Button>
         </div>
+
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This page provides a centralized inventory of all software licenses in use across your projects. It is designed to help you track license types, ownership, status, and the components or products they are associated with. Effective license management is crucial for ensuring compliance and optimizing software expenditure.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
+
         <Card>
           <CardHeader>
             <CardTitle>License Inventory</CardTitle>

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Deployment, Product } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
-import { PlusCircle, Upload, GitMerge, Trash2, Loader2, List } from 'lucide-react';
+import { PlusCircle, Upload, GitMerge, Trash2, Loader2, List, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const DeploymentMap = dynamic(() => import('./_components/deployment-map'), {
     ssr: false,
@@ -97,6 +98,20 @@ export default function DeploymentDashboardPage() {
                         </Button>
                     </div>
                 </div>
+
+                 <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger className="text-lg font-semibold">
+                            <div className="flex items-center gap-2">
+                                <Info className="h-5 w-5" />
+                                Introduction
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground">
+                            The Deployment Dashboard provides a centralized hub for managing the entire lifecycle of your global deployments. Use the map to visualize your fleet's status, and access the wizards to perform key operations like new installations, upgrades, migrations, and decommissions. The table below shows your most recent deployment activities.
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     <Card className="col-span-1 lg:col-span-3">

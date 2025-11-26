@@ -1,5 +1,4 @@
 
-
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -14,10 +13,10 @@ import type { User, CmdbTenant, Product, OnboardingConfiguration } from '@/lib/d
 import { getUser } from '@/lib/auth';
 import { Loader2, UploadCloud, ChevronRight } from 'lucide-react';
 import { MultiSelectListBox, type Option } from '@/components/ui/multi-select-list-box';
-import OnboardingPhaseComponent from '../../create/_components/onboarding-phase';
+import OnboardingPhaseComponent from '../../../tenants/create/_components/onboarding-phase';
 import { cn } from '@/lib/utils';
 
-type EditTenantFormState = Partial<Omit<CmdbTenant, '_id' | 'created_at' | 'updated_at'>> & { updateComment?: string };
+type EditTenantFormState = Partial<Omit<CmdbTenant, 'created_at' | 'updated_at'>> & { updateComment?: string };
 
 const statusColors: Record<string, string> = {
     'Not Started': 'bg-gray-200 text-gray-800',
@@ -31,7 +30,7 @@ const statusColors: Record<string, string> = {
 export default function EditTenantPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const [formState, setFormState] = useState<EditTenantFormState>({});
+    const [formState, setFormState] = useState<EditTenantFormState | null>(null);
     const router = useRouter();
     const params = useParams();
     const { id } = params;
@@ -52,14 +51,16 @@ export default function EditTenantPage() {
     useEffect(() => {
         getUser().then(setUser);
         if (!id) return;
-        setLoading(true);
-        try {
-            Promise.all([
-                fetch(`/api/cmdb/tenants/${id}`),
-                fetch('/api/cmdb/tenants'),
-                fetch('/api/products'),
-                fetch('/api/settings/tenant-onboarding')
-            ]).then(async ([tenantRes, allTenantsRes, allProductsRes, configRes]) => {
+
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [tenantRes, allTenantsRes, allProductsRes, configRes] = await Promise.all([
+                    fetch(`/api/cmdb/tenants/${id}`),
+                    fetch('/api/cmdb/tenants'),
+                    fetch('/api/products'),
+                    fetch('/api/settings/tenant-onboarding')
+                ]);
 
                 if (!tenantRes.ok) throw new Error('Failed to fetch tenant data');
                 
@@ -86,13 +87,13 @@ export default function EditTenantPage() {
                         setOnboardingConfig(configs.reduce((latest: any, current: any) => current.version > latest.version ? current : latest, configs[0]));
                     }
                 }
-            });
-
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Error', description: `Failed to load data: ${error.message}` });
-        } finally {
-            setLoading(false);
+            } catch (error: any) {
+                toast({ variant: 'destructive', title: 'Error', description: `Failed to load data: ${error.message}` });
+            } finally {
+                setLoading(false);
+            }
         }
+        fetchData();
     }, [id, toast]);
 
     const handleExpandPhase = (phaseId: string) => {
@@ -135,25 +136,25 @@ export default function EditTenantPage() {
         const { id, value, type } = e.target;
         if (id.startsWith('resources_')) {
             const resourceKey = id.replace('resources_', '');
-            setFormState(prev => ({
+            setFormState(prev => prev ? ({
                 ...prev,
                 resources: {
                     ...prev.resources,
                     [resourceKey]: type === 'number' ? Number(value) : value
                 } as any
-            }));
+            }) : null);
         } else {
-             setFormState(prev => ({ ...prev, [id]: type === 'number' ? Number(value) : value }));
+             setFormState(prev => prev ? ({ ...prev, [id]: type === 'number' ? Number(value) : value }) : null);
         }
     };
     
     const handleMultiSelectChange = (field: 'dependent_tenants' | 'products', selectedItems: { id: string; name: string }[]) => {
-        setFormState(prev => ({ ...prev, [field]: selectedItems }));
+        setFormState(prev => prev ? ({ ...prev, [field]: selectedItems }) : null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formState.updateComment) {
+        if (!formState || !formState.updateComment) {
             toast({ variant: 'destructive', title: 'Error', description: 'Update Reason is required.' });
             return;
         }
@@ -203,7 +204,7 @@ export default function EditTenantPage() {
         fieldName: 'dependent_tenants' | 'products',
         allOptions: Option[]
     ) => {
-        if (!formState._id) return null; // Don't render if formState is not ready
+        if (!formState?._id) return null; // Don't render if formState is not ready
         const currentItemAndSelfFilteredOptions = allOptions.filter(opt => opt.id !== formState._id);
         const chosenItems = (formState[fieldName] || []) as { id: string; name: string; }[];
         const chosenIds = new Set(chosenItems.map(item => item.id));
@@ -235,7 +236,7 @@ export default function EditTenantPage() {
         );
     };
 
-    if (loading) {
+    if (loading || !formState) {
         return <DashboardLayout user={user}><div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div></DashboardLayout>;
     }
 
@@ -275,14 +276,18 @@ export default function EditTenantPage() {
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="dependent_tenants">Dependent Tenants</Label>
-                                    {renderMultiSelect('dependent_tenants', allTenants.map(t => ({id: t._id, label: t.name})))}
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="products">Products</Label>
-                                    {renderMultiSelect('products', allProducts.map(p => ({id: p._id, label: p.name})))}
-                                </div>
+                                {formState._id && (
+                                    <>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="dependent_tenants">Dependent Tenants</Label>
+                                            {renderMultiSelect('dependent_tenants', allTenants.map(t => ({id: t._id, label: t.name})))}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="products">Products</Label>
+                                            {renderMultiSelect('products', allProducts.map(p => ({id: p._id, label: p.name})))}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                              <div className="space-y-2">
                                 <Label>Resources</Label>

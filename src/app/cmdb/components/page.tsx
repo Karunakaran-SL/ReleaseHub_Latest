@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Loader2, Trash2, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { User, CmdbComponent } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
@@ -32,6 +32,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 function DeleteComponentDialog({ componentId, componentName, onComponentDeleted }: { componentId: string, componentName: string, onComponentDeleted: () => void}) {
     const [deleteComment, setDeleteComment] = useState('');
@@ -166,6 +167,20 @@ export default function ComponentsPage() {
             <Link href="/cmdb/components/create">ONBOARD COMPONENT</Link>
           </Button>
         </div>
+
+        <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
+            <AccordionItem value="item-1">
+                <AccordionTrigger className="text-lg font-semibold">
+                    <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        Introduction
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                    This page lists all the reusable software components managed in the CMDB. Components are the building blocks of your applications, such as microservices, libraries, or other shared services. From here, you can onboard new components, view their details, and manage their lifecycle.
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
 
         <Card>
           <CardContent className="p-0">
