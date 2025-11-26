@@ -20,7 +20,7 @@ export default function N8nUiPage() {
 
     return (
         <DashboardLayout user={user}>
-            <main className="flex-1 flex flex-col bg-muted/40">
+            <main className="flex-1 flex flex-col bg-muted/40 h-[calc(100vh-7rem)]">
                 {loading ? (
                     <div className="flex-1 flex items-center justify-center">
                         <Loader2 className="h-8 w-8 animate-spin" />
@@ -28,8 +28,8 @@ export default function N8nUiPage() {
                 ) : (
                     <iframe
                         src={n8nUrl}
-                        className="w-full h-full border-0"
-                        title="n8n Workflow Editor"
+                        className="w-full h-full border-0 block"
+                        title="Default Workflow Editor"
                     />
                 )}
             </main>
