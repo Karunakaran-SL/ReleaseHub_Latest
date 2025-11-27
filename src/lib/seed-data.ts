@@ -204,7 +204,7 @@ const initialOnboardingConfig = {
     version: 1,
     phases: [{
         id: 'phase1', name: 'Information Gathering', ownerName: 'John Doe', ownerEmail: 'john.doe@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Done'],
-        fields: [{ type: 'TextField', name: 'tenantName', label: 'Tenant Name', helpText: 'The official name of the tenant' }]
+        fields: [{ type: 'TextField' as 'TextField', name: 'tenantName', label: 'Tenant Name', helpText: 'The official name of the tenant' }]
     }]
 };
 
@@ -214,9 +214,148 @@ const defaultApprovalConfig = {
     version: 1,
     phases: [{
         id: 'approval1', name: 'Standard Approval', ownerName: 'Release Manager', ownerEmail: 'release@example.com', sendEmailOnComplete: true, statusOptions: ['Pending', 'Approved', 'Rejected'],
-        fields: [{ type: 'Checkbox', name: 'approved', label: 'I approve this request', proof: true }]
+        fields: [{ type: 'Checkbox' as 'Checkbox', name: 'approved', label: 'I approve this request', proof: true }]
     }]
 };
+
+const initialProducts: Omit<Product, '_id'>[] = [
+    {
+        name: 'OneStopShop Portal',
+        owner: 'Alice',
+        owner_email: 'alice@example.com',
+        product_image: 'https://picsum.photos/seed/product1/400/400',
+        approval_needed: true,
+        default_workflow: { id: 'wf-standard', name: 'Standard Approval Workflow' },
+        custom_workflows: [],
+        cmdb: { id: 'cmdb-main', name: 'Main CMDB' },
+        compliance_checks: [{ id: 'cc-pci', name: 'PCI DSS' }],
+        deployment_type: { id: 'dt-cloud', name: 'Cloud' },
+        git_repo: 'https://github.com/example/onestopshop',
+        artifacts_repo: 'https://jfrog.example.com/artifactory/onestopshop',
+        pipeline: 'https://jenkins.example.com/job/onestopshop',
+        specifications: [{ id: 'StandardVirtual', name: 'Standard Virtual Server' }],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        version: '1.2.3',
+    }
+];
+
+const initialTenants: Omit<CmdbTenant, '_id'>[] = [
+    {
+        id: 'acme-corp',
+        name: 'ACME Corporation',
+        description: 'Primary tenant for ACME Corporation.',
+        version: '1.0.0',
+        products: [{ id: 'OneStopShopPortal', name: 'OneStopShop Portal' }],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    }
+];
+
+const initialComponents: Omit<CmdbComponent, '_id'>[] = [
+    {
+        id: 'auth-service',
+        name: 'Authentication Service',
+        version: '2.1.0',
+        tenants: [{ id: 'acme-corp', name: 'ACME Corporation' }],
+        phases: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    }
+];
+
+const initialApplications: Omit<CmdbApplication, '_id'>[] = [
+    {
+        id: 'dashboard-ui',
+        name: 'Dashboard UI',
+        version: '1.5.0',
+        tenants: [{ id: 'acme-corp', name: 'ACME Corporation' }],
+        dependent_components: [{ id: 'auth-service', name: 'Authentication Service' }],
+        phases: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    }
+];
+
+const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
+    { id: 'rest-api', name: 'REST API', description: 'A RESTful API endpoint' }
+];
+
+const initialInterfaces: Omit<CmdbInterface, '_id'>[] = [
+    {
+        id: 'auth-api-v2',
+        name: 'Authentication API v2',
+        type: { id: 'rest-api', name: 'REST API' },
+        version: '2.1.0',
+        owner_name: 'Auth Team',
+        owner_email: 'auth-team@example.com',
+        source: { id: 'auth-service', name: 'Authentication Service' },
+        security: { internal: { secure: true, authentication: true }, external: { secure: true, authentication: true } },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    }
+];
+
+const initialWorkflows: any[] = [
+  { _id: 'wf-standard', id: 'wf-standard', name: 'Standard Approval Workflow', description: 'Default workflow for approvals.'}
+];
+
+const initialComplianceChecks: any[] = [
+  { _id: 'cc-pci', id: 'cc-pci', name: 'PCI DSS', description: 'Payment Card Industry Data Security Standard'}
+];
+
+const initialDeploymentTypes: any[] = [
+  { _id: 'dt-cloud', id: 'dt-cloud', name: 'Cloud', description: 'Standard cloud deployment.'}
+];
+
+const initialServiceContracts: any[] = [];
+const initialSpecVendors: any[] = [];
+const initialSpecHwTypes: any[] = [];
+const initialSpecNetworkCards: any[] = [];
+const initialSpecPlugPowerCords: any[] = [];
+const initialSpecCpuTypes: any[] = [];
+const initialSpecGpuTypes: any[] = [];
+const initialSpecDiskTypes: any[] = [];
+const initialSpecHypervisors: any[] = [];
+const initialLicenses: any[] = [];
+const initialProductLicensing: any[] = [];
+const fullSpecifications: any[] = [];
+const initialPlatformFoundations: any[] = [];
+const initialDevEnvironments: any[] = [];
+const initialTestEnvironments: any[] = [];
+const initialSimulators: any[] = [];
+const initialEmulators: any[] = [];
+const initialSdkApps: any[] = [];
+const initialBaselines: Omit<Baseline, '_id'>[] = [
+    {
+        product: { id: 'OneStopShopPortal', name: 'OneStopShop Portal', version: '1.2.3' },
+        specifications: [{ id: 'StandardVirtual', name: 'Standard Virtual Server', version: '1.0' }],
+        tenants: [],
+        status: 'RELEASED',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: 'seeduser',
+        artifacts: [],
+        package_properties: { location: '', checksum_md5: '', checksum_sha256: '' }
+    }
+];
+const initialDeployments: Omit<Deployment, '_id'>[] = [
+    {
+        productId: 'OneStopShopPortal',
+        specificationId: 'StandardVirtual',
+        hypervisorId: 'vmware-esxi',
+        foundationComponentIds: ['auth-service'],
+        security: {},
+        details: {
+            deploymentId: 'DEP-US-001',
+            customer: 'ACME Corporation',
+            country: 'United States'
+        },
+        createdBy: 'seeduser',
+        createdAt: new Date().toISOString(),
+        status: 'ACTIVE'
+    }
+];
 
 export async function seedDatabase() {
   const client = await clientPromise;
@@ -232,7 +371,7 @@ export async function seedDatabase() {
       if (collectionName === 'products') {
         const productsWithId = data.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, '')}));
         await collection.insertMany(productsWithId);
-      } else if (collectionName === 'cmdb_tenants' || collectionName === 'cmdb_components' || collectionName === 'cmdb_applications' || collectionName === 'cmdb_interfaces') {
+      } else if (collectionName.startsWith('cmdb_') || collectionName === 'workflows' || collectionName === 'compliance_checks' || collectionName === 'deployment_types') {
          await collection.insertMany(data.map(d => ({ ...d, _id: d.id })));
       } else {
         await collection.insertMany(data);
