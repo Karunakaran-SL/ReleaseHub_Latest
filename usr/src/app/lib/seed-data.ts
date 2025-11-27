@@ -537,6 +537,7 @@ const initialTenantOnboarding: Omit<OnboardingConfiguration, '_id'> = {
   ],
 };
 
+
 const initialDefaultApprovalPhases: OnboardingPhase[] = [
     { id: 'product-owner', name: 'Product Owner', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
     { id: 'product-manager', name: 'Product Manager', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
@@ -792,8 +793,8 @@ export async function seedDatabase() {
         await collection.insertMany(productsWithId);
       } else if (collectionName.startsWith('cmdb_') || collectionName.startsWith('specification_') || ['workflows', 'compliance_checks', 'deployment_types', 'service_contracts', 'licenses', 'product_licensing', 'baselines', 'deployments', 'platform_foundations', 'simulators', 'emulators'].includes(collectionName)) {
          await collection.insertMany(data.map(d => ({ ...d, _id: d.id || d._id })));
-      } else if (collectionName.startsWith('settings_approval_')) {
-          await collection.insertMany(data.map(d => ({ ...d, _id: d._id || d.name.replace(/[^a-zA-Z0-9]/g, '') })));
+      } else if (collectionName.startsWith('settings_approval_') || collectionName.startsWith('sdk_apps')) {
+          await collection.insertMany(data);
       }
        else {
         await collection.insertMany(data);
