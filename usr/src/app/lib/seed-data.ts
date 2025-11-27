@@ -198,25 +198,383 @@ const appCatalogData = [
   }
 ];
 
-const initialOnboardingConfig = {
-    _id: "default_tenant_onboarding_v1",
-    name: 'Tenant Onboarding',
-    version: 1,
-    phases: [{
-        id: 'phase1', name: 'Information Gathering', ownerName: 'John Doe', ownerEmail: 'john.doe@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Done'],
-        fields: [{ type: 'TextField' as 'TextField', name: 'tenantName', label: 'Tenant Name', helpText: 'The official name of the tenant' }]
-    }]
+const initialApplicationOnboarding: Omit<OnboardingConfiguration, '_id'> = {
+  name: 'Application Onboarding',
+  version: 1,
+  phases: [
+    {
+      id: "phase-1",
+      name: "Initiate Onboarding",
+      ownerName: "Sales Team",
+      ownerEmail: "sales@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
+        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
+        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
+        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
+      ],
+    },
+    {
+      id: "phase-2",
+      name: "Product Definitions",
+      ownerName: "Product Team",
+      ownerEmail: "product@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
+        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
+        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
+      ],
+    },
+    {
+        id: "phase-3",
+        name: "Detail Design",
+        ownerName: "Engineering Team",
+        ownerEmail: "eng@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
+          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
+          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
+          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
+        ],
+    },
+    {
+        id: "phase-4",
+        name: "Delivery",
+        ownerName: "QA Team",
+        ownerEmail: "qa@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
+            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
+            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
+            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
+        ]
+    },
+     {
+        id: "phase-5",
+        name: "Alpha Qualification",
+        ownerName: "Alpha Team",
+        ownerEmail: "alpha@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
+            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
+            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
+        ]
+    },
+    {
+        id: "phase-6",
+        name: "Prepare customer",
+        ownerName: "Support Team",
+        ownerEmail: "support@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
+            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
+        ]
+    },
+    {
+        id: "phase-7",
+        name: "Beta Qualification",
+        ownerName: "Beta Team",
+        ownerEmail: "beta@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
+            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
+            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
+        ]
+    },
+    {
+        id: "phase-8",
+        name: "Completed",
+        ownerName: "Release Team",
+        ownerEmail: "release@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
+        ]
+    }
+  ],
 };
 
-const defaultApprovalConfig = {
-    _id: "default_approval_v1",
-    name: "Default Approval",
-    version: 1,
-    phases: [{
-        id: 'approval1', name: 'Standard Approval', ownerName: 'Release Manager', ownerEmail: 'release@example.com', sendEmailOnComplete: true, statusOptions: ['Pending', 'Approved', 'Rejected'],
-        fields: [{ type: 'Checkbox' as 'Checkbox', name: 'approved', label: 'I approve this request', proof: true }]
-    }]
+const initialComponentOnboarding: Omit<OnboardingConfiguration, '_id'> = {
+  name: 'Component Onboarding',
+  version: 1,
+  phases: [
+    {
+      id: "phase-1",
+      name: "Initiate Onboarding",
+      ownerName: "Sales Team",
+      ownerEmail: "sales@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
+        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
+        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
+        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
+      ],
+    },
+    {
+      id: "phase-2",
+      name: "Product Definitions",
+      ownerName: "Product Team",
+      ownerEmail: "product@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
+        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
+        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
+      ],
+    },
+    {
+        id: "phase-3",
+        name: "Detail Design",
+        ownerName: "Engineering Team",
+        ownerEmail: "eng@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
+          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
+          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
+          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
+        ],
+    },
+    {
+        id: "phase-4",
+        name: "Delivery",
+        ownerName: "QA Team",
+        ownerEmail: "qa@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
+            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
+            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
+            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
+        ]
+    },
+     {
+        id: "phase-5",
+        name: "Alpha Qualification",
+        ownerName: "Alpha Team",
+        ownerEmail: "alpha@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
+            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
+            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
+        ]
+    },
+    {
+        id: "phase-6",
+        name: "Prepare customer",
+        ownerName: "Support Team",
+        ownerEmail: "support@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
+            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
+        ]
+    },
+    {
+        id: "phase-7",
+        name: "Beta Qualification",
+        ownerName: "Beta Team",
+        ownerEmail: "beta@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
+            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
+            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
+        ]
+    },
+    {
+        id: "phase-8",
+        name: "Completed",
+        ownerName: "Release Team",
+        ownerEmail: "release@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
+        ]
+    }
+  ],
 };
+
+const initialTenantOnboarding: Omit<OnboardingConfiguration, '_id'> = {
+  name: 'Tenant Onboarding',
+  version: 1,
+  phases: [
+    {
+      id: "phase-1",
+      name: "Initiate Onboarding",
+      ownerName: "Sales Team",
+      ownerEmail: "sales@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "requestFormSubmitted", label: "Request Form Submitted", proof: true },
+        { type: "Checkbox", name: "csApproved", label: "CS Approved", proof: true },
+        { type: "Checkbox", name: "pmApproved", label: "PM Approved", proof: true },
+        { type: "Checkbox", name: "productTeamAgreement", label: "Product Team Agreement", proof: true },
+      ],
+    },
+    {
+      id: "phase-2",
+      name: "Product Definitions",
+      ownerName: "Product Team",
+      ownerEmail: "product@example.com",
+      sendEmailOnComplete: true,
+      statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+      fields: [
+        { type: "Checkbox", name: "architectAgreed", label: "Architect Agreed", proof: true },
+        { type: "Checkbox", name: "specChanged", label: "System level Specification changed?", proof: true },
+        { type: "Checkbox", name: "hlDesignApproved", label: "High Level Design approved", proof: true },
+      ],
+    },
+    {
+        id: "phase-3",
+        name: "Detail Design",
+        ownerName: "Engineering Team",
+        ownerEmail: "eng@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+          { type: "Checkbox", name: "detailDesignDone", label: "Detail design done", proof: true },
+          { type: "Checkbox", name: "dependencyIdentified", label: "Dependency identified", proof: true },
+          { type: "Checkbox", name: "pertReady", label: "PERT ready", proof: true },
+          { type: "Checkbox", name: "testPlanReady", label: "Test Plan ready", proof: true },
+        ],
+    },
+    {
+        id: "phase-4",
+        name: "Delivery",
+        ownerName: "QA Team",
+        ownerEmail: "qa@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "implementationDone", label: "Implementation done", proof: true },
+            { type: "Checkbox", name: "unitTestDone", label: "Unit test done", proof: true },
+            { type: "Checkbox", name: "staticCodeDone", label: "Static Code done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationDone", label: "System Integration done", proof: true },
+            { type: "Checkbox", name: "systemIntegrationTestingDone", label: "System Integration Testing done", proof: true },
+            { type: "Checkbox", name: "allTestCasesAutomated", label: "All Test cases are automated", proof: true },
+        ]
+    },
+     {
+        id: "phase-5",
+        name: "Alpha Qualification",
+        ownerName: "Alpha Team",
+        ownerEmail: "alpha@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "uatTestDone", label: "UAT Test done", proof: true },
+            { type: "Checkbox", name: "riskReported", label: "Risk reported", proof: true },
+            { type: "Checkbox", name: "serviceMetricsDone", label: "Service Metrix are done", proof: true },
+        ]
+    },
+    {
+        id: "phase-6",
+        name: "Prepare customer",
+        ownerName: "Support Team",
+        ownerEmail: "support@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "communicatedChanges", label: "Communicated the changes", proof: true },
+            { type: "Checkbox", name: "plannedMCWindow", label: "Planned M/C window", proof: true },
+        ]
+    },
+    {
+        id: "phase-7",
+        name: "Beta Qualification",
+        ownerName: "Beta Team",
+        ownerEmail: "beta@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "deploymentRunbookForBeta", label: "Deployment Runbook for Beta", proof: true },
+            { type: "Checkbox", name: "deploymentDone", label: "Deployment done", proof: true },
+            { type: "Checkbox", name: "betaTestsExecuted", label: "Beta Tests are executed and pass", proof: true },
+        ]
+    },
+    {
+        id: "phase-8",
+        name: "Completed",
+        ownerName: "Release Team",
+        ownerEmail: "release@example.com",
+        sendEmailOnComplete: true,
+        statusOptions: ["Not Started", "In Progress", "Done", "Cancelled", "Skipped"],
+        fields: [
+            { type: "Checkbox", name: "onboardingCompleteClosure", label: "Onboarding complete closure", proof: true },
+        ]
+    }
+  ],
+};
+
+
+const initialDefaultApprovalPhases: OnboardingPhase[] = [
+    { id: 'product-owner', name: 'Product Owner', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'product-manager', name: 'Product Manager', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'quality-assurance', name: 'Quality Assurance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'release-owner', name: 'Release Owner', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'export-control-board', name: 'Export Control Board', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'license-compliance-board', name: 'License Compliance Board', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'security-compliance', name: 'Security Compliance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'data-compliance', name: 'Data Compliance', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'customer', name: 'Customer', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+    { id: 'field-engineer', name: 'Field Engineer', ownerName: '', ownerEmail: '', sendEmailOnComplete: false, statusOptions: ["Not Started", "In Progress", "Approved", "Rejected"], fields: [{ type: 'Checkbox', name: 'approved', label: 'Approved', proof: true }] },
+];
+
+const initialApprovalConfigs = [
+    { name: 'Product Onboarding Approval', key: 'product-onboarding' },
+    { name: 'Tenant Approval', key: 'tenant-approval' },
+    { name: 'Components Approval', key: 'components-approval' },
+    { name: 'Application Approval', key: 'application-approval' },
+    { name: 'Interface Approval', key: 'interface-approval' },
+    { name: 'Baseline Approval', key: 'baseline-approval' },
+    { name: 'Deployment Approval', key: 'deployment-approval' },
+    { name: 'Upgrade Approval', key: 'upgrade-approval' },
+    { name: 'Migration Approval', key: 'migration-approval' },
+    { name: 'Decommission Approval', key: 'decommission-approval' },
+    { name: 'License Approval', key: 'license-approval' },
+    { name: 'Export Control Approval', key: 'export-control-approval' },
+    { name: 'Security Approval', key: 'security-approval' },
+].map(config => ({
+    name: config.name,
+    collectionName: `settings_approval_${config.key.replace(/-/g, '_')}`,
+    data: [{
+        _id: `default_${config.key.replace(/-/g, '_')}_v1`,
+        name: config.name,
+        version: 1,
+        phases: initialDefaultApprovalPhases,
+    }]
+}));
 
 const initialServiceContracts: any[] = [
     { _id: 'ServiceContract_ProSupport_Plus', id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus', description: '24/7 premium support with on-site service.' },
@@ -435,7 +793,10 @@ export async function seedDatabase() {
         await collection.insertMany(productsWithId);
       } else if (collectionName.startsWith('cmdb_') || collectionName.startsWith('specification_') || ['workflows', 'compliance_checks', 'deployment_types', 'service_contracts', 'licenses', 'product_licensing', 'baselines', 'deployments', 'platform_foundations', 'simulators', 'emulators'].includes(collectionName)) {
          await collection.insertMany(data.map(d => ({ ...d, _id: d.id || d._id })));
-      } else {
+      } else if (collectionName.startsWith('settings_approval_')) {
+          await collection.insertMany(data.map(d => ({ ...d, _id: d._id || d.name.replace(/[^a-zA-Z0-9]/g, '') })));
+      }
+       else {
         await collection.insertMany(data);
       }
       seededCount++;
@@ -478,33 +839,13 @@ export async function seedDatabase() {
   await seedCollection('deployments', initialDeployments);
 
   // Seed settings collections
-  await seedCollection('settings_tenant_onboarding', [initialOnboardingConfig]);
-  await seedCollection('settings_component_onboarding', [{ ...initialOnboardingConfig, _id: 'default_component_onboarding_v1', name: 'Component Onboarding'}]);
-  await seedCollection('settings_application_onboarding', [{ ...initialOnboardingConfig, _id: 'default_application_onboarding_v1', name: 'Application Onboarding'}]);
-  await seedCollection('settings_baseline_onboarding', [{ ...initialOnboardingConfig, _id: 'default_baseline_validation_v1', name: 'Baseline Validation'}]);
+  await seedCollection('settings_tenant_onboarding', [{ ...initialTenantOnboarding, _id: 'default_tenant_onboarding_v1' }]);
+  await seedCollection('settings_component_onboarding', [{ ...initialComponentOnboarding, _id: 'default_component_onboarding_v1' }]);
+  await seedCollection('settings_application_onboarding', [{ ...initialApplicationOnboarding, _id: 'default_application_onboarding_v1' }]);
+  await seedCollection('settings_baseline_onboarding', [{ ...initialTenantOnboarding, _id: 'default_baseline_validation_v1', name: 'Baseline Validation'}]);
   
-  const approvalTypes = [
-    'product_onboarding',
-    'tenant_approval',
-    'components_approval',
-    'application_approval',
-    'interface_approval',
-    'baseline_approval',
-    'deployment_approval',
-    'upgrade_approval',
-    'migration_approval',
-    'decommission_approval',
-    'license_approval',
-    'export_control_approval',
-    'security_approval',
-  ];
-  
-  for (const type of approvalTypes) {
-      await seedCollection(`settings_approval_${type}`, [{
-          ...defaultApprovalConfig,
-          _id: `default_${type}_v1`,
-          name: `${type.replace(/_/g, ' ')} Approval`
-      }]);
+  for (const config of initialApprovalConfigs) {
+    await seedCollection(config.collectionName, config.data);
   }
 
   // After seeding, generate dependency trees
