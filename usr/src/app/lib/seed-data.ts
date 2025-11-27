@@ -204,7 +204,7 @@ const initialOnboardingConfig = {
     version: 1,
     phases: [{
         id: 'phase1', name: 'Information Gathering', ownerName: 'John Doe', ownerEmail: 'john.doe@example.com', sendEmailOnComplete: true, statusOptions: ['Not Started', 'In Progress', 'Done'],
-        fields: [{ type: 'TextField', name: 'tenantName', label: 'Tenant Name', helpText: 'The official name of the tenant' }]
+        fields: [{ type: 'TextField' as 'TextField', name: 'tenantName', label: 'Tenant Name', helpText: 'The official name of the tenant' }]
     }]
 };
 
@@ -214,39 +214,210 @@ const defaultApprovalConfig = {
     version: 1,
     phases: [{
         id: 'approval1', name: 'Standard Approval', ownerName: 'Release Manager', ownerEmail: 'release@example.com', sendEmailOnComplete: true, statusOptions: ['Pending', 'Approved', 'Rejected'],
-        fields: [{ type: 'Checkbox', name: 'approved', label: 'I approve this request', proof: true }]
+        fields: [{ type: 'Checkbox' as 'Checkbox', name: 'approved', label: 'I approve this request', proof: true }]
     }]
 };
 
-const initialProducts: any[] = [];
-const initialTenants: any[] = [];
-const initialComponents: any[] = [];
-const initialApplications: any[] = [];
-const initialInterfaces: any[] = [];
-const initialInterfaceTypes: any[] = [];
-const initialWorkflows: any[] = [];
-const initialComplianceChecks: any[] = [];
-const initialDeploymentTypes: any[] = [];
-const initialServiceContracts: any[] = [];
-const initialSpecVendors: any[] = [];
-const initialSpecHwTypes: any[] = [];
-const initialSpecNetworkCards: any[] = [];
-const initialSpecPlugPowerCords: any[] = [];
-const initialSpecCpuTypes: any[] = [];
-const initialSpecGpuTypes: any[] = [];
-const initialSpecDiskTypes: any[] = [];
-const initialSpecHypervisors: any[] = [];
-const initialLicenses: any[] = [];
-const initialProductLicensing: any[] = [];
-const fullSpecifications: any[] = [];
-const initialPlatformFoundations: any[] = [];
-const initialDevEnvironments: any[] = [];
-const initialTestEnvironments: any[] = [];
-const initialSimulators: any[] = [];
-const initialEmulators: any[] = [];
-const initialSdkApps: any[] = [];
-const initialBaselines: any[] = [];
-const initialDeployments: any[] = [];
+const initialServiceContracts: any[] = [
+    { _id: 'ServiceContract_ProSupport_Plus', id: 'ServiceContract_ProSupport_Plus', name: 'ProSupport Plus', description: '24/7 premium support with on-site service.' },
+    { _id: 'ServiceContract_Standard_Warranty', id: 'ServiceContract_Standard_Warranty', name: 'Standard Warranty', description: 'Standard 3-year warranty.' },
+];
+const initialSpecVendors: any[] = [
+    { _id: 'HPE', id: 'HPE', name: 'HPE', description: 'Hewlett Packard Enterprise' },
+    { _id: 'Dell', id: 'Dell', name: 'Dell', description: 'Dell EMC' },
+    { _id: 'Cisco', id: 'Cisco', name: 'Cisco', description: 'Cisco Systems' },
+];
+const initialSpecHwTypes: any[] = [
+    { _id: 'Blade', id: 'Blade', name: 'Blade', description: 'Blade Server for chassis-based systems.' },
+    { _id: 'Rack', id: 'Rack', name: 'Rack', description: 'Rack-mountable server.' },
+    { _id: 'Virtual', id: 'Virtual', name: 'Virtual', description: 'Virtual Machine cluster specification.' },
+];
+const initialSpecNetworkCards: any[] = [
+    { _id: 'Ethernet_10G_SFP', id: 'Ethernet_10G_SFP', name: 'Ethernet 10G SFP+', description: '10 Gigabit SFP+ NIC' },
+    { _id: 'Ethernet_40G_QSFP+', id: 'Ethernet_40G_QSFP+', name: 'Ethernet 40G QSFP+', description: '40 Gigabit QSFP+ NIC' },
+];
+const initialSpecPlugPowerCords: any[] = [
+    { _id: 'NEMA_5_15P', id: 'NEMA_5_15P', name: 'NEMA 5-15P', description: 'Standard North American 3-prong plug.' },
+    { _id: 'IEC_C14', id: 'IEC_C14', name: 'IEC C14', description: 'Standard for most data center equipment.' },
+];
+const initialSpecCpuTypes: any[] = [
+    { _id: 'Intel_Xeon_Scalable', id: 'Intel_Xeon_Scalable', name: 'Intel Xeon Scalable', description: 'Intel Xeon Scalable processor family.' },
+    { _id: 'AMD_EPYC', id: 'AMD_EPYC', name: 'AMD EPYC', description: 'AMD EPYC server processor family.' },
+];
+const initialSpecGpuTypes: any[] = [
+    { _id: 'NVIDIA_A100', id: 'NVIDIA_A100', name: 'NVIDIA A100', description: 'NVIDIA A100 Tensor Core GPU.' },
+    { _id: 'AMD_Instinct_MI250X', id: 'AMD_Instinct_MI250X', name: 'AMD Instinct MI250X', description: 'AMD Instinct MI250X accelerator.' },
+];
+const initialSpecDiskTypes: any[] = [
+    { _id: 'SSD_NVMe_U2_PCIeGen4', id: 'SSD_NVMe_U2_PCIeGen4', name: 'SSD NVMe U.2 PCIe Gen4', description: 'High-speed NVMe solid state drive.' },
+    { _id: 'HDD_SAS_10K', id: 'HDD_SAS_10K', name: 'HDD SAS 10K', description: '10,000 RPM SAS hard disk drive.' },
+];
+const initialSpecHypervisors: any[] = [
+    { _id: 'vmware-esxi', id: 'vmware-esxi', name: 'VMware ESXi', description: 'VMware ESXi hypervisor.' },
+    { _id: 'kvm', id: 'kvm', name: 'KVM', description: 'Kernel-based Virtual Machine.' },
+];
+const initialLicenses: Omit<License, '_id'>[] = [
+    { id: 'apache-2.0', name: 'Apache License 2.0', type: 'open-source', owner: 'Apache Foundation', components: ['auth-service'], status: 'active' },
+    { id: 'oracle-java-se', name: 'Oracle Java SE', type: 'proprietary', owner: 'Oracle', components: ['dashboard-ui'], status: 'active' },
+];
+const initialProductLicensing: Omit<ProductLicensing, '_id'>[] = [
+    { id: 'pl-onestopshop', product_id: 'OneStopShopPortal', license_model: 'hybrid', entitlements: ['premium-support', 'analytics-module'], package_included: true, validity: 'Perpetual', compliance: 'Audited' },
+];
+const fullSpecifications: Omit<Specification, '_id'>[] = [
+    { name: 'StandardVirtual', hw_type: { id: 'Virtual', name: 'Virtual' }, vendor: 'Generic', clusterName: 'Standard K8s Cluster', nodeCount: { controlPlane: 3, worker: 5 }, nodes: [] },
+    { name: 'HPE-Blade-Gen11', hw_type: { id: 'Blade', name: 'Blade' }, vendor: 'HPE', bladeCount: 8, symmetric: true, blades: [{ name: "Blade Template", hasGpu: true }] }
+];
+const initialPlatformFoundations: any[] = [
+    { _id: 'pf-k8s-standard', name: 'Standard Kubernetes Foundation', specification: { _id: 'StandardVirtual', id: 'StandardVirtual', name: 'StandardVirtual' }, kubernetes: { distribution: 'k3s', controlPlaneNodes: [{id: 'cp-1', label: 'cp-1'}], workerNodes: [{id: 'w-1', label: 'w-1'}] } }
+];
+const initialDevEnvironments: Omit<DevelopmentEnvironment, '_id'>[] = [
+    { name: 'OSS-Dev-Env', productId: 'OneStopShopPortal', productName: 'OneStopShop Portal', specificationId: 'StandardVirtual', specName: 'Standard Virtual Server', createdAt: new Date().toISOString(), createdBy: 'seeduser', status: 'READY' },
+];
+const initialTestEnvironments: Omit<TestEnvironment, '_id'>[] = [
+    { name: 'OSS-Perf-Test-Env', productId: 'OneStopShopPortal', productName: 'OneStopShop Portal', specificationId: 'HPE-Blade-Gen11', specName: 'HPE Blade Gen11', createdAt: new Date().toISOString(), createdBy: 'seeduser', status: 'PROVISIONING' },
+];
+const initialSimulators: Omit<Simulator, '_id'>[] = [
+    { name: 'Network Latency Simulator', dockerImage: 'slowdown/net-latency:latest' },
+];
+const initialEmulators: Omit<Emulator, '_id'>[] = [
+    { name: 'ARM64 QEMU Emulator', dockerImage: 'qemu/arm64:latest' },
+];
+const initialSdkApps: Omit<SdkApp, '_id'>[] = [
+    { projectName: 'billing-service-sdk', group: 'com.acme.billing', dependencies: [{ id: 'sql-postgres', name: 'SQL Database (PostgreSQL)', description: 'Adds JDBC driver and configuration for PostgreSQL.', group: 'Databases' }], environmentType: 'development', environmentId: 'OSS-Dev-Env', status: 'READY', version: '1.0.0' }
+];
+
+const initialProducts: Omit<Product, '_id'>[] = [
+    {
+        name: 'OneStopShop Portal',
+        owner: 'Alice',
+        owner_email: 'alice@example.com',
+        product_image: 'https://picsum.photos/seed/product1/400/400',
+        approval_needed: true,
+        default_workflow: { id: 'wf-standard', name: 'Standard Approval Workflow' },
+        custom_workflows: [],
+        cmdb: { id: 'cmdb-main', name: 'Main CMDB' },
+        compliance_checks: [{ id: 'cc-pci', name: 'PCI DSS' }],
+        deployment_type: { id: 'dt-cloud', name: 'Cloud' },
+        git_repo: 'https://github.com/example/onestopshop',
+        artifacts_repo: 'https://jfrog.example.com/artifactory/onestopshop',
+        pipeline: 'https://jenkins.example.com/job/onestopshop',
+        specifications: [{ id: 'StandardVirtual', name: 'Standard Virtual Server' }],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        version: '1.2.3',
+    }
+];
+
+const initialTenants: Omit<CmdbTenant, '_id'>[] = [
+    {
+        id: 'acme-corp',
+        name: 'ACME Corporation',
+        description: 'Primary tenant for ACME Corporation.',
+        version: '1.0.0',
+        products: [{ id: 'OneStopShopPortal', name: 'OneStopShop Portal' }],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        phases: [],
+    }
+];
+
+const initialComponents: Omit<CmdbComponent, '_id'>[] = [
+    {
+        id: 'auth-service',
+        name: 'Authentication Service',
+        version: '2.1.0',
+        tenants: [{ id: 'acme-corp', name: 'ACME Corporation' }],
+        phases: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        provided_interfaces: [{id: 'auth-api-v2', name: 'Authentication API v2'}]
+    }
+];
+
+const initialApplications: Omit<CmdbApplication, '_id'>[] = [
+    {
+        id: 'dashboard-ui',
+        name: 'Dashboard UI',
+        version: '1.5.0',
+        tenants: [{ id: 'acme-corp', name: 'ACME Corporation' }],
+        dependent_components: [{ id: 'auth-service', name: 'Authentication Service' }],
+        dependent_interfaces: [{ id: 'auth-api-v2', name: 'Authentication API v2' }],
+        phases: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    }
+];
+
+const initialInterfaceTypes: Omit<CmdbInterfaceType, '_id'>[] = [
+    { id: 'rest-api', name: 'REST API', description: 'A RESTful API endpoint' }
+];
+
+const initialInterfaces: Omit<CmdbInterface, '_id'>[] = [
+    {
+        id: 'auth-api-v2',
+        name: 'Authentication API v2',
+        type: { id: 'rest-api', name: 'REST API' },
+        version: '2.1.0',
+        owner_name: 'Auth Team',
+        owner_email: 'auth-team@example.com',
+        source: { id: 'auth-service', name: 'Authentication Service' },
+        security: { internal: { secure: true, authentication: true }, external: { secure: true, authentication: true } },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    }
+];
+
+const initialWorkflows: any[] = [
+  { _id: 'wf-standard', id: 'wf-standard', name: 'Standard Approval Workflow', description: 'Default workflow for approvals.'}
+];
+
+const initialComplianceChecks: any[] = [
+  { _id: 'cc-pci', id: 'cc-pci', name: 'PCI DSS', description: 'Payment Card Industry Data Security Standard'}
+];
+
+const initialDeploymentTypes: any[] = [
+  { _id: 'dt-cloud', id: 'dt-cloud', name: 'Cloud', description: 'Standard cloud deployment.'}
+];
+
+const initialBaselines: Omit<Baseline, '_id'>[] = [
+    {
+        _id: 'OneStopShopPortal_1.2.3_baseline',
+        product: { id: 'OneStopShopPortal', name: 'OneStopShop Portal', version: '1.2.3' },
+        specifications: [{ id: 'StandardVirtual', name: 'Standard Virtual Server', version: '1.0' }],
+        tenants: [{
+            id: 'acme-corp',
+            name: 'ACME Corporation',
+            version: '1.0.0',
+            components: [{id: 'auth-service', name: 'Authentication Service', version: '2.1.0'}],
+            applications: [{id: 'dashboard-ui', name: 'Dashboard UI', version: '1.5.0'}]
+        }],
+        status: 'RELEASED',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: 'seeduser',
+        artifacts: [],
+        package_properties: { location: '', checksum_md5: '', checksum_sha256: '' }
+    }
+];
+const initialDeployments: Omit<Deployment, '_id'>[] = [
+    {
+        _id: 'DEP-US-001',
+        productId: 'OneStopShopPortal',
+        specificationId: 'StandardVirtual',
+        hypervisorId: 'vmware-esxi',
+        foundationComponentIds: ['auth-service'],
+        security: {},
+        details: {
+            deploymentId: 'DEP-US-001',
+            customer: 'ACME Corporation',
+            country: 'United States',
+            region: 'Americas'
+        },
+        createdBy: 'seeduser',
+        createdAt: new Date().toISOString(),
+        status: 'ACTIVE'
+    }
+];
 
 export async function seedDatabase() {
   const client = await clientPromise;
@@ -262,8 +433,8 @@ export async function seedDatabase() {
       if (collectionName === 'products') {
         const productsWithId = data.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, '')}));
         await collection.insertMany(productsWithId);
-      } else if (collectionName === 'cmdb_tenants' || collectionName === 'cmdb_components' || collectionName === 'cmdb_applications' || collectionName === 'cmdb_interfaces') {
-         await collection.insertMany(data.map(d => ({ ...d, _id: d.id })));
+      } else if (collectionName.startsWith('cmdb_') || collectionName.startsWith('specification_') || ['workflows', 'compliance_checks', 'deployment_types', 'service_contracts', 'licenses', 'product_licensing', 'baselines', 'deployments'].includes(collectionName)) {
+         await collection.insertMany(data.map(d => ({ ...d, _id: d.id || d._id })));
       } else {
         await collection.insertMany(data);
       }
