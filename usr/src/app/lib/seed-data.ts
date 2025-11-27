@@ -258,17 +258,17 @@ const initialSpecHypervisors: any[] = [
 ];
 const initialLicenses: Omit<License, '_id'>[] = [
     { id: 'apache-2.0', name: 'Apache License 2.0', type: 'open-source', owner: 'Apache Foundation', components: ['auth-service'], status: 'active' },
-    { id: 'oracle-java-se', name: 'Oracle Java SE', type: 'proprietary', owner: 'Oracle', components: ['dashboard-ui'], status: 'active' },
+    { id: 'oracle-java-se', name: 'Oracle Java SE', type: 'proprietary', owner: 'Oracle', apps: ['dashboard-ui'], status: 'active' },
 ];
 const initialProductLicensing: Omit<ProductLicensing, '_id'>[] = [
     { id: 'pl-onestopshop', product_id: 'OneStopShopPortal', license_model: 'hybrid', entitlements: ['premium-support', 'analytics-module'], package_included: true, validity: 'Perpetual', compliance: 'Audited' },
 ];
 const fullSpecifications: Omit<Specification, '_id'>[] = [
-    { name: 'StandardVirtual', hw_type: { id: 'Virtual', name: 'Virtual' }, vendor: 'Generic', clusterName: 'Standard K8s Cluster', nodeCount: { controlPlane: 3, worker: 5 }, nodes: [] },
-    { name: 'HPE-Blade-Gen11', hw_type: { id: 'Blade', name: 'Blade' }, vendor: 'HPE', bladeCount: 8, symmetric: true, blades: [{ name: "Blade Template", hasGpu: true }] }
+    { _id: 'StandardVirtual', name: 'Standard Virtual Server', hw_type: { id: 'Virtual', name: 'Virtual' }, vendor: 'Generic', clusterName: 'Standard K8s Cluster', nodeCount: { controlPlane: 3, worker: 5 }, nodes: [] },
+    { _id: 'HPE-Blade-Gen11', name: 'HPE Blade Gen11', hw_type: { id: 'Blade', name: 'Blade' }, vendor: 'HPE', bladeCount: 8, symmetric: true, blades: [{ name: "Blade Template", hasGpu: true, cpuType: 'Intel_Xeon_Scalable', cpuCores: 32, memory: 256, diskType: 'SSD_NVMe_U2_PCIeGen4', diskCapacity: 4096 }] }
 ];
 const initialPlatformFoundations: any[] = [
-    { _id: 'pf-k8s-standard', name: 'Standard Kubernetes Foundation', specification: { _id: 'StandardVirtual', id: 'StandardVirtual', name: 'StandardVirtual' }, kubernetes: { distribution: 'k3s', controlPlaneNodes: [{id: 'cp-1', label: 'cp-1'}], workerNodes: [{id: 'w-1', label: 'w-1'}] } }
+    { _id: 'pf-k8s-standard', id: 'pf-k8s-standard', name: 'Standard Kubernetes Foundation', specification: { _id: 'StandardVirtual', id: 'StandardVirtual', name: 'StandardVirtual' }, kubernetes: { distribution: 'k3s', controlPlaneNodes: [{id: 'cp-1', label: 'cp-1'}], workerNodes: [{id: 'w-1', label: 'w-1'}] } }
 ];
 const initialDevEnvironments: Omit<DevelopmentEnvironment, '_id'>[] = [
     { name: 'OSS-Dev-Env', productId: 'OneStopShopPortal', productName: 'OneStopShop Portal', specificationId: 'StandardVirtual', specName: 'Standard Virtual Server', createdAt: new Date().toISOString(), createdBy: 'seeduser', status: 'READY' },
@@ -277,10 +277,10 @@ const initialTestEnvironments: Omit<TestEnvironment, '_id'>[] = [
     { name: 'OSS-Perf-Test-Env', productId: 'OneStopShopPortal', productName: 'OneStopShop Portal', specificationId: 'HPE-Blade-Gen11', specName: 'HPE Blade Gen11', createdAt: new Date().toISOString(), createdBy: 'seeduser', status: 'PROVISIONING' },
 ];
 const initialSimulators: Omit<Simulator, '_id'>[] = [
-    { name: 'Network Latency Simulator', dockerImage: 'slowdown/net-latency:latest' },
+    { _id: 'sim-network-latency', name: 'Network Latency Simulator', dockerImage: 'slowdown/net-latency:latest' },
 ];
 const initialEmulators: Omit<Emulator, '_id'>[] = [
-    { name: 'ARM64 QEMU Emulator', dockerImage: 'qemu/arm64:latest' },
+    { _id: 'emu-arm64-qemu', name: 'ARM64 QEMU Emulator', dockerImage: 'qemu/arm64:latest' },
 ];
 const initialSdkApps: Omit<SdkApp, '_id'>[] = [
     { projectName: 'billing-service-sdk', group: 'com.acme.billing', dependencies: [{ id: 'sql-postgres', name: 'SQL Database (PostgreSQL)', description: 'Adds JDBC driver and configuration for PostgreSQL.', group: 'Databases' }], environmentType: 'development', environmentId: 'OSS-Dev-Env', status: 'READY', version: '1.0.0' }
@@ -433,7 +433,7 @@ export async function seedDatabase() {
       if (collectionName === 'products') {
         const productsWithId = data.map(p => ({...p, _id: p.name.replace(/[^a-zA-Z0-9]/g, '')}));
         await collection.insertMany(productsWithId);
-      } else if (collectionName.startsWith('cmdb_') || collectionName.startsWith('specification_') || ['workflows', 'compliance_checks', 'deployment_types', 'service_contracts', 'licenses', 'product_licensing', 'baselines', 'deployments'].includes(collectionName)) {
+      } else if (collectionName.startsWith('cmdb_') || collectionName.startsWith('specification_') || ['workflows', 'compliance_checks', 'deployment_types', 'service_contracts', 'licenses', 'product_licensing', 'baselines', 'deployments', 'platform_foundations', 'simulators', 'emulators'].includes(collectionName)) {
          await collection.insertMany(data.map(d => ({ ...d, _id: d.id || d._id })));
       } else {
         await collection.insertMany(data);
