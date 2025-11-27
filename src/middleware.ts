@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { decrypt } from '@/lib/session';
-import { cookies } from 'next/headers';
 
 const publicRoutes = ['/login'];
-const protectedRoutes = ['/', '/products', '/api-docs'];
+const protectedRoutes = ['/', '/products', '/api-docs', '/audits', '/cmdb', '/dependency-metrics', '/fleet-management', '/license', '/platform-engineering', '/release-management', '/settings', '/specifications', '/workflows'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const sessionCookie = cookies().get('session')?.value;
+  const sessionCookie = request.cookies.get('session')?.value;
 
   let session;
   try {
@@ -18,9 +17,9 @@ export async function middleware(request: NextRequest) {
     session = null;
   }
 
-  // Redirect to home if a logged-in user tries to access the login page
+  // Redirect to dashboard if a logged-in user tries to access the login page
   if (pathname.startsWith('/login') && session) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   // Allow access to public routes for unauthenticated users
@@ -28,11 +27,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protect routes
-  if (protectedRoutes.some(route => pathname.startsWith(route))) {
-    if (!session) {
-        return NextResponse.redirect(new URL('/login', request.url));
-    }
+  // Protect all other routes
+  if (!pathname.startsWith('/login') && !session) {
+      return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();
