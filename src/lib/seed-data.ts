@@ -2547,6 +2547,56 @@ const generateDeployments = (): Omit<Deployment, '_id'>[] => {
 
 const initialDeployments = generateDeployments();
 
+const generateDataFlows = () => {
+  const names = [
+    'Ingest - Telemetry',
+    'Ingest - Metrics',
+    'Transform - Aggregation',
+    'Transform - Normalization',
+    'Delivery - Warehouse',
+    'Delivery - RealTime API',
+    'Enrichment - UserProfiles',
+    'Enrichment - RiskScores',
+    'Batch - Nightly ETL',
+    'Streaming - ClickStream',
+    'Streaming - OrderEvents',
+    'Sync - CRM Integration',
+  ];
+
+  const statuses = ['RUNNING', 'PAUSED', 'FAILED', 'IDLE'];
+  const flows = [] as any[];
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i];
+    const product = initialProducts[i % initialProducts.length];
+    const status = statuses[i % statuses.length];
+    const throughput = Math.round(50 + Math.random() * 1000);
+    const successRate = +(80 + Math.random() * 20).toFixed(2);
+    const lagSeconds = Math.round(Math.random() * 500);
+    const lastRunAt = new Date(2025, (i % 11), (i % 28) + 1, 2 + (i % 20)).toISOString();
+
+    flows.push({
+      id: `DF-${1000 + i}`,
+      name,
+      productId: product.name.replace(/[^a-zA-Z0-9]/g, ''),
+      stages: [
+        { id: `s-${i}-1`, name: 'Ingest', status: 'OK' },
+        { id: `s-${i}-2`, name: 'Transform', status: 'OK' },
+        { id: `s-${i}-3`, name: 'Deliver', status: status === 'FAILED' ? 'Failed' : 'OK' },
+      ],
+      status,
+      throughput,
+      successRate,
+      lagSeconds,
+      lastRunAt,
+      createdAt: new Date(2024, i % 12, (i % 28) + 1).toISOString(),
+      createdBy: 'seed-user'
+    });
+  }
+  return flows;
+};
+
+const initialDataFlows = generateDataFlows();
+
 
 const initialWorkflows: { _id: string; id: string; name: string; description: string }[] = [
     { _id: 'StandardApproval', id: 'StandardApproval', name: 'Standard Approval', description: 'Default workflow with a single approval step.' },
@@ -2953,6 +3003,7 @@ export async function seedDatabase() {
         { name: 'sdk_apps', data: initialSdkApps.map(app => ({ ...app, createdAt: new Date().toISOString(), createdBy: 'seed-user' })) },
         { name: 'baselines', data: initialBaselines.map(b => ({ ...b, _id: `${b.product.id}_${b.product.version}` })) },
         { name: 'deployments', data: initialDeployments.map(d => ({ ...d, _id: d.details.deploymentId })) },
+        { name: 'dataflows', data: initialDataFlows.map(d => ({ ...d, _id: d.id })) },
         { name: 'app_catalog', data: appCatalogData },
     ];
     

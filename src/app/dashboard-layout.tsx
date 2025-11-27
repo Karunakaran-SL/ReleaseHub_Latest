@@ -213,7 +213,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboard/data-flow" isActive={pathname.startsWith('/dashboard/data-flow')}>
                             Data Flow Mgmt
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>

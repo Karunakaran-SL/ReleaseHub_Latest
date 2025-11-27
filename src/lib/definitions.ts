@@ -33,10 +33,6 @@ export type Product = {
     id: string;
     name: string;
   }[];
-  cmdb: {
-    id: string;
-    name: string;
-  };
   compliance_checks: {
     id:string;
     name: string;
