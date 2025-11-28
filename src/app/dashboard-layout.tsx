@@ -228,7 +228,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboard/workflow-mgmt" isActive={pathname.startsWith('/dashboard/workflow-mgmt')}>
                             Workflow Mgmt
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
