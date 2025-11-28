@@ -233,7 +233,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboard/security-monitoring" isActive={pathname.startsWith('/dashboard/security-monitoring')}>
                             Security Monitoring
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -608,13 +608,6 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
-
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Jobs' }}>
-                    <ClipboardList />
-                    Jobs
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
 
                 <Collapsible asChild defaultOpen={isAuditPage}>
                   <SidebarMenuItem>
