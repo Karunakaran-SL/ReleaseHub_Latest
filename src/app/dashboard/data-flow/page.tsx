@@ -189,6 +189,7 @@ export default function DataFlowMgmtPage() {
     }, {});
 
     const statusData = Object.entries(statusCounts).map(([status, value]) => ({ name: status, value }));
+    const chartColors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
     const throughputData = effectiveFlows.map((f: Flow) => ({ name: f.name, throughput: f.throughput }));
 
@@ -245,21 +246,14 @@ export default function DataFlowMgmtPage() {
                     <div className="grid gap-6 md:grid-cols-3">
                         <Widget title="Pipeline Health" description="Overview of pipeline statuses">
                             {loading ? <div className="h-40 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> : (
-                                <ChartContainer config={{ running: {label: 'Running', color: 'var(--color-active)'}, paused: {label: 'Paused', color: 'var(--color-upgrading)'}, failed: {label: 'Failed', color: 'var(--color-failed)'}}} className="min-h-[160px]">
+                                <ChartContainer config={{}} className="min-h-[160px]">
                                     <ResponsiveContainer width="100%" height={160}>
                                         <PieChart>
                                             <Tooltip content={<ChartTooltipContent />} />
                                             <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={40} outerRadius={70}>
-                                                {statusData.map((entry, idx) => {
-                                                    const colorMap: Record<string, string> = {
-                                                        running: 'var(--color-active)',
-                                                        paused: 'var(--color-upgrading)',
-                                                        failed: 'var(--color-failed)',
-                                                        idle: 'var(--color-provisioning)',
-                                                    };
-                                                    const fillColor = colorMap[(entry.name || '').toString().toLowerCase()] || 'var(--color-active)';
-                                                    return <Cell key={`cell-${idx}`} fill={fillColor} />;
-                                                })}
+                                                {statusData.map((entry, idx) => (
+                                                    <Cell key={`cell-${idx}`} fill={chartColors[idx % chartColors.length]} />
+                                                ))}
                                             </Pie>
                                         </PieChart>
                                     </ResponsiveContainer>
@@ -269,14 +263,14 @@ export default function DataFlowMgmtPage() {
 
                         <Widget title="Throughput" description="Stream records/sec across pipelines">
                             {loading ? <div className="h-40 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> : (
-                                <ChartContainer config={{ throughput: { label: 'Throughput', color: 'var(--color-active)' } }} className="min-h-[160px]">
+                                <ChartContainer config={{ throughput: { label: 'Throughput', color: 'hsl(var(--chart-2))' } }} className="min-h-[160px]">
                                     <ResponsiveContainer width="100%" height={160}>
                                         <BarChart data={throughputData}>
                                             <CartesianGrid vertical={false} />
-                                            <XAxis dataKey="name" tickLine={false} axisLine={false} />
+                                            <XAxis dataKey="name" tickLine={false} axisLine={false} tick={false} />
                                             <YAxis />
                                             <Tooltip content={<ChartTooltipContent />} />
-                                            <Bar dataKey="throughput" fill="var(--color-active)" radius={[4,4,0,0]} />
+                                            <Bar dataKey="throughput" fill="hsl(var(--chart-2))" radius={[4,4,0,0]} />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </ChartContainer>
@@ -292,7 +286,7 @@ export default function DataFlowMgmtPage() {
                                             <XAxis dataKey="name" tickLine={false} axisLine={false} />
                                             <YAxis />
                                             <Tooltip content={<ChartTooltipContent />} />
-                                            <Bar dataKey="value" fill="var(--color-active)" radius={[4,4,0,0]} />
+                                            <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={[4,4,0,0]} />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </ChartContainer>
@@ -304,7 +298,7 @@ export default function DataFlowMgmtPage() {
                         <Widget title="Recent Dataflows" description="Latest data pipelines and events">
                             {loading ? <div className="h-40 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin"/></div> : (
                                 <div className="space-y-2">
-                                    {effectiveFlows.map(flow => (
+                                    {effectiveFlows.slice(0, 5).map(flow => (
                                         <div key={flow._id || flow.id} className="flex items-center justify-between rounded-md border p-3">
                                             <div>
                                                 <div className="font-medium">{flow.name}</div>
