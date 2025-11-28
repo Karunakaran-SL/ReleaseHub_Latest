@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BarChart as BarChartIcon, List, CheckCircle, Package, Move, Trash2, Rocket, FileCode, Users, HardDrive, Puzzle, AppWindow } from 'lucide-react';
+import { Move, Trash2, Rocket, FileCode, Users, HardDrive, Puzzle, AppWindow, GitGraph } from 'lucide-react';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
-import type { User, Deployment, Product, Baseline, CmdbTenant, CmdbComponent, CmdbApplication } from '@/lib/definitions';
+import type { User, Deployment, Product, Baseline, CmdbTenant, CmdbComponent, CmdbApplication, Specification } from '@/lib/definitions';
 import { Loader2 } from 'lucide-react';
 import { Bar, BarChart, Pie, PieChart, Cell, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -213,19 +213,21 @@ export default function DashboardPage() {
     const [tenants, setTenants] = useState<CmdbTenant[]>([]);
     const [components, setComponents] = useState<CmdbComponent[]>([]);
     const [applications, setApplications] = useState<CmdbApplication[]>([]);
+    const [specifications, setSpecifications] = useState<Specification[]>([]);
 
     useEffect(() => {
         getUser().then(setUser);
         async function fetchData() {
             setLoading(true);
             try {
-                const [deploymentsRes, productsRes, baselinesRes, tenantsRes, componentsRes, applicationsRes] = await Promise.all([
+                const [deploymentsRes, productsRes, baselinesRes, tenantsRes, componentsRes, applicationsRes, specificationsRes] = await Promise.all([
                     fetch('/api/deployments'),
                     fetch('/api/products'),
                     fetch('/api/baselines'),
                     fetch('/api/cmdb/tenants'),
                     fetch('/api/cmdb/components'),
-                    fetch('/api/cmdb/applications')
+                    fetch('/api/cmdb/applications'),
+                    fetch('/api/specifications'),
                 ]);
                 setDeployments(await deploymentsRes.json());
                 setProducts(await productsRes.json());
@@ -233,6 +235,7 @@ export default function DashboardPage() {
                 setTenants(await tenantsRes.json());
                 setComponents(await componentsRes.json());
                 setApplications(await applicationsRes.json());
+                setSpecifications(await specificationsRes.json());
             } catch (error) {
                 console.error("Failed to load dashboard data", error);
             } finally {
@@ -303,6 +306,41 @@ export default function DashboardPage() {
                                 ))}
                             </TableBody>
                         </Table>
+                    </Widget>
+                </div>
+                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <Widget title="Product vs Specs">
+                        <ChartContainer config={{ count: { label: 'Specifications' } }} className="min-h-[200px] w-full">
+                            <ResponsiveContainer width="100%" height={250}>
+                                <BarChart data={products.map(p => ({ name: p.name, count: p.specifications?.length || 0}))}>
+                                    <CartesianGrid vertical={false} />
+                                    <XAxis dataKey="name" tickLine={false} axisLine={false} tick={false} />
+                                    <YAxis />
+                                    <Tooltip content={<ChartTooltipContent />} />
+                                    <Bar dataKey="count" fill="hsl(var(--chart-3))" radius={4} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </ChartContainer>
+                    </Widget>
+                    <Widget title="Product vs Compliance">
+                        <ChartContainer config={{ count: { label: 'Checks' } }} className="min-h-[200px] w-full">
+                            <ResponsiveContainer width="100%" height={250}>
+                                <BarChart data={products.map(p => ({ name: p.name, count: p.compliance_checks?.length || 0}))}>
+                                    <CartesianGrid vertical={false} />
+                                    <XAxis dataKey="name" tickLine={false} axisLine={false} tick={false} />
+                                    <YAxis />
+                                    <Tooltip content={<ChartTooltipContent />} />
+                                    <Bar dataKey="count" fill="hsl(var(--chart-4))" radius={4} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </ChartContainer>
+                    </Widget>
+                    <Widget title="Dependency Graph">
+                         <div className="h-full flex flex-col items-center justify-center text-center">
+                            <GitGraph className="h-16 w-16 text-muted-foreground" />
+                            <p className="text-muted-foreground mt-4">Navigate to Dependency Metrics to explore the detailed graph.</p>
+                            <Button asChild variant="link" className="mt-2"><Link href="/dependency-metrics">Explore Dependencies</Link></Button>
+                         </div>
                     </Widget>
                 </div>
             </div>
