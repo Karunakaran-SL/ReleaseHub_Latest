@@ -223,9 +223,9 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
-                            Fleet Mgmt
-                          </SidebarMenuSubButton>
+                           <SidebarMenuSubButton href="/fleet-management/deployment" isActive={pathname === '/fleet-management/deployment'}>
+                                Fleet Mgmt
+                            </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="#">

@@ -6,12 +6,12 @@ import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Deployment, Product } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { PlusCircle, Upload, GitMerge, Trash2, Loader2, List, Info } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -20,7 +20,6 @@ const DeploymentMap = dynamic(() => import('./_components/deployment-map'), {
     ssr: false,
     loading: () => <div className="h-96 bg-muted rounded-md flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
 });
-
 
 const statusColors: Record<string, string> = {
     PROVISIONING: 'bg-yellow-200 text-yellow-800',
@@ -31,7 +30,7 @@ const statusColors: Record<string, string> = {
     DECOMMISSIONED: 'bg-gray-300 text-gray-900',
 };
 
-export default function DeploymentDashboardPage() {
+export default function FleetManagementDashboardPage() {
     const [user, setUser] = useState<User | null>(null);
     const [deployments, setDeployments] = useState<Deployment[]>([]);
     const [products, setProducts] = useState<Record<string, Product>>({});
@@ -67,7 +66,7 @@ export default function DeploymentDashboardPage() {
             <main className="flex-1 p-6 md:p-10">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold">Deployment Dashboard</h1>
+                        <h1 className="text-3xl font-bold">Fleet Management Dashboard</h1>
                         <p className="text-muted-foreground">Centralized view of all worldwide deployments.</p>
                     </div>
                     <div className="flex gap-2">
@@ -108,13 +107,13 @@ export default function DeploymentDashboardPage() {
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="text-muted-foreground">
-                            The Deployment Dashboard provides a centralized hub for managing the entire lifecycle of your global deployments. Use the map to visualize your fleet's status, and access the wizards to perform key operations like new installations, upgrades, migrations, and decommissions. The table below shows your most recent deployment activities.
+                            The Fleet Management Dashboard provides a centralized hub for managing the entire lifecycle of your global deployments. Use the map to visualize your fleet's status, and access the wizards to perform key operations like new installations, upgrades, migrations, and decommissions. The table below shows your most recent deployment activities.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
 
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <Card className="col-span-1 lg:col-span-3">
+                <div className="grid gap-6 md:grid-cols-1">
+                    <Card className="col-span-1">
                         <CardHeader>
                             <CardTitle>Global Deployment View</CardTitle>
                         </CardHeader>
@@ -145,7 +144,7 @@ export default function DeploymentDashboardPage() {
                                 {loading ? (
                                     <TableRow><TableCell colSpan={6} className="text-center h-24"><Loader2 className="animate-spin mx-auto"/></TableCell></TableRow>
                                 ) : deployments.length > 0 ? (
-                                    deployments.map(dep => (
+                                    deployments.slice(0,10).map(dep => (
                                         <TableRow key={dep._id}>
                                             <TableCell className="font-mono">
                                                 <Link href={`/fleet-management/deployment/${dep._id}/view`} className="hover:underline">
@@ -155,7 +154,7 @@ export default function DeploymentDashboardPage() {
                                             <TableCell>{products[dep.productId]?.name || dep.productId}</TableCell>
                                             <TableCell>{dep.details.customer}</TableCell>
                                             <TableCell>{dep.details.country || 'N/A'}</TableCell>
-                                            <TableCell>{format(new Date(dep.createdAt), 'PPP')}</TableCell>
+                                            <TableCell>{format(parseISO(dep.createdAt), 'PPP')}</TableCell>
                                             <TableCell>
                                                 <Badge className={cn(statusColors[dep.status] || 'bg-gray-200')}>
                                                     {dep.status.replace(/_/g, ' ')}
