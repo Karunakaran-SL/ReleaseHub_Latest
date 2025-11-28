@@ -63,6 +63,12 @@ import {
   PieChart,
   Grid3x3,
   GitBranch,
+  Shield,
+  Fingerprint,
+  UserCheck,
+  BookLock,
+  Landmark,
+  FileArchive
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -185,6 +191,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isWorkflowPage = pathname.startsWith('/workflows');
     const isPlatformEngineeringPage = pathname.startsWith('/platform-engineering');
     const isCicdPage = pathname.startsWith('/cicd');
+    const isCompliancePage = pathname.startsWith('/compliance');
 
 
   return (
@@ -195,11 +202,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isCmdbPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isCmdbPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isCompliancePage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage}
+                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isCompliancePage}
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -259,7 +266,6 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             <Box />
                             Products
                          </Link>
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                   </SidebarMenuItem>
@@ -609,6 +615,56 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </SidebarMenuItem>
                 </Collapsible>
 
+                <Collapsible asChild defaultOpen={isCompliancePage}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        isActive={isCompliancePage}
+                        tooltip={{ children: 'Compliance' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <ListChecks />
+                        Compliance
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/compliance/security" isActive={pathname.startsWith('/compliance/security')}>
+                            <Shield className="mr-2"/> Security
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/compliance/data" isActive={pathname.startsWith('/compliance/data')}>
+                            <Fingerprint className="mr-2"/> Data
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/compliance/operational" isActive={pathname.startsWith('/compliance/operational')}>
+                            <UserCheck className="mr-2"/> Operational
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/compliance/third-party" isActive={pathname.startsWith('/compliance/third-party')}>
+                            <BookLock className="mr-2"/> Third-Party
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/compliance/regulatory" isActive={pathname.startsWith('/compliance/regulatory')}>
+                            <Landmark className="mr-2"/> Regulatory
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/compliance/audit-reporting" isActive={pathname.startsWith('/compliance/audit-reporting')}>
+                            <FileArchive className="mr-2"/> Audit & Reporting
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+
                 <Collapsible asChild defaultOpen={isAuditPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
@@ -621,18 +677,10 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             <ShieldCheck />
                             Audit
                          </Link>
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                   </SidebarMenuItem>
                 </Collapsible>
-
-                <SidebarMenuItem>
-                  <SidebarMenuButton tooltip={{ children: 'Compliance' }}>
-                    <ListChecks />
-                    Compliance
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 
                 <Collapsible asChild defaultOpen={isSettingsPage}>
                   <SidebarMenuItem>
