@@ -238,7 +238,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboard/compliance-monitoring" isActive={pathname.startsWith('/dashboard/compliance-monitoring')}>
                             Compliance Monitoring
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
