@@ -218,7 +218,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
+                          <SidebarMenuSubButton href="/dashboard/release-baseline-mgmt" isActive={pathname.startsWith('/dashboard/release-baseline-mgmt')}>
                             Release & Baseline Mgmt
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
