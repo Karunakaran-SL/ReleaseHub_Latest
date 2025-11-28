@@ -19,7 +19,7 @@ interface WorkflowRun {
     name: string;
     status: 'Running' | 'Completed' | 'Failed' | 'Paused';
     duration: number;
-    startedAt: string; // Changed from Date to string
+    startedAt: string;
 }
 
 const generateDummyWorkflows = (): WorkflowRun[] => {
@@ -30,7 +30,7 @@ const generateDummyWorkflows = (): WorkflowRun[] => {
         name: names[i % names.length],
         status: statuses[Math.floor(Math.random() * statuses.length)],
         duration: Math.floor(Math.random() * 3600) + 60, // 1 minute to 1 hour
-        startedAt: subDays(new Date(), Math.floor(Math.random() * 7)).toISOString(), // Convert to string
+        startedAt: subDays(new Date(), Math.floor(Math.random() * 7)).toISOString(),
     }));
 };
 
@@ -64,12 +64,29 @@ export default function WorkflowManagementDashboard() {
     const [user, setUser] = useState<User | null>(null);
     const [workflows, setWorkflows] = useState<WorkflowRun[]>([]);
     const [loading, setLoading] = useState(true);
+    const [executionsOverTimeData, setExecutionsOverTimeData] = useState<any[]>([]);
 
     useEffect(() => {
         getUser().then(setUser);
         // Simulate fetching data
         setTimeout(() => {
-            setWorkflows(generateDummyWorkflows());
+            const dummyWorkflows = generateDummyWorkflows();
+            setWorkflows(dummyWorkflows);
+            
+            // Calculate executions over time data on client side
+            const data: Record<string, number> = {};
+            for (let i = 6; i >= 0; i--) {
+                const d = subDays(new Date(), i);
+                data[d.toISOString().split('T')[0]] = 0;
+            }
+            dummyWorkflows.forEach(wf => {
+                const day = wf.startedAt.split('T')[0];
+                if (data[day] !== undefined) {
+                    data[day]++;
+                }
+            });
+            setExecutionsOverTimeData(Object.entries(data).map(([day, count]) => ({ day: new Date(day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), count })));
+            
             setLoading(false);
         }, 1000);
     }, []);
@@ -80,21 +97,6 @@ export default function WorkflowManagementDashboard() {
             return acc;
         }, {} as Record<string, number>);
         return Object.entries(counts).map(([name, value]) => ({ name, value }));
-    }, [workflows]);
-
-    const executionsOverTimeData = useMemo(() => {
-        const data: Record<string, number> = {};
-        for (let i = 6; i >= 0; i--) {
-            const d = subDays(new Date(), i);
-            data[d.toISOString().split('T')[0]] = 0;
-        }
-        workflows.forEach(wf => {
-            const day = wf.startedAt.split('T')[0];
-            if (data[day] !== undefined) {
-                data[day]++;
-            }
-        });
-        return Object.entries(data).map(([day, count]) => ({ day: new Date(day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), count }));
     }, [workflows]);
     
     const avgDurationData = useMemo(() => {
