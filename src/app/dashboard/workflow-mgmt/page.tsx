@@ -12,15 +12,27 @@ import { PieChart, Pie, BarChart, Bar, AreaChart, Area, XAxis, YAxis, Responsive
 import { Loader2, Move, Trash2, Clock, CheckCircle, AlertTriangle, Workflow, Play, Pause, PowerOff } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { formatDistanceToNow, subDays } from 'date-fns';
+import { formatDistanceToNow, subDays, parseISO } from 'date-fns';
 
 interface WorkflowRun {
     id: string;
     name: string;
     status: 'Running' | 'Completed' | 'Failed' | 'Paused';
     duration: number;
-    startedAt: Date;
+    startedAt: string; // ISO string
 }
+
+// Client-side only component to prevent hydration errors with relative time
+function TimeAgo({ dateString }: { dateString: string }) {
+    const [timeAgo, setTimeAgo] = useState('');
+
+    useEffect(() => {
+        setTimeAgo(formatDistanceToNow(parseISO(dateString), { addSuffix: true }));
+    }, [dateString]);
+
+    return <span>{timeAgo}</span>;
+}
+
 
 const generateDummyWorkflows = (): WorkflowRun[] => {
     const names = ['User Onboarding', 'Nightly Data Sync', 'Invoice Processing', 'Security Scan', 'Customer Report Generation', 'Deployment Pipeline'];
@@ -30,7 +42,7 @@ const generateDummyWorkflows = (): WorkflowRun[] => {
         name: names[i % names.length],
         status: statuses[Math.floor(Math.random() * statuses.length)],
         duration: Math.floor(Math.random() * 3600) + 60, // 1 minute to 1 hour
-        startedAt: subDays(new Date(), Math.floor(Math.random() * 7)),
+        startedAt: subDays(new Date(), Math.floor(Math.random() * 7)).toISOString(),
     }));
 };
 
@@ -64,12 +76,29 @@ export default function WorkflowManagementDashboard() {
     const [user, setUser] = useState<User | null>(null);
     const [workflows, setWorkflows] = useState<WorkflowRun[]>([]);
     const [loading, setLoading] = useState(true);
+    const [executionsOverTimeData, setExecutionsOverTimeData] = useState<any[]>([]);
 
     useEffect(() => {
         getUser().then(setUser);
         // Simulate fetching data
         setTimeout(() => {
-            setWorkflows(generateDummyWorkflows());
+            const dummyWorkflows = generateDummyWorkflows();
+            setWorkflows(dummyWorkflows);
+            
+            // Calculate executions over time data on client side to avoid hydration issues
+            const data: Record<string, number> = {};
+            for (let i = 6; i >= 0; i--) {
+                const d = subDays(new Date(), i);
+                data[d.toISOString().split('T')[0]] = 0;
+            }
+            dummyWorkflows.forEach(wf => {
+                const day = wf.startedAt.split('T')[0];
+                if (data[day] !== undefined) {
+                    data[day]++;
+                }
+            });
+            setExecutionsOverTimeData(Object.entries(data).map(([day, count]) => ({ day: new Date(day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), count })));
+            
             setLoading(false);
         }, 1000);
     }, []);
@@ -80,21 +109,6 @@ export default function WorkflowManagementDashboard() {
             return acc;
         }, {} as Record<string, number>);
         return Object.entries(counts).map(([name, value]) => ({ name, value }));
-    }, [workflows]);
-
-    const executionsOverTimeData = useMemo(() => {
-        const data: Record<string, number> = {};
-        for (let i = 6; i >= 0; i--) {
-            const d = subDays(new Date(), i);
-            data[d.toISOString().split('T')[0]] = 0;
-        }
-        workflows.forEach(wf => {
-            const day = wf.startedAt.toISOString().split('T')[0];
-            if (data[day] !== undefined) {
-                data[day]++;
-            }
-        });
-        return Object.entries(data).map(([day, count]) => ({ day: new Date(day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), count }));
     }, [workflows]);
     
     const avgDurationData = useMemo(() => {
@@ -206,7 +220,9 @@ export default function WorkflowManagementDashboard() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell>{(wf.duration / 60).toFixed(1)} min</TableCell>
-                                        <TableCell>{formatDistanceToNow(wf.startedAt, { addSuffix: true })}</TableCell>
+                                        <TableCell>
+                                            <TimeAgo dateString={wf.startedAt} />
+                                        </TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="outline" size="sm">View Details</Button>
                                         </TableCell>
