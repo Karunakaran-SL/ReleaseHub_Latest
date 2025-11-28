@@ -23,6 +23,17 @@ interface ComplianceEvent {
     productName: string;
 }
 
+// Client-side only component to prevent hydration errors with relative time
+function TimeAgo({ dateString }: { dateString: string }) {
+    const [timeAgo, setTimeAgo] = useState('');
+
+    useEffect(() => {
+        setTimeAgo(formatDistanceToNow(parseISO(dateString), { addSuffix: true }));
+    }, [dateString]);
+
+    return <span>{timeAgo}</span>;
+}
+
 const generateDummyEvents = (products: Product[]): ComplianceEvent[] => {
     const controls: ComplianceEvent['control'][] = ['SOC 2', 'ISO 27001', 'GDPR', 'PCI DSS'];
     const statuses: ComplianceEvent['status'][] = ['Passed', 'Failed', 'Remediation Required', 'Passed', 'Passed'];
@@ -198,7 +209,7 @@ export default function ComplianceMonitoringDashboard() {
                                                 {event.status}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell>{formatDistanceToNow(parseISO(event.timestamp), { addSuffix: true })}</TableCell>
+                                        <TableCell><TimeAgo dateString={event.timestamp} /></TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
