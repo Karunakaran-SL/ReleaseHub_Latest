@@ -234,11 +234,6 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="#">
-                            Jobs Monitoring
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="#">
                             Security Monitoring
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
