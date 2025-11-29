@@ -748,7 +748,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                                 <SidebarMenuButton
                                     isActive={isHelpPage}
                                     tooltip={{ children: 'Help' }}
-                                    className="data-[state=open]:bg-sidebar-accent mt-auto"
+                                    className="data-[state=open]:bg-sidebar-accent"
                                 >
                                     <HelpCircle />
                                     Help
