@@ -3,7 +3,19 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { AuditLog } from '@/lib/definitions';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, parseISO } from 'date-fns';
+
+function TimeAgo({ dateString }: { dateString: string }) {
+    const [timeAgo, setTimeAgo] = useState('');
+
+    useEffect(() => {
+        setTimeAgo(formatDistanceToNow(parseISO(dateString), { addSuffix: true }));
+    }, [dateString]);
+
+    if (!timeAgo) return null;
+
+    return <span>({timeAgo})</span>;
+}
 
 export default function Footer() {
     const [latestLog, setLatestLog] = useState<AuditLog | null>(null);
@@ -12,7 +24,7 @@ export default function Footer() {
     useEffect(() => {
         async function fetchLatestLog() {
             try {
-                const res = await fetch('/api/audits?limit=1');
+                const res = await fetch('/api/audits'); // Fetch more than 1 to ensure we get the latest
                 if (res.ok) {
                     const data = await res.json();
                     if (data.length > 0) {
@@ -35,7 +47,7 @@ export default function Footer() {
             case 'UPDATE': actionText = 'updated'; break;
             case 'DELETE': actionText = 'deleted'; break;
         }
-        return `${log.user} ${actionText} the ${log.entity} "${log.comment}"`;
+        return `${log.user} ${actionText} the ${log.entity}: "${log.comment}"`;
     }
 
     return (
@@ -56,7 +68,7 @@ export default function Footer() {
                         <span>Loading latest activity...</span>
                     ) : latestLog ? (
                         <Link href="/audits" className="hover:underline hover:text-foreground transition-colors">
-                           <span className='font-semibold'>Latest Activity:</span> {formatLogMessage(latestLog)} ({formatDistanceToNow(new Date(latestLog.timestamp), { addSuffix: true })})
+                           <span className='font-semibold'>Latest Activity:</span> {formatLogMessage(latestLog)} <TimeAgo dateString={latestLog.timestamp} />
                         </Link>
                     ) : (
                         <span>No recent activity.</span>
