@@ -68,7 +68,8 @@ import {
   UserCheck,
   BookLock,
   Landmark,
-  FileArchive
+  FileArchive,
+  HelpCircle,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -192,6 +193,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
     const isPlatformEngineeringPage = pathname.startsWith('/platform-engineering');
     const isCicdPage = pathname.startsWith('/cicd');
     const isCompliancePage = pathname.startsWith('/compliance');
+    const isHelpPage = pathname.startsWith('/help');
 
 
   return (
@@ -202,11 +204,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isCmdbPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isCompliancePage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isCmdbPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isCompliancePage && !isHelpPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isCompliancePage}
+                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isCompliancePage && !isHelpPage}
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -738,79 +740,43 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
-
-                <Collapsible asChild defaultOpen={isApiDocsPage}>
-                    <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                        <SidebarMenuButton
-                            isActive={isApiDocsPage}
-                            tooltip={{ children: 'API' }}
-                            className="data-[state=open]:bg-sidebar-accent"
-                        >
-                            <Link href="/api-docs" className='flex items-center gap-2 w-full'>
-                                <FileCode />
-                                API
-                            </Link>
-                            <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                        </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                             <SidebarMenuSub>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname === '/api-docs' && !pathname.includes('#')}>
-                                        <Link href="/api-docs">API Doc</Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#authentication')}>
-                                        <Link href="/api-docs#authentication">Authentication</Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#products')}>
-                                        <Link href="/api-docs#products">Products</Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#audits')}>
-                                        <Link href="/api-docs#audits">Audits</Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#workflows')}>
-                                        <Link href="/api-docs#workflows">Workflows</Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#cmdb')}>
-                                        <Link href="/api-docs#cmdb">CMDB</Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#compliance-checks')}>
-                                        <Link href="/api-docs#compliance-checks">Compliance</Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#deployment-types')}>
-                                        <Link href="/api-docs#deployment-types">Deployment</Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#specifications')}>
-                                        <Link href="/api-docs#specifications">Specifications</Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                                <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild isActive={pathname.endsWith('#specification-settings')}>
-                                        <Link href="/api-docs#specification-settings">Spec Settings</Link>
-                                    </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                            </SidebarMenuSub>
-                        </CollapsibleContent>
-                    </SidebarMenuItem>
-                </Collapsible>
-
+                
+                <SidebarMenuItem className="mt-auto">
+                    <Collapsible asChild defaultOpen={isHelpPage}>
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                                <SidebarMenuButton
+                                    isActive={isHelpPage}
+                                    tooltip={{ children: 'Help' }}
+                                    className="data-[state=open]:bg-sidebar-accent mt-auto"
+                                >
+                                    <HelpCircle />
+                                    Help
+                                    <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/quick-start">Quick Start</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/specifications">Speciifcations</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/products">Products</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/cmdb">CMDB</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/platform-engineering">Platform Engineering</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/offline-cd">Offline CD</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/deployments">Deployments</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/release-baseline">Release & Baseline</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/ci-integrations">CI Integrations</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/workflows">Workflows</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/onboarding-settings">Onboarding Settings</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/fleet-mgmt">Fleet Mgmnt</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/resource-mgmt">Resource Mgmt</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/audit">Audit</SidebarMenuSubButton></SidebarMenuSubItem>
+                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/license">License</SidebarMenuSubButton></SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>
