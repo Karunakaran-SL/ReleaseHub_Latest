@@ -24,7 +24,10 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for Quick Start content.</p>
+                        <video controls preload="metadata" className="w-full h-auto" title="Release Hub Quick Start Video">
+                            <source src="/Release Hub.mp4" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
                     </CardContent>
                 </Card>
             </main>
