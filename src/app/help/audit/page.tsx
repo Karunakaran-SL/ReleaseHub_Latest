@@ -24,7 +24,14 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for Audit help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Store activity logs, change history and events for governance and troubleshooting.</p>
+
+                        <h4 className="mt-4 font-medium">Key Fields</h4>
+                        <p className="text-muted-foreground"><code>timestamp</code>, <code>actor</code>, <code>action</code>, <code>target</code>, <code>details</code>, <code>outcome</code>.</p>
+
+                        <h4 className="mt-4 font-medium">Typical Uses</h4>
+                        <p className="text-muted-foreground">Investigate approvals, changes to Offline CD bundles, and events related to deployments and configuration changes.</p>
                     </CardContent>
                 </Card>
             </main>

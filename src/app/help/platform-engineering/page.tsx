@@ -24,7 +24,17 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for Platform Engineering help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Tools and templates for building platform foundations — CI/CD patterns, observability and deployment templates.</p>
+
+                        <h4 className="mt-4 font-medium">Key Sections</h4>
+                        <ul className="list-disc pl-5 text-muted-foreground">
+                            <li><strong>Platform Foundations</strong>: curated components and templates.</li>
+                            <li><strong>Platform Builder</strong>: construct opinionated stacks from templates and policies.</li>
+                            <li><strong>Simulators / Test Environments</strong>: run platform components in a sandbox.</li>
+                        </ul>
+
+                        <p className="text-muted-foreground">Validate templates in simulators and pin template versions to ensure reproducible offline builds.</p>
                     </CardContent>
                 </Card>
             </main>

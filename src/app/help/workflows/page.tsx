@@ -24,7 +24,17 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for Workflows help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Define automated sequences (CI/CD pipelines, approval gates, manual steps) for delivering software across environments.</p>
+
+                        <h4 className="mt-4 font-medium">Key Concepts</h4>
+                        <ul className="list-disc pl-5 text-muted-foreground">
+                            <li><strong>Steps</strong>: build, test, package, sign, export.</li>
+                            <li><strong>Approvals</strong>: manual gates with approvers and comments.</li>
+                            <li><strong>Triggers</strong>: scheduled, webhook or manual.</li>
+                        </ul>
+
+                        <p className="text-muted-foreground">Create or import workflow templates and attach them to products or baselines.</p>
                     </CardContent>
                 </Card>
             </main>

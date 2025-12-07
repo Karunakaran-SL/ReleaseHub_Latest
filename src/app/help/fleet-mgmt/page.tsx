@@ -24,7 +24,14 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for Fleet Management help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Oversee and manage deployment targets and runtime resources across fleets of clusters, hypervisors and hosts.</p>
+
+                        <h4 className="mt-4 font-medium">Key Concepts</h4>
+                        <p className="text-muted-foreground">Deployment target groups, health, resource usage and drift detection.</p>
+
+                        <h4 className="mt-4 font-medium">Typical Actions</h4>
+                        <p className="text-muted-foreground">Group targets into fleets for coordinated operations, monitor fleet health and trigger rolling updates.</p>
                     </CardContent>
                 </Card>
             </main>

@@ -24,7 +24,14 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for Onboarding Settings help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Configure organization defaults, team memberships, user roles and onboarding flows.</p>
+
+                        <h4 className="mt-4 font-medium">Key Fields</h4>
+                        <p className="text-muted-foreground"><code>organization name</code>, <code>default roles</code>, <code>team definitions</code>, and <code>user invite policy</code>.</p>
+
+                        <h4 className="mt-4 font-medium">Common Tasks</h4>
+                        <p className="text-muted-foreground">Invite users, assign roles and configure default approval chains and reviewers for offline deliveries.</p>
                     </CardContent>
                 </Card>
             </main>

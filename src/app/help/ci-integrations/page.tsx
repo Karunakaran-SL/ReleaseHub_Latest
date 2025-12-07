@@ -24,7 +24,14 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for CI Integrations help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Configure connections to CI systems (Jenkins, GitLab CI, GitHub Actions) to import build artifacts and trigger workflows.</p>
+
+                        <h4 className="mt-4 font-medium">Typical Fields</h4>
+                        <p className="text-muted-foreground">Integration name, type (Jenkins/GitLab/GitHub), URL, credentials (token or service account), and project/repo mapping.</p>
+
+                        <h4 className="mt-4 font-medium">Workflows</h4>
+                        <p className="text-muted-foreground">Add credentials, test connections, map CI jobs to Products and enable automatic imports via polling or webhooks.</p>
                     </CardContent>
                 </Card>
             </main>

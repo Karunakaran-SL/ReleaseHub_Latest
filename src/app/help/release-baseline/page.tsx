@@ -24,7 +24,14 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for Release & Baseline help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Create release baselines to group product versions, artifacts and deployment policies for a coordinated release.</p>
+
+                        <h4 className="mt-4 font-medium">Key Fields</h4>
+                        <p className="text-muted-foreground"><code>baseline name</code>, <code>description</code>, <code>included products</code>, <code>approval state</code>.</p>
+
+                        <h4 className="mt-4 font-medium">Typical Actions</h4>
+                        <p className="text-muted-foreground">Create a baseline, lock it for approvals and export it as part of an Offline CD Transfer Bundle.</p>
                     </CardContent>
                 </Card>
             </main>

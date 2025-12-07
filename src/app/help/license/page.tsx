@@ -24,7 +24,14 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for License help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Track product licenses and entitlements used by deployed software and tools.</p>
+
+                        <h4 className="mt-4 font-medium">Key Fields</h4>
+                        <p className="text-muted-foreground"><code>product</code>, <code>license key</code>, <code>expiry</code>, <code>assigned hosts</code>, <code>compliance status</code>.</p>
+
+                        <h4 className="mt-4 font-medium">Typical Actions</h4>
+                        <p className="text-muted-foreground">Register licenses, assign them to products or hosts, and run compliance scans to detect expired or missing licenses.</p>
                     </CardContent>
                 </Card>
             </main>

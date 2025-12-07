@@ -24,7 +24,14 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for Resource Management help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Track real-time capacity, allocations and constraints for hosts, clusters and cloud resources.</p>
+
+                        <h4 className="mt-4 font-medium">Key Fields</h4>
+                        <p className="text-muted-foreground"><code>component</code>, <code>allocated</code>, <code>available</code>, <code>thresholds</code>, <code>alerts</code>.</p>
+
+                        <h4 className="mt-4 font-medium">Typical Actions</h4>
+                        <p className="text-muted-foreground">Inspect utilization prior to scheduling a deployment, and reserve capacity for critical baselines or maintenance windows.</p>
                     </CardContent>
                 </Card>
             </main>

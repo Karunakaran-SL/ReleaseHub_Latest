@@ -24,7 +24,20 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for Specifications help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Manage hardware, cloud and platform specifications used by templates, CMDB records, and deployment pipelines.</p>
+
+                        <h4 className="mt-4 font-medium">Key Fields</h4>
+                        <ul className="list-disc pl-5 text-muted-foreground">
+                            <li><code>name</code>: Human-friendly spec name.</li>
+                            <li><code>type</code>: Hardware | Cloud | Hypervisor | Platform.</li>
+                            <li><code>cpu</code>, <code>memory</code>, <code>storage</code>: resource sizing attributes.</li>
+                            <li><code>network</code>: network profile (VLANs, CIDR, ingress rules).</li>
+                            <li><code>tags</code>: environment identifiers (dev, qa, prod, airgapped).</li>
+                        </ul>
+
+                        <h4 className="mt-4 font-medium">Common Workflows</h4>
+                        <p className="text-muted-foreground">Create specs and attach them to products or deployment templates to ensure consistent resource allocation. Specs also feed CMDB and Offline CD bundles.</p>
                     </CardContent>
                 </Card>
             </main>

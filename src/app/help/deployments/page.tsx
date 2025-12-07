@@ -24,7 +24,17 @@ export default function HelpPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Placeholder for Deployments help content.</p>
+                        <h3 className="text-lg font-semibold">Overview</h3>
+                        <p className="text-muted-foreground">Manage release rollouts, view deployment history, and monitor deployment health across environments (online and offline).</p>
+
+                        <h4 className="mt-4 font-medium">Key Fields</h4>
+                        <ul className="list-disc pl-5 text-muted-foreground">
+                            <li><code>id</code>, <code>name</code>, <code>product</code>, <code>version</code>, <code>environment</code>, <code>status</code>.</li>
+                            <li><code>target components</code>: list of CMDB components targeted by the deployment.</li>
+                        </ul>
+
+                        <h4 className="mt-4 font-medium">Common Actions</h4>
+                        <p className="text-muted-foreground">Start deployments, monitor logs and status, and rollback when necessary. Offline deployments use Transfer Bundles created by Offline CD.</p>
                     </CardContent>
                 </Card>
             </main>
