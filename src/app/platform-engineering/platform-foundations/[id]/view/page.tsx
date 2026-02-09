@@ -23,7 +23,7 @@ export default function ViewPlatformFoundationPage() {
     useEffect(() => {
         getUser().then(setUser);
         if (!id) return;
-        
+
         async function fetchFoundation() {
             setLoading(true);
             try {
@@ -57,8 +57,8 @@ export default function ViewPlatformFoundationPage() {
                         <CardTitle>View Platform Foundation: {foundation.name}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="h-[75vh]">
-                            <VisualBuilder foundation={foundation} />
+                        <div>
+                            <VisualBuilder foundation={foundation} autoHeight={true} />
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">

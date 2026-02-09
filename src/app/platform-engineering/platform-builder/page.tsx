@@ -30,14 +30,14 @@ export default function PlatformBuilderPage() {
     useEffect(() => {
         getUser().then(setUser);
     }, []);
-    
+
     const handleNext = () => setStep(s => s + 1);
     const handleBack = () => setStep(s => s - 1);
-    
+
     const updateFoundation = (data: any) => {
-        setPlatformFoundation((prev: any) => ({...prev, ...data}));
+        setPlatformFoundation((prev: any) => ({ ...prev, ...data }));
     };
-    
+
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
@@ -69,12 +69,12 @@ export default function PlatformBuilderPage() {
             case 3:
                 return <Step3Kubernetes data={platformFoundation} onUpdate={updateFoundation} />;
             case 4:
-                 return <Step4Summary data={platformFoundation} />;
+                return <Step4Summary data={platformFoundation} onUpdate={updateFoundation} />;
             default:
                 return null;
         }
     };
-    
+
     const isNextDisabled = (): boolean => {
         switch (step) {
             case 1:
@@ -104,7 +104,7 @@ export default function PlatformBuilderPage() {
                         <Button variant="outline" onClick={() => router.push('/platform-engineering/platform-foundations')}>View Foundations</Button>
                     </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
                     <Card className="flex flex-col">
                         <CardHeader>
@@ -116,7 +116,7 @@ export default function PlatformBuilderPage() {
                             {step === 1 && (
                                 <div className="space-y-4 mb-6">
                                     <Label htmlFor="foundation-name">Platform Foundation Name</Label>
-                                    <Input id="foundation-name" value={platformFoundation.name} onChange={(e) => updateFoundation({ name: e.target.value })}/>
+                                    <Input id="foundation-name" value={platformFoundation.name} onChange={(e) => updateFoundation({ name: e.target.value })} />
                                 </div>
                             )}
                             {renderStep()}
@@ -131,13 +131,13 @@ export default function PlatformBuilderPage() {
                                 </Button>
                             ) : (
                                 <Button onClick={handleSubmit} disabled={isSubmitting}>
-                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4" />}
+                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                     Save Platform Foundation
                                 </Button>
                             )}
                         </CardFooter>
                     </Card>
-                    
+
                     <VisualBuilder foundation={platformFoundation} />
                 </div>
             </main>

@@ -20,15 +20,15 @@ const BaselineCreateSchema = z.object({
 
 // List all baselines
 export async function GET(req: NextRequest) {
-  try {
-    const client = await clientPromise;
-    const db = client.db();
-    const items = await db.collection(COLLECTION_NAME).find({}).sort({ created_at: -1 }).toArray();
-    return NextResponse.json(items, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
-  }
+    try {
+        const client = await clientPromise;
+        const db = client.db();
+        const items = await db.collection(COLLECTION_NAME).find({}).sort({ created_at: -1 }).toArray();
+        return NextResponse.json(items, { status: 200 });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ message: 'An internal server error occurred.' }, { status: 500 });
+    }
 }
 
 // Create a new baseline
@@ -40,12 +40,12 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        
+
         const validatedData = BaselineCreateSchema.safeParse(body);
         if (!validatedData.success) {
             return NextResponse.json({ message: 'Invalid baseline data. Product information is missing.' }, { status: 400 });
         }
-        
+
         const { product, specifications, tenants, versionIncrementType } = validatedData.data;
 
         const client = await clientPromise;
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
             latestBaselines.sort((a, b) => {
                 const aParts = a.product.version.split('.').map(Number);
                 const bParts = b.product.version.split('.').map(Number);
-                for(let i = 0; i < 3; i++) {
+                for (let i = 0; i < 3; i++) {
                     if (aParts[i] > bParts[i]) return -1;
                     if (aParts[i] < bParts[i]) return 1;
                 }
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
             });
             const latestVersion = latestBaselines[0].product.version;
             const versionParts = latestVersion.split('.').map(Number);
-            
+
             switch (versionIncrementType) {
                 case 'major':
                     versionParts[0] += 1;
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'Baseline onboarding configuration not found.' }, { status: 500 });
         }
         const validationConfig = onboardingConfigs[0] as OnboardingConfiguration;
-        
+
         // Initialize validation phases for the new baseline
         const validationPhases = validationConfig.phases.map(phase => ({
             ...phase,
@@ -115,16 +115,29 @@ export async function POST(req: NextRequest) {
                 proof: { link: '' }
             }))
         }));
-        
+
+        // Use tenant data from dependency tree as-is
+        // The frontend sends complete tenant objects with components, applications, and interfaces
+        // populated from the dependency tree API
+        const enrichedTenants = tenants.map((tenant: any) => ({
+            id: tenant.id,
+            name: tenant.name,
+            version: tenant.version,
+            description: tenant.description || '',
+            components: tenant.components || [],
+            applications: tenant.applications || [],
+            interfaces: tenant.interfaces || []
+        }));
+
         const newBaseline: Baseline = {
             _id: newBaselineId,
-            product: { 
-                id: product.id, 
-                name: product.name, 
-                version: newVersion 
+            product: {
+                id: product.id,
+                name: product.name,
+                version: newVersion
             },
             specifications: specifications,
-            tenants: tenants,
+            tenants: enrichedTenants,
             status: 'DRAFT',
             validation_phases: validationPhases,
             created_at: new Date().toISOString(),
@@ -143,7 +156,7 @@ export async function POST(req: NextRequest) {
         };
 
         await baselinesCollection.insertOne(newBaseline as any);
-        
+
         await logAuditEvent({
             action: 'CREATE',
             entity: 'baseline',

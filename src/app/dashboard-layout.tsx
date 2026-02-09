@@ -100,14 +100,14 @@ function Header({ user }: { user: User | null }) {
         </div>
 
         <div className="flex flex-1 justify-center px-4">
-            <div className="relative w-full max-w-sm items-center hidden md:flex">
-                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                type="search"
-                placeholder="Search..."
-                className="w-full rounded-full bg-muted pl-10"
-                />
-            </div>
+          <div className="relative w-full max-w-sm items-center hidden md:flex">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="w-full rounded-full bg-muted pl-10"
+            />
+          </div>
         </div>
 
         <div className="flex items-center justify-end space-x-4">
@@ -177,23 +177,23 @@ function Header({ user }: { user: User | null }) {
 }
 
 export default function DashboardLayout({ children, user }: { children: React.ReactNode, user: User | null }) {
-    const pathname = usePathname();
-    const isProductsPage = pathname.startsWith('/products');
-    const isSpecificationsPage = pathname.startsWith('/specifications');
-    const isApiDocsPage = pathname.startsWith('/api-docs');
-    const isAuditPage = pathname.startsWith('/audits');
-    const isSettingsPage = pathname.startsWith('/settings');
-    const isCmdbPage = pathname.startsWith('/cmdb');
-    const isDependencyMetricsPage = pathname.startsWith('/dependency-metrics');
-    const isReleaseManagementPage = pathname.startsWith('/release-management');
-    const isDocumentsPage = pathname.startsWith('/documents');
-    const isFleetManagementPage = pathname.startsWith('/fleet-management');
-    const isLicensePage = pathname.startsWith('/license');
-    const isWorkflowPage = pathname.startsWith('/workflows');
-    const isPlatformEngineeringPage = pathname.startsWith('/platform-engineering');
-    const isCicdPage = pathname.startsWith('/cicd');
-    const isCompliancePage = pathname.startsWith('/compliance');
-    const isHelpPage = pathname.startsWith('/help');
+  const pathname = usePathname();
+  const isProductsPage = pathname.startsWith('/products');
+  const isSpecificationsPage = pathname.startsWith('/specifications');
+  const isApiDocsPage = pathname.startsWith('/api-docs');
+  const isAuditPage = pathname.startsWith('/audits');
+  const isSettingsPage = pathname.startsWith('/settings');
+  const isCmdbPage = pathname.startsWith('/cmdb');
+  const isDependencyMetricsPage = pathname.startsWith('/dependency-metrics');
+  const isReleaseManagementPage = pathname.startsWith('/release-management');
+  const isDocumentsPage = pathname.startsWith('/documents');
+  const isFleetManagementPage = pathname.startsWith('/fleet-management');
+  const isLicensePage = pathname.startsWith('/license');
+  const isWorkflowPage = pathname.startsWith('/workflows');
+  const isPlatformEngineeringPage = pathname.startsWith('/platform-engineering');
+  const isCicdPage = pathname.startsWith('/cicd');
+  const isCompliancePage = pathname.startsWith('/compliance');
+  const isHelpPage = pathname.startsWith('/help');
 
 
   return (
@@ -212,10 +212,10 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
-                         <Link href="/" className='flex items-center gap-2 w-full'>
-                            <LayoutGrid />
-                            Dashboard
-                         </Link>
+                        <Link href="/" className='flex items-center gap-2 w-full'>
+                          <LayoutGrid />
+                          Dashboard
+                        </Link>
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
@@ -232,9 +232,9 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                           <SidebarMenuSubButton href="/dashboard/fleet-mgmt" isActive={pathname.startsWith('/dashboard/fleet-mgmt')}>
-                                Fleet Mgmt
-                            </SidebarMenuSubButton>
+                          <SidebarMenuSubButton href="/dashboard/fleet-mgmt" isActive={pathname.startsWith('/dashboard/fleet-mgmt')}>
+                            Fleet Mgmt
+                          </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/dashboard/workflow-mgmt" isActive={pathname.startsWith('/dashboard/workflow-mgmt')}>
@@ -255,40 +255,40 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
-                
+
                 <Collapsible asChild defaultOpen={isProductsPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton 
-                        isActive={isProductsPage} 
+                      <SidebarMenuButton
+                        isActive={isProductsPage}
                         tooltip={{ children: 'Products' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
-                         <Link href="/products" className='flex items-center gap-2 w-full'>
-                            <Box />
-                            Products
-                         </Link>
+                        <Link href="/products" className='flex items-center gap-2 w-full'>
+                          <Box />
+                          Products
+                        </Link>
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                   </SidebarMenuItem>
                 </Collapsible>
 
-                 <SidebarMenuItem>
-                    <SidebarMenuButton
-                        isActive={isSpecificationsPage}
-                        tooltip={{ children: 'Specifications' }}
-                    >
-                        <Link href="/specifications" className='flex items-center gap-2 w-full'>
-                            <FileText />
-                            Specifications
-                        </Link>
-                    </SidebarMenuButton>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={isSpecificationsPage}
+                    tooltip={{ children: 'Specifications' }}
+                  >
+                    <Link href="/specifications" className='flex items-center gap-2 w-full'>
+                      <FileText />
+                      Specifications
+                    </Link>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                 <Collapsible asChild defaultOpen={isDocumentsPage}>
+                <Collapsible asChild defaultOpen={isDocumentsPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton 
+                      <SidebarMenuButton
                         isActive={isDocumentsPage}
                         tooltip={{ children: 'Documents' }}
                         className="data-[state=open]:bg-sidebar-accent"
@@ -298,18 +298,18 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
-                     <CollapsibleContent>
+                    <CollapsibleContent>
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/documents/service-contracts" isActive={pathname.startsWith('/documents/service-contracts')}>
-                                Service Contracts
-                            </SidebarMenuSubButton>
+                          <SidebarMenuSubButton href="/documents/service-contracts" isActive={pathname.startsWith('/documents/service-contracts')}>
+                            Service Contracts
+                          </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
-                 <Collapsible asChild defaultOpen={isPlatformEngineeringPage}>
+                <Collapsible asChild defaultOpen={isPlatformEngineeringPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
@@ -324,83 +324,83 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                          <SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/platform-engineering/platform-foundations" isActive={pathname.startsWith('/platform-engineering/platform-foundations')}>
-                             <Blocks className="mr-2"/> Platform Foundations
+                            <Blocks className="mr-2" /> Platform Foundations
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <Collapsible asChild defaultOpen={pathname.startsWith('/platform-engineering/sdk')}>
                           <SidebarMenuItem>
                             <CollapsibleTrigger asChild>
                               <SidebarMenuSubButton>
-                                <Rocket className="mr-2"/> SDK
+                                <Rocket className="mr-2" /> SDK
                                 <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                               </SidebarMenuSubButton>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                               <SidebarMenuSub>
                                 <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton href="/platform-engineering/sdk" isActive={pathname === '/platform-engineering/sdk'}>
-                                        Project Initializer
-                                    </SidebarMenuSubButton>
+                                  <SidebarMenuSubButton href="/platform-engineering/sdk" isActive={pathname === '/platform-engineering/sdk'}>
+                                    Project Initializer
+                                  </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
-                                 <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton href="/platform-engineering/sdk/apps" isActive={pathname.startsWith('/platform-engineering/sdk/apps')}>
-                                        Generated Applications
-                                    </SidebarMenuSubButton>
+                                <SidebarMenuSubItem>
+                                  <SidebarMenuSubButton href="/platform-engineering/sdk/apps" isActive={pathname.startsWith('/platform-engineering/sdk/apps')}>
+                                    Generated Applications
+                                  </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
                               </SidebarMenuSub>
                             </CollapsibleContent>
                           </SidebarMenuItem>
                         </Collapsible>
-                         <SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/platform-engineering/app-catalog" isActive={pathname.startsWith('/platform-engineering/app-catalog')}>
-                             <Grid3x3 className="mr-2"/> App Catalog
+                            <Grid3x3 className="mr-2" /> App Catalog
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/platform-engineering/no-code-platform" isActive={pathname.startsWith('/platform-engineering/no-code-platform')}>
-                             <MousePointerClick className="mr-2"/> No Code Platform
+                            <MousePointerClick className="mr-2" /> No Code Platform
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/platform-engineering/development-environments" isActive={pathname.startsWith('/platform-engineering/development-environments')}>
-                             <TerminalSquare className="mr-2"/> Development Environments
+                            <TerminalSquare className="mr-2" /> Development Environments
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/platform-engineering/test-environments" isActive={pathname.startsWith('/platform-engineering/test-environments')}>
-                             <FlaskConical className="mr-2"/> Test Environments
+                            <FlaskConical className="mr-2" /> Test Environments
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/platform-engineering/simulators" isActive={pathname.startsWith('/platform-engineering/simulators')}>
-                             <Waypoints className="mr-2"/> Simulators
+                            <Waypoints className="mr-2" /> Simulators
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <Collapsible asChild defaultOpen={pathname.startsWith('/platform-engineering/quality')}>
-                            <SidebarMenuItem>
-                                <CollapsibleTrigger asChild>
-                                    <SidebarMenuSubButton href="/platform-engineering/quality" isActive={pathname === '/platform-engineering/quality'}>
-                                        <BadgeCheck className="mr-2"/> Quality
-                                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                                    </SidebarMenuSubButton>
-                                </CollapsibleTrigger>
-                                <CollapsibleContent>
-                                     <SidebarMenuSub>
-                                        <SidebarMenuSubItem>
-                                            <SidebarMenuSubButton href="/platform-engineering/quality/static-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/static-analyzer')}>
-                                                <ScanLine className="mr-2"/> Static Analyzer
-                                            </SidebarMenuSubButton>
-                                        </SidebarMenuSubItem>
-                                        <SidebarMenuSubItem>
-                                            <SidebarMenuSubButton href="/platform-engineering/quality/dynamic-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/dynamic-analyzer')}>
-                                                <ScanSearch className="mr-2"/> Dynamic Analyzer
-                                            </SidebarMenuSubButton>
-                                        </SidebarMenuSubItem>
-                                    </SidebarMenuSub>
-                                </CollapsibleContent>
-                            </SidebarMenuItem>
+                        <Collapsible asChild defaultOpen={pathname.startsWith('/platform-engineering/quality')}>
+                          <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                              <SidebarMenuSubButton href="/platform-engineering/quality" isActive={pathname === '/platform-engineering/quality'}>
+                                <BadgeCheck className="mr-2" /> Quality
+                                <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                              </SidebarMenuSubButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <SidebarMenuSub>
+                                <SidebarMenuSubItem>
+                                  <SidebarMenuSubButton href="/platform-engineering/quality/static-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/static-analyzer')}>
+                                    <ScanLine className="mr-2" /> Static Analyzer
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                                <SidebarMenuSubItem>
+                                  <SidebarMenuSubButton href="/platform-engineering/quality/dynamic-analyzer" isActive={pathname.startsWith('/platform-engineering/quality/dynamic-analyzer')}>
+                                    <ScanSearch className="mr-2" /> Dynamic Analyzer
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              </SidebarMenuSub>
+                            </CollapsibleContent>
+                          </SidebarMenuItem>
                         </Collapsible>
                       </SidebarMenuSub>
                     </CollapsibleContent>
@@ -424,7 +424,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/cicd/integration" isActive={pathname.startsWith('/cicd/integration')}>
-                            <DatabaseZap className="mr-2"/> Integration
+                            <DatabaseZap className="mr-2" /> Integration
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
@@ -436,7 +436,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                 <Collapsible asChild defaultOpen={isCmdbPage || isDependencyMetricsPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton 
+                      <SidebarMenuButton
                         isActive={isCmdbPage || isDependencyMetricsPage}
                         tooltip={{ children: 'CMDB' }}
                         className="data-[state=open]:bg-sidebar-accent"
@@ -449,34 +449,34 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/cmdb/tenants" isActive={pathname.startsWith('/cmdb/tenants')}>
-                                <Warehouse className="mr-2"/> Tenants
-                            </SidebarMenuSubButton>
+                          <SidebarMenuSubButton href="/cmdb/tenants" isActive={pathname.startsWith('/cmdb/tenants')}>
+                            <Warehouse className="mr-2" /> Tenants
+                          </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/cmdb/components" isActive={pathname.startsWith('/cmdb/components')}>
-                                <Puzzle className="mr-2"/> Components
-                            </SidebarMenuSubButton>
+                          <SidebarMenuSubButton href="/cmdb/components" isActive={pathname.startsWith('/cmdb/components')}>
+                            <Puzzle className="mr-2" /> Components
+                          </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/cmdb/applications" isActive={pathname.startsWith('/cmdb/applications')}>
-                                <AppWindow className="mr-2"/> Applications
-                            </SidebarMenuSubButton>
+                          <SidebarMenuSubButton href="/cmdb/applications" isActive={pathname.startsWith('/cmdb/applications')}>
+                            <AppWindow className="mr-2" /> Applications
+                          </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/cmdb/interfaces" isActive={pathname.startsWith('/cmdb/interfaces')}>
-                                <Network className="mr-2"/> Interfaces
-                            </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/dependency-metrics" isActive={isDependencyMetricsPage}>
-                                <GitGraph className="mr-2"/> Dependency Metrics
-                            </SidebarMenuSubButton>
+                          <SidebarMenuSubButton href="/cmdb/interfaces" isActive={pathname.startsWith('/cmdb/interfaces')}>
+                            <Network className="mr-2" /> Interfaces
+                          </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/cmdb/integration" isActive={pathname.startsWith('/cmdb/integration')}>
-                                <DatabaseZap className="mr-2"/> CMDB Integration
-                            </SidebarMenuSubButton>
+                          <SidebarMenuSubButton href="/dependency-metrics" isActive={isDependencyMetricsPage}>
+                            <GitGraph className="mr-2" /> Dependency Metrics
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/cmdb/integration" isActive={pathname.startsWith('/cmdb/integration')}>
+                            <DatabaseZap className="mr-2" /> CMDB Integration
+                          </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
@@ -486,7 +486,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                 <Collapsible asChild defaultOpen={isReleaseManagementPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton 
+                      <SidebarMenuButton
                         isActive={isReleaseManagementPage}
                         tooltip={{ children: 'Release Management' }}
                         className="data-[state=open]:bg-sidebar-accent"
@@ -496,18 +496,18 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
-                     <CollapsibleContent>
+                    <CollapsibleContent>
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/release-management/baseline" isActive={pathname.startsWith('/release-management/baseline')}>
-                                <FileCode className="mr-2"/> Baseline
-                            </SidebarMenuSubButton>
+                          <SidebarMenuSubButton href="/release-management/baseline" isActive={pathname.startsWith('/release-management/baseline')}>
+                            <FileCode className="mr-2" /> Baseline
+                          </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
-                
+
                 <Collapsible asChild defaultOpen={isFleetManagementPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
@@ -525,34 +525,34 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/fleet-management/deployment" isActive={pathname.startsWith('/fleet-management/deployment')}>
-                            <Rocket className="mr-2"/> Deployment
+                            <Rocket className="mr-2" /> Deployment
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <Collapsible asChild defaultOpen={pathname.startsWith('/fleet-management/resource-management')}>
-                            <SidebarMenuItem>
-                                <CollapsibleTrigger asChild>
-                                    <SidebarMenuSubButton href="/fleet-management/resource-management" isActive={pathname.startsWith('/fleet-management/resource-management')}>
-                                        <Globe className="mr-2"/> Resource Mgmt
-                                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                                    </SidebarMenuSubButton>
-                                </CollapsibleTrigger>
-                                <CollapsibleContent>
-                                     <SidebarMenuSub>
-                                        <SidebarMenuSubItem>
-                                            <SidebarMenuSubButton href="/fleet-management/resource-management/details" isActive={pathname.startsWith('/fleet-management/resource-management/details')}>
-                                                <PieChart className="mr-2"/> Detailed View
-                                            </SidebarMenuSubButton>
-                                        </SidebarMenuSubItem>
-                                    </SidebarMenuSub>
-                                </CollapsibleContent>
-                            </SidebarMenuItem>
+                        <Collapsible asChild defaultOpen={pathname.startsWith('/fleet-management/resource-management')}>
+                          <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                              <SidebarMenuSubButton href="/fleet-management/resource-management" isActive={pathname.startsWith('/fleet-management/resource-management')}>
+                                <Globe className="mr-2" /> Resource Mgmt
+                                <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                              </SidebarMenuSubButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <SidebarMenuSub>
+                                <SidebarMenuSubItem>
+                                  <SidebarMenuSubButton href="/fleet-management/resource-management/details" isActive={pathname.startsWith('/fleet-management/resource-management/details')}>
+                                    <PieChart className="mr-2" /> Detailed View
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              </SidebarMenuSub>
+                            </CollapsibleContent>
+                          </SidebarMenuItem>
                         </Collapsible>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
-                
-                 <Collapsible asChild defaultOpen={isLicensePage}>
+
+                <Collapsible asChild defaultOpen={isLicensePage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
@@ -560,7 +560,7 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         tooltip={{ children: 'License' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
-                         <FileKey2 />
+                        <FileKey2 />
                         License
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
@@ -569,17 +569,17 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/license/usage" isActive={pathname.startsWith('/license/usage')}>
-                            <BarChart className="mr-2"/> License Usage
+                            <BarChart className="mr-2" /> License Usage
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/license/product-licensing" isActive={pathname.startsWith('/license/product-licensing')}>
-                            <BoxIcon className="mr-2"/> Product Licensing
+                            <BoxIcon className="mr-2" /> Product Licensing
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/license/tools" isActive={pathname.startsWith('/license/tools')}>
-                             <Wrench className="mr-2"/> LMS Integrations
+                            <Wrench className="mr-2" /> LMS Integrations
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
@@ -602,14 +602,14 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                          <SidebarMenuSubItem>
-                              <SidebarMenuSubButton href="/workflows/n8n-ui" isActive={pathname.startsWith('/workflows/n8n-ui')}>
-                                <WorkflowIcon className="mr-2"/> Default
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/workflows/n8n-ui" isActive={pathname.startsWith('/workflows/n8n-ui')}>
+                            <WorkflowIcon className="mr-2" /> Default
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/workflows/integration" isActive={pathname.startsWith('/workflows/integration')}>
-                            <DatabaseZap className="mr-2"/> Integration
+                            <DatabaseZap className="mr-2" /> Integration
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
@@ -634,32 +634,32 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                       <SidebarMenuSub>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/compliance/security" isActive={pathname.startsWith('/compliance/security')}>
-                            <Shield className="mr-2"/> Security
+                            <Shield className="mr-2" /> Security
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/compliance/data" isActive={pathname.startsWith('/compliance/data')}>
-                            <Fingerprint className="mr-2"/> Data
+                            <Fingerprint className="mr-2" /> Data
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/compliance/operational" isActive={pathname.startsWith('/compliance/operational')}>
-                            <UserCheck className="mr-2"/> Operational
+                            <UserCheck className="mr-2" /> Operational
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/compliance/third-party" isActive={pathname.startsWith('/compliance/third-party')}>
-                            <BookLock className="mr-2"/> Third-Party
+                            <BookLock className="mr-2" /> Third-Party
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/compliance/regulatory" isActive={pathname.startsWith('/compliance/regulatory')}>
-                            <Landmark className="mr-2"/> Regulatory
+                            <Landmark className="mr-2" /> Regulatory
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/compliance/audit-reporting" isActive={pathname.startsWith('/compliance/audit-reporting')}>
-                            <FileArchive className="mr-2"/> Audit & Reporting
+                            <FileArchive className="mr-2" /> Audit & Reporting
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
@@ -670,113 +670,111 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                 <Collapsible asChild defaultOpen={isAuditPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton 
+                      <SidebarMenuButton
                         isActive={isAuditPage}
                         tooltip={{ children: 'Audit' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
-                         <Link href="/audits" className='flex items-center gap-2 w-full'>
-                            <ShieldCheck />
-                            Audit
-                         </Link>
+                        <Link href="/audits" className='flex items-center gap-2 w-full'>
+                          <ShieldCheck />
+                          Audit
+                        </Link>
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                   </SidebarMenuItem>
                 </Collapsible>
-                
+
                 <Collapsible asChild defaultOpen={isSettingsPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton 
+                      <SidebarMenuButton
                         isActive={isSettingsPage}
                         tooltip={{ children: 'Settings' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
-                         <Link href="/settings" className='flex items-center gap-2 w-full'>
-                            <Settings />
-                            Settings
-                         </Link>
+                        <Link href="/settings" className='flex items-center gap-2 w-full'>
+                          <Settings />
+                          Settings
+                        </Link>
                         <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
-                     <CollapsibleContent>
+                    <CollapsibleContent>
                       <SidebarMenuSub>
-                         <SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/general" isActive={pathname.startsWith('/settings/general')}>
-                             <Settings2 className="mr-2"/> General
+                            <Settings2 className="mr-2" /> General
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/onboarding" isActive={pathname.startsWith('/settings/onboarding')}>
-                            <SlidersHorizontal className="mr-2"/> Onboarding
+                            <SlidersHorizontal className="mr-2" /> Onboarding
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/approval" isActive={pathname.startsWith('/settings/approval')}>
-                            <CheckSquare className="mr-2"/> Approval
+                            <CheckSquare className="mr-2" /> Approval
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                         <SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/cicd" isActive={pathname.startsWith('/settings/cicd')}>
-                            <GitBranch className="mr-2"/> CICD
+                            <GitBranch className="mr-2" /> CICD
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/specifications" isActive={pathname.startsWith('/settings/specifications')}>
-                            <HardDrive className="mr-2"/> Specifications
+                            <HardDrive className="mr-2" /> Specifications
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/cmdb" isActive={pathname.startsWith('/settings/cmdb')}>
-                            <Database className="mr-2"/> CMDB
+                            <Database className="mr-2" /> CMDB
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/baseline" isActive={pathname.startsWith('/settings/baseline')}>
-                            <GanttChartSquare className="mr-2"/> Baseline
+                            <GanttChartSquare className="mr-2" /> Baseline
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
                 </Collapsible>
-                
-                <SidebarMenuItem className="mt-auto">
-                    <Collapsible asChild defaultOpen={isHelpPage}>
-                        <SidebarMenuItem>
-                            <CollapsibleTrigger asChild>
-                                <SidebarMenuButton
-                                    isActive={isHelpPage}
-                                    tooltip={{ children: 'Help' }}
-                                    className="data-[state=open]:bg-sidebar-accent"
-                                >
-                                    <HelpCircle />
-                                    Help
-                                    <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                                </SidebarMenuButton>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                                <SidebarMenuSub>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/quick-start">Quick Start</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/specifications">Speciifcations</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/products">Products</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/cmdb">CMDB</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/platform-engineering">Platform Engineering</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/offline-cd">Offline CD</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/deployments">Deployments</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/release-baseline">Release & Baseline</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/ci-integrations">CI Integrations</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/workflows">Workflows</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/onboarding-settings">Onboarding Settings</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/fleet-mgmt">Fleet Mgmnt</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/resource-mgmt">Resource Mgmt</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/audit">Audit</SidebarMenuSubButton></SidebarMenuSubItem>
-                                    <SidebarMenuSubItem><SidebarMenuSubButton href="/help/license">License</SidebarMenuSubButton></SidebarMenuSubItem>
-                                </SidebarMenuSub>
-                            </CollapsibleContent>
-                        </SidebarMenuItem>
-                    </Collapsible>
-                </SidebarMenuItem>
+
+                <Collapsible asChild defaultOpen={isHelpPage}>
+                  <SidebarMenuItem className="mt-auto">
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        isActive={isHelpPage}
+                        tooltip={{ children: 'Help' }}
+                        className="data-[state=open]:bg-sidebar-accent"
+                      >
+                        <HelpCircle />
+                        Help
+                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/quick-start">Quick Start</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/specifications">Speciifcations</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/products">Products</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/cmdb">CMDB</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/platform-engineering">Platform Engineering</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/offline-cd">Offline CD</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/deployments">Deployments</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/release-baseline">Release & Baseline</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/ci-integrations">CI Integrations</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/workflows">Workflows</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/onboarding-settings">Onboarding Settings</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/fleet-mgmt">Fleet Mgmnt</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/resource-mgmt">Resource Mgmt</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/audit">Audit</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem><SidebarMenuSubButton href="/help/license">License</SidebarMenuSubButton></SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
               </SidebarMenu>
             </SidebarContent>
             <SidebarFooter>

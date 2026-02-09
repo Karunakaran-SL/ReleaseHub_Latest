@@ -1,13 +1,55 @@
 
 'use client';
+import { useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle, Package } from "lucide-react";
 
 interface Step4Props {
     data: any;
+    onUpdate: (data: any) => void;
 }
 
-export default function Step4Summary({ data }: Step4Props) {
+const COMPONENT_NAMES = [
+    "GitOps Client",
+    "GitOps Server",
+    "Git Repo",
+    "Container Registry (Harbor)",
+    "Helm Registry",
+    "ArgoCD",
+    "Artifact Loader",
+    "Spider Test Runner",
+    "Report Generator",
+    "Observability Stack",
+    "Security Stack"
+];
+
+const getRandomVersion = () => `v${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 20)}.${Math.floor(Math.random() * 10)}`;
+const getRandomResource = (min: number, max: number, unit: string) => `${Math.floor(Math.random() * (max - min + 1) + min)}${unit}`;
+
+const generateComponents = () => COMPONENT_NAMES.map(name => ({
+    name,
+    version: getRandomVersion(),
+    cpu: getRandomResource(100, 1000, 'm'),
+    memory: getRandomResource(128, 1024, 'Mi'),
+    disk: getRandomResource(1, 10, 'Gi')
+}));
+
+export default function Step4Summary({ data, onUpdate }: Step4Props) {
+    useEffect(() => {
+        const currentComps = data.kubernetes?.platformComponents;
+        // Generate if missing or if it's the old string format
+        if (!currentComps || (Array.isArray(currentComps) && typeof currentComps[0] === 'string')) {
+            const platformVersion = `v2024.${Math.floor(Math.random() * 12) + 1}.${Math.floor(Math.random() * 28) + 1}`;
+            onUpdate({
+                kubernetes: {
+                    ...data.kubernetes,
+                    platformVersion,
+                    platformComponents: generateComponents()
+                }
+            });
+        }
+    }, [data.kubernetes, onUpdate]);
+
     return (
         <div className="space-y-6">
             <Alert>

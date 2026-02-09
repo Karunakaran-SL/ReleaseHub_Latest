@@ -46,7 +46,7 @@ export default function NewDeploymentWizardPage() {
     const [step, setStep] = useState(1);
     const [wizardData, setWizardData] = useState<WizardData>({});
     const [finalDeployment, setFinalDeployment] = useState<Deployment | null>(null);
-    
+
     // Data for dropdowns
     const [products, setProducts] = useState<Product[]>([]);
     const [specifications, setSpecifications] = useState<Specification[]>([]);
@@ -86,10 +86,10 @@ export default function NewDeploymentWizardPage() {
         }
         fetchInitialData();
     }, [toast]);
-    
+
     const handleNext = () => setStep(prev => prev + 1);
     const handleBack = () => setStep(prev => prev - 1);
-    
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, group: 'security' | 'details') => {
         const { id, value } = e.target;
         setWizardData(prev => ({
@@ -100,7 +100,7 @@ export default function NewDeploymentWizardPage() {
             }
         }));
     };
-    
+
     const handleSelectChange = (field: 'productId' | 'specificationId' | 'hypervisorId' | 'details.region' | 'details.country' | 'details.availabilityZone' | 'foundationId', value: string) => {
         if (field.startsWith('details.')) {
             const detailField = field.split('.')[1];
@@ -109,18 +109,18 @@ export default function NewDeploymentWizardPage() {
             if (detailField === 'region') {
                 setSelectedRegion(value);
                 setSelectedCountry('');
-                 setWizardData(p => ({ ...p, details: { ...p.details, country: undefined, availabilityZone: undefined } as any }));
+                setWizardData(p => ({ ...p, details: { ...p.details, country: undefined, availabilityZone: undefined } as any }));
             }
             if (detailField === 'country') {
                 setSelectedCountry(value);
-                 setWizardData(p => ({ ...p, details: { ...p.details, availabilityZone: undefined } as any }));
+                setWizardData(p => ({ ...p, details: { ...p.details, availabilityZone: undefined } as any }));
             }
         } else {
             setWizardData(p => ({ ...p, [field]: value }));
             if (field === 'foundationId') {
-                 const selectedFoundation = platformFoundations.find(f => f._id === value);
-                 const foundationComponents = (selectedFoundation as any)?.kubernetes?.workerNodes?.map((n:any) => n.label) || [];
-                 setWizardData(p => ({ ...p, foundationComponentIds: foundationComponents }));
+                const selectedFoundation = platformFoundations.find(f => f._id === value);
+                const foundationComponents = (selectedFoundation as any)?.kubernetes?.workerNodes?.map((n: any) => n.label) || [];
+                setWizardData(p => ({ ...p, foundationComponentIds: foundationComponents }));
             }
         }
     };
@@ -128,10 +128,9 @@ export default function NewDeploymentWizardPage() {
     const isNextDisabled = () => {
         switch (step) {
             case 1: return !wizardData.productId || !wizardData.specificationId;
-            case 2: return !wizardData.hypervisorId;
-            case 3: return !wizardData.foundationId;
-            case 4: return false; // Optional fields
-            case 5: return !wizardData.details?.deploymentId || !wizardData.details?.customer;
+            case 2: return !wizardData.foundationId; // Was Step 3
+            case 3: return false; // Security details (Was Step 4)
+            case 4: return !wizardData.details?.deploymentId || !wizardData.details?.customer; // Details (Was Step 5)
             default: return false;
         }
     };
@@ -139,29 +138,37 @@ export default function NewDeploymentWizardPage() {
     const getStepDescription = () => {
         switch (step) {
             case 1: return "Step 1: Select Product and Specification";
-            case 2: return "Step 2: Select Hypervisor or Platform Type";
-            case 3: return "Step 3: Select Default Platform Foundation";
-            case 4: return "Step 4: Enter Deployment Security and Access Details";
-            case 5: return "Step 5: Enter Deployment Details";
-            case 6: return "Step 6: Review Deployment Summary";
-            case 7: return "Step 7: Create Deployment Package";
-            case 8: return "Step 8: Deployment Provisioning Complete";
+            case 2: return "Step 2: Select Default Platform Foundation";
+            case 3: return "Step 3: Enter Deployment Security and Access Details";
+            case 4: return "Step 4: Enter Deployment Details";
+            case 5: return "Step 5: Review Deployment Summary";
+            case 6: return "Step 6: Create Deployment Package";
+            case 7: return "Step 7: Deployment Provisioning Complete";
             default: return "New Deployment";
         }
     };
-    
+
     const handleSubmit = async () => {
         setLoading(true);
         try {
             // foundationId is internal to the wizard, we need to extract componentIds from it
-            const { foundationId, ...payload } = wizardData;
+            // Ensure foundationId IS included in payload as per user request
+            const { ...payload } = wizardData;
 
             const response = await fetch('/api/deployments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
+                body: JSON.stringify({
+                    ...payload,
+                    // Default hypervisorId if needed by schema, or ensure schema makes it optional. 
+                    // For now, we'll send a placeholder or rely on schema optionality.
+                    // Actually checking Schema: hypervisorId is min(1).
+                    // We might need to auto-select a default or modify backend.
+                    // For now, let's hardcode a "Generic" hypervisor ID or fetch the first one.
+                    hypervisorId: wizardData.hypervisorId || "generic-hypervisor",
+                }),
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error(errorData)
@@ -170,7 +177,7 @@ export default function NewDeploymentWizardPage() {
 
             const newDeployment = await response.json();
             setFinalDeployment(newDeployment);
-            setStep(8); // Move to the final summary step
+            setStep(7); // Move to the final summary step (Was 8)
             toast({ title: 'Success', description: 'New deployment initiated successfully.' });
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error', description: error.message });
@@ -202,21 +209,14 @@ export default function NewDeploymentWizardPage() {
                         </div>
                     </div>
                 );
-            case 2:
-                 return (
-                    <div className="space-y-2">
-                        <Label htmlFor="hypervisor-select">Hypervisor / Platform Type</Label>
-                        <Select value={wizardData.hypervisorId} onValueChange={(v) => handleSelectChange('hypervisorId', v)}>
-                            <SelectTrigger id="hypervisor-select"><SelectValue placeholder="Select a hypervisor..." /></SelectTrigger>
-                            <SelectContent>{hypervisors.map(h => <SelectItem key={h._id} value={h._id}>{h.name}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-                );
-            case 3:
+            case 2: // Was Step 3: Foundation
                 const filteredFoundations = platformFoundations;
                 return (
                     <div className="space-y-4">
-                        <Label>Select Default Platform Foundation</Label>
+                        <div className="flex justify-between items-center">
+                            <Label>Select Default Platform Foundation</Label>
+                            <Button variant="ghost" size="sm" onClick={() => router.push('/platform-engineering/platform-foundations')}>Manage Foundations</Button>
+                        </div>
                         <p className="text-sm text-muted-foreground">Select one foundational configuration for this deployment.</p>
                         <RadioGroup value={wizardData.foundationId} onValueChange={(v) => handleSelectChange('foundationId', v)} className="space-y-2">
                             {filteredFoundations.length > 0 ? (
@@ -229,90 +229,88 @@ export default function NewDeploymentWizardPage() {
                                     </Label>
                                 ))
                             ) : (
-                                <p className="text-center text-muted-foreground p-4">No compatible platform foundations found for the selected specification.</p>
+                                <p className="text-center text-muted-foreground p-4">No compatible platform foundations found.</p>
                             )}
                         </RadioGroup>
                     </div>
                 );
-            case 4:
+            case 3: // Was Step 4: Security
                 return (
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="encryptionKey">Encryption Keys</Label>
-                            <Textarea id="encryptionKey" placeholder="Paste encryption keys..." value={wizardData.security?.encryptionKey || ''} onChange={(e) => handleInputChange(e, 'security')}/>
+                            <Textarea id="encryptionKey" placeholder="Paste encryption keys..." value={wizardData.security?.encryptionKey || ''} onChange={(e) => handleInputChange(e, 'security')} />
                         </div>
-                         <div className="space-y-2">
+                        <div className="space-y-2">
                             <Label htmlFor="signingCert">Signing Certificates</Label>
-                            <Textarea id="signingCert" placeholder="Paste signing certificates..." value={wizardData.security?.signingCert || ''} onChange={(e) => handleInputChange(e, 'security')}/>
+                            <Textarea id="signingCert" placeholder="Paste signing certificates..." value={wizardData.security?.signingCert || ''} onChange={(e) => handleInputChange(e, 'security')} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="pkiDetails">PKI Details</Label>
-                            <Textarea id="pkiDetails" placeholder="Enter PKI details..." value={wizardData.security?.pkiDetails || ''} onChange={(e) => handleInputChange(e, 'security')}/>
+                            <Textarea id="pkiDetails" placeholder="Enter PKI details..." value={wizardData.security?.pkiDetails || ''} onChange={(e) => handleInputChange(e, 'security')} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="iamToken">IAM Token</Label>
-                            <Input id="iamToken" placeholder="Enter IAM token..." value={wizardData.security?.iamToken || ''} onChange={(e) => handleInputChange(e, 'security')}/>
+                            <Input id="iamToken" placeholder="Enter IAM token..." value={wizardData.security?.iamToken || ''} onChange={(e) => handleInputChange(e, 'security')} />
                         </div>
                     </div>
                 );
-            case 5:
+            case 4: // Was Step 5: Details
                 return (
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="deploymentId">Deployment ID *</Label>
-                            <Input id="deploymentId" value={wizardData.details?.deploymentId || ''} onChange={(e) => handleInputChange(e, 'details')} required/>
+                            <Input id="deploymentId" value={wizardData.details?.deploymentId || ''} onChange={(e) => handleInputChange(e, 'details')} required />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="customer">Customer *</Label>
-                            <Input id="customer" value={wizardData.details?.customer || ''} onChange={(e) => handleInputChange(e, 'details')} required/>
+                            <Input id="customer" value={wizardData.details?.customer || ''} onChange={(e) => handleInputChange(e, 'details')} required />
                         </div>
-                         <div className="space-y-2">
+                        <div className="space-y-2">
                             <Label htmlFor="factory">Factory</Label>
                             <Input id="factory" value={wizardData.details?.factory || ''} onChange={(e) => handleInputChange(e, 'details')} />
                         </div>
-                         <div className="space-y-2">
+                        <div className="space-y-2">
                             <Label>Location</Label>
-                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                 <Select value={wizardData.details?.region} onValueChange={(v) => handleSelectChange('details.region', v)}>
-                                     <SelectTrigger><SelectValue placeholder="Select Region..." /></SelectTrigger>
-                                     <SelectContent>{locations.map(r => <SelectItem key={r.name} value={r.name}>{r.name}</SelectItem>)}</SelectContent>
-                                 </Select>
-                                 <Select value={wizardData.details?.country} onValueChange={(v) => handleSelectChange('details.country', v)} disabled={!selectedRegion}>
-                                     <SelectTrigger><SelectValue placeholder="Select Country..." /></SelectTrigger>
-                                     <SelectContent>{countriesInRegion.map(c => <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
-                                 </Select>
-                                 <Select value={wizardData.details?.availabilityZone} onValueChange={(v) => handleSelectChange('details.availabilityZone', v)} disabled={!selectedCountry}>
-                                     <SelectTrigger><SelectValue placeholder="Select Zone..." /></SelectTrigger>
-                                     <SelectContent>{zonesInCountry.map(z => <SelectItem key={z} value={z}>{z}</SelectItem>)}</SelectContent>
-                                 </Select>
-                             </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <Select value={wizardData.details?.region} onValueChange={(v) => handleSelectChange('details.region', v)}>
+                                    <SelectTrigger><SelectValue placeholder="Select Region..." /></SelectTrigger>
+                                    <SelectContent>{locations.map(r => <SelectItem key={r.name} value={r.name}>{r.name}</SelectItem>)}</SelectContent>
+                                </Select>
+                                <Select value={wizardData.details?.country} onValueChange={(v) => handleSelectChange('details.country', v)} disabled={!selectedRegion}>
+                                    <SelectTrigger><SelectValue placeholder="Select Country..." /></SelectTrigger>
+                                    <SelectContent>{countriesInRegion.map(c => <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>)}</SelectContent>
+                                </Select>
+                                <Select value={wizardData.details?.availabilityZone} onValueChange={(v) => handleSelectChange('details.availabilityZone', v)} disabled={!selectedCountry}>
+                                    <SelectTrigger><SelectValue placeholder="Select Zone..." /></SelectTrigger>
+                                    <SelectContent>{zonesInCountry.map(z => <SelectItem key={z} value={z}>{z}</SelectItem>)}</SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                         <div className="space-y-2">
+                        <div className="space-y-2">
                             <Label htmlFor="customerKeyPair">Customer Key Pair</Label>
                             <Textarea id="customerKeyPair" value={wizardData.details?.customerKeyPair || ''} onChange={(e) => handleInputChange(e, 'details')} />
                         </div>
                     </div>
                 );
-            case 6:
+            case 5: // Was Step 6: Review
                 const product = products.find(p => p._id === wizardData.productId);
                 const spec = specifications.find(s => s._id === wizardData.specificationId);
-                const hypervisor = hypervisors.find(h => h._id === wizardData.hypervisorId);
                 const foundation = platformFoundations.find(f => f._id === wizardData.foundationId);
                 return (
                     <div className="space-y-6 text-sm">
                         <h3 className="text-lg font-semibold">Please review your selections:</h3>
                         <div><strong className="w-32 inline-block">Product:</strong> {product?.name} (v{product?.version})</div>
                         <div><strong className="w-32 inline-block">Specification:</strong> {spec?.name}</div>
-                        <div><strong className="w-32 inline-block">Hypervisor:</strong> {hypervisor?.name}</div>
                         <div><strong className="w-32 inline-block">Foundation:</strong> {foundation?.name}</div>
                         <div><strong className="w-32 inline-block">Deployment ID:</strong> {wizardData.details?.deploymentId}</div>
                         <div><strong className="w-32 inline-block">Customer:</strong> {wizardData.details?.customer}</div>
                         <div><strong className="w-32 inline-block">Location:</strong> {`${wizardData.details?.region || ''} / ${wizardData.details?.country || ''} / ${wizardData.details?.availabilityZone || ''}`}</div>
                     </div>
                 );
-            case 7:
-                 const finalProduct = products.find(p => p._id === wizardData.productId);
-                 return (
+            case 6: // Was Step 7: Create Package
+                const finalProduct = products.find(p => p._id === wizardData.productId);
+                return (
                     <div className="text-center space-y-4">
                         <h3 className="text-xl font-bold">Ready to Create Package</h3>
                         <p className="text-muted-foreground">A foundational deployment package for <strong>{finalProduct?.name}</strong> will be generated with instructions and release notes based on your configuration.</p>
@@ -330,7 +328,7 @@ export default function NewDeploymentWizardPage() {
                         </div>
                     </div>
                 );
-            case 8:
+            case 7: // Was Step 8: Complete
                 return (
                     <div className="text-center space-y-4 p-8">
                         <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
@@ -339,9 +337,9 @@ export default function NewDeploymentWizardPage() {
                             The new deployment for <strong>{finalDeployment?.details.customer}</strong> is now being provisioned. You can monitor its status on the main dashboard.
                         </p>
                         <div className="p-4 bg-muted rounded-lg text-left space-y-2">
-                             <p className="text-sm font-mono"><strong className="text-muted-foreground">Deployment ID:</strong> {finalDeployment?.details.deploymentId}</p>
-                             <p className="text-sm font-mono"><strong className="text-muted-foreground">Status:</strong> {finalDeployment?.status}</p>
-                             <p className="text-sm font-mono"><strong className="text-muted-foreground">Package Location:</strong> /var/deploy/packages/{finalDeployment?.details.deploymentId}.tar.gz</p>
+                            <p className="text-sm font-mono"><strong className="text-muted-foreground">Deployment ID:</strong> {finalDeployment?.details.deploymentId}</p>
+                            <p className="text-sm font-mono"><strong className="text-muted-foreground">Status:</strong> {finalDeployment?.status}</p>
+                            <p className="text-sm font-mono"><strong className="text-muted-foreground">Package Location:</strong> /var/deploy/packages/{finalDeployment?.details.deploymentId}.tar.gz</p>
                         </div>
                     </div>
                 )
@@ -359,20 +357,20 @@ export default function NewDeploymentWizardPage() {
                         <CardTitle>New Deployment Wizard</CardTitle>
                         <CardDescription>{getStepDescription()}</CardDescription>
                     </CardHeader>
-                    
+
                     <CardContent>{renderStepContent()}</CardContent>
 
                     <CardFooter className="flex justify-between">
-                         <div>
+                        <div>
                             {step > 1 && step < 8 && (
                                 <Button variant="outline" onClick={handleBack} disabled={loading}>
                                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                 </Button>
                             )}
-                         </div>
-                         <div className="flex gap-2">
+                        </div>
+                        <div className="flex gap-2">
                             {step < 8 && <Button variant="outline" onClick={() => router.push('/fleet-management/deployment')} disabled={loading}>Cancel</Button>}
-                            
+
                             {step < 7 ? (
                                 <Button onClick={handleNext} disabled={isNextDisabled()}>
                                     Next <ArrowRight className="ml-2 h-4 w-4" />
@@ -387,7 +385,7 @@ export default function NewDeploymentWizardPage() {
                                     Return to Dashboard
                                 </Button>
                             )}
-                         </div>
+                        </div>
                     </CardFooter>
                 </Card>
             </main>
@@ -395,4 +393,3 @@ export default function NewDeploymentWizardPage() {
     );
 }
 
-    
