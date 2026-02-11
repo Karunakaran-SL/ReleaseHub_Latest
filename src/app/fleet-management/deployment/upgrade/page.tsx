@@ -14,6 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, CheckCircle, SlidersHorizontal, Package, FileText, Calendar as CalendarIcon, Upload, Users, ShieldCheck, FileCode, ChevronRight, Save, Warehouse, Puzzle, AppWindow, Info } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
@@ -84,6 +85,7 @@ function UpgradeWizardPageComponent() {
     // Visual Builder State
     const [visualFoundation, setVisualFoundation] = useState<any>(null);
     const [baselineVisualData, setBaselineVisualData] = useState<any>(null);
+    const [individualVisualData, setIndividualVisualData] = useState<any>(null);
 
 
     useEffect(() => {
@@ -353,7 +355,73 @@ function UpgradeWizardPageComponent() {
         };
 
         setBaselineVisualData(visualData);
-    }, [selectedBaselineId, upgradeScope, baselines, selectedProductId, selectedSpecId, products, specifications, selectedDeploymentIds, deployments, platformFoundations]);
+    }, [selectedBaselineId, baselines, products, specifications, selectedProductId, selectedSpecId, deployments, selectedDeploymentIds, platformFoundations]);
+
+    // Build visual data for Individual Component Upgrade selections
+    useEffect(() => {
+        if (!dependencyTree || !selectedProductId || !selectedSpecId || selectedIndividualItems.tenants.size === 0) {
+            setIndividualVisualData(null);
+            return;
+        }
+
+        const product = products.find(p => p._id === selectedProductId);
+        const spec = specifications.find(s => s._id === selectedSpecId);
+
+        // Get Foundation from selected deployment (if available)
+        let foundation = null;
+        if (selectedDeploymentIds.size > 0) {
+            const firstDeploymentId = Array.from(selectedDeploymentIds)[0];
+            const deployment = deployments.find(d => d._id === firstDeploymentId);
+            if (deployment && deployment.foundationId) {
+                foundation = platformFoundations.find(f => f._id === deployment.foundationId);
+            }
+        }
+
+        const foundationK8s = foundation?.kubernetes || {};
+        const foundationSpec = foundation?.specification || {};
+
+        // Filter tenants, components, and applications based on selections
+        const selectedTenants = dependencyTree.tenants
+            .filter((tenant: any) => selectedIndividualItems.tenants.has(tenant.id))
+            .map((tenant: any) => ({
+                id: tenant.id,
+                name: tenant.name,
+                version: tenant.version,
+                description: tenant.description || '',
+                components: tenant.components?.filter((comp: any) =>
+                    selectedIndividualItems.components.has(comp.id)
+                ) || [],
+                applications: tenant.applications?.filter((app: any) =>
+                    selectedIndividualItems.applications.has(app.id)
+                ) || [],
+                interfaces: tenant.interfaces || []
+            }));
+
+        const visualData = {
+            ...(foundation || {}),
+            type: 'baseline', // Reuse baseline rendering
+            product: {
+                name: product?.name || '',
+                version: product?.version || '',
+                owner: product?.owner || '',
+                deploymentType: product?.deployment_type || '',
+                complianceChecks: product?.compliance_checks || false
+            },
+            specification: {
+                hardware: foundationSpec.hardware || spec?.hardware || {},
+                vendor: foundationSpec.vendor || spec?.vendor || 'Unknown',
+                type: foundationSpec.type || spec?.type || 'Unknown'
+            },
+            kubernetes: {
+                distro: foundationK8s.distro || 'Unknown',
+                version: foundationK8s.version || 'Unknown',
+                platformComponents: foundationK8s.platformComponents || []
+            },
+            tenants: selectedTenants
+        };
+
+        setIndividualVisualData(visualData);
+    }, [selectedIndividualItems, dependencyTree, products, specifications, selectedProductId, selectedSpecId, deployments, selectedDeploymentIds, platformFoundations]);
 
 
 
@@ -819,6 +887,19 @@ function UpgradeWizardPageComponent() {
                                     </AccordionItem>
                                 ))}
                             </Accordion>
+
+                            {individualVisualData && selectedIndividualItems.tenants.size > 0 && (
+                                <>
+                                    <Separator className="my-6" />
+                                    <div className="mt-6">
+                                        <h3 className="text-lg font-semibold mb-2">Selected Items Preview</h3>
+                                        <p className="text-sm text-muted-foreground mb-4">
+                                            Visual and JSON representation of the platform with only your selected tenants, components, and applications.
+                                        </p>
+                                        <VisualBuilder foundation={individualVisualData} autoHeight={true} />
+                                    </div>
+                                </>
+                            )}
                         </div>
                     );
                 }
