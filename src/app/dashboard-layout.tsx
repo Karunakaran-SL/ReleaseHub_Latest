@@ -70,6 +70,7 @@ import {
   Landmark,
   FileArchive,
   HelpCircle,
+  Plug,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -734,6 +735,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/baseline" isActive={pathname.startsWith('/settings/baseline')}>
                             <GanttChartSquare className="mr-2" /> Baseline
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/settings/plugins" isActive={pathname.startsWith('/settings/plugins')}>
+                            <Plug className="mr-2" /> Plugins
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
