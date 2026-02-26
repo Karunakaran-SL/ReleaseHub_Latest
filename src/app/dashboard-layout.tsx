@@ -1,5 +1,6 @@
 
 'use client';
+import { useState, useEffect } from 'react';
 import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/logo';
@@ -178,6 +179,19 @@ function Header({ user }: { user: User | null }) {
 }
 
 export default function DashboardLayout({ children, user }: { children: React.ReactNode, user: User | null }) {
+  const [installedPlugins, setInstalledPlugins] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/system/plugins/list')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setInstalledPlugins(data.plugins);
+        }
+      })
+      .catch(err => console.error("Failed to fetch plugins", err));
+  }, []);
+
   const pathname = usePathname();
   const isProductsPage = pathname.startsWith('/products');
   const isSpecificationsPage = pathname.startsWith('/specifications');
@@ -742,6 +756,13 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             <Plug className="mr-2" /> Plugins
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
+                        {installedPlugins.length > 0 && installedPlugins.filter(p => p.navigation?.parent === 'Settings').map((plugin) => (
+                          <SidebarMenuSubItem key={plugin.id}>
+                            <SidebarMenuSubButton href={plugin.navigation?.path || `/settings/${plugin.id}`} isActive={pathname.startsWith(plugin.navigation?.path || `/settings/${plugin.id}`)}>
+                              <Box className="mr-2 h-4 w-4" /> {plugin.navigation?.label || plugin.name}
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>

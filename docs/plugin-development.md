@@ -52,19 +52,20 @@ ReleaseHub utilizes Next.js Route Handlers for its backend API.
 
 ReleaseHub uses the standard native Node.js MongoDB driver.
 
-* **Connection**: Import the MongoDB connection utility from `src/lib/mongodb.ts`.
+* **Connection**: Import the global MongoDB client promise from `src/lib/mongodb.ts`.
 * **Best Practices**:
-  * Always await the database connection: `const db = await connectToDatabase();`
+  * Always await the database promise: `const client = await clientPromise; const db = client.db();`
   * Use the specific database initialized by the utility.
-  * Do not create new connection pools within the route handlers; reuse `connectToDatabase()`.
+  * Do not create new connection pools within the route handlers; reuse `clientPromise`.
   
   ```typescript
-  import { connectToDatabase } from '@/lib/mongodb';
+  import clientPromise from '@/lib/mongodb';
   import { NextResponse } from 'next/server';
 
   export async function GET() {
     try {
-      const db = await connectToDatabase();
+      const client = await clientPromise;
+      const db = client.db();
       const collection = db.collection('my_plugin_data');
       const data = await collection.find({}).toArray();
       

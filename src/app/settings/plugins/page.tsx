@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plug, Download, ExternalLink, CheckCircle2 } from 'lucide-react';
 import PluginIcon from './plugin-icon';
 import DashboardLayout from '@/app/dashboard-layout';
+import PluginManager from './plugin-manager';
 import { getUser } from '@/lib/auth';
 
 interface PluginFeature {
@@ -66,11 +67,13 @@ export default async function PluginsPage() {
                 <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))] -z-10" />
                 <div className="absolute inset-0 bg-background/80 backdrop-blur-3xl -z-10" />
 
-                <div className="flex items-center justify-between space-y-2">
+                <div className="flex items-center justify-between space-y-2 mb-8">
                     <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Plugins</h2>
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <PluginManager />
+
+                <div className="flex flex-col gap-2 mt-8">
                     <h3 className="text-lg font-medium text-foreground">Available Integrations</h3>
                     <p className="text-sm text-muted-foreground w-full max-w-2xl">
                         Browse and install verified plugins to extend your workspace. Enhance your workflow with official and community-built integrations.
