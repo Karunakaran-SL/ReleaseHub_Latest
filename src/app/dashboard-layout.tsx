@@ -763,6 +763,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         <SidebarMenuSubItem><SidebarMenuSubButton href="/api-docs">API Documentation</SidebarMenuSubButton></SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/help/plugins" isActive={pathname.startsWith('/help/plugins')}>
+                            <Plug className="mr-2 h-4 w-4" /> Plugins
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
                         <SidebarMenuSubItem><SidebarMenuSubButton href="/help/quick-start">Quick Start</SidebarMenuSubButton></SidebarMenuSubItem>
                         <SidebarMenuSubItem><SidebarMenuSubButton href="/help/specifications">Speciifcations</SidebarMenuSubButton></SidebarMenuSubItem>
                         <SidebarMenuSubItem><SidebarMenuSubButton href="/help/products">Products</SidebarMenuSubButton></SidebarMenuSubItem>
