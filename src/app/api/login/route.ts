@@ -25,48 +25,48 @@ export async function POST(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db();
     const usersCollection = db.collection<User>('users');
-    
+
     const user = await usersCollection.findOne({ username });
 
     // Case 1: User does not exist. Create them.
     if (!user) {
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newUserResult = await usersCollection.insertOne({ username, password: hashedPassword });
-      await createSession(newUserResult.insertedId.toString(), username);
+      const newUserResult = await usersCollection.insertOne({ username, password: hashedPassword, role: 'viewer' } as any);
+      await createSession(newUserResult.insertedId.toString(), username, 'viewer');
       return NextResponse.json({ message: 'User created and logged in successfully' }, { status: 201 });
     }
 
     // User exists. Check password.
     if (typeof user.password !== 'string') {
-        // Handle cases where password is not a string (e.g., null, undefined)
-        return NextResponse.json({ message: 'Invalid credentials format.' }, { status: 401 });
+      // Handle cases where password is not a string (e.g., null, undefined)
+      return NextResponse.json({ message: 'Invalid credentials format.' }, { status: 401 });
     }
-    
+
     const isPasswordHashed = user.password.startsWith('$2a$') || user.password.startsWith('$2b$');
 
     if (isPasswordHashed) {
-        // Case 2: User exists and password is a valid hash. Compare it.
-        const passwordsMatch = await bcrypt.compare(password, user.password);
-        if (passwordsMatch) {
-            await createSession(user._id.toString(), user.username);
-            return NextResponse.json({ message: 'Logged in successfully' }, { status: 200 });
-        }
+      // Case 2: User exists and password is a valid hash. Compare it.
+      const passwordsMatch = await bcrypt.compare(password, user.password);
+      if (passwordsMatch) {
+        await createSession(user._id.toString(), user.username, (user as any).role || 'viewer');
+        return NextResponse.json({ message: 'Logged in successfully' }, { status: 200 });
+      }
     } else {
-        // Case 3: User exists, but password is a plaintext string (legacy).
-        if (user.password === password) {
-            // Hash the plaintext password and update it in the DB.
-            const hashedPassword = await bcrypt.hash(password, 10);
-            await usersCollection.updateOne(
-              { _id: user._id },
-              { $set: { password: hashedPassword } }
-            );
-            
-            await createSession(user._id.toString(), user.username);
-            
-            return NextResponse.json({ message: 'Password updated and logged in successfully' }, { status: 200 });
-        }
+      // Case 3: User exists, but password is a plaintext string (legacy).
+      if (user.password === password) {
+        // Hash the plaintext password and update it in the DB.
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await usersCollection.updateOne(
+          { _id: user._id },
+          { $set: { password: hashedPassword } }
+        );
+
+        await createSession(user._id.toString(), user.username, (user as any).role || 'viewer');
+
+        return NextResponse.json({ message: 'Password updated and logged in successfully' }, { status: 200 });
+      }
     }
-    
+
     // If we've reached here, it means the password comparison failed.
     return NextResponse.json({ message: 'Invalid username or password.' }, { status: 401 });
 

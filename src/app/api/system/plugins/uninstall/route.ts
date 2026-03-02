@@ -3,6 +3,15 @@ import fs from 'fs';
 import path from 'path';
 import { getUser } from '@/lib/auth';
 
+// All directories where plugin files can be installed
+const PLUGIN_DIRS = [
+    'src/app/settings',
+    'src/app/dashboard/plugins',
+    'src/app/plugins',
+    'src/app/help',
+    'src/app/api/plugins',
+];
+
 export async function DELETE(request: Request) {
     try {
         const user = await getUser();
@@ -15,21 +24,21 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: 'Plugin ID is required' }, { status: 400 });
         }
 
-        // Define paths to delete
-        const uiPath = path.join(process.cwd(), 'src/app/settings', pluginId);
-        const apiPath = path.join(process.cwd(), 'src/app/api/plugins', pluginId);
+        let deletedDirs = 0;
 
-        // Delete UI directory safely
-        if (fs.existsSync(uiPath)) {
-            fs.rmSync(uiPath, { recursive: true, force: true });
+        // Delete plugin from all possible directories
+        for (const relDir of PLUGIN_DIRS) {
+            const pluginPath = path.join(process.cwd(), relDir, pluginId);
+            if (fs.existsSync(pluginPath)) {
+                fs.rmSync(pluginPath, { recursive: true, force: true });
+                deletedDirs++;
+            }
         }
 
-        // Delete API directory safely
-        if (fs.existsSync(apiPath)) {
-            fs.rmSync(apiPath, { recursive: true, force: true });
-        }
-
-        return NextResponse.json({ success: true, message: `Plugin ${pluginId} uninstalled successfully.` });
+        return NextResponse.json({
+            success: true,
+            message: `Plugin ${pluginId} uninstalled successfully. Cleaned ${deletedDirs} directories.`
+        });
     } catch (error: any) {
         console.error('Uninstall Error:', error);
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });

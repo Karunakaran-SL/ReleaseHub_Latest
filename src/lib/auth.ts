@@ -17,7 +17,8 @@ export async function getUser() {
   if (!decryptedSession) return null;
 
   return {
-      id: decryptedSession.userId,
-      username: decryptedSession.username
+    id: decryptedSession.userId,
+    username: decryptedSession.username,
+    role: (decryptedSession.role as string) || 'viewer'
   };
 }

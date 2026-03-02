@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Move, Trash2, Rocket, FileCode, Users, HardDrive, Puzzle, AppWindow } from 'lucide-react';
+import { Move, Trash2, Rocket, FileCode, Users, HardDrive, Puzzle, AppWindow, Plug } from 'lucide-react';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
 import type { User, Deployment, Product, Baseline, CmdbTenant, CmdbComponent, CmdbApplication } from '@/lib/definitions';
@@ -45,7 +45,7 @@ function Widget({ title, children, description }: { title: string, children: Rea
                     <CardTitle>{title}</CardTitle>
                     {description && <CardDescription>{description}</CardDescription>}
                 </div>
-                 <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" className="cursor-move h-8 w-8">
                         <Move className="h-4 w-4" />
                     </Button>
@@ -72,45 +72,45 @@ function GlobalViewWidget({ deployments, loading }: { deployments: Deployment[],
 }
 
 const chartConfig = {
-  active: { label: 'Active', color: 'hsl(var(--chart-2))' },
-  upgrading: { label: 'Upgrading', color: 'hsl(var(--chart-3))' },
-  provisioning: { label: 'Provisioning', color: 'hsl(var(--chart-4))' },
-  failed: { label: 'Failed', color: 'hsl(var(--chart-1))' },
-  decommissioned: { label: 'Decommissioned', color: 'hsl(var(--chart-5))' },
-  compliant: { label: 'Compliant', color: 'hsl(var(--chart-2))' },
-  noncompliant: { label: 'Non-Compliant', color: 'hsl(var(--chart-1))' },
-  unknown: { label: 'Unknown', color: 'hsl(var(--chart-5))' },
-  tenants: { label: 'Tenants', color: 'hsl(var(--chart-2))' },
+    active: { label: 'Active', color: 'hsl(var(--chart-2))' },
+    upgrading: { label: 'Upgrading', color: 'hsl(var(--chart-3))' },
+    provisioning: { label: 'Provisioning', color: 'hsl(var(--chart-4))' },
+    failed: { label: 'Failed', color: 'hsl(var(--chart-1))' },
+    decommissioned: { label: 'Decommissioned', color: 'hsl(var(--chart-5))' },
+    compliant: { label: 'Compliant', color: 'hsl(var(--chart-2))' },
+    noncompliant: { label: 'Non-Compliant', color: 'hsl(var(--chart-1))' },
+    unknown: { label: 'Unknown', color: 'hsl(var(--chart-5))' },
+    tenants: { label: 'Tenants', color: 'hsl(var(--chart-2))' },
 };
 
 function DeploymentStatusPieChart({ deployments, loading }: { deployments: Deployment[], loading: boolean }) {
-  const deploymentStatusData = Object.entries(
-    deployments.reduce((acc, d) => {
-      acc[d.status] = (acc[d.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>)
-  ).map(([name, value]) => ({ name, value }));
+    const deploymentStatusData = Object.entries(
+        deployments.reduce((acc, d) => {
+            acc[d.status] = (acc[d.status] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>)
+    ).map(([name, value]) => ({ name, value }));
 
-  return (
-    <Widget title="Deployments by Status">
-      {loading ? (
-          <div className="h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
-      ) : (
-        <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-            <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                    <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-                    <Pie data={deploymentStatusData} dataKey="value" nameKey="name" >
-                        {deploymentStatusData.map((entry, index) => (
-                           <Cell key={`cell-${index}`} fill={`var(--color-${entry.name.toLowerCase()})`} />
-                        ))}
-                    </Pie>
-                </PieChart>
-            </ResponsiveContainer>
-        </ChartContainer>
-      )}
-    </Widget>
-  );
+    return (
+        <Widget title="Deployments by Status">
+            {loading ? (
+                <div className="h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+            ) : (
+                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                    <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                            <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+                            <Pie data={deploymentStatusData} dataKey="value" nameKey="name" >
+                                {deploymentStatusData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={`var(--color-${entry.name.toLowerCase()})`} />
+                                ))}
+                            </Pie>
+                        </PieChart>
+                    </ResponsiveContainer>
+                </ChartContainer>
+            )}
+        </Widget>
+    );
 }
 
 function BaselineComplianceChart({ baselines, loading }: { baselines: Baseline[], loading: boolean }) {
@@ -124,9 +124,9 @@ function BaselineComplianceChart({ baselines, loading }: { baselines: Baseline[]
 
     return (
         <Widget title="Baseline Compliance">
-             {loading ? (
+            {loading ? (
                 <div className="h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
-             ) : (
+            ) : (
                 <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
                     <ResponsiveContainer width="100%" height={250}>
                         <BarChart data={baselineComplianceData} layout="vertical" margin={{ left: 20 }}>
@@ -141,7 +141,7 @@ function BaselineComplianceChart({ baselines, loading }: { baselines: Baseline[]
                         </BarChart>
                     </ResponsiveContainer>
                 </ChartContainer>
-             )}
+            )}
         </Widget>
     );
 }
@@ -159,10 +159,10 @@ function ProductDeploymentChart({ deployments, products, loading }: { deployment
 
     return (
         <Widget title="Deployments by Product">
-             {loading ? (
+            {loading ? (
                 <div className="h-full flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
-             ) : (
-                 <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+            ) : (
+                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
                     <ResponsiveContainer width="100%" height={250}>
                         <BarChart data={productDeploymentData}>
                             <CartesianGrid vertical={false} />
@@ -176,7 +176,7 @@ function ProductDeploymentChart({ deployments, products, loading }: { deployment
                         </BarChart>
                     </ResponsiveContainer>
                 </ChartContainer>
-             )}
+            )}
         </Widget>
     )
 }
@@ -192,7 +192,7 @@ function ProductTenantChart({ products, tenants }: { products: Product[], tenant
             <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
                 <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={productTenantData}>
-                         <CartesianGrid vertical={false} />
+                        <CartesianGrid vertical={false} />
                         <XAxis dataKey="name" tickLine={false} axisLine={false} />
                         <YAxis />
                         <ChartTooltip content={<ChartTooltipContent />} />
@@ -213,6 +213,8 @@ export default function DashboardPage() {
     const [tenants, setTenants] = useState<CmdbTenant[]>([]);
     const [components, setComponents] = useState<CmdbComponent[]>([]);
     const [applications, setApplications] = useState<CmdbApplication[]>([]);
+    const [pluginWidgets, setPluginWidgets] = useState<any[]>([]);
+    const [pluginWidgetData, setPluginWidgetData] = useState<Record<string, any>>({});
 
     useEffect(() => {
         getUser().then(setUser);
@@ -240,73 +242,132 @@ export default function DashboardPage() {
             }
         }
         fetchData();
+
+        // Fetch plugin widgets
+        fetch('/api/system/plugins/list')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const widgetPlugins = data.plugins.filter((p: any) => p.widgets && p.widgets.length > 0);
+                    setPluginWidgets(widgetPlugins);
+                    // Fetch data for each widget plugin
+                    widgetPlugins.forEach((plugin: any) => {
+                        fetch(`/api/plugins/${plugin.id}`)
+                            .then(res => res.json())
+                            .then(widgetData => {
+                                setPluginWidgetData(prev => ({ ...prev, [plugin.id]: widgetData }));
+                            })
+                            .catch(() => { });
+                    });
+                }
+            })
+            .catch(() => { });
     }, []);
 
-  return (
-    <DashboardLayout user={user}>
-        <main className="flex-1 space-y-8 p-6 md:p-10">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-                <p className="mt-2 text-muted-foreground">Your central hub for monitoring and managing all operations.</p>
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                <Card><CardHeader className="pb-2"><CardDescription>Products</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : products.length}</CardTitle></CardHeader></Card>
-                <Card><CardHeader className="pb-2"><CardDescription>Tenants</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : tenants.length}</CardTitle></CardHeader></Card>
-                <Card><CardHeader className="pb-2"><CardDescription>Components</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : components.length}</CardTitle></CardHeader></Card>
-                <Card><CardHeader className="pb-2"><CardDescription>Applications</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : applications.length}</CardTitle></CardHeader></Card>
-                <Card><CardHeader className="pb-2"><CardDescription>Baselines</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : baselines.length}</CardTitle></CardHeader></Card>
-                <Card><CardHeader className="pb-2"><CardDescription>Deployments</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : deployments.length}</CardTitle></CardHeader></Card>
-            </div>
+    return (
+        <DashboardLayout user={user}>
+            <main className="flex-1 space-y-8 p-6 md:p-10">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                    <p className="mt-2 text-muted-foreground">Your central hub for monitoring and managing all operations.</p>
+                </div>
 
-            <div className="space-y-6">
-                <GlobalViewWidget deployments={deployments} loading={loading} />
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-                    <DeploymentStatusPieChart deployments={deployments} loading={loading} />
-                    <BaselineComplianceChart baselines={baselines} loading={loading}/>
-                    <ProductDeploymentChart deployments={deployments} products={products} loading={loading} />
-                    <ProductTenantChart products={products} tenants={tenants} />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <Card><CardHeader className="pb-2"><CardDescription>Products</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : products.length}</CardTitle></CardHeader></Card>
+                    <Card><CardHeader className="pb-2"><CardDescription>Tenants</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : tenants.length}</CardTitle></CardHeader></Card>
+                    <Card><CardHeader className="pb-2"><CardDescription>Components</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : components.length}</CardTitle></CardHeader></Card>
+                    <Card><CardHeader className="pb-2"><CardDescription>Applications</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : applications.length}</CardTitle></CardHeader></Card>
+                    <Card><CardHeader className="pb-2"><CardDescription>Baselines</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : baselines.length}</CardTitle></CardHeader></Card>
+                    <Card><CardHeader className="pb-2"><CardDescription>Deployments</CardDescription><CardTitle className="text-4xl">{loading ? <Loader2 className="h-8 w-8 animate-spin" /> : deployments.length}</CardTitle></CardHeader></Card>
                 </div>
-                 <div className="grid gap-6 md:grid-cols-2">
-                    <Widget title="Recent Baselines" description="The last 5 baselines that were created or updated.">
-                        <Table>
-                            <TableHeader><TableRow><TableHead>Product</TableHead><TableHead>Version</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
-                            <TableBody>
-                                {loading ? <TableRow><TableCell colSpan={4} className="text-center h-24"><Loader2 className="h-6 w-6 animate-spin mx-auto"/></TableCell></TableRow>
-                                : baselines.slice(0, 5).map(b => (
-                                    <TableRow key={b._id}>
-                                        <TableCell>
-                                            <Link href={`/release-management/baseline/${b._id}/summary`} className="font-medium hover:underline">{b.product.name}</Link>
-                                        </TableCell>
-                                        <TableCell>{b.product.version}</TableCell>
-                                        <TableCell><Badge className={cn(statusColors[b.status] || 'bg-gray-200')}>{b.status}</Badge></TableCell>
-                                        <TableCell>{format(parseISO(b.updated_at), 'PPP')}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </Widget>
-                     <Widget title="Recent Deployments" description="The last 5 deployments that were created or updated.">
-                         <Table>
-                            <TableHeader><TableRow><TableHead>Deployment ID</TableHead><TableHead>Customer</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
-                            <TableBody>
-                                {loading ? <TableRow><TableCell colSpan={4} className="text-center h-24"><Loader2 className="h-6 w-6 animate-spin mx-auto"/></TableCell></TableRow>
-                                : deployments.slice(0, 5).map(d => (
-                                    <TableRow key={d._id}>
-                                        <TableCell>
-                                            <Link href={`/fleet-management/deployment/${d._id}/view`} className="font-medium hover:underline font-mono text-xs">{d.details.deploymentId}</Link>
-                                        </TableCell>
-                                        <TableCell>{d.details.customer}</TableCell>
-                                        <TableCell><Badge className={cn(statusColors[d.status] || 'bg-gray-200')}>{d.status}</Badge></TableCell>
-                                        <TableCell>{format(parseISO(d.createdAt), 'PPP')}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </Widget>
+
+                <div className="space-y-6">
+                    <GlobalViewWidget deployments={deployments} loading={loading} />
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+                        <DeploymentStatusPieChart deployments={deployments} loading={loading} />
+                        <BaselineComplianceChart baselines={baselines} loading={loading} />
+                        <ProductDeploymentChart deployments={deployments} products={products} loading={loading} />
+                        <ProductTenantChart products={products} tenants={tenants} />
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2">
+                        <Widget title="Recent Baselines" description="The last 5 baselines that were created or updated.">
+                            <Table>
+                                <TableHeader><TableRow><TableHead>Product</TableHead><TableHead>Version</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
+                                <TableBody>
+                                    {loading ? <TableRow><TableCell colSpan={4} className="text-center h-24"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
+                                        : baselines.slice(0, 5).map(b => (
+                                            <TableRow key={b._id}>
+                                                <TableCell>
+                                                    <Link href={`/release-management/baseline/${b._id}/summary`} className="font-medium hover:underline">{b.product.name}</Link>
+                                                </TableCell>
+                                                <TableCell>{b.product.version}</TableCell>
+                                                <TableCell><Badge className={cn(statusColors[b.status] || 'bg-gray-200')}>{b.status}</Badge></TableCell>
+                                                <TableCell>{format(parseISO(b.updated_at), 'PPP')}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+                        </Widget>
+                        <Widget title="Recent Deployments" description="The last 5 deployments that were created or updated.">
+                            <Table>
+                                <TableHeader><TableRow><TableHead>Deployment ID</TableHead><TableHead>Customer</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
+                                <TableBody>
+                                    {loading ? <TableRow><TableCell colSpan={4} className="text-center h-24"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
+                                        : deployments.slice(0, 5).map(d => (
+                                            <TableRow key={d._id}>
+                                                <TableCell>
+                                                    <Link href={`/fleet-management/deployment/${d._id}/view`} className="font-medium hover:underline font-mono text-xs">{d.details.deploymentId}</Link>
+                                                </TableCell>
+                                                <TableCell>{d.details.customer}</TableCell>
+                                                <TableCell><Badge className={cn(statusColors[d.status] || 'bg-gray-200')}>{d.status}</Badge></TableCell>
+                                                <TableCell>{format(parseISO(d.createdAt), 'PPP')}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+                        </Widget>
+                    </div>
+
+                    {/* Plugin Widgets */}
+                    {pluginWidgets.length > 0 && (
+                        <div className="space-y-4">
+                            <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+                                <Plug className="h-5 w-5" /> Plugin Widgets
+                            </h2>
+                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                {pluginWidgets.flatMap((plugin: any) =>
+                                    plugin.widgets.map((widget: any) => {
+                                        const data = pluginWidgetData[plugin.id];
+                                        return (
+                                            <Widget key={widget.id} title={widget.title} description={widget.description}>
+                                                {data ? (
+                                                    <div className="space-y-3">
+                                                        {data.data && (
+                                                            <div className="grid grid-cols-2 gap-3">
+                                                                {Object.entries(data.data).filter(([k]) => k !== 'timestamp' && k !== 'user').map(([key, value]) => (
+                                                                    <div key={key} className="p-3 rounded-lg bg-muted/50">
+                                                                        <p className="text-xs text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
+                                                                        <p className="text-lg font-semibold">{String(value)}</p>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                        <p className="text-xs text-muted-foreground">From plugin: {plugin.name}</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center justify-center h-20">
+                                                        <Loader2 className="h-6 w-6 animate-spin" />
+                                                    </div>
+                                                )}
+                                            </Widget>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
-            </div>
-        </main>
-    </DashboardLayout>
-  );
+            </main>
+        </DashboardLayout>
+    );
 }

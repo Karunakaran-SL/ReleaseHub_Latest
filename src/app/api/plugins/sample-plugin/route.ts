@@ -14,17 +14,22 @@ export async function GET() {
         const client = await clientPromise;
         const db = client.db();
 
-        // 3. Create a unique collection for this plugin to avoid collisions
-        const collection = db.collection('plugin_sample_data');
-
-        // For demonstration, we just return a success message and check if the collection is accessible
-        const documentCount = await collection.countDocuments();
+        // 3. Fetch counts from core collections for the widget
+        const [productCount, specCount, deploymentCount, documentCount] = await Promise.all([
+            db.collection('products').countDocuments(),
+            db.collection('specifications').countDocuments(),
+            db.collection('deployments').countDocuments(),
+            db.collection('plugin_sample_data').countDocuments(),
+        ]);
 
         return NextResponse.json({
             success: true,
             message: 'Sample Plugin API executed successfully!',
             data: {
                 user: user.username,
+                products: productCount,
+                specifications: specCount,
+                deployments: deploymentCount,
                 documentCount,
                 timestamp: new Date().toISOString()
             }

@@ -2,14 +2,79 @@
     "id": "sample-plugin",
     "version": "1.0.0",
     "name": "Sample App Plugin",
-    "description": "A demonstration plugin created by AI based on the Developer Guide.",
+    "description": "A demonstration plugin showcasing Products, Specifications, Deployments and User Management.",
     "publisher": "AI Assistant",
-    "navigation": {
-        "type": "submenu",
-        "parent": "Settings",
-        "label": "Sample Plugin",
-        "icon": "Box",
-        "path": "/settings/sample-plugin"
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Sample Plugin Overview",
+            "icon": "Box",
+            "path": "/dashboard/plugins/sample-plugin"
+        },
+        {
+            "type": "main-menu",
+            "label": "Sample Plugin",
+            "icon": "Puzzle",
+            "path": "/plugins/sample-plugin",
+            "children": [
+                {
+                    "label": "Products View",
+                    "icon": "Box",
+                    "path": "/plugins/sample-plugin/products"
+                },
+                {
+                    "label": "Specifications",
+                    "icon": "FileText",
+                    "path": "/plugins/sample-plugin/specifications"
+                },
+                {
+                    "label": "Deployments",
+                    "icon": "Rocket",
+                    "path": "/plugins/sample-plugin/deployments"
+                },
+                {
+                    "label": "User Management",
+                    "icon": "Users",
+                    "path": "/plugins/sample-plugin/users"
+                }
+            ]
+        },
+        {
+            "type": "help",
+            "label": "Sample Plugin Help",
+            "icon": "HelpCircle",
+            "path": "/help/sample-plugin"
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Sample Plugin",
+            "icon": "Box",
+            "path": "/settings/sample-plugin"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "sample-plugin-summary",
+            "title": "Plugin Data Summary",
+            "description": "Shows counts from Products, Specifications & Deployments.",
+            "size": "small"
+        }
+    ],
+    "permissions": {
+        "admin": [
+            "read",
+            "write",
+            "delete",
+            "manage-users"
+        ],
+        "editor": [
+            "read",
+            "write"
+        ],
+        "viewer": [
+            "read"
+        ]
     },
     "dependencies": []
 }

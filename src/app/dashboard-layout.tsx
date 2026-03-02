@@ -209,6 +209,39 @@ export default function DashboardLayout({ children, user }: { children: React.Re
   const isCicdPage = pathname.startsWith('/cicd');
   const isCompliancePage = pathname.startsWith('/compliance');
   const isHelpPage = pathname.startsWith('/help');
+  const isPluginsPage = pathname.startsWith('/plugins');
+
+  // Map icon strings from plugin.json to Lucide components
+  const IconMapper = ({ name, className }: { name: string, className?: string }) => {
+    switch (name) {
+      case 'Box': return <Box className={className} />;
+      case 'FileText': return <FileText className={className} />;
+      case 'Rocket': return <Rocket className={className} />;
+      case 'Users': return <Users className={className} />;
+      case 'HelpCircle': return <HelpCircle className={className} />;
+      case 'Puzzle': return <Puzzle className={className} />;
+      default: return <Plug className={className} />;
+    }
+  };
+
+  // Helper: extract nav items of a given type from installed plugins
+  function getPluginNavItems(type: string) {
+    const items: any[] = [];
+    for (const plugin of installedPlugins) {
+      const navArray = Array.isArray(plugin.navigation) ? plugin.navigation : (plugin.navigation ? [plugin.navigation] : []);
+      for (const nav of navArray) {
+        if (nav.type === type) {
+          items.push({ ...nav, pluginId: plugin.id, pluginName: plugin.name });
+        }
+      }
+    }
+    return items;
+  }
+
+  const dashboardPlugins = getPluginNavItems('dashboard-submenu');
+  const mainMenuPlugins = getPluginNavItems('main-menu');
+  const helpPlugins = getPluginNavItems('help');
+  const settingsPlugins = getPluginNavItems('submenu').filter((n: any) => n.parent === 'Settings');
 
 
   return (
@@ -266,6 +299,13 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             Compliance Monitoring
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
+                        {dashboardPlugins.map((nav: any) => (
+                          <SidebarMenuSubItem key={`${nav.pluginId}-${nav.label}`}>
+                            <SidebarMenuSubButton href={nav.path} isActive={pathname.startsWith(nav.path)}>
+                              <IconMapper name={nav.icon} className="mr-2 h-4 w-4" /> {nav.label}
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>
@@ -682,6 +722,39 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </SidebarMenuItem>
                 </Collapsible>
 
+                {mainMenuPlugins.map((nav: any) => (
+                  <Collapsible key={`${nav.pluginId}-${nav.label}`} asChild defaultOpen={isPluginsPage && pathname.startsWith(nav.path)}>
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                          isActive={pathname.startsWith(nav.path)}
+                          tooltip={{ children: nav.label }}
+                          className="data-[state=open]:bg-sidebar-accent"
+                        >
+                          <IconMapper name={nav.icon} />
+                          {nav.label}
+                          {nav.children && nav.children.length > 0 && (
+                            <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                          )}
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      {nav.children && nav.children.length > 0 && (
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {nav.children.map((child: any, idx: number) => (
+                              <SidebarMenuSubItem key={idx}>
+                                <SidebarMenuSubButton href={child.path} isActive={pathname.startsWith(child.path)}>
+                                  <IconMapper name={child.icon} className="mr-2 h-4 w-4" /> {child.label}
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      )}
+                    </SidebarMenuItem>
+                  </Collapsible>
+                ))}
+
                 <Collapsible asChild defaultOpen={isAuditPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
@@ -756,10 +829,10 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             <Plug className="mr-2" /> Plugins
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
-                        {installedPlugins.length > 0 && installedPlugins.filter(p => p.navigation?.parent === 'Settings').map((plugin) => (
-                          <SidebarMenuSubItem key={plugin.id}>
-                            <SidebarMenuSubButton href={plugin.navigation?.path || `/settings/${plugin.id}`} isActive={pathname.startsWith(plugin.navigation?.path || `/settings/${plugin.id}`)}>
-                              <Box className="mr-2 h-4 w-4" /> {plugin.navigation?.label || plugin.name}
+                        {settingsPlugins.map((nav: any) => (
+                          <SidebarMenuSubItem key={`${nav.pluginId}-${nav.label}`}>
+                            <SidebarMenuSubButton href={nav.path || `/settings/${nav.pluginId}`} isActive={pathname.startsWith(nav.path || `/settings/${nav.pluginId}`)}>
+                              <IconMapper name={nav.icon} className="mr-2 h-4 w-4" /> {nav.label}
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}
@@ -804,6 +877,13 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <SidebarMenuSubItem><SidebarMenuSubButton href="/help/resource-mgmt">Resource Mgmt</SidebarMenuSubButton></SidebarMenuSubItem>
                         <SidebarMenuSubItem><SidebarMenuSubButton href="/help/audit">Audit</SidebarMenuSubButton></SidebarMenuSubItem>
                         <SidebarMenuSubItem><SidebarMenuSubButton href="/help/license">License</SidebarMenuSubButton></SidebarMenuSubItem>
+                        {helpPlugins.map((nav: any) => (
+                          <SidebarMenuSubItem key={`${nav.pluginId}-${nav.label}`}>
+                            <SidebarMenuSubButton href={nav.path} isActive={pathname.startsWith(nav.path)}>
+                              <IconMapper name={nav.icon} className="mr-2 h-4 w-4" /> {nav.label}
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>

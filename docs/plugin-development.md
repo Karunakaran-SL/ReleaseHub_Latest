@@ -82,6 +82,10 @@ When building plugins that consume existing ReleaseHub APIs:
 * **Internal APIs**: Fetch data internally using the absolute URL (e.g., `http://localhost:3000/api/...` or utilizing `process.env.NEXT_PUBLIC_API_URL`).
 * **Server Components**: It is highly recommended to perform data fetching directly in Server Components without hitting the API routes if the API simply wraps a database call. You can call the DB logic directly from the Server Component for better performance.
 * **Client Components**: Use standard `fetch` or a data fetching library like `SWR` / `React Query` to hit the Next.js API route handlers.
+* **API Reference**: See the API documentation at `/api-docs` for available endpoints including:
+  * `GET /api/products` — List all products
+  * `GET /api/specifications` — List all specifications
+  * `GET /api/deployments` — List all deployments (sorted by `createdAt`)
 
 ## 5. Security Roles and Parameters
 
@@ -102,7 +106,14 @@ Plugins must adhere to the application's security model.
     // Proceed with secure action using user.id
   }
   ```
-* **Authorization**: If your plugin requires specific roles (e.g., restricted to "Admin"), verify the role logic before executing sensitive code.
+* **Authorization (RBAC)**: The system supports three roles: `admin`, `editor`, `viewer`. The `getUser()` function returns the user's `role` field. Check role-based permissions before executing sensitive operations:
+  ```typescript
+  const user = await getUser();
+  if (user?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  ```
+* **Plugin Permissions**: Plugins define their own RBAC matrix in `plugin.json` under the `permissions` field. This allows each plugin to specify which roles can perform which operations.
 
 ## 6. Plugin Metadata and Dependencies
 
@@ -117,12 +128,49 @@ Plugins should define their structure, menu integration, and dependencies using 
   "name": "My Custom Plugin",
   "description": "Extends ReleaseHub with custom functionality.",
   "publisher": "Your Name",
-  "navigation": {
-    "type": "submenu",       // Options: "root", "submenu"
-    "parent": "Settings",    // Required if type is "submenu"
-    "label": "My Plugin",
-    "icon": "Box",           // Must be a valid lucide-react icon name
-    "path": "/settings/my-plugin"
+  "navigation": [
+    {
+      "type": "dashboard-submenu",
+      "label": "Plugin Overview",
+      "icon": "Box",
+      "path": "/dashboard/plugins/my-custom-plugin"
+    },
+    {
+      "type": "main-menu",
+      "label": "My Plugin",
+      "icon": "Puzzle",
+      "path": "/plugins/my-custom-plugin",
+      "children": [
+        { "label": "Feature A", "icon": "Box", "path": "/plugins/my-custom-plugin/feature-a" },
+        { "label": "Feature B", "icon": "FileText", "path": "/plugins/my-custom-plugin/feature-b" }
+      ]
+    },
+    {
+      "type": "help",
+      "label": "My Plugin Help",
+      "icon": "HelpCircle",
+      "path": "/help/my-custom-plugin"
+    },
+    {
+      "type": "submenu",
+      "parent": "Settings",
+      "label": "My Plugin",
+      "icon": "Box",
+      "path": "/settings/my-custom-plugin"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "my-widget",
+      "title": "Widget Title",
+      "description": "Short description of the widget.",
+      "size": "small"
+    }
+  ],
+  "permissions": {
+    "admin": ["read", "write", "delete", "manage-users"],
+    "editor": ["read", "write"],
+    "viewer": ["read"]
   },
   "dependencies": [
     {
@@ -134,5 +182,51 @@ Plugins should define their structure, menu integration, and dependencies using 
 }
 ```
 
-* **Navigation Parsing**: The application will parse this metadata. When `navigation.type` is `submenu`, the application will inject an entry into the Sidebar under the specified `parent` menu. If `root`, it adds a top-level menu item.
+### Navigation Types
+
+The `navigation` field is an **array** allowing plugins to add menus in multiple locations:
+
+| Type | Description | Installation Directory |
+|------|-------------|----------------------|
+| `dashboard-submenu` | Adds an entry under the Dashboard collapsible menu | `src/app/dashboard/plugins/{pluginId}/` |
+| `main-menu` | Adds a top-level collapsible menu with optional `children` sub-items | `src/app/plugins/{pluginId}/` |
+| `help` | Adds an entry under the Help collapsible menu | `src/app/help/{pluginId}/` |
+| `submenu` | Adds an entry under a specified `parent` menu (e.g. Settings) | `src/app/settings/{pluginId}/` |
+
+> **Backward Compatibility**: A single navigation object (non-array) is still supported for legacy plugins.
+
+### Widget Definitions
+
+The `widgets` array defines dashboard widgets that will be rendered on the main dashboard page. Each widget:
+- Fetches data from the plugin's API route (`/api/plugins/{pluginId}`)
+- Renders within the existing Widget component wrapper
+- Supports sizes: `small`, `medium`, `large`
+
+### Permissions (RBAC)
+
+The `permissions` object maps roles to allowed operations. The application uses three roles:
+- **admin**: Full access including user management
+- **editor**: Read and write access
+- **viewer**: Read-only access
+
+### Plugin File Structure
+
+```
+my-custom-plugin/
+├── plugin.json              # Metadata, navigation, widgets, permissions
+├── api/
+│   └── route.ts             # Backend API route handler
+└── ui/
+    ├── page.tsx              # Main plugin page (settings/main-menu root)
+    ├── dashboard/
+    │   └── page.tsx          # Dashboard sub-page
+    ├── help/
+    │   └── page.tsx          # Help sub-page
+    ├── feature-a/
+    │   └── page.tsx          # Main-menu child page
+    └── feature-b/
+        └── page.tsx          # Main-menu child page
+```
+
+* **Navigation Parsing**: The application will parse the `navigation` array. For each entry, it dynamically injects sidebar menu items in the appropriate location.
 * **Dependency Resolution**: During installation, the system will check the `dependencies` array to ensure required plugins (and their compatible versions) are present in the active registry.
