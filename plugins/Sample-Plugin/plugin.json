@@ -1,0 +1,15 @@
+{
+    "id": "sample-plugin",
+    "version": "1.0.0",
+    "name": "Sample App Plugin",
+    "description": "A demonstration plugin created by AI based on the Developer Guide.",
+    "publisher": "AI Assistant",
+    "navigation": {
+        "type": "submenu",
+        "parent": "Settings",
+        "label": "Sample Plugin",
+        "icon": "Box",
+        "path": "/settings/sample-plugin"
+    },
+    "dependencies": []
+}
