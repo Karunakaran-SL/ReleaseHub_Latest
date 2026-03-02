@@ -14,7 +14,8 @@ export async function createSession(userId: string, username: string, role: stri
   const expiresAt = new Date(Date.now() + aDayInSeconds * 1000);
   const session = await encrypt({ userId, username, role, expiresAt });
 
-  cookies().set('session', session, {
+  const cookieStore = await cookies();
+  cookieStore.set('session', session, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     expires: expiresAt,
@@ -24,7 +25,8 @@ export async function createSession(userId: string, username: string, role: stri
 }
 
 export async function deleteSession() {
-  cookies().delete('session');
+  const cookieStore = await cookies();
+  cookieStore.delete('session');
 }
 
 export async function encrypt(payload: SessionPayload) {

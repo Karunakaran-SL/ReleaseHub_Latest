@@ -2,22 +2,23 @@ import { cookies, headers } from 'next/headers';
 import type { AuditLog } from './definitions';
 
 interface AuditEvent {
-    action: 'CREATE' | 'UPDATE' | 'DELETE';
-    entity: string;
-    entityId: string;
-    comment: string;
-    user: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE';
+  entity: string;
+  entityId: string;
+  comment: string;
+  user: string;
 }
 
 export async function logAuditEvent(event: Omit<AuditEvent, 'user'> & { user?: string }): Promise<void> {
-  const sessionCookie = cookies().get('session')?.value;
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('session')?.value;
 
   if (!sessionCookie) {
-      console.error("Audit log failed: No session cookie found.");
-      return;
+    console.error("Audit log failed: No session cookie found.");
+    return;
   }
-  
-  const requestHeaders = headers();
+
+  const requestHeaders = await headers();
   const host = requestHeaders.get('host');
   const protocol = requestHeaders.get('x-forwarded-proto') || 'http';
   const baseUrl = `${protocol}://${host}`;
@@ -25,7 +26,7 @@ export async function logAuditEvent(event: Omit<AuditEvent, 'user'> & { user?: s
   try {
     const response = await fetch(`${baseUrl}/api/audits`, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Cookie': `session=${sessionCookie}`
       },

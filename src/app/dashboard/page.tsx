@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Move, Trash2, Rocket, FileCode, Users, HardDrive, Puzzle, AppWindow, Plug } from 'lucide-react';
+import { Move, Trash2, Rocket, FileCode, Users, HardDrive, Puzzle, AppWindow, Plug, BarChart3, PieChart as PieChartIcon, FileText } from 'lucide-react';
 import DashboardLayout from '@/app/dashboard-layout';
 import { getUser } from '@/lib/auth';
 import type { User, Deployment, Product, Baseline, CmdbTenant, CmdbComponent, CmdbApplication } from '@/lib/definitions';
@@ -16,6 +16,16 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import Link from 'next/link';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Search, Plus } from 'lucide-react';
 
 const DeploymentMap = dynamic(() => import('@/app/fleet-management/deployment/_components/deployment-map'), {
     ssr: false,
@@ -37,21 +47,23 @@ const statusColors: Record<string, string> = {
     DECOMMISSIONED: 'bg-gray-300 text-gray-900',
 };
 
-function Widget({ title, children, description }: { title: string, children: React.ReactNode, description?: string }) {
+function Widget({ title, children, description, onRemove }: { title: string, children: React.ReactNode, description?: string, onRemove?: () => void }) {
     return (
-        <Card className="flex flex-col">
+        <Card className="flex flex-col group relative">
             <CardHeader className='flex-row items-center justify-between'>
                 <div>
-                    <CardTitle>{title}</CardTitle>
-                    {description && <CardDescription>{description}</CardDescription>}
+                    <CardTitle className="text-lg">{title}</CardTitle>
+                    {description && <CardDescription className="line-clamp-1">{description}</CardDescription>}
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="cursor-move h-8 w-8">
-                        <Move className="h-4 w-4" />
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="cursor-move h-7 w-7">
+                        <Move className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    {onRemove && (
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onRemove}>
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                    )}
                 </div>
             </CardHeader>
             <CardContent className="flex-1">
@@ -215,9 +227,31 @@ export default function DashboardPage() {
     const [applications, setApplications] = useState<CmdbApplication[]>([]);
     const [pluginWidgets, setPluginWidgets] = useState<any[]>([]);
     const [pluginWidgetData, setPluginWidgetData] = useState<Record<string, any>>({});
+    const [activeWidgetIds, setActiveWidgetIds] = useState<string[]>([]);
+    const [isAddWidgetOpen, setIsAddWidgetOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const CORE_WIDGETS = [
+        { id: 'global-view', title: 'Global View', description: 'Worldwide operational status map.', icon: <Rocket className="h-4 w-4" />, size: 'full' },
+        { id: 'deployment-status', title: 'Deployments by Status', description: 'Breakdown of deployment states.', icon: <PieChartIcon className="h-4 w-4" />, size: 'half' },
+        { id: 'baseline-compliance', title: 'Baseline Compliance', description: 'Compliant vs Non-Compliant baselines.', icon: <FileCode className="h-4 w-4" />, size: 'half' },
+        { id: 'product-deployment', title: 'Deployments by Product', description: 'Stacked bar chart of product health.', icon: <BarChart3 className="h-4 w-4" />, size: 'half' },
+        { id: 'product-tenant', title: 'Tenants per Product', description: 'Number of tenants assigned per product.', icon: <Users className="h-4 w-4" />, size: 'half' },
+        { id: 'recent-baselines', title: 'Recent Baselines', description: 'List of the last 5 created baselines.', icon: <FileText className="h-4 w-4" />, size: 'half' },
+        { id: 'recent-deployments', title: 'Recent Deployments', description: 'List of the last 5 operational changes.', icon: <HardDrive className="h-4 w-4" />, size: 'half' },
+    ];
 
     useEffect(() => {
         getUser().then(setUser);
+
+        // Load active widgets from localStorage or use default
+        const savedWidgets = localStorage.getItem('dashboard_widgets');
+        if (savedWidgets) {
+            setActiveWidgetIds(JSON.parse(savedWidgets));
+        } else {
+            setActiveWidgetIds(['global-view', 'deployment-status', 'baseline-compliance', 'product-deployment', 'product-tenant', 'recent-baselines', 'recent-deployments']);
+        }
+
         async function fetchData() {
             setLoading(true);
             try {
@@ -264,12 +298,115 @@ export default function DashboardPage() {
             .catch(() => { });
     }, []);
 
+    const toggleWidget = (id: string) => {
+        const newIds = activeWidgetIds.includes(id)
+            ? activeWidgetIds.filter(i => i !== id)
+            : [...activeWidgetIds, id];
+        setActiveWidgetIds(newIds);
+        localStorage.setItem('dashboard_widgets', JSON.stringify(newIds));
+    };
+
+    const removeWidget = (id: string) => {
+        const newIds = activeWidgetIds.filter(i => i !== id);
+        setActiveWidgetIds(newIds);
+        localStorage.setItem('dashboard_widgets', JSON.stringify(newIds));
+    };
+
+    const allAvailableWidgets = [
+        ...CORE_WIDGETS.map(w => ({ ...w, source: 'Core' })),
+        ...pluginWidgets.flatMap(p => (p.widgets || []).map((w: any) => ({
+            id: `plugin-${p.id}-${w.id}`,
+            originalId: w.id,
+            pluginId: p.id,
+            title: w.title,
+            description: w.description,
+            icon: <Plug className="h-4 w-4" />,
+            source: p.name,
+            isPlugin: true
+        })))
+    ];
+
+    const filteredWidgets = allAvailableWidgets.filter(w =>
+        w.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        w.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        w.source.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 space-y-8 p-6 md:p-10">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-                    <p className="mt-2 text-muted-foreground">Your central hub for monitoring and managing all operations.</p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                        <p className="mt-2 text-muted-foreground">Your central hub for monitoring and managing all operations.</p>
+                    </div>
+                    <Dialog open={isAddWidgetOpen} onOpenChange={setIsAddWidgetOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="gap-2">
+                                <Plus className="h-4 w-4" /> Add Widget
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
+                            <DialogHeader>
+                                <DialogTitle>Add Widgets</DialogTitle>
+                                <DialogDescription>
+                                    Customize your dashboard by adding widgets from core features and installed plugins.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="relative my-4">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search widgets by name, description or source..."
+                                    className="pl-9"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+                                {filteredWidgets.map((widget) => {
+                                    const isActive = activeWidgetIds.includes(widget.id);
+                                    return (
+                                        <div
+                                            key={widget.id}
+                                            className={cn(
+                                                "flex items-center justify-between p-3 rounded-lg border transition-colors",
+                                                isActive ? "bg-muted/50 border-primary/50" : "hover:bg-muted/30"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 rounded-md bg-background border">
+                                                    {widget.icon}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-sm">{widget.title}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge variant="outline" className="text-[10px] py-0 px-1 h-4">
+                                                            {widget.source}
+                                                        </Badge>
+                                                        <span className="text-xs text-muted-foreground line-clamp-1">
+                                                            {widget.description}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                variant={isActive ? "destructive" : "default"}
+                                                onClick={() => toggleWidget(widget.id)}
+                                            >
+                                                {isActive ? "Remove" : "Add"}
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
+                                {filteredWidgets.length === 0 && (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                        No widgets found matching your search.
+                                    </div>
+                                )}
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -282,90 +419,108 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="space-y-6">
-                    <GlobalViewWidget deployments={deployments} loading={loading} />
+                    {/* Render Core Widgets */}
+                    {activeWidgetIds.includes('global-view') && <GlobalViewWidget deployments={deployments} loading={loading} />}
+
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-                        <DeploymentStatusPieChart deployments={deployments} loading={loading} />
-                        <BaselineComplianceChart baselines={baselines} loading={loading} />
-                        <ProductDeploymentChart deployments={deployments} products={products} loading={loading} />
-                        <ProductTenantChart products={products} tenants={tenants} />
+                        {activeWidgetIds.includes('deployment-status') && <DeploymentStatusPieChart deployments={deployments} loading={loading} />}
+                        {activeWidgetIds.includes('baseline-compliance') && <BaselineComplianceChart baselines={baselines} loading={loading} />}
+                        {activeWidgetIds.includes('product-deployment') && <ProductDeploymentChart deployments={deployments} products={products} loading={loading} />}
+                        {activeWidgetIds.includes('product-tenant') && <ProductTenantChart products={products} tenants={tenants} />}
                     </div>
+
                     <div className="grid gap-6 md:grid-cols-2">
-                        <Widget title="Recent Baselines" description="The last 5 baselines that were created or updated.">
-                            <Table>
-                                <TableHeader><TableRow><TableHead>Product</TableHead><TableHead>Version</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
-                                <TableBody>
-                                    {loading ? <TableRow><TableCell colSpan={4} className="text-center h-24"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
-                                        : baselines.slice(0, 5).map(b => (
-                                            <TableRow key={b._id}>
-                                                <TableCell>
-                                                    <Link href={`/release-management/baseline/${b._id}/summary`} className="font-medium hover:underline">{b.product.name}</Link>
-                                                </TableCell>
-                                                <TableCell>{b.product.version}</TableCell>
-                                                <TableCell><Badge className={cn(statusColors[b.status] || 'bg-gray-200')}>{b.status}</Badge></TableCell>
-                                                <TableCell>{format(parseISO(b.updated_at), 'PPP')}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                </TableBody>
-                            </Table>
-                        </Widget>
-                        <Widget title="Recent Deployments" description="The last 5 deployments that were created or updated.">
-                            <Table>
-                                <TableHeader><TableRow><TableHead>Deployment ID</TableHead><TableHead>Customer</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
-                                <TableBody>
-                                    {loading ? <TableRow><TableCell colSpan={4} className="text-center h-24"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
-                                        : deployments.slice(0, 5).map(d => (
-                                            <TableRow key={d._id}>
-                                                <TableCell>
-                                                    <Link href={`/fleet-management/deployment/${d._id}/view`} className="font-medium hover:underline font-mono text-xs">{d.details.deploymentId}</Link>
-                                                </TableCell>
-                                                <TableCell>{d.details.customer}</TableCell>
-                                                <TableCell><Badge className={cn(statusColors[d.status] || 'bg-gray-200')}>{d.status}</Badge></TableCell>
-                                                <TableCell>{format(parseISO(d.createdAt), 'PPP')}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                </TableBody>
-                            </Table>
-                        </Widget>
+                        {activeWidgetIds.includes('recent-baselines') && (
+                            <Widget
+                                title="Recent Baselines"
+                                description="The last 5 baselines that were created or updated."
+                                onRemove={() => removeWidget('recent-baselines')}
+                            >
+                                <Table>
+                                    <TableHeader><TableRow><TableHead>Product</TableHead><TableHead>Version</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
+                                    <TableBody>
+                                        {loading ? <TableRow><TableCell colSpan={4} className="text-center h-24"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
+                                            : baselines.slice(0, 5).map(b => (
+                                                <TableRow key={b._id}>
+                                                    <TableCell>
+                                                        <Link href={`/release-management/baseline/${b._id}/summary`} className="font-medium hover:underline">{b.product.name}</Link>
+                                                    </TableCell>
+                                                    <TableCell>{b.product.version}</TableCell>
+                                                    <TableCell><Badge className={cn(statusColors[b.status] || 'bg-gray-200')}>{b.status}</Badge></TableCell>
+                                                    <TableCell>{format(parseISO(b.updated_at), 'PPP')}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                    </TableBody>
+                                </Table>
+                            </Widget>
+                        )}
+                        {activeWidgetIds.includes('recent-deployments') && (
+                            <Widget
+                                title="Recent Deployments"
+                                description="The last 5 deployments that were created or updated."
+                                onRemove={() => removeWidget('recent-deployments')}
+                            >
+                                <Table>
+                                    <TableHeader><TableRow><TableHead>Deployment ID</TableHead><TableHead>Customer</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
+                                    <TableBody>
+                                        {loading ? <TableRow><TableCell colSpan={4} className="text-center h-24"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></TableCell></TableRow>
+                                            : deployments.slice(0, 5).map(d => (
+                                                <TableRow key={d._id}>
+                                                    <TableCell>
+                                                        <Link href={`/fleet-management/deployment/${d._id}/view`} className="font-medium hover:underline font-mono text-xs">{d.details.deploymentId}</Link>
+                                                    </TableCell>
+                                                    <TableCell>{d.details.customer}</TableCell>
+                                                    <TableCell><Badge className={cn(statusColors[d.status] || 'bg-gray-200')}>{d.status}</Badge></TableCell>
+                                                    <TableCell>{format(parseISO(d.createdAt), 'PPP')}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                    </TableBody>
+                                </Table>
+                            </Widget>
+                        )}
                     </div>
 
                     {/* Plugin Widgets */}
-                    {pluginWidgets.length > 0 && (
-                        <div className="space-y-4">
-                            <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
-                                <Plug className="h-5 w-5" /> Plugin Widgets
-                            </h2>
-                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                {pluginWidgets.flatMap((plugin: any) =>
-                                    plugin.widgets.map((widget: any) => {
-                                        const data = pluginWidgetData[plugin.id];
-                                        return (
-                                            <Widget key={widget.id} title={widget.title} description={widget.description}>
-                                                {data ? (
-                                                    <div className="space-y-3">
-                                                        {data.data && (
-                                                            <div className="grid grid-cols-2 gap-3">
-                                                                {Object.entries(data.data).filter(([k]) => k !== 'timestamp' && k !== 'user').map(([key, value]) => (
-                                                                    <div key={key} className="p-3 rounded-lg bg-muted/50">
-                                                                        <p className="text-xs text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
-                                                                        <p className="text-lg font-semibold">{String(value)}</p>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                        <p className="text-xs text-muted-foreground">From plugin: {plugin.name}</p>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center justify-center h-20">
-                                                        <Loader2 className="h-6 w-6 animate-spin" />
-                                                    </div>
-                                                )}
-                                            </Widget>
-                                        );
-                                    })
-                                )}
-                            </div>
+                    <div className="space-y-4">
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            {pluginWidgets.flatMap((plugin: any) =>
+                                (plugin.widgets || []).map((widget: any) => {
+                                    const id = `plugin-${plugin.id}-${widget.id}`;
+                                    if (!activeWidgetIds.includes(id)) return null;
+
+                                    const data = pluginWidgetData[plugin.id];
+                                    return (
+                                        <Widget
+                                            key={id}
+                                            title={widget.title}
+                                            description={widget.description}
+                                            onRemove={() => removeWidget(id)}
+                                        >
+                                            {data ? (
+                                                <div className="space-y-3">
+                                                    {data.data && (
+                                                        <div className="grid grid-cols-2 gap-3">
+                                                            {Object.entries(data.data).filter(([k]) => k !== 'timestamp' && k !== 'user').map(([key, value]) => (
+                                                                <div key={key} className="p-3 rounded-lg bg-muted/50">
+                                                                    <p className="text-xs text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
+                                                                    <p className="text-lg font-semibold">{String(value)}</p>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    <p className="text-xs text-muted-foreground">From plugin: {plugin.name}</p>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-center h-20">
+                                                    <Loader2 className="h-6 w-6 animate-spin" />
+                                                </div>
+                                            )}
+                                        </Widget>
+                                    );
+                                })
+                            )}
                         </div>
-                    )}
+                    </div>
                 </div>
             </main>
         </DashboardLayout>

@@ -8,7 +8,7 @@ const protectedRoutes = ['/', '/products', '/api-docs'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const sessionCookie = cookies().get('session')?.value;
+  const sessionCookie = request.cookies.get('session')?.value;
 
   let session;
   try {
@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   // Protect routes
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
     if (!session) {
-        return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL('/login', request.url));
     }
   }
 
