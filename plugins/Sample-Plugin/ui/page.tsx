@@ -3,7 +3,7 @@ import { getUser } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Box, Play, CheckCircle2 } from 'lucide-react';
-import pluginConfig from '../../plugin.json';
+import pluginConfig from './plugin.json';
 
 export default async function SamplePluginPage() {
     const user = await getUser();
