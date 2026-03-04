@@ -1,0 +1,79 @@
+{
+    "id": "cm-communities",
+    "version": "1.0.0",
+    "name": "CM: Collaboration & Community",
+    "description": "Skill discussion boards, peer collaboration spaces, knowledge base articles linked to competencies, and mentor-mentee matching.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-communities",
+            "children": [
+                {
+                    "label": "Communities",
+                    "icon": "Users",
+                    "path": "/plugins/cm-communities",
+                    "children": [
+                        {
+                            "label": "Skill Forums",
+                            "icon": "MessageSquare",
+                            "path": "/plugins/cm-communities"
+                        },
+                        {
+                            "label": "Knowledge Base",
+                            "icon": "BookMarked",
+                            "path": "/plugins/cm-communities/knowledge"
+                        },
+                        {
+                            "label": "Mentorship",
+                            "icon": "HeartHandshake",
+                            "path": "/plugins/cm-communities/mentorship"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-community-activity",
+            "title": "Community Activity",
+            "description": "Recent forum posts and mentor matches.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_community_view",
+            "label": "View Community",
+            "description": "Browse forums and knowledge base."
+        },
+        {
+            "key": "cm_community_post",
+            "label": "Post & Contribute",
+            "description": "Create posts and mentor matches."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_community_member",
+            "label": "Community Member",
+            "description": "Full community participation.",
+            "permissions": {
+                "cm_community_view": [
+                    "view"
+                ],
+                "cm_community_post": [
+                    "view",
+                    "create",
+                    "edit"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-skill-taxonomy"
+    ]
+}

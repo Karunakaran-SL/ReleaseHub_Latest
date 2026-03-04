@@ -1,0 +1,80 @@
+{
+    "id": "cm-marketplace",
+    "version": "1.0.0",
+    "name": "CM: Talent Marketplace",
+    "description": "Internal gig economy — post project opportunities, recommend matched employees, track applications, and show skill match percentages.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-marketplace",
+            "children": [
+                {
+                    "label": "Talent Marketplace",
+                    "icon": "Store",
+                    "path": "/plugins/cm-marketplace",
+                    "children": [
+                        {
+                            "label": "Opportunities",
+                            "icon": "Briefcase",
+                            "path": "/plugins/cm-marketplace"
+                        },
+                        {
+                            "label": "My Applications",
+                            "icon": "FileText",
+                            "path": "/plugins/cm-marketplace/applications"
+                        },
+                        {
+                            "label": "Recommendations",
+                            "icon": "Sparkles",
+                            "path": "/plugins/cm-marketplace/recommendations"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-open-opps",
+            "title": "Open Opportunities",
+            "description": "Internal gig opportunities matching your skills.",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_market_view",
+            "label": "Browse Opportunities",
+            "description": "View internal gig postings."
+        },
+        {
+            "key": "cm_market_manage",
+            "label": "Manage Opportunities",
+            "description": "Create and manage gig postings."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_market_admin",
+            "label": "Marketplace Admin",
+            "description": "Manage talent marketplace.",
+            "permissions": {
+                "cm_market_view": [
+                    "view"
+                ],
+                "cm_market_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-talent-matching"
+    ]
+}

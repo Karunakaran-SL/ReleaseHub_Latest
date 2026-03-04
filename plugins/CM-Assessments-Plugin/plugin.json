@@ -1,0 +1,92 @@
+{
+    "id": "cm-assessments",
+    "version": "1.0.0",
+    "name": "CM: Skills Assessment",
+    "description": "Conduct self, manager, and peer skill evaluations. Build test banks, assign assessments, auto-grade, and track historical results.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-assessments",
+            "children": [
+                {
+                    "label": "Assessments",
+                    "icon": "ClipboardList",
+                    "path": "/plugins/cm-assessments",
+                    "children": [
+                        {
+                            "label": "All Assessments",
+                            "icon": "ClipboardList",
+                            "path": "/plugins/cm-assessments"
+                        },
+                        {
+                            "label": "Self Assessment",
+                            "icon": "UserCheck",
+                            "path": "/plugins/cm-assessments/self"
+                        },
+                        {
+                            "label": "Manager Review",
+                            "icon": "UserCog",
+                            "path": "/plugins/cm-assessments/manager-review"
+                        },
+                        {
+                            "label": "History",
+                            "icon": "Clock",
+                            "path": "/plugins/cm-assessments/history"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Assessments",
+            "icon": "ClipboardList",
+            "path": "/settings/cm-assessments"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-assessments-pending",
+            "title": "Pending Assessments",
+            "description": "Assessments awaiting review.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_assess_view",
+            "label": "View Assessments",
+            "description": "Browse assessment results."
+        },
+        {
+            "key": "cm_assess_manage",
+            "label": "Run Assessments",
+            "description": "Create and submit assessments."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_assessor",
+            "label": "Competence Assessor",
+            "description": "Run and review skill assessments.",
+            "permissions": {
+                "cm_assess_view": [
+                    "view"
+                ],
+                "cm_assess_manage": [
+                    "view",
+                    "create",
+                    "edit"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-skill-taxonomy",
+        "cm-employee-profiles"
+    ]
+}

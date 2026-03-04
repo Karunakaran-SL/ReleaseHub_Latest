@@ -1,0 +1,102 @@
+{
+    "id": "cm-employee-profiles",
+    "version": "1.0.0",
+    "name": "CM: Employee Skill Profiles",
+    "description": "Maintain individual competency records for all employees — self-assessments, manager validations, skill history, and peer endorsements.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-employee-profiles",
+            "children": [
+                {
+                    "label": "Employee Profiles",
+                    "icon": "UserCheck",
+                    "path": "/plugins/cm-employee-profiles",
+                    "children": [
+                        {
+                            "label": "All Profiles",
+                            "icon": "Users",
+                            "path": "/plugins/cm-employee-profiles"
+                        },
+                        {
+                            "label": "My Skills",
+                            "icon": "UserCheck",
+                            "path": "/plugins/cm-employee-profiles/my-skills"
+                        },
+                        {
+                            "label": "Team Skills",
+                            "icon": "UsersRound",
+                            "path": "/plugins/cm-employee-profiles/team"
+                        },
+                        {
+                            "label": "Skill History",
+                            "icon": "Clock",
+                            "path": "/plugins/cm-employee-profiles/history"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Employee Profiles",
+            "icon": "UserCheck",
+            "path": "/settings/cm-employee-profiles"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-my-skills-widget",
+            "title": "My Skill Profile",
+            "description": "Personal skill snapshot and pending validations.",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_profiles_view",
+            "label": "View Profiles",
+            "description": "Browse employee skill profiles."
+        },
+        {
+            "key": "cm_profiles_self",
+            "label": "Self Assessment",
+            "description": "Add and update own skills."
+        },
+        {
+            "key": "cm_profiles_manage",
+            "label": "Manage Profiles",
+            "description": "Manage any employee skill record."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_profiles_admin",
+            "label": "Profile Administrator",
+            "description": "Manage all employee skill profiles.",
+            "permissions": {
+                "cm_profiles_view": [
+                    "view"
+                ],
+                "cm_profiles_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ],
+                "cm_profiles_self": [
+                    "view",
+                    "create",
+                    "edit"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-skill-taxonomy"
+    ]
+}

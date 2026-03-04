@@ -1,0 +1,90 @@
+{
+    "id": "cm-skill-taxonomy",
+    "version": "1.0.0",
+    "name": "CM: Skill Taxonomy",
+    "description": "Foundation plugin — central master registry for all competencies, skill categories, proficiency scales, and external framework mappings (SFIA, ESCO, O*NET).",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-skill-taxonomy",
+            "children": [
+                {
+                    "label": "Skill Taxonomy",
+                    "icon": "Library",
+                    "path": "/plugins/cm-skill-taxonomy",
+                    "children": [
+                        {
+                            "label": "Skill Library",
+                            "icon": "BookOpen",
+                            "path": "/plugins/cm-skill-taxonomy"
+                        },
+                        {
+                            "label": "Categories",
+                            "icon": "Folders",
+                            "path": "/plugins/cm-skill-taxonomy/categories"
+                        },
+                        {
+                            "label": "Framework Mapping",
+                            "icon": "Map",
+                            "path": "/plugins/cm-skill-taxonomy/framework"
+                        },
+                        {
+                            "label": "Import / Export",
+                            "icon": "FileDown",
+                            "path": "/plugins/cm-skill-taxonomy/import-export"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Skill Taxonomy Settings",
+            "icon": "Library",
+            "path": "/settings/cm-skill-taxonomy"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-taxonomy-overview",
+            "title": "Skill Library",
+            "description": "Total active skills, categories, and recently added competencies.",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_taxonomy_view",
+            "label": "View Skill Library",
+            "description": "Browse competencies and categories."
+        },
+        {
+            "key": "cm_taxonomy_manage",
+            "label": "Manage Skills",
+            "description": "Create, edit, archive competencies."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_taxonomy_admin",
+            "label": "Taxonomy Administrator",
+            "description": "Full access to skill taxonomy management.",
+            "permissions": {
+                "cm_taxonomy_view": [
+                    "view"
+                ],
+                "cm_taxonomy_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}

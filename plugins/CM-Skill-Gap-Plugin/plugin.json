@@ -1,0 +1,80 @@
+{
+    "id": "cm-skill-gap",
+    "version": "1.0.0",
+    "name": "CM: Skill Gap Analysis",
+    "description": "Compare employee actual skill levels against role requirements. Compute gap severity, rank priorities, and export gap reports for individuals, teams, and organisations.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-skill-gap",
+            "children": [
+                {
+                    "label": "Skill Gap Analysis",
+                    "icon": "TrendingDown",
+                    "path": "/plugins/cm-skill-gap",
+                    "children": [
+                        {
+                            "label": "Individual Gap",
+                            "icon": "User",
+                            "path": "/plugins/cm-skill-gap"
+                        },
+                        {
+                            "label": "Team Gap",
+                            "icon": "Users",
+                            "path": "/plugins/cm-skill-gap/team"
+                        },
+                        {
+                            "label": "Organisation Gap",
+                            "icon": "Building",
+                            "path": "/plugins/cm-skill-gap/organisation"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-top-gaps",
+            "title": "Top Skill Gaps",
+            "description": "Most critical skill deficits across the organisation.",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_gap_view",
+            "label": "View Gap Analysis",
+            "description": "Access skill gap reports."
+        },
+        {
+            "key": "cm_gap_run",
+            "label": "Run Gap Analysis",
+            "description": "Calculate and store new gap analyses."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_gap_analyst",
+            "label": "Gap Analyst",
+            "description": "Run and review skill gap analyses.",
+            "permissions": {
+                "cm_gap_view": [
+                    "view"
+                ],
+                "cm_gap_run": [
+                    "view",
+                    "create"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-skill-taxonomy",
+        "cm-employee-profiles",
+        "cm-roles"
+    ]
+}

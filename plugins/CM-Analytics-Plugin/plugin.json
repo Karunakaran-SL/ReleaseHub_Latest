@@ -1,0 +1,83 @@
+{
+    "id": "cm-analytics",
+    "version": "1.0.0",
+    "name": "CM: Workforce Analytics",
+    "description": "Aggregate skill data across the organisation. Time-series analysis, department comparison, skill deficit trends, and predictive skill demand forecasting.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-analytics",
+            "children": [
+                {
+                    "label": "Workforce Analytics",
+                    "icon": "BarChart3",
+                    "path": "/plugins/cm-analytics",
+                    "children": [
+                        {
+                            "label": "Organisation Dashboard",
+                            "icon": "LayoutDashboard",
+                            "path": "/plugins/cm-analytics"
+                        },
+                        {
+                            "label": "Trends",
+                            "icon": "TrendingUp",
+                            "path": "/plugins/cm-analytics/trends"
+                        },
+                        {
+                            "label": "Department View",
+                            "icon": "Building",
+                            "path": "/plugins/cm-analytics/departments"
+                        },
+                        {
+                            "label": "Forecast",
+                            "icon": "LineChart",
+                            "path": "/plugins/cm-analytics/forecast"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Analytics",
+            "icon": "BarChart3",
+            "path": "/settings/cm-analytics"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-org-skills",
+            "title": "Org Skill Health",
+            "description": "Skill distribution and coverage across departments.",
+            "size": "large"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_analytics_view",
+            "label": "View Analytics",
+            "description": "Access workforce analytics dashboards."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_analytics_viewer",
+            "label": "Analytics Viewer",
+            "description": "View organisation analytics.",
+            "permissions": {
+                "cm_analytics_view": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-skill-taxonomy",
+        "cm-employee-profiles",
+        "cm-roles"
+    ]
+}

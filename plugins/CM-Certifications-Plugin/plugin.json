@@ -1,0 +1,87 @@
+{
+    "id": "cm-certifications",
+    "version": "1.0.0",
+    "name": "CM: Certification & Compliance",
+    "description": "Upload and track employee certifications, generate expiry alerts, and export compliance status reports.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-certifications",
+            "children": [
+                {
+                    "label": "Certifications",
+                    "icon": "Award",
+                    "path": "/plugins/cm-certifications",
+                    "children": [
+                        {
+                            "label": "Certificate Library",
+                            "icon": "Award",
+                            "path": "/plugins/cm-certifications"
+                        },
+                        {
+                            "label": "Expiry Tracker",
+                            "icon": "AlertTriangle",
+                            "path": "/plugins/cm-certifications/expiry"
+                        },
+                        {
+                            "label": "Compliance Report",
+                            "icon": "FileBarChart",
+                            "path": "/plugins/cm-certifications/compliance"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Certifications",
+            "icon": "Award",
+            "path": "/settings/cm-certifications"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-certs-expiring",
+            "title": "Expiring Certifications",
+            "description": "Certificates expiring in next 90 days.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_certs_view",
+            "label": "View Certificates",
+            "description": "Browse certification records."
+        },
+        {
+            "key": "cm_certs_manage",
+            "label": "Manage Certificates",
+            "description": "Add and renew certificates."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_certs_admin",
+            "label": "Certification Admin",
+            "description": "Manage employee certifications.",
+            "permissions": {
+                "cm_certs_view": [
+                    "view"
+                ],
+                "cm_certs_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-employee-profiles"
+    ]
+}

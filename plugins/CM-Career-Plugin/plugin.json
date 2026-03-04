@@ -1,0 +1,81 @@
+{
+    "id": "cm-career",
+    "version": "1.0.0",
+    "name": "CM: Career Development",
+    "description": "Define career ladders and progression paths between roles. Map skill milestones, track each employee's career readiness, and visualise promotion pathways.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-career",
+            "children": [
+                {
+                    "label": "Career Pathing",
+                    "icon": "Map",
+                    "path": "/plugins/cm-career",
+                    "children": [
+                        {
+                            "label": "Career Maps",
+                            "icon": "Map",
+                            "path": "/plugins/cm-career"
+                        },
+                        {
+                            "label": "My Career Path",
+                            "icon": "TrendingUp",
+                            "path": "/plugins/cm-career/my-path"
+                        },
+                        {
+                            "label": "Milestones",
+                            "icon": "Flag",
+                            "path": "/plugins/cm-career/milestones"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-my-career",
+            "title": "My Career Progress",
+            "description": "Progression percentage toward next role.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_career_view",
+            "label": "View Career Paths",
+            "description": "Browse career ladders."
+        },
+        {
+            "key": "cm_career_manage",
+            "label": "Manage Career Paths",
+            "description": "Create and edit career progressions."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_career_admin",
+            "label": "Career Path Admin",
+            "description": "Manage career progression definitions.",
+            "permissions": {
+                "cm_career_view": [
+                    "view"
+                ],
+                "cm_career_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-roles",
+        "cm-skill-taxonomy"
+    ]
+}
