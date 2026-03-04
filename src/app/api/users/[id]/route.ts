@@ -9,16 +9,17 @@ import { isAdminRole } from '@/lib/role-utils';
 // PUT /api/users/[id] — update user role or password
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
     const currentUser = await getUser();
-    if (!currentUser || !isAdminRole(currentUser.role)) {
+    if (!currentUser || !isAdminRole(currentUser.roles)) {
         return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
-    const { role, email, newPassword } = await req.json();
+    const { roles, role, email, newPassword } = await req.json();
     const client = await clientPromise;
     const db = client.db();
 
     const updateFields: Record<string, any> = {};
-    if (role) updateFields.role = role;
+    if (roles) updateFields.roles = roles;
+    else if (role) updateFields.roles = [role];
     if (email !== undefined) updateFields.email = email;
     if (newPassword) {
         updateFields.password = await bcrypt.hash(newPassword, 10);
@@ -46,7 +47,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 // DELETE /api/users/[id] — delete user (cannot delete yourself)
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
     const currentUser = await getUser();
-    if (!currentUser || !isAdminRole(currentUser.role)) {
+    if (!currentUser || !isAdminRole(currentUser.roles)) {
         return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 

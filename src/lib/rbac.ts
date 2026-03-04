@@ -3,7 +3,7 @@
 // ============================================================
 
 import { DEFAULT_ROLES, type Action, type FeatureKey } from './permissions';
-import { isAdminRole, normalizeRole } from './role-utils';
+import { isAdminRole, normalizeRoles } from './role-utils';
 
 // In-memory roles cache (populated from DB when available)
 let _rolesCache: Record<string, { permissions: Record<string, Action[]> }> | null = null;
@@ -24,38 +24,43 @@ function getRolePermissions(role: string): Record<string, Action[]> {
 }
 
 /**
- * Check if a role has a specific permission action on a feature.
+ * Check if ANY of the user's roles has a specific permission action on a feature.
  * Admins always have full access.
  */
 export function hasPermission(
-    userRole: string | undefined | null,
+    userRoles: string[] | string | undefined | null,
     feature: FeatureKey | string,
     action: Action
 ): boolean {
-    if (!userRole) return false;
-    if (isAdminRole(userRole)) return true;
-    const normalized = normalizeRole(userRole);
-    const permissions = getRolePermissions(normalized);
-    const actions = permissions[feature] ?? [];
-    return actions.includes(action);
+    if (!userRoles) return false;
+    if (isAdminRole(userRoles)) return true;
+
+    const normalizedRoles = normalizeRoles(userRoles);
+
+    // Return true if ANY role grants this permission
+    return normalizedRoles.some(role => {
+        const permissions = getRolePermissions(role);
+        const actions = permissions[feature] ?? [];
+        return actions.includes(action);
+    });
 }
 
-/** Shorthand: can the role view a feature? */
-export function canView(userRole: string | undefined | null, feature: FeatureKey | string): boolean {
-    return hasPermission(userRole, feature, 'view');
+/** Shorthand: can the roles view a feature? */
+export function canView(userRoles: string[] | string | undefined | null, feature: FeatureKey | string): boolean {
+    return hasPermission(userRoles, feature, 'view');
 }
 
-/** Shorthand: can the role create in a feature? */
-export function canCreate(userRole: string | undefined | null, feature: FeatureKey | string): boolean {
-    return hasPermission(userRole, feature, 'create');
+/** Shorthand: can the roles create in a feature? */
+export function canCreate(userRoles: string[] | string | undefined | null, feature: FeatureKey | string): boolean {
+    return hasPermission(userRoles, feature, 'create');
 }
 
-/** Shorthand: can the role edit in a feature? */
-export function canEdit(userRole: string | undefined | null, feature: FeatureKey | string): boolean {
-    return hasPermission(userRole, feature, 'edit');
+/** Shorthand: can the roles edit in a feature? */
+export function canEdit(userRoles: string[] | string | undefined | null, feature: FeatureKey | string): boolean {
+    return hasPermission(userRoles, feature, 'edit');
 }
 
-/** Shorthand: can the role delete in a feature? */
-export function canDelete(userRole: string | undefined | null, feature: FeatureKey | string): boolean {
-    return hasPermission(userRole, feature, 'delete');
+/** Shorthand: can the roles delete in a feature? */
+export function canDelete(userRoles: string[] | string | undefined | null, feature: FeatureKey | string): boolean {
+    return hasPermission(userRoles, feature, 'delete');
 }

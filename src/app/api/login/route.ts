@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import clientPromise from '@/lib/mongodb';
 import { createSession } from '@/lib/session';
 import type { User } from '@/lib/definitions';
-import { normalizeRole } from '@/lib/role-utils';
+import { normalizeRoles } from '@/lib/role-utils';
 
 const SignInSchema = z.object({
   username: z.string().min(1, { message: 'Username is required.' }),
@@ -46,7 +46,8 @@ export async function POST(req: NextRequest) {
       // Case 2: User exists and password is a valid hash. Compare it.
       const passwordsMatch = await bcrypt.compare(password, user.password);
       if (passwordsMatch) {
-        await createSession(user._id.toString(), user.username, normalizeRole((user as any).role));
+        const rolesToPass = normalizeRoles(user.roles || (user as any).role);
+        await createSession(user._id.toString(), user.username, rolesToPass);
         return NextResponse.json({ message: 'Logged in successfully' }, { status: 200 });
       }
     } else {
@@ -59,7 +60,8 @@ export async function POST(req: NextRequest) {
           { $set: { password: hashedPassword } }
         );
 
-        await createSession(user._id.toString(), user.username, normalizeRole((user as any).role));
+        const rolesToPass = normalizeRoles(user.roles || (user as any).role);
+        await createSession(user._id.toString(), user.username, rolesToPass);
 
         return NextResponse.json({ message: 'Password updated and logged in successfully' }, { status: 200 });
       }

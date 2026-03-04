@@ -139,8 +139,8 @@ function Header({ user }: { user: User | null }) {
                   </Avatar>
                   <div className="hidden text-left md:block">
                     <div className="font-medium">{user?.username}</div>
-                    <div className="text-xs text-muted-foreground capitalize">
-                      {user?.role ?? 'viewer'}
+                    <div className="text-xs text-muted-foreground capitalize truncate max-w-[120px]">
+                      {(user?.roles || (user?.role ? [user.role] : ['viewer'])).join(', ')}
                     </div>
                   </div>
                   <ChevronDown className="hidden h-4 w-4 text-muted-foreground md:block" />
@@ -153,8 +153,8 @@ function Header({ user }: { user: User | null }) {
                   <p className="text-sm font-medium leading-none">
                     {user?.username}
                   </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    Release Engineer
+                  <p className="text-xs leading-none text-muted-foreground capitalize">
+                    {(user?.roles || (user?.role ? [user.role] : ['viewer'])).join(', ')}
                   </p>
                 </div>
               </DropdownMenuLabel>
@@ -203,7 +203,6 @@ export default function DashboardLayout({ children, user }: { children: React.Re
   const isReleaseManagementPage = pathname.startsWith('/release-management');
   const isDocumentsPage = pathname.startsWith('/documents');
   const isFleetManagementPage = pathname.startsWith('/fleet-management');
-  const isLicensePage = pathname.startsWith('/license');
   const isWorkflowPage = pathname.startsWith('/workflows');
   const isPlatformEngineeringPage = pathname.startsWith('/platform-engineering');
   const isCicdPage = pathname.startsWith('/cicd');
@@ -239,7 +238,18 @@ export default function DashboardLayout({ children, user }: { children: React.Re
   }
 
   const dashboardPlugins = getPluginNavItems('dashboard-submenu');
-  const mainMenuPlugins = getPluginNavItems('main-menu');
+  const rawMainMenuPlugins = getPluginNavItems('main-menu');
+  const mainMenuPlugins = rawMainMenuPlugins.reduce((acc: any[], nav: any) => {
+    const existing = acc.find(item => item.label === nav.label);
+    if (existing) {
+      if (nav.children) {
+        existing.children = [...(existing.children || []), ...nav.children];
+      }
+    } else {
+      acc.push({ ...nav, children: nav.children ? [...nav.children] : [] });
+    }
+    return acc;
+  }, []);
   const helpPlugins = getPluginNavItems('help');
   const settingsPlugins = getPluginNavItems('submenu').filter((n: any) => n.parent === 'Settings');
 
@@ -252,11 +262,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
           <Sidebar>
             <SidebarContent>
               <SidebarMenu>
-                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isCmdbPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isCompliancePage && !isHelpPage}>
+                <Collapsible asChild defaultOpen={!isProductsPage && !isSpecificationsPage && !isApiDocsPage && !isAuditPage && !isSettingsPage && !isCmdbPage && !isDependencyMetricsPage && !isReleaseManagementPage && !isDocumentsPage && !isFleetManagementPage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isCompliancePage && !isHelpPage}>
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isLicensePage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isCompliancePage && !isHelpPage}
+                        isActive={!isProductsPage && !isSpecificationsPage && !isSettingsPage && !isDependencyMetricsPage && !isFleetManagementPage && !isWorkflowPage && !isPlatformEngineeringPage && !isCicdPage && !isCompliancePage && !isHelpPage}
                         tooltip={{ children: 'Dashboard' }}
                         className="data-[state=open]:bg-sidebar-accent"
                       >
@@ -602,41 +612,6 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                             </CollapsibleContent>
                           </SidebarMenuItem>
                         </Collapsible>
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-
-                <Collapsible asChild defaultOpen={isLicensePage}>
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        isActive={isLicensePage}
-                        tooltip={{ children: 'License' }}
-                        className="data-[state=open]:bg-sidebar-accent"
-                      >
-                        <FileKey2 />
-                        License
-                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/license/usage" isActive={pathname.startsWith('/license/usage')}>
-                            <BarChart className="mr-2" /> License Usage
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/license/product-licensing" isActive={pathname.startsWith('/license/product-licensing')}>
-                            <BoxIcon className="mr-2" /> Product Licensing
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton href="/license/tools" isActive={pathname.startsWith('/license/tools')}>
-                            <Wrench className="mr-2" /> LMS Integrations
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>
                   </SidebarMenuItem>

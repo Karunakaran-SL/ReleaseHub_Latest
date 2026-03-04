@@ -37,7 +37,7 @@ const ROLE_BADGE: Record<string, string> = {
 
 type RoleData = { name: string; label: string; description: string; permissions: Record<string, string[]>; isDefault?: boolean; pluginId?: string };
 type FeatureData = { key: string; label: string; description: string; isSystem: boolean; pluginId?: string | null };
-type DbUser = { _id: string; username: string; role: string; email?: string; createdAt?: string; createdBy?: string };
+type DbUser = { _id: string; username: string; roles?: string[]; role?: string; email?: string; createdAt?: string; createdBy?: string };
 
 function Toast({ message, type, onDismiss }: { message: string; type: 'success' | 'error'; onDismiss: () => void }) {
     return (
@@ -62,7 +62,8 @@ function RoleChip({ role, label }: { role: string; label: string }) {
 
 const EMPTY_NEW_ROLE = { name: '', label: '', description: '' };
 const EMPTY_NEW_FEATURE = { key: '', label: '', description: '' };
-const EMPTY_NEW_USER = { username: '', password: '', role: 'viewer', email: '' };
+type NewUserForm = { username: string; password?: string; roles: string[]; role?: string; email?: string };
+const EMPTY_NEW_USER: NewUserForm = { username: '', password: '', roles: ['viewer'], role: undefined, email: '' };
 
 export default function UserManagementPage() {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -107,7 +108,8 @@ export default function UserManagementPage() {
     const [newUser, setNewUser] = useState(EMPTY_NEW_USER);
     const [addError, setAddError] = useState('');
     const [addLoading, setAddLoading] = useState(false);
-    const [editRole, setEditRole] = useState('');
+    // Edit User
+    const [editRoles, setEditRoles] = useState<string[]>([]); // Changed from editRole to editRoles
     const [editEmail, setEditEmail] = useState('');
     const [editLoading, setEditLoading] = useState(false);
     const [newPassword, setNewPassword] = useState('');
@@ -135,7 +137,7 @@ export default function UserManagementPage() {
     }, []);
 
     useEffect(() => {
-        getUser().then(u => { setCurrentUser(u); setIsAdmin(isAdminRole(u?.role)); });
+        getUser().then(u => { setCurrentUser(u as unknown as User); setIsAdmin(isAdminRole(u?.roles)); });
         Promise.all([fetchUsers(), fetchRoles(), fetchFeatures()]).finally(() => setLoading(false));
     }, [fetchUsers, fetchRoles, fetchFeatures]);
 
@@ -216,22 +218,30 @@ export default function UserManagementPage() {
 
     async function handleAddUser(e: React.FormEvent) {
         e.preventDefault(); setAddError(''); setAddLoading(true);
+        console.log("=== TRYING TO ADD USER ===", newUser);
         try {
             const res = await fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newUser) });
-            const data = await res.json();
+            const textResponse = await res.text();
+            console.log("=== API RESPONSE STATUS ===", res.status, "BODY ===", textResponse);
+
+            let data;
+            try { data = JSON.parse(textResponse); } catch (e) { data = { message: textResponse }; }
+
             if (!res.ok) { setAddError(data.message); return; }
             setShowAddUser(false); setNewUser(EMPTY_NEW_USER); await fetchUsers(); showToast('User created.', 'success');
-        } catch { setAddError('Unexpected error.'); }
+        } catch (err) { console.error("=== FATAL ADD USER ERROR ===", err); setAddError('Unexpected error.'); }
         finally { setAddLoading(false); }
     }
 
     async function handleEditUser(e: React.FormEvent) {
-        e.preventDefault(); if (!editingUser) return; setEditLoading(true);
+        e.preventDefault(); if (!editingUser) return;
+        setEditLoading(true);
         try {
-            const res = await fetch(`/api/users/${editingUser._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: editRole, email: editEmail }) });
-            if (res.ok) { setShowEditUser(false); await fetchUsers(); showToast('User updated.', 'success'); }
-            else showToast((await res.json()).message || 'Failed.', 'error');
-        } finally { setEditLoading(false); }
+            const res = await fetch(`/api/users/${editingUser._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ roles: editRoles, email: editEmail }) }); // Changed role to roles
+            if (!res.ok) { showToast('Error updating user', 'error'); return; }
+            setShowEditUser(false); await fetchUsers(); showToast('User updated', 'success');
+        } catch { showToast('Unexpected error', 'error'); }
+        finally { setEditLoading(false); }
     }
 
     async function handleDeleteUser() {
@@ -251,9 +261,12 @@ export default function UserManagementPage() {
         } finally { setResetLoading(false); }
     }
 
-    const roleStats = roles.map(r => ({ ...r, count: users.filter(u => u.role === r.name).length }));
+    const roleStats = roles.map(r => ({
+        ...r,
+        count: users.filter(u => u.roles?.includes(r.name) || u.role === r.name).length // Updated to check roles array
+    }));
     const customFeatures = features.filter(f => !f.isSystem);
-    const detailRole = roles.find(r => r.name === detailUser?.role);
+    const detailRole = roles.find(r => r.name === detailUser?.role); // Kept for detailUser, which might still use single role
 
     // All features for permission matrix (system + custom from DB)
     const allFeatureKeys = features.map(f => f.key);
@@ -348,7 +361,13 @@ export default function UserManagementPage() {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="text-muted-foreground text-sm">{u.email || '—'}</TableCell>
-                                                    <TableCell><RoleChip role={u.role} label={roles.find(r => r.name === u.role)?.label ?? u.role} /></TableCell>
+                                                    <TableCell>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {(u.roles || (u.role ? [u.role] : ['viewer'])).map((roleKey: string) => (
+                                                                <RoleChip key={roleKey} role={roleKey} label={roles.find(r => r.name === roleKey)?.label ?? roleKey} />
+                                                            ))}
+                                                        </div>
+                                                    </TableCell>
                                                     <TableCell className="text-muted-foreground text-sm">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</TableCell>
                                                     <TableCell className="text-muted-foreground text-sm">{u.createdBy || '—'}</TableCell>
                                                     <TableCell className="text-right">
@@ -356,7 +375,7 @@ export default function UserManagementPage() {
                                                             <Button variant="ghost" size="icon" title="View capabilities" onClick={() => { setDetailUser(u); setShowUserDetail(true); }} className="h-8 w-8"><Eye className="h-4 w-4" /></Button>
                                                             {isAdmin && (
                                                                 <>
-                                                                    <Button variant="ghost" size="icon" title="Edit" onClick={() => { setEditingUser(u); setEditRole(u.role); setEditEmail(u.email ?? ''); setShowEditUser(true); }} className="h-8 w-8"><Pencil className="h-4 w-4" /></Button>
+                                                                    <Button variant="ghost" size="icon" title="Edit" onClick={() => { setEditingUser(u); setEditRoles(u.roles || (u.role ? [u.role] : ['viewer'])); setEditEmail(u.email ?? ''); setShowEditUser(true); }} className="h-8 w-8"><Pencil className="h-4 w-4" /></Button>
                                                                     <Button variant="ghost" size="icon" title="Reset password" onClick={() => { setResetPwUser(u); setNewPassword(''); setShowPw(false); setShowResetPw(true); }} className="h-8 w-8"><KeyRound className="h-4 w-4" /></Button>
                                                                     <Button variant="ghost" size="icon" title="Delete" disabled={u._id === currentUser?._id} onClick={() => { setDeletingUser(u); setShowDeleteUser(true); }} className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-30"><Trash2 className="h-4 w-4" /></Button>
                                                                 </>
@@ -589,12 +608,26 @@ export default function UserManagementPage() {
                                 <div className="relative"><Input id="nu-password" type={showPw ? 'text' : 'password'} required value={newUser.password} onChange={e => setNewUser(f => ({ ...f, password: e.target.value }))} placeholder="Min. 8 chars" /><button type="button" onClick={() => setShowPw(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">{showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
                             </div>
                             <div className="space-y-1.5">
-                                <Label htmlFor="nu-role">Role *</Label>
-                                <Select value={newUser.role} onValueChange={v => setNewUser(f => ({ ...f, role: v }))}>
-                                    <SelectTrigger id="nu-role"><SelectValue /></SelectTrigger>
-                                    <SelectContent>{roles.map(r => <SelectItem key={r.name} value={r.name}>{r.label}</SelectItem>)}</SelectContent>
-                                </Select>
-                                <p className="text-xs text-muted-foreground">{roles.find(r => r.name === newUser.role)?.description}</p>
+                                <Label>Roles *</Label>
+                                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1">
+                                    {roles.map(r => (
+                                        <div key={r.name} className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={`nu-role-${r.name}`}
+                                                checked={newUser.roles?.includes(r.name) ?? false}
+                                                onCheckedChange={(c) => {
+                                                    setNewUser(prev => {
+                                                        const currentRoles = prev.roles || [];
+                                                        const newRoles = c ? [...currentRoles, r.name] : currentRoles.filter(x => x !== r.name);
+                                                        return { ...prev, roles: newRoles.length ? newRoles : ['viewer'] };
+                                                    });
+                                                }}
+                                            />
+                                            <Label htmlFor={`nu-role-${r.name}`} className="text-sm cursor-pointer font-normal">{r.label}</Label>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-muted-foreground">Select one or more roles.</p>
                             </div>
                             {addError && <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 dark:text-red-400 p-3 rounded-lg border border-red-200 dark:border-red-900"><AlertCircle className="h-4 w-4 shrink-0" />{addError}</div>}
                             <DialogFooter><Button type="button" variant="outline" onClick={() => setShowAddUser(false)}>Cancel</Button><Button type="submit" disabled={addLoading} className="gap-2">{addLoading && <Loader2 className="h-4 w-4 animate-spin" />}Create User</Button></DialogFooter>
@@ -609,9 +642,25 @@ export default function UserManagementPage() {
                         <form onSubmit={handleEditUser} className="space-y-4 mt-2">
                             <div className="space-y-1.5"><Label htmlFor="eu-email">Email</Label><Input id="eu-email" type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)} /></div>
                             <div className="space-y-1.5">
-                                <Label htmlFor="eu-role">Role</Label>
-                                <Select value={editRole} onValueChange={setEditRole}><SelectTrigger id="eu-role"><SelectValue /></SelectTrigger><SelectContent>{roles.map(r => <SelectItem key={r.name} value={r.name}>{r.label}</SelectItem>)}</SelectContent></Select>
-                                <p className="text-xs text-muted-foreground">{roles.find(r => r.name === editRole)?.description}</p>
+                                <Label>Roles</Label>
+                                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1">
+                                    {roles.map(r => (
+                                        <div key={r.name} className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={`eu-role-${r.name}`}
+                                                checked={editRoles.includes(r.name)}
+                                                onCheckedChange={(c) => {
+                                                    setEditRoles(prev => {
+                                                        const newRoles = c ? [...prev, r.name] : prev.filter(x => x !== r.name);
+                                                        return newRoles.length ? newRoles : ['viewer'];
+                                                    });
+                                                }}
+                                            />
+                                            <Label htmlFor={`eu-role-${r.name}`} className="text-sm cursor-pointer font-normal">{r.label}</Label>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-muted-foreground">Select one or more roles.</p>
                             </div>
                             <DialogFooter><Button type="button" variant="outline" onClick={() => setShowEditUser(false)}>Cancel</Button><Button type="submit" disabled={editLoading} className="gap-2">{editLoading && <Loader2 className="h-4 w-4 animate-spin" />}Save</Button></DialogFooter>
                         </form>
@@ -680,12 +729,19 @@ export default function UserManagementPage() {
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-3">
                                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">{detailUser?.username?.charAt(0).toUpperCase()}</div>
-                                <div><div>{detailUser?.username}</div>{detailRole && <RoleChip role={detailUser!.role} label={detailRole.label} />}</div>
+                                <div>
+                                    <div className="mb-1">{detailUser?.username}</div>
+                                    <div className="flex gap-1">
+                                        {(detailUser?.roles || (detailUser?.role ? [detailUser.role] : ['viewer'])).map((roleKey: string) => (
+                                            <RoleChip key={roleKey} role={roleKey} label={roles.find(r => r.name === roleKey)?.label ?? roleKey} />
+                                        ))}
+                                    </div>
+                                </div>
                             </DialogTitle>
-                            <DialogDescription>{detailRole?.description ?? 'User permissions based on assigned role.'}</DialogDescription>
+                            <DialogDescription>User permissions are the combined set of all assigned roles.</DialogDescription>
                         </DialogHeader>
                         <div className="mt-2">
-                            {isAdminRole(detailUser?.role) ? (
+                            {isAdminRole(detailUser?.roles || detailUser?.role) ? (
                                 <div className="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 p-4 text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
                                     <ShieldCheck className="h-5 w-5 shrink-0" /> This user is an Administrator with <strong>full access</strong> to all features.
                                 </div>
@@ -694,12 +750,21 @@ export default function UserManagementPage() {
                                     <TableHeader><TableRow><TableHead>Feature</TableHead>{ACTIONS.map(a => <TableHead key={a} className="text-center capitalize">{a}</TableHead>)}</TableRow></TableHeader>
                                     <TableBody>
                                         {allFeatureKeys.map(fKey => {
-                                            const perms = detailRole?.permissions[fKey] ?? [];
-                                            const any = ACTIONS.some(a => perms.includes(a));
+                                            const userRolesToUse = detailUser?.roles || (detailUser?.role ? [detailUser.role] : ['viewer']);
+
+                                            // Check across all of user's roles
+                                            const hasAction = (a: Action) => {
+                                                return userRolesToUse.some(r => {
+                                                    const roleDef = roles.find(dbRole => dbRole.name === r);
+                                                    return roleDef?.permissions[fKey]?.includes(a);
+                                                });
+                                            };
+
+                                            const any = ACTIONS.some(a => hasAction(a));
                                             return (
                                                 <TableRow key={fKey} className={any ? '' : 'opacity-40'}>
                                                     <TableCell className="font-medium text-sm">{featureLabelFor(fKey)}</TableCell>
-                                                    {ACTIONS.map(a => <TableCell key={a} className="text-center"><PermBadge allowed={perms.includes(a)} /></TableCell>)}
+                                                    {ACTIONS.map(a => <TableCell key={a} className="text-center"><PermBadge allowed={hasAction(a)} /></TableCell>)}
                                                 </TableRow>
                                             );
                                         })}

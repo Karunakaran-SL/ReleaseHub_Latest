@@ -8,7 +8,7 @@ import { isAdminRole } from '@/lib/role-utils';
 // GET /api/users — list all users (admin only)
 export async function GET() {
     const currentUser = await getUser();
-    if (!currentUser || !isAdminRole(currentUser.role)) {
+    if (!currentUser || !isAdminRole(currentUser.roles)) {
         return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
@@ -24,14 +24,15 @@ export async function GET() {
 // POST /api/users — create user (admin only)
 export async function POST(req: Request) {
     const currentUser = await getUser();
-    if (!currentUser || !isAdminRole(currentUser.role)) {
+    if (!currentUser || !isAdminRole(currentUser.roles)) {
         return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
-    const { username, password, role, email } = await req.json();
+    const { username, password, roles, role, email } = await req.json();
+    const rolesArray = roles || (role ? [role] : undefined);
 
-    if (!username || !password || !role) {
-        return NextResponse.json({ message: 'username, password, and role are required.' }, { status: 400 });
+    if (!username || !password || !rolesArray || rolesArray.length === 0) {
+        return NextResponse.json({ message: 'username, password, and at least one role are required.' }, { status: 400 });
     }
 
     const client = await clientPromise;
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
     const result = await db.collection('users').insertOne({
         username,
         password: hashedPassword,
-        role,
+        roles: rolesArray,
         email: email || '',
         createdAt: now,
         createdBy: currentUser.username,

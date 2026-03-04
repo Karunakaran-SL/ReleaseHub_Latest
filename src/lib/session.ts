@@ -10,9 +10,9 @@ const secretKey = process.env.SESSION_SECRET || 'a-super-secret-key-that-is-long
 const encodedKey = new TextEncoder().encode(secretKey);
 const aDayInSeconds = 24 * 60 * 60;
 
-export async function createSession(userId: string, username: string, role: string = 'viewer') {
+export async function createSession(userId: string, username: string, roles: string[] = ['viewer']) {
   const expiresAt = new Date(Date.now() + aDayInSeconds * 1000);
-  const session = await encrypt({ userId, username, role, expiresAt });
+  const session = await encrypt({ userId, username, roles, expiresAt });
 
   const cookieStore = await cookies();
   cookieStore.set('session', session, {

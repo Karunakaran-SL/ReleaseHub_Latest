@@ -10,7 +10,8 @@ export type User = {
   _id: string;
   username: string;
   password?: string;
-  role?: string;
+  roles?: string[];
+  role?: string; // Legacy field for backwards compatibility during migration
   email?: string;
   createdAt?: string;
   createdBy?: string;
@@ -29,7 +30,8 @@ export type RoleRecord = {
 export type SessionPayload = {
   userId: string;
   username: string;
-  role: string;
+  roles: string[];
+  role?: string; // Legacy fallback
   expiresAt: Date;
 };
 

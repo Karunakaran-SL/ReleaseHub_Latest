@@ -5,10 +5,10 @@ import DashboardLayout from '@/app/dashboard-layout';
 import type { User } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -54,8 +54,8 @@ function ToolCard({ tool }: { tool: { id: string, name: string; features: string
                 </div>
             </CardContent>
             <CardFooter>
-                 <Button variant="outline" asChild>
-                    <Link href={`/license/tools/${tool.id}`}>
+                <Button variant="outline" asChild>
+                    <Link href={`/plugins/lms-integrations`}>
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                     </Link>
@@ -81,7 +81,7 @@ export default function CMDBIntegrationPage() {
                         An overview of popular open-source and commercial Configuration Management Database (CMDB) tools.
                     </p>
                 </div>
-                
+
                 <Accordion type="multiple" defaultValue={['open-source', 'commercial']} className="space-y-4">
                     <AccordionItem value="open-source">
                         <AccordionTrigger className="text-xl font-semibold bg-muted p-4 rounded-md">Open Source Tools</AccordionTrigger>
@@ -89,11 +89,11 @@ export default function CMDBIntegrationPage() {
                             {openSourceTools.map(tool => <ToolCard key={tool.name} tool={tool} />)}
                         </AccordionContent>
                     </AccordionItem>
-                    
+
                     <AccordionItem value="commercial">
                         <AccordionTrigger className="text-xl font-semibold bg-muted p-4 rounded-md">Commercial Tools</AccordionTrigger>
                         <AccordionContent className="p-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                             {commercialTools.map(tool => <ToolCard key={tool.name} tool={tool} />)}
+                            {commercialTools.map(tool => <ToolCard key={tool.name} tool={tool} />)}
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>

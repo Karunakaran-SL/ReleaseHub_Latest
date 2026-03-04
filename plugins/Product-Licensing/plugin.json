@@ -1,0 +1,58 @@
+{
+    "id": "product-licensing",
+    "version": "1.0.0",
+    "name": "Product Licensing Manager",
+    "description": "Configure licensing models per product, such as online/offline models, entitlements, and validity periods.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Product Licensing Overview",
+            "icon": "BoxSelect",
+            "path": "/dashboard/plugins/product-licensing"
+        },
+        {
+            "type": "main-menu",
+            "label": "License",
+            "icon": "FileKey2",
+            "path": "/plugins",
+            "children": [
+                {
+                    "label": "Product Licensing",
+                    "icon": "BoxIcon",
+                    "path": "/plugins/product-licensing"
+                }
+            ]
+        },
+        {
+            "type": "help",
+            "label": "Product Licensing Help",
+            "icon": "HelpCircle",
+            "path": "/help/product-licensing"
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Product Licensing",
+            "icon": "BoxSelect",
+            "path": "/settings/product-licensing"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "product-licensing-summary",
+            "title": "Configured Products",
+            "description": "Total products with active licensing configurations.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "product_licensing_manage",
+            "label": "Product Licensing Management",
+            "description": "View and manage per-product licensing models."
+        }
+    ],
+    "roles": [],
+    "dependencies": []
+}

@@ -17,9 +17,12 @@ export async function getUser() {
   const decryptedSession = await decrypt(session);
   if (!decryptedSession) return null;
 
+  const rolesFromSession = decryptedSession.roles ||
+    (decryptedSession.role ? [decryptedSession.role] : ['viewer']);
+
   return {
     _id: decryptedSession.userId,
     username: decryptedSession.username,
-    role: (decryptedSession.role as any) || 'viewer'
+    roles: rolesFromSession as string[]
   };
 }
