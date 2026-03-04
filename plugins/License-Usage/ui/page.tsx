@@ -25,8 +25,8 @@ async function getLicenses() {
 
 export default async function LicenseUsagePluginPage() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user._id, username: user.username } : null;
-    const canManage = user ? hasPermission(user.role, 'license_usage_manage', 'edit') : false;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
+    const canManage = user ? hasPermission(user.roles || user.role, 'license_usage_manage', 'edit') : false;
 
     const licenses = await getLicenses();
 

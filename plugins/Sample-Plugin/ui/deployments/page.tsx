@@ -17,7 +17,7 @@ const statusColors: Record<string, string> = {
 
 export default async function PluginDeploymentsPage() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user.id, username: user.username } : null;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
 
     let deployments: any[] = [];
     try {

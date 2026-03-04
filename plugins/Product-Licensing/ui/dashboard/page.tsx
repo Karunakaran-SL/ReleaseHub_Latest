@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 export default async function ProductLicensingDashboardWidget() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user._id, username: user.username } : null;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
 
     let configCount = 0;
     try {

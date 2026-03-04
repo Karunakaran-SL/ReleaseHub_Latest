@@ -5,7 +5,7 @@ import { Info, ShieldAlert, Settings2 } from 'lucide-react';
 
 export default async function LMSIntegrationsHelpPage() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user._id, username: user.username } : null;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
 
     return (
         <DashboardLayout user={layoutUser}>

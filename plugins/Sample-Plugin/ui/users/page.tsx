@@ -33,7 +33,7 @@ const roleBadgeColors: Record<string, string> = {
 
 export default async function PluginUsersPage() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user.id, username: user.username } : null;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
 
     return (
         <DashboardLayout user={layoutUser}>
@@ -56,12 +56,12 @@ export default async function PluginUsersPage() {
                                 <p className="font-medium">{user?.username || 'Unknown'}</p>
                                 <p className="text-sm text-muted-foreground">Current user</p>
                             </div>
-                            <Badge className={`${roleBadgeColors[user?.role || 'viewer']} capitalize px-3 py-1`}>
-                                {user?.role || 'viewer'}
+                            <Badge className={`${roleBadgeColors[user?.roles?.[0] || 'viewer']} capitalize px-3 py-1`}>
+                                {user?.roles?.[0] || 'viewer'}
                             </Badge>
                         </div>
                         <div className="mt-4 flex flex-wrap gap-2">
-                            {permissions[user?.role || 'viewer']?.map(perm => (
+                            {permissions[user?.roles?.[0] as keyof typeof permissions || 'viewer']?.map(perm => (
                                 <Badge key={perm} variant="outline" className="gap-1.5 px-2.5 py-1">
                                     {permissionIcons[perm]} {perm}
                                 </Badge>

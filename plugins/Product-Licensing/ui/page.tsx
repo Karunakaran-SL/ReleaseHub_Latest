@@ -27,8 +27,8 @@ async function getProductsMap() {
 
 export default async function ProductLicensingPluginPage() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user._id, username: user.username } : null;
-    const canManage = user ? hasPermission(user.role, 'product_licensing_manage', 'edit') : false;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
+    const canManage = user ? hasPermission(user.roles || user.role, 'product_licensing_manage', 'edit') : false;
 
     const [licenses, productsMap] = await Promise.all([
         getProductLicenses(),

@@ -5,7 +5,7 @@ import { Info, ShieldAlert, BoxSelect } from 'lucide-react';
 
 export default async function ProductLicensingHelpPage() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user._id, username: user.username } : null;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
 
     return (
         <DashboardLayout user={layoutUser}>

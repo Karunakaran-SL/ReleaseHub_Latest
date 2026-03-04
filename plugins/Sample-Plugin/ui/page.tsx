@@ -58,7 +58,7 @@ const permissionIcons: Record<string, React.ReactNode> = {
 
 export default async function SamplePluginPage() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user.id, username: user.username } : null;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
 
     const [products, specifications, deployments] = await Promise.all([
         getProducts(),
@@ -269,7 +269,7 @@ export default async function SamplePluginPage() {
                                 <div className="mt-6 p-4 rounded-lg bg-muted/50 border">
                                     <p className="text-sm text-muted-foreground">
                                         <strong>Your current role:</strong>{' '}
-                                        <Badge className="ml-1 bg-indigo-200 text-indigo-800 capitalize">{user?.role || 'viewer'}</Badge>
+                                        <Badge className="ml-1 bg-indigo-200 text-indigo-800 capitalize">{user?.roles?.[0] || 'viewer'}</Badge>
                                     </p>
                                 </div>
                             </CardContent>

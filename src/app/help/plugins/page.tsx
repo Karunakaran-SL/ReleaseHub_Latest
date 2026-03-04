@@ -9,7 +9,7 @@ import { BookOpen, Code2 } from 'lucide-react';
 
 export default async function PluginHelpPage() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user.id, username: user.username } : null;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
 
     // Read the markdown file from the file system
     const filePath = path.join(process.cwd(), 'docs', 'plugin-development.md');

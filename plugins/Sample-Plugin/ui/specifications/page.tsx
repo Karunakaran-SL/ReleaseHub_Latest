@@ -8,7 +8,7 @@ import clientPromise from '@/lib/mongodb';
 
 export default async function PluginSpecificationsPage() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user.id, username: user.username } : null;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
 
     let specifications: any[] = [];
     try {

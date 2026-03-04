@@ -44,8 +44,8 @@ async function getConfiguredTools() {
 
 export default async function LMSIntegrationsPluginPage() {
     const user = await getUser();
-    const layoutUser = user ? { _id: user._id, username: user.username } : null;
-    const canManage = user ? hasPermission(user.role, 'lms_integration_manage', 'edit') : false;
+    const layoutUser = user ? { _id: user._id, username: user.username, roles: user.roles } : null;
+    const canManage = user ? hasPermission(user.roles || user.role, 'lms_integration_manage', 'edit') : false;
 
     const configuredTools = await getConfiguredTools();
 
@@ -61,50 +61,43 @@ export default async function LMSIntegrationsPluginPage() {
                                 <Settings2 className="h-5 w-5" />
                             </div>
                             <h2 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
-                                LMS Integrations
+                                LMS Integrations Overview
                             </h2>
                         </div>
                         <p className="text-muted-foreground mt-2 text-lg">
-                            Configure integration points with License Management System tools.
+                            Monitor and manage your License Management System tool integrations.
                         </p>
                     </div>
+                    {canManage && (
+                        <Button asChild>
+                            <Link href="/settings/lms-integrations">
+                                <Settings className="mr-2 h-4 w-4" /> Manage Connections
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
-                <Accordion type="single" collapsible defaultValue="item-1" className="mb-8 bg-card border rounded-lg px-4">
-                    <AccordionItem value="item-1" className="border-none">
-                        <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                            <div className="flex items-center gap-2">
-                                <Info className="h-5 w-5 text-teal-500" />
-                                Plugin Information
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground pb-4">
-                            This plugin provides a configuration interface for various external License Management Systems. Administrators can supply API keys, webhook URLs, and integration toggles to enable automated compliance scanning.
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <Card className="shadow-sm border-border/50">
                         <CardHeader className="pb-2">
-                            <CardDescription className="flex items-center gap-2">Configured Integrations</CardDescription>
-                            <CardTitle className="text-3xl font-bold">{configuredTools.length}</CardTitle>
+                            <CardDescription>Configured</CardDescription>
+                            <CardTitle className="text-3xl font-bold text-teal-600">{configuredTools.length}</CardTitle>
                         </CardHeader>
                     </Card>
                     <Card className="shadow-sm border-border/50">
                         <CardHeader className="pb-2">
-                            <CardDescription className="flex items-center gap-2">Available Integrations</CardDescription>
+                            <CardDescription>Available Tools</CardDescription>
                             <CardTitle className="text-3xl font-bold">{tools.length}</CardTitle>
                         </CardHeader>
                     </Card>
                     <Card className="shadow-sm border-border/50">
                         <CardHeader className="pb-2">
-                            <CardDescription className="flex items-center gap-2">Requirements</CardDescription>
+                            <CardDescription>Access Level</CardDescription>
                             <CardTitle className="text-lg flex items-center gap-2 mt-2">
                                 {canManage ? (
-                                    <Badge className="bg-teal-100 text-teal-800"><Shield className="w-3 h-3 mr-1" /> Manage Access</Badge>
+                                    <Badge className="bg-teal-100 text-teal-800 font-normal underline decoration-teal-500/30 decoration-2 underline-offset-4">Administrator</Badge>
                                 ) : (
-                                    <Badge variant="outline" className="text-muted-foreground"><Shield className="w-3 h-3 mr-1" /> Read Only Access</Badge>
+                                    <Badge variant="outline" className="text-muted-foreground font-normal">Viewer</Badge>
                                 )}
                             </CardTitle>
                         </CardHeader>
@@ -113,7 +106,7 @@ export default async function LMSIntegrationsPluginPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {tools.map(tool => (
-                        <Card key={tool.id} className="flex flex-col border-border/50 shadow-sm relative overflow-hidden">
+                        <Card key={tool.id} className="flex flex-col border-border/50 shadow-sm relative overflow-hidden group hover:border-teal-500/50 transition-colors">
                             {configuredTools.includes(tool.id) && (
                                 <div className="absolute top-0 right-0 w-16 h-16 pointer-events-none">
                                     <div className="absolute transform rotate-45 bg-teal-500 text-white text-[10px] font-bold py-1 right-[-35px] top-[12px] w-[120px] text-center shadow">
@@ -124,7 +117,7 @@ export default async function LMSIntegrationsPluginPage() {
                             <CardHeader>
                                 <div className="flex justify-between items-start">
                                     <CardTitle className="text-lg">{tool.name}</CardTitle>
-                                    <Badge className={`${tool.status.color} flex items-center gap-1`}>
+                                    <Badge className={`${tool.status.color} flex items-center gap-1 font-normal`}>
                                         {iconMap[tool.status.icon as keyof typeof iconMap]}
                                         <span className="hidden xl:inline">{tool.status.text}</span>
                                     </Badge>
@@ -133,19 +126,12 @@ export default async function LMSIntegrationsPluginPage() {
                             </CardHeader>
                             <div className="flex-grow"></div>
                             <CardFooter className="pt-4 border-t border-border/50 bg-muted/20">
-                                {canManage ? (
-                                    <Button variant={configuredTools.includes(tool.id) ? "secondary" : "default"} className="w-full" asChild>
-                                        <Link href={`/settings/lms-integrations`}>
-                                            <Settings className="mr-2 h-4 w-4" />
-                                            {configuredTools.includes(tool.id) ? 'Manage Settings' : 'Configure Integration'}
-                                        </Link>
-                                    </Button>
-                                ) : (
-                                    <Button variant="outline" className="w-full" disabled>
+                                <Button variant="ghost" className="w-full text-teal-600 hover:text-teal-700 hover:bg-teal-50 group-hover:bg-teal-100/50" asChild>
+                                    <Link href={`/settings/lms-integrations`}>
                                         <Settings className="mr-2 h-4 w-4" />
-                                        Read Only
-                                    </Button>
-                                )}
+                                        {configuredTools.includes(tool.id) ? 'View Configuration' : 'Setup Integration'}
+                                    </Link>
+                                </Button>
                             </CardFooter>
                         </Card>
                     ))}
