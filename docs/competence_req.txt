@@ -1,0 +1,1545 @@
+Full list of Plugins for Competence Management.
+# Competence Management Suite  
+## Modular Plugin Architecture (21 Independent Plugins)
+
+---
+
+# Overview
+
+This document defines a complete **Competence Management System** implemented as 21 independent but interoperable plugins.
+
+Each plugin includes:
+
+- Purpose
+- Dependencies
+- Menu Structure
+- Settings
+- Dashboard Requirements
+- Detailed Functional Requirements
+
+All plugins operate under the main navigation:
+
+Competence Management
+
+---
+
+# 1. Skill Taxonomy Plugin
+
+## Purpose
+Central master registry for all skills and competencies.
+
+## Dependencies
+None (Foundation Plugin)
+
+## Menu Structure
+Competence Management  
+└── Skill Taxonomy  
+    ├── Skill Library  
+    ├── Categories  
+    ├── Framework Mapping  
+    └── Import / Export  
+
+## Settings
+- Proficiency Scale Configuration (1–5, Custom)
+- Enable Skill Versioning (Boolean)
+- External Framework Mapping (SFIA, ESCO, O*NET)
+- Skill Approval Workflow (Optional)
+
+## Dashboard
+- Total Active Skills
+- Skills by Category
+- Recently Added Skills
+- Skill Usage Trend
+
+## Functional Requirements
+- Create / Edit / Archive skills
+- Define parent-child relationships
+- Assign metadata and tags
+- Maintain skill versions
+- Import/export skill library (CSV/JSON)
+- Prevent hard deletion (soft delete only)
+
+---
+
+# 2. Employee Skill Profile Plugin
+
+## Dependencies
+Requires: Skill Taxonomy
+
+## Menu
+Competence Management  
+└── Employee Profiles  
+    ├── My Skills  
+    ├── Team Skills  
+    ├── Skill Timeline  
+    └── Certifications  
+
+## Settings
+- Enable Self Assessment
+- Require Manager Validation
+- Enable Peer Endorsements
+- Skill Expiry Tracking
+
+## Dashboard
+- Skills Per Employee
+- Proficiency Distribution
+- Skill Growth Trends
+
+## Functional Requirements
+- Add skills to employee
+- Record proficiency level
+- Manager validation workflow
+- Skill endorsement
+- Maintain skill history log
+- Track skill expiration
+
+---
+
+# 3. Skills Assessment Plugin
+
+## Dependencies
+Requires: Skill Taxonomy  
+Optional: Employee Profile
+
+## Menu
+Competence Management  
+└── Assessments  
+    ├── Question Bank  
+    ├── Create Assessment  
+    ├── Assignments  
+    └── Results  
+
+## Settings
+- Assessment Types (MCQ, Practical, Scenario)
+- Passing Score Threshold
+- Retake Rules
+- Time Limits
+
+## Dashboard
+- Pass Rate by Skill
+- Average Score
+- Assessment Completion Rate
+
+## Functional Requirements
+- Build skill-based tests
+- Assign to employees
+- Auto-grading
+- Store attempt history
+- Normalize scoring
+
+---
+
+# 4. Skill Gap Analysis Plugin
+
+## Dependencies
+Requires:
+- Skill Taxonomy
+- Employee Profile
+- Role Framework
+
+## Menu
+Competence Management  
+└── Skill Gap Analysis  
+    ├── Individual Gap  
+    ├── Team Gap  
+    └── Organization Gap  
+
+## Dashboard
+- Top Skill Gaps
+- Heatmap Visualization
+- Critical Gap Alerts
+
+## Functional Requirements
+- Compare actual vs required skill levels
+- Compute gap severity score
+- Rank gaps by priority
+- Export gap report
+
+---
+
+# 5. Role & Job Framework Plugin
+
+## Dependencies
+Requires: Skill Taxonomy
+
+## Menu
+Competence Management  
+└── Roles & Jobs  
+    ├── Role Library  
+    ├── Role Skill Mapping  
+    ├── Role Versions  
+    └── Role Clusters  
+
+## Functional Requirements
+- Define required skills per role
+- Assign skill weight
+- Maintain role versions
+- Archive deprecated roles
+
+---
+
+# 6. Talent Matching Plugin
+
+## Dependencies
+Requires:
+- Employee Profile
+- Role Framework
+
+## Menu
+Competence Management  
+└── Talent Matching  
+    ├── Match by Role  
+    ├── Match by Project  
+    └── Readiness Score  
+
+## Dashboard
+- Top Matched Employees
+- Match Score Breakdown
+
+## Functional Requirements
+- Weighted scoring engine
+- Readiness percentage calculation
+- Matching explanation output
+- Ranking algorithm
+
+---
+
+# 7. Learning Integration Plugin
+
+## Dependencies
+Requires: Skill Gap Analysis
+
+## Menu
+Competence Management  
+└── Learning & Development  
+    ├── Learning Paths  
+    ├── Course Mapping  
+    └── Development Plans  
+
+## Functional Requirements
+- Map course to skill
+- Auto-recommend learning for gaps
+- Track course completion
+- Update skill after completion
+
+---
+
+# 8. Workforce Analytics Plugin
+
+## Dependencies
+Requires: Core Plugins
+
+## Menu
+Competence Management  
+└── Analytics  
+    ├── Organization Dashboard  
+    ├── Trends  
+    ├── Forecast  
+    └── Department View  
+
+## Dashboard
+- Skill Distribution
+- Skill Deficit Trend
+- Department Comparison
+
+## Functional Requirements
+- Aggregate skill data
+- Time-series analysis
+- Predictive skill demand
+
+---
+
+# 9. Strategic Skill Planning Plugin
+
+## Dependencies
+Requires: Workforce Analytics
+
+## Menu
+Competence Management  
+└── Strategic Planning  
+    ├── Future Skills  
+    ├── Scenario Modeling  
+    └── Investment Planning  
+
+## Functional Requirements
+- Define future skill needs
+- Model supply vs demand
+- Forecast skill shortages
+- Budget planning for upskilling
+
+---
+
+# 10. Team Competency Matrix Plugin
+
+## Dependencies
+Requires: Employee Profile
+
+## Menu
+Competence Management  
+└── Team Matrix  
+    ├── Matrix View  
+    ├── Comparison  
+    └── Export  
+
+## Functional Requirements
+- Display team skill matrix grid
+- Calculate team readiness score
+- Export matrix
+
+---
+
+# 11. Internal Talent Marketplace Plugin
+
+## Dependencies
+Requires: Talent Matching
+
+## Menu
+Competence Management  
+└── Talent Marketplace  
+    ├── Opportunities  
+    ├── Recommendations  
+    └── Applications  
+
+## Functional Requirements
+- Create internal gig postings
+- Recommend employees
+- Show skill match %
+- Track applications
+
+---
+
+# 12. Career Development Plugin
+
+## Dependencies
+Requires: Role Framework
+
+## Menu
+Competence Management  
+└── Career Pathing  
+    ├── Career Maps  
+    ├── Milestones  
+    └── Progress  
+
+## Functional Requirements
+- Define career ladders
+- Map skill milestones
+- Track career readiness
+
+---
+
+# 13. Certification & Compliance Plugin
+
+## Dependencies
+Requires: Employee Profile
+
+## Menu
+Competence Management  
+└── Certifications  
+    ├── Certificate Library  
+    ├── Expiry Tracker  
+    └── Compliance Report  
+
+## Functional Requirements
+- Upload certificates
+- Expiry alerts
+- Compliance status report
+
+---
+
+# 14. Performance Integration Plugin
+
+## Dependencies
+Requires: Employee Profile
+
+## Menu
+Competence Management  
+└── Performance  
+    ├── Reviews  
+    ├── Feedback  
+    └── Skill Correlation  
+
+## Functional Requirements
+- Link skill to performance rating
+- 360° feedback support
+- Skill-performance analytics
+
+---
+
+# 15. Competency Risk Plugin
+
+## Dependencies
+Requires: Skill Gap Analysis
+
+## Menu
+Competence Management  
+└── Competency Risk  
+    ├── Risk Heatmap  
+    ├── Critical Skills  
+    └── Mitigation Plans  
+
+## Functional Requirements
+- Calculate skill risk score
+- Detect critical skill shortages
+- Trigger alerts
+- Mitigation workflow
+
+---
+
+# 16. Visualization & Reporting Plugin
+
+## Dependencies
+Requires: Workforce Analytics
+
+## Menu
+Competence Management  
+└── Reports  
+    ├── Custom Reports  
+    ├── Scheduled Reports  
+    └── Export Center  
+
+## Functional Requirements
+- Radar charts
+- Heatmaps
+- Scheduled reporting
+- PDF/CSV export
+
+---
+
+# 17. Mobile Experience Plugin
+
+## Dependencies
+Requires: Employee Profile
+
+## Functional Requirements
+- Responsive UI
+- Push notifications
+- Mobile skill updates
+- Offline support
+
+---
+
+# 18. Security & Governance Plugin
+
+## Dependencies
+Core System
+
+## Menu
+Competence Management  
+└── Governance  
+    ├── Roles & Permissions  
+    ├── Audit Logs  
+    └── Data Retention  
+
+## Functional Requirements
+- Role-based access control
+- Field-level permissions
+- Immutable audit trail
+- Data retention policy
+
+---
+
+# 19. Collaboration & Community Plugin
+
+## Dependencies
+Requires: Skill Taxonomy
+
+## Menu
+Competence Management  
+└── Communities  
+    ├── Forums  
+    ├── Knowledge Base  
+    └── Mentorship  
+
+## Functional Requirements
+- Skill discussion boards
+- Peer collaboration
+- Mentor matching
+
+---
+
+# 20. Integration & API Plugin
+
+## Dependencies
+All Plugins
+
+## Menu
+Competence Management  
+└── Integrations  
+    ├── HRIS  
+    ├── LMS  
+    ├── Dev Tools  
+    └── API Keys  
+
+## Functional Requirements
+- REST API
+- GraphQL API
+- Webhooks
+- OAuth2 authentication
+- External sync scheduler
+
+---
+
+# 21. AI Intelligence Plugin
+
+## Dependencies
+All Data Plugins
+
+## Menu
+Competence Management  
+└── AI Intelligence  
+    ├── Skill Prediction  
+    ├── AI Matching  
+    ├── Trend Forecast  
+    └── Smart Recommendations  
+
+## Functional Requirements
+- Resume skill extraction
+- Predict future skill demand
+- Predict skill decay
+- Smart development recommendations
+- AI-powered gap prioritization
+
+---
+
+# End of Document
+
+
+Mongo DB Schema
+# 🧠 Competence Management – Complete 21 Plugin Architecture
+**Architecture:** Modular Plug-in Based  
+**Database:** MongoDB  
+**Design Principle:** Independent but Interconnected Plugins  
+
+---
+
+# 1️⃣ Competency Framework Plugin
+
+## Purpose
+Central library to define competencies, categories, and proficiency levels.
+
+## Dependencies
+None (Foundation Plugin)
+
+## Menu Structure
+Competence Management  
+└── Framework  
+  ├── Competency Library  
+  ├── Categories  
+  ├── Proficiency Levels  
+  ├── Version History  
+  └── Import / Export  
+
+## Dashboard
+- Total Competencies
+- Competencies by Category
+- Version Timeline
+- Active vs Archived
+
+## Settings
+- Proficiency Scale (1–5 or Custom)
+- Versioning Enabled
+- Archive Policy
+
+## MongoDB Schema
+
+### Collection: competencies
+```json
+{
+  "_id": "ObjectId",
+  "code": "COMP-001",
+  "name": "System Architecture",
+  "description": "Design scalable systems",
+  "categoryId": "ObjectId",
+  "levels": [
+    { "level": 1, "label": "Beginner" },
+    { "level": 2, "label": "Intermediate" },
+    { "level": 3, "label": "Advanced" },
+    { "level": 4, "label": "Expert" }
+  ],
+  "version": 1,
+  "status": "active",
+  "createdAt": "ISODate",
+  "updatedAt": "ISODate"
+}
+```
+
+---
+
+# 2️⃣ Role & Job Profile Plugin
+
+## Purpose
+Define roles and map required competencies.
+
+## Dependencies
+- Competency Framework Plugin
+
+## Menu
+Competence Management  
+└── Roles  
+  ├── Job Profiles  
+  ├── Role Mapping  
+  └── Compare Roles  
+
+## Dashboard
+- Role Coverage %
+- Missing Skills per Role
+- Department Distribution
+
+## MongoDB Schema
+
+### Collection: roles
+```json
+{
+  "_id": "ObjectId",
+  "name": "Senior Backend Engineer",
+  "department": "Engineering",
+  "competencies": [
+    {
+      "competencyId": "ObjectId",
+      "requiredLevel": 3,
+      "mandatory": true
+    }
+  ],
+  "createdAt": "ISODate"
+}
+```
+
+---
+
+# 3️⃣ Employee Skill Profile Plugin
+
+## Purpose
+Maintain individual competency records.
+
+## Dependencies
+- Competency Framework
+- Role Plugin
+
+## Menu
+Competence Management  
+└── Employees  
+  ├── Skill Profiles  
+  ├── Certifications  
+  └── Experience  
+
+## Dashboard
+- Skill Matrix
+- Top Experts
+- Skill Coverage %
+
+## MongoDB Schema
+
+### Collection: employeeSkills
+```json
+{
+  "_id": "ObjectId",
+  "employeeId": "EMP001",
+  "competencyId": "ObjectId",
+  "currentLevel": 2,
+  "validated": true,
+  "validatedBy": "Manager01",
+  "lastReviewed": "ISODate"
+}
+```
+
+---
+
+# 4️⃣ Skill Assessment Plugin
+
+## Purpose
+Conduct evaluations (Self, Manager, Peer).
+
+## Dependencies
+- Employee Profile
+- Competency Framework
+
+## Menu
+Competence Management  
+└── Assessments  
+  ├── New Assessment  
+  ├── Self Assessment  
+  ├── Manager Review  
+  └── History  
+
+## Dashboard
+- Completion %
+- Skill Trend
+- Pending Reviews
+
+## MongoDB Schema
+
+### Collection: assessments
+```json
+{
+  "_id": "ObjectId",
+  "employeeId": "EMP001",
+  "assessorId": "Manager01",
+  "competencyId": "ObjectId",
+  "assessedLevel": 3,
+  "type": "manager",
+  "comments": "Improved performance",
+  "date": "ISODate"
+}
+```
+
+---
+
+# 5️⃣ Skill Gap Analysis Plugin
+
+## Purpose
+Compare employee skills against role requirements.
+
+## Dependencies
+- Role Plugin
+- Employee Skill Plugin
+
+## Menu
+Competence Management  
+└── Gap Analysis  
+  ├── Individual Gap  
+  ├── Team Gap  
+  └── Organization Gap  
+
+## MongoDB Schema
+
+### Collection: skillGaps
+```json
+{
+  "_id": "ObjectId",
+  "employeeId": "EMP001",
+  "roleId": "ObjectId",
+  "gaps": [
+    {
+      "competencyId": "ObjectId",
+      "requiredLevel": 3,
+      "currentLevel": 1,
+      "gap": 2
+    }
+  ],
+  "calculatedAt": "ISODate"
+}
+```
+
+---
+
+# 6️⃣ Learning & Development Plugin
+
+## Purpose
+Link training programs to competency improvement.
+
+## Dependencies
+- Competency Framework
+- Employee Skills
+
+## Menu
+Competence Management  
+└── Learning  
+  ├── Courses  
+  ├── Certifications  
+  ├── Development Plans  
+  └── Assign Training  
+
+## MongoDB Schema
+
+### Collection: courses
+```json
+{
+  "_id": "ObjectId",
+  "title": "Advanced Microservices",
+  "linkedCompetencies": ["ObjectId"],
+  "provider": "Udemy",
+  "durationHours": 12,
+  "active": true
+}
+```
+
+---
+
+# 7️⃣ Certification Management Plugin
+
+## Purpose
+Track employee certifications.
+
+## Dependencies
+- Employee Plugin
+
+## MongoDB Schema
+
+### Collection: certifications
+```json
+{
+  "_id": "ObjectId",
+  "employeeId": "EMP001",
+  "name": "AWS Architect",
+  "issuedBy": "Amazon",
+  "validUntil": "ISODate",
+  "status": "valid"
+}
+```
+
+---
+
+# 8️⃣ Career Path Planning Plugin
+
+## Purpose
+Define career progression paths.
+
+## Dependencies
+- Role Plugin
+- Competency Framework
+
+## MongoDB Schema
+
+### Collection: careerPaths
+```json
+{
+  "_id": "ObjectId",
+  "fromRole": "Junior Engineer",
+  "toRole": "Senior Engineer",
+  "requiredCompetencies": ["ObjectId"]
+}
+```
+
+---
+
+# 9️⃣ Succession Planning Plugin
+
+## Purpose
+Identify future leaders and backups.
+
+## MongoDB Schema
+
+### Collection: successionPlans
+```json
+{
+  "_id": "ObjectId",
+  "criticalRoleId": "ObjectId",
+  "candidates": [
+    {
+      "employeeId": "EMP001",
+      "readinessLevel": "1 year"
+    }
+  ]
+}
+```
+
+---
+
+# 🔟 Workforce Planning Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "department": "Engineering",
+  "requiredSkills": ["ObjectId"],
+  "forecastYear": 2026
+}
+```
+
+---
+
+# 11️⃣ Performance Integration Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "employeeId": "EMP001",
+  "performanceScore": 4.5,
+  "linkedCompetencies": ["ObjectId"],
+  "year": 2026
+}
+```
+
+---
+
+# 12️⃣ 360 Feedback Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "employeeId": "EMP001",
+  "feedbackFrom": "Peer01",
+  "competencyId": "ObjectId",
+  "rating": 4,
+  "comment": "Strong collaboration"
+}
+```
+
+---
+
+# 13️⃣ Talent Marketplace Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "projectId": "PROJ001",
+  "requiredCompetencies": ["ObjectId"],
+  "assignedEmployees": ["EMP001"]
+}
+```
+
+---
+
+# 14️⃣ Skill Analytics & Reporting Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "reportType": "Skill Gap Summary",
+  "generatedBy": "Admin01",
+  "generatedAt": "ISODate"
+}
+```
+
+---
+
+# 15️⃣ Compliance & Audit Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "entity": "employeeSkills",
+  "entityId": "ObjectId",
+  "action": "update",
+  "performedBy": "Admin01",
+  "timestamp": "ISODate"
+}
+```
+
+---
+
+# 16️⃣ Skill Matrix Visualization Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "teamId": "Team01",
+  "matrixData": [
+    {
+      "employeeId": "EMP001",
+      "competencyId": "ObjectId",
+      "level": 3
+    }
+  ]
+}
+```
+
+---
+
+# 17️⃣ Benchmarking Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "industry": "FinTech",
+  "competencyId": "ObjectId",
+  "averageLevel": 3
+}
+```
+
+---
+
+# 18️⃣ Knowledge Repository Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "title": "Microservices Guide",
+  "linkedCompetencies": ["ObjectId"],
+  "fileUrl": "/docs/microservices.pdf"
+}
+```
+
+---
+
+# 19️⃣ AI Skill Recommendation Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "employeeId": "EMP001",
+  "recommendedCompetencies": ["ObjectId"],
+  "generatedAt": "ISODate"
+}
+```
+
+---
+
+# 20️⃣ Goal & OKR Integration Plugin
+
+## MongoDB Schema
+```json
+{
+  "_id": "ObjectId",
+  "employeeId": "EMP001",
+  "goal": "Improve Cloud Architecture",
+  "linkedCompetencyId": "ObjectId",
+  "targetLevel": 4
+}
+```
+
+---
+
+# 21️⃣ Settings & Administration Plugin
+
+## Purpose
+Global configuration for Competence Management.
+
+## MongoDB Schema
+
+### Collection: competenceSettings
+```json
+{
+  "_id": "ObjectId",
+  "defaultReviewCycleMonths": 6,
+  "enableAIRecommendations": true,
+  "enable360Feedback": true,
+  "createdAt": "ISODate"
+}
+```
+
+---
+
+# ✅ End of Complete Competence Management Architecture
+
+
+
+details as below for each plugin. 
+
+1️⃣ Skill Taxonomy Plugin
+
+Purpose
+
+Central master registry of all skills and competencies.
+
+Dependencies
+
+None (Foundation Plugin)
+
+Menu Structure
+
+Competence Management
+└── Skill Taxonomy
+  ├── Skill Library
+  ├── Categories
+  ├── Framework Mapping
+  └── Import/Export
+
+Settings
+	•	Proficiency Scale (1–5, Beginner–Expert, Custom)
+	•	Enable Versioning (Y/N)
+	•	External Framework Mapping (SFIA, ESCO, O*NET)
+
+Dashboard
+	•	Total Skills
+	•	Skill Growth Trend
+	•	Most Used Skills
+
+Requirements
+	•	Create/Edit/Delete skills
+	•	Skill versioning
+	•	Skill tags and metadata
+	•	Parent-child skill relationships
+	•	Skill archival (soft delete only)
+
+⸻
+
+2️⃣ Employee Skill Profile Plugin
+
+Dependencies
+
+Requires: Skill Taxonomy
+Optional: Assessment Plugin
+
+Menu
+
+Competence Management
+└── Employee Profiles
+  ├── My Skills
+  ├── Team Skills
+  └── Skill History
+
+Settings
+	•	Allow self-assessment (Y/N)
+	•	Require manager validation (Y/N)
+	•	Skill endorsement limit
+
+Dashboard
+	•	Skills per employee
+	•	Proficiency distribution
+	•	Skill growth per quarter
+
+Requirements
+	•	Add skill to employee
+	•	Track proficiency
+	•	Skill endorsements
+	•	Skill history timeline
+	•	Skill expiry tracking
+
+⸻
+
+3️⃣ Skills Assessment Plugin
+
+Dependencies
+
+Requires: Skill Taxonomy
+Optional: Employee Profile
+
+Menu
+
+Competence Management
+└── Assessments
+  ├── Create Test
+  ├── Question Bank
+  ├── Results
+  └── Analytics
+
+Settings
+	•	Assessment types enabled
+	•	Passing threshold
+	•	Retake rules
+
+Dashboard
+	•	Pass rate
+	•	Skill-level assessment scores
+	•	Benchmark comparison
+
+Requirements
+	•	Create MCQ/Scenario/Practical tests
+	•	Assign assessments
+	•	Auto grading
+	•	Store attempt history
+	•	Score normalization
+
+⸻
+
+4️⃣ Skill Gap Analysis Plugin
+
+Dependencies
+
+Requires: Skill Taxonomy, Employee Profile, Role Framework
+
+Menu
+
+Competence Management
+└── Skill Gap
+  ├── Individual Gap
+  ├── Team Gap
+  └── Organizational Gap
+
+Dashboard
+	•	Top skill gaps
+	•	Heatmap view
+	•	Risk-level indicators
+
+Requirements
+	•	Compare actual vs required
+	•	Gap severity score
+	•	Auto-prioritize gaps
+	•	Export reports
+
+⸻
+
+5️⃣ Role & Job Framework Plugin
+
+Dependencies
+
+Requires: Skill Taxonomy
+
+Menu
+
+Competence Management
+└── Roles & Jobs
+  ├── Role Library
+  ├── Role Skill Mapping
+  └── Role Versions
+
+Requirements
+	•	Define role skill requirements
+	•	Weight skill importance
+	•	Version role definitions
+	•	Archive obsolete roles
+
+⸻
+
+6️⃣ Talent Matching Plugin
+
+Dependencies
+
+Requires: Employee Profile, Role Framework
+
+Menu
+
+Competence Management
+└── Talent Matching
+  ├── Match by Role
+  ├── Match by Project
+  └── Readiness Score
+
+Dashboard
+	•	Best match candidates
+	•	Match score ranking
+
+Requirements
+	•	Weighted scoring algorithm
+	•	Match explanation
+	•	Readiness %
+
+⸻
+
+7️⃣ Learning Integration Plugin
+
+Dependencies
+
+Requires: Skill Gap Plugin
+
+Menu
+
+Competence Management
+└── Learning & Development
+  ├── Learning Paths
+  ├── Course Mapping
+  └── Skill Development Plan
+
+Requirements
+	•	Map course to skill
+	•	Auto-suggest learning for gap
+	•	Completion tracking
+
+⸻
+
+8️⃣ Workforce Analytics Plugin
+
+Dependencies
+
+Requires: All core plugins
+
+Menu
+
+Competence Management
+└── Analytics
+  ├── Org Dashboard
+  ├── Trend Analysis
+  └── Forecasting
+
+Dashboard
+	•	Skill distribution
+	•	Skill deficit trend
+	•	Department comparison
+
+Requirements
+	•	Aggregated skill metrics
+	•	Predictive analytics
+	•	Downloadable reports
+
+⸻
+
+9️⃣ Strategic Skill Planning Plugin
+
+Dependencies
+
+Requires: Workforce Analytics
+
+Menu
+
+Competence Management
+└── Strategic Planning
+  ├── Future Skills
+  ├── Scenario Modeling
+  └── Investment Planning
+
+Requirements
+	•	Define future skills
+	•	Skill supply-demand modeling
+	•	Strategic gap forecast
+
+⸻
+
+🔟 Team Competency Matrix Plugin
+
+Dependencies
+
+Requires: Employee Profile
+
+Menu
+
+Competence Management
+└── Team Matrix
+  ├── Team View
+  ├── Comparison
+  └── Export
+
+Requirements
+	•	Matrix grid view
+	•	Filter by team
+	•	Skill density scoring
+
+⸻
+
+11️⃣ Internal Talent Marketplace Plugin
+
+Dependencies
+
+Requires: Talent Matching
+
+Menu
+
+Competence Management
+└── Talent Marketplace
+  ├── Opportunities
+  ├── Apply
+  └── Recommendations
+
+Requirements
+	•	Internal gig postings
+	•	AI role suggestions
+	•	Skill match visibility
+
+⸻
+
+12️⃣ Career Development Plugin
+
+Dependencies
+
+Requires: Role Framework
+
+Menu
+
+Competence Management
+└── Career Pathing
+  ├── Career Maps
+  ├── Milestones
+  └── Progress Tracker
+
+Requirements
+	•	Multi-level career ladders
+	•	Skill milestone tracking
+	•	Goal linking
+
+⸻
+
+13️⃣ Certification & Compliance Plugin
+
+Dependencies
+
+Requires: Employee Profile
+
+Menu
+
+Competence Management
+└── Certifications
+  ├── Certificates
+  ├── Expiry Tracker
+  └── Audit Logs
+
+Requirements
+	•	Upload certification
+	•	Expiry alerts
+	•	Compliance reporting
+
+⸻
+
+14️⃣ Performance Integration Plugin
+
+Dependencies
+
+Requires: Employee Profile
+
+Menu
+
+Competence Management
+└── Performance & Skills
+  ├── 360 Feedback
+  ├── Review Linking
+  └── Skill Correlation
+
+Requirements
+	•	Link skill to performance rating
+	•	Feedback tagging
+	•	Skill-performance correlation chart
+
+⸻
+
+15️⃣ Competency Risk Plugin
+
+Dependencies
+
+Requires: Skill Gap Plugin
+
+Menu
+
+Competence Management
+└── Competency Risk
+  ├── Risk Heatmap
+  ├── Critical Skill Alert
+  └── Mitigation Actions
+
+Requirements
+	•	Skill criticality score
+	•	Risk threshold
+	•	Alert engine
+
+⸻
+
+16️⃣ Visualization & Reporting Plugin
+
+Dependencies
+
+Requires: Analytics
+
+Menu
+
+Competence Management
+└── Reports
+  ├── Custom Reports
+  ├── Scheduled Reports
+  └── Export Center
+
+Requirements
+	•	Radar charts
+	•	Heatmaps
+	•	CSV/PDF export
+
+⸻
+
+17️⃣ Mobile Experience Plugin
+
+Dependencies
+
+Requires: Employee Profile
+
+Requirements
+	•	Responsive UI
+	•	Skill update via mobile
+	•	Push notifications
+
+(No dashboard – UI extension plugin)
+
+⸻
+
+18️⃣ Security & Governance Plugin
+
+Dependencies
+
+Core system
+
+Menu
+
+Competence Management
+└── Governance
+  ├── Roles & Permissions
+  ├── Audit Logs
+  └── Data Retention
+
+Requirements
+	•	RBAC
+	•	Field-level control
+	•	Immutable audit trail
+
+⸻
+
+19️⃣ Collaboration & Community Plugin
+
+Dependencies
+
+Requires: Skill Taxonomy
+
+Menu
+
+Competence Management
+└── Communities
+  ├── Skill Forums
+  ├── Knowledge Sharing
+  └── Mentorship
+
+Requirements
+	•	Discussion threads
+	•	Skill-based community
+	•	Mentor pairing
+
+⸻
+
+20️⃣ Integration & API Plugin
+
+Dependencies
+
+All plugins
+
+Menu
+
+Competence Management
+└── Integrations
+  ├── HRIS
+  ├── LMS
+  ├── Dev Tools
+  └── API Keys
+
+Requirements
+	•	REST APIs
+	•	Webhooks
+	•	OAuth2 authentication
+	•	External sync scheduler
+
+⸻
+
+21️⃣ AI Intelligence Plugin
+
+Dependencies
+
+Requires: All data plugins
+
+Menu
+
+Competence Management
+└── AI Intelligence
+  ├── Skill Prediction
+  ├── AI Matching
+  ├── Trend Forecast
+  └── Smart Recommendations
+
+Requirements
+	•	Auto skill extraction
+	•	Skill demand forecasting
+	•	Predictive gap alerts
+	•	Recommendation engine
+
+⸻
+
+🔗 DEPENDENCY HIERARCHY SUMMARY
+
+Foundation Layer:
+	1.	Skill Taxonomy
+	2.	Employee Profile
+	3.	Role Framework
+
+Core Logic:
+4. Gap Analysis
+6. Talent Matching
+10. Team Matrix
+
+Intelligence Layer:
+8. Analytics
+15. Risk
+9. Strategic Planning
+21. AI
+
+Experience Layer:
+11. Marketplace
+12. Career
+19. Collaboration
+
+Governance Layer:
+13. Certification
+14. Performance
+18. Security
+20. Integration
