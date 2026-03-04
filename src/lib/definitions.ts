@@ -10,7 +10,20 @@ export type User = {
   _id: string;
   username: string;
   password?: string;
-  role?: 'admin' | 'editor' | 'viewer';
+  role?: string;
+  email?: string;
+  createdAt?: string;
+  createdBy?: string;
+};
+
+export type RoleRecord = {
+  _id?: string;
+  name: string;
+  label: string;
+  description: string;
+  permissions: Record<string, string[]>; // feature -> Action[]
+  isDefault?: boolean;
+  updatedAt?: string;
 };
 
 export type SessionPayload = {
@@ -18,6 +31,10 @@ export type SessionPayload = {
   username: string;
   role: string;
   expiresAt: Date;
+};
+
+export type SystemInitStatus = {
+  initialized: boolean;
 };
 
 export type Product = {

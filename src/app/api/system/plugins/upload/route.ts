@@ -3,6 +3,7 @@ import AdmZip from 'adm-zip';
 import fs from 'fs';
 import path from 'path';
 import { getUser } from '@/lib/auth';
+import clientPromise from '@/lib/mongodb';
 
 // Determine install directories based on navigation config
 function getInstallDirs(pluginId: string, navigation: any): { uiDirs: { type: string; dir: string }[]; apiDir: string } {
@@ -155,20 +156,40 @@ export async function POST(request: Request) {
             }
         }
 
-        if (extractedFiles === 0) {
-            // Revert all directories if no files were extracted
-            for (const { dir } of uiDirs) {
-                fs.rmSync(dir, { recursive: true, force: true });
+        // 5. Register plugin roles and features in DB (if declared in plugin.json)
+        const client = await clientPromise;
+        const db = client.db();
+        const now = new Date().toISOString();
+
+        if (Array.isArray(pluginConfig.features) && pluginConfig.features.length > 0) {
+            for (const feature of pluginConfig.features) {
+                if (!feature.key || !feature.label) continue;
+                await db.collection('features').updateOne(
+                    { key: feature.key },
+                    { $set: { key: feature.key, label: feature.label, description: feature.description ?? '', isSystem: false, pluginId, createdAt: now } },
+                    { upsert: true }
+                );
             }
-            fs.rmSync(apiDir, { recursive: true, force: true });
-            return NextResponse.json({ error: 'Invalid Plugin: Archive must contain recognizable UI or API files.' }, { status: 400 });
+        }
+
+        if (Array.isArray(pluginConfig.roles) && pluginConfig.roles.length > 0) {
+            for (const role of pluginConfig.roles) {
+                if (!role.name || !role.label) continue;
+                await db.collection('roles').updateOne(
+                    { name: role.name },
+                    { $set: { name: role.name, label: role.label, description: role.description ?? '', permissions: role.permissions ?? {}, isDefault: false, pluginId, createdAt: now, updatedAt: now } },
+                    { upsert: true }
+                );
+            }
         }
 
         return NextResponse.json({
             success: true,
             message: `Plugin ${pluginConfig.name} installed successfully!`,
             pluginId: pluginId,
-            installedDirs: uiDirs.map(d => d.type)
+            installedDirs: uiDirs.map(d => d.type),
+            registeredFeatures: (pluginConfig.features ?? []).length,
+            registeredRoles: (pluginConfig.roles ?? []).length,
         });
 
     } catch (error: any) {

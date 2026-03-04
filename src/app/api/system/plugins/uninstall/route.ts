@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { getUser } from '@/lib/auth';
+import clientPromise from '@/lib/mongodb';
 
 // All directories where plugin files can be installed
 const PLUGIN_DIRS = [
@@ -35,9 +36,15 @@ export async function DELETE(request: Request) {
             }
         }
 
+        // Remove plugin roles and features from DB
+        const client = await clientPromise;
+        const db = client.db();
+        const deletedRoles = await db.collection('roles').deleteMany({ pluginId });
+        const deletedFeatures = await db.collection('features').deleteMany({ pluginId });
+
         return NextResponse.json({
             success: true,
-            message: `Plugin ${pluginId} uninstalled successfully. Cleaned ${deletedDirs} directories.`
+            message: `Plugin ${pluginId} uninstalled successfully. Cleaned ${deletedDirs} directories, removed ${deletedRoles.deletedCount} roles, ${deletedFeatures.deletedCount} features.`
         });
     } catch (error: any) {
         console.error('Uninstall Error:', error);

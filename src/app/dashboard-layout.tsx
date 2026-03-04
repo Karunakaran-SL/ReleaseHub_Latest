@@ -139,8 +139,8 @@ function Header({ user }: { user: User | null }) {
                   </Avatar>
                   <div className="hidden text-left md:block">
                     <div className="font-medium">{user?.username}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Release Engineer
+                    <div className="text-xs text-muted-foreground capitalize">
+                      {user?.role ?? 'viewer'}
                     </div>
                   </div>
                   <ChevronDown className="hidden h-4 w-4 text-muted-foreground md:block" />
@@ -827,6 +827,11 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton href="/settings/plugins" isActive={pathname.startsWith('/settings/plugins')}>
                             <Plug className="mr-2" /> Plugins
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton href="/settings/user-management" isActive={pathname.startsWith('/settings/user-management')}>
+                            <ShieldCheck className="mr-2" /> User Management
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                         {settingsPlugins.map((nav: any) => (

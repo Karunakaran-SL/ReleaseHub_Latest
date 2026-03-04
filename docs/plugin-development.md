@@ -106,14 +106,23 @@ Plugins must adhere to the application's security model.
     // Proceed with secure action using user.id
   }
   ```
-* **Authorization (RBAC)**: The system supports three roles: `admin`, `editor`, `viewer`. The `getUser()` function returns the user's `role` field. Check role-based permissions before executing sensitive operations:
+* **Authorization (RBAC)**: The system supports five default roles: `admin`, `release_engineer`, `platform_engineer`, `auditor`, `viewer`. Use the `hasPermission()` utility:
   ```typescript
-  const user = await getUser();
-  if (user?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  import { getUser } from '@/lib/auth';
+  import { hasPermission } from '@/lib/rbac';
+  import { isAdminRole } from '@/lib/role-utils';
+  import { NextResponse } from 'next/server';
+
+  export async function POST(request: Request) {
+    const user = await getUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!hasPermission(user.role, 'my_plugin_feature', 'create')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    // proceed...
   }
   ```
-* **Plugin Permissions**: Plugins define their own RBAC matrix in `plugin.json` under the `permissions` field. This allows each plugin to specify which roles can perform which operations.
+* **Plugin Permissions**: Plugins declare their roles and features in `plugin.json` under `roles[]` and `features[]`. These are automatically registered in the DB on install and removed on uninstall.
 
 ## 6. Plugin Metadata and Dependencies
 
@@ -167,11 +176,24 @@ Plugins should define their structure, menu integration, and dependencies using 
       "size": "small"
     }
   ],
-  "permissions": {
-    "admin": ["read", "write", "delete", "manage-users"],
-    "editor": ["read", "write"],
-    "viewer": ["read"]
-  },
+  "features": [
+    {
+      "key": "my_plugin_incidents",
+      "label": "My Plugin Incidents",
+      "description": "Incident tracking provided by My Custom Plugin."
+    }
+  ],
+  "roles": [
+    {
+      "name": "my_plugin_operator",
+      "label": "My Plugin Operator",
+      "description": "Can view and manage My Plugin incidents.",
+      "permissions": {
+        "my_plugin_incidents": ["view", "create", "edit"],
+        "dashboard": ["view"]
+      }
+    }
+  ],
   "dependencies": [
     {
       "pluginId": "sample-plugin-1",
@@ -202,12 +224,41 @@ The `widgets` array defines dashboard widgets that will be rendered on the main 
 - Renders within the existing Widget component wrapper
 - Supports sizes: `small`, `medium`, `large`
 
-### Permissions (RBAC)
+### Features (RBAC)
 
-The `permissions` object maps roles to allowed operations. The application uses three roles:
-- **admin**: Full access including user management
-- **editor**: Read and write access
-- **viewer**: Read-only access
+The `features[]` array defines **new feature scopes** your plugin introduces. Each entry is registered in the `features` DB collection and appears in the User Management → Features tab and all role permission matrices.
+
+```json
+"features": [
+  {
+    "key": "my_plugin_incidents",
+    "label": "My Plugin Incidents",
+    "description": "Incident management provided by this plugin."
+  }
+]
+```
+
+On **install**, these features are upserted into MongoDB. On **uninstall**, they are removed.
+
+### Roles (RBAC)
+
+The `roles[]` array defines **new roles** your plugin introduces. Each role is stored in the `roles` DB collection and appears in User Management → Roles.
+
+```json
+"roles": [
+  {
+    "name": "my_plugin_operator",
+    "label": "My Plugin Operator",
+    "description": "Can manage My Plugin incidents.",
+    "permissions": {
+      "my_plugin_incidents": ["view", "create", "edit"],
+      "dashboard": ["view"]
+    }
+  }
+]
+```
+
+Actions supported: `view`, `create`, `edit`, `delete`.
 
 ### Plugin File Structure
 

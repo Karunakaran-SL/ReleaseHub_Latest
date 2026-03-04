@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import clientPromise from '@/lib/mongodb';
 import { createSession } from '@/lib/session';
 import type { User } from '@/lib/definitions';
+import { normalizeRole } from '@/lib/role-utils';
 
 const SignInSchema = z.object({
   username: z.string().min(1, { message: 'Username is required.' }),
@@ -28,12 +29,9 @@ export async function POST(req: NextRequest) {
 
     const user = await usersCollection.findOne({ username });
 
-    // Case 1: User does not exist. Create them.
+    // User does not exist → reject (users must be created by an admin)
     if (!user) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const newUserResult = await usersCollection.insertOne({ username, password: hashedPassword, role: 'viewer' } as any);
-      await createSession(newUserResult.insertedId.toString(), username, 'viewer');
-      return NextResponse.json({ message: 'User created and logged in successfully' }, { status: 201 });
+      return NextResponse.json({ message: 'Invalid username or password.' }, { status: 401 });
     }
 
     // User exists. Check password.
@@ -48,7 +46,7 @@ export async function POST(req: NextRequest) {
       // Case 2: User exists and password is a valid hash. Compare it.
       const passwordsMatch = await bcrypt.compare(password, user.password);
       if (passwordsMatch) {
-        await createSession(user._id.toString(), user.username, (user as any).role || 'viewer');
+        await createSession(user._id.toString(), user.username, normalizeRole((user as any).role));
         return NextResponse.json({ message: 'Logged in successfully' }, { status: 200 });
       }
     } else {
@@ -61,7 +59,7 @@ export async function POST(req: NextRequest) {
           { $set: { password: hashedPassword } }
         );
 
-        await createSession(user._id.toString(), user.username, (user as any).role || 'viewer');
+        await createSession(user._id.toString(), user.username, normalizeRole((user as any).role));
 
         return NextResponse.json({ message: 'Password updated and logged in successfully' }, { status: 200 });
       }
