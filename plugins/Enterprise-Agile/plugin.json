@@ -1,0 +1,130 @@
+{
+    "id": "enterprise-agile",
+    "version": "1.0.0",
+    "name": "Enterprise Agile Execution",
+    "description": "Enterprise-grade strategy, portfolio, and agile execution platform. Enforces strict hierarchy from Strategic Themes down to Sub-tasks with real-time ROI, WSJF, and DORA tracking.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Enterprise Agile",
+            "icon": "Target",
+            "path": "/dashboard/plugins/enterprise-agile"
+        },
+        {
+            "type": "main-menu",
+            "label": "Enterprise Agile",
+            "icon": "Target",
+            "path": "/plugins/enterprise-agile",
+            "children": [
+                {
+                    "label": "Strategy (Themes & Epics)",
+                    "icon": "Rocket",
+                    "path": "/plugins/enterprise-agile/strategy"
+                },
+                {
+                    "label": "Execution (ARTs & Backlog)",
+                    "icon": "Kanban",
+                    "path": "/plugins/enterprise-agile/execution"
+                },
+                {
+                    "label": "Boards",
+                    "icon": "LayoutDashboard",
+                    "path": "/plugins/enterprise-agile/boards"
+                },
+                {
+                    "label": "Intelligence (Roles & Metrics)",
+                    "icon": "BrainCircuit",
+                    "path": "/plugins/enterprise-agile/intelligence"
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Enterprise Agile Details",
+            "icon": "Settings2",
+            "path": "/settings/enterprise-agile"
+        },
+        {
+            "type": "help",
+            "label": "Enterprise Agile Platform Docs",
+            "icon": "HelpCircle",
+            "path": "/help/enterprise-agile"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "enterprise-agile-health",
+            "title": "Platform Health",
+            "description": "Shows open epics, pending features, and current sprint predictability.",
+            "size": "large"
+        }
+    ],
+    "features": [
+        {
+            "key": "strategy_manage",
+            "label": "Strategy Management",
+            "description": "Manage Themes, Epics, Value Streams."
+        },
+        {
+            "key": "execution_manage",
+            "label": "Execution Management",
+            "description": "Manage ARTs, Capabilities, Features, Stories."
+        },
+        {
+            "key": "intelligence_manage",
+            "label": "Intelligence Management",
+            "description": "Manage DORA, Risks, Skills, Financials."
+        }
+    ],
+    "roles": [
+        {
+            "name": "portfolio_manager",
+            "label": "Portfolio Manager",
+            "description": "Full access to Strategy and Financials.",
+            "permissions": {
+                "strategy_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        },
+        {
+            "name": "product_manager",
+            "label": "Product Manager",
+            "description": "Full access to Features and ART execution.",
+            "permissions": {
+                "execution_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        },
+        {
+            "name": "agile_developer",
+            "label": "Scrum Team / Developer",
+            "description": "Access to Stories, Tasks, Boards.",
+            "permissions": {
+                "execution_manage": [
+                    "view",
+                    "edit"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}
