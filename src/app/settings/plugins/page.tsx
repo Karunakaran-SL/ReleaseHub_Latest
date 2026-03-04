@@ -59,7 +59,7 @@ async function getPlugins(): Promise<PluginRegistry | null> {
 export default async function PluginsPage() {
     const registry = await getPlugins();
     const rawUser = await getUser();
-    const user = rawUser ? { _id: rawUser.id, username: rawUser.username } : null;
+    const user = rawUser ? { _id: rawUser._id, username: rawUser.username, roles: rawUser.roles } : null;
 
     return (
         <DashboardLayout user={user}>

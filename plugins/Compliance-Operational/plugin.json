@@ -1,0 +1,75 @@
+{
+    "id": "compliance-operational",
+    "version": "1.0.0",
+    "name": "Operational Compliance",
+    "description": "Track SOPs, operational checklists, change records, and process deviation reports.",
+    "publisher": "ReleaseHub",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Operational Compliance",
+            "icon": "UserCheck",
+            "path": "/dashboard/plugins/compliance-operational"
+        },
+        {
+            "type": "main-menu",
+            "label": "Compliance",
+            "icon": "ListChecks",
+            "path": "/compliance",
+            "children": [
+                {
+                    "label": "Operational",
+                    "icon": "UserCheck",
+                    "path": "/compliance/operational"
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Operational Compliance",
+            "icon": "UserCheck",
+            "path": "/settings/compliance-operational"
+        },
+        {
+            "type": "help",
+            "label": "Operational Compliance Help",
+            "icon": "HelpCircle",
+            "path": "/help/compliance-operational"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "operational-compliance-summary",
+            "title": "Operational Compliance",
+            "description": "Shows SOP coverage and open deviation reports.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "operational_compliance_manage",
+            "label": "Operational Compliance Management",
+            "description": "View and manage SOPs and process deviations."
+        }
+    ],
+    "roles": [
+        {
+            "name": "operational_compliance_manager",
+            "label": "Operational Compliance Manager",
+            "description": "Can manage SOPs, checklists, and deviation reports.",
+            "permissions": {
+                "operational_compliance_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}

@@ -523,58 +523,6 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </Collapsible>
                 )}
 
-                {canView(user?.roles || user?.role, 'compliance') && (
-                  <Collapsible asChild defaultOpen={isCompliancePage}>
-                    <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton
-                          isActive={isCompliancePage}
-                          tooltip={{ children: 'Compliance' }}
-                          className="data-[state=open]:bg-sidebar-accent"
-                        >
-                          <ListChecks />
-                          Compliance
-                          <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <SidebarMenuSub>
-                          <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/compliance/security" isActive={pathname.startsWith('/compliance/security')}>
-                              <Shield className="mr-2" /> Security
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                          <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/compliance/data" isActive={pathname.startsWith('/compliance/data')}>
-                              <Fingerprint className="mr-2" /> Data
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                          <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/compliance/operational" isActive={pathname.startsWith('/compliance/operational')}>
-                              <UserCheck className="mr-2" /> Operational
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                          <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/compliance/third-party" isActive={pathname.startsWith('/compliance/third-party')}>
-                              <BookLock className="mr-2" /> Third-Party
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                          <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/compliance/regulatory" isActive={pathname.startsWith('/compliance/regulatory')}>
-                              <Landmark className="mr-2" /> Regulatory
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                          <SidebarMenuSubItem>
-                            <SidebarMenuSubButton href="/compliance/audit-reporting" isActive={pathname.startsWith('/compliance/audit-reporting')}>
-                              <FileArchive className="mr-2" /> Audit & Reporting
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        </SidebarMenuSub>
-                      </CollapsibleContent>
-                    </SidebarMenuItem>
-                  </Collapsible>
-                )}
-
                 {mainMenuPlugins.filter((n: any) => !n.feature || canView(user?.roles || user?.role, n.feature)).map((nav: any) => (
                   <Collapsible key={`${nav.pluginId}-${nav.label}`} asChild defaultOpen={isPluginsPage && pathname.startsWith(nav.path)}>
                     <SidebarMenuItem>

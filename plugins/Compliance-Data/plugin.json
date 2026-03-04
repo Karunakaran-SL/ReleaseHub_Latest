@@ -1,0 +1,75 @@
+{
+    "id": "compliance-data",
+    "version": "1.0.0",
+    "name": "Data Compliance",
+    "description": "Track data classification, GDPR/DSAR requests, data retention policies, and breach events.",
+    "publisher": "ReleaseHub",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Data Compliance",
+            "icon": "Fingerprint",
+            "path": "/dashboard/plugins/compliance-data"
+        },
+        {
+            "type": "main-menu",
+            "label": "Compliance",
+            "icon": "ListChecks",
+            "path": "/compliance",
+            "children": [
+                {
+                    "label": "Data",
+                    "icon": "Fingerprint",
+                    "path": "/compliance/data"
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Data Compliance",
+            "icon": "Fingerprint",
+            "path": "/settings/compliance-data"
+        },
+        {
+            "type": "help",
+            "label": "Data Compliance Help",
+            "icon": "HelpCircle",
+            "path": "/help/compliance-data"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "data-compliance-summary",
+            "title": "Data Compliance",
+            "description": "Shows data asset counts and open DSAR requests.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "data_compliance_manage",
+            "label": "Data Compliance Management",
+            "description": "View and manage data assets and DSAR requests."
+        }
+    ],
+    "roles": [
+        {
+            "name": "data_protection_officer",
+            "label": "Data Protection Officer",
+            "description": "Can manage data assets, DSAR requests, and breach events.",
+            "permissions": {
+                "data_compliance_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}

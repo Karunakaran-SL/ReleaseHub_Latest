@@ -1,0 +1,75 @@
+{
+    "id": "compliance-security",
+    "version": "1.0.0",
+    "name": "Security Compliance",
+    "description": "Manage security controls, vulnerability assessments, and incident tracking for regulatory compliance.",
+    "publisher": "ReleaseHub",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Security Compliance",
+            "icon": "Shield",
+            "path": "/dashboard/plugins/compliance-security"
+        },
+        {
+            "type": "main-menu",
+            "label": "Compliance",
+            "icon": "ListChecks",
+            "path": "/compliance",
+            "children": [
+                {
+                    "label": "Security",
+                    "icon": "Shield",
+                    "path": "/compliance/security"
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Security Compliance",
+            "icon": "Shield",
+            "path": "/settings/compliance-security"
+        },
+        {
+            "type": "help",
+            "label": "Security Compliance Help",
+            "icon": "HelpCircle",
+            "path": "/help/compliance-security"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "security-compliance-summary",
+            "title": "Security Compliance",
+            "description": "Shows open security incidents and control coverage.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "security_compliance_manage",
+            "label": "Security Compliance Management",
+            "description": "View and manage security controls and incidents."
+        }
+    ],
+    "roles": [
+        {
+            "name": "security_compliance_officer",
+            "label": "Security Compliance Officer",
+            "description": "Can manage all security compliance controls and incidents.",
+            "permissions": {
+                "security_compliance_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}

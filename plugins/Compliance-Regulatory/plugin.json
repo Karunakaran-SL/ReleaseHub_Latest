@@ -1,0 +1,75 @@
+{
+    "id": "compliance-regulatory",
+    "version": "1.0.0",
+    "name": "Regulatory Compliance",
+    "description": "Track regulatory frameworks (ISO 27001, SOC2, HIPAA), certification status, and evidence submissions.",
+    "publisher": "ReleaseHub",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Regulatory Compliance",
+            "icon": "Landmark",
+            "path": "/dashboard/plugins/compliance-regulatory"
+        },
+        {
+            "type": "main-menu",
+            "label": "Compliance",
+            "icon": "ListChecks",
+            "path": "/compliance",
+            "children": [
+                {
+                    "label": "Regulatory",
+                    "icon": "Landmark",
+                    "path": "/compliance/regulatory"
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Regulatory Compliance",
+            "icon": "Landmark",
+            "path": "/settings/compliance-regulatory"
+        },
+        {
+            "type": "help",
+            "label": "Regulatory Compliance Help",
+            "icon": "HelpCircle",
+            "path": "/help/compliance-regulatory"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "regulatory-compliance-summary",
+            "title": "Regulatory Compliance",
+            "description": "Shows certification status and pending evidence items.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "regulatory_compliance_manage",
+            "label": "Regulatory Compliance Management",
+            "description": "View and manage regulatory frameworks, certifications, and evidence."
+        }
+    ],
+    "roles": [
+        {
+            "name": "regulatory_compliance_officer",
+            "label": "Regulatory Compliance Officer",
+            "description": "Can manage regulatory frameworks and evidence submissions.",
+            "permissions": {
+                "regulatory_compliance_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}
