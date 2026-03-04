@@ -1,0 +1,75 @@
+{
+    "id": "compliance-audit-reporting",
+    "version": "1.0.0",
+    "name": "Audit & Reporting",
+    "description": "Schedule and track compliance audits, log audit findings, and generate compliance reports.",
+    "publisher": "ReleaseHub",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Audit & Reporting",
+            "icon": "FileArchive",
+            "path": "/dashboard/plugins/compliance-audit-reporting"
+        },
+        {
+            "type": "main-menu",
+            "label": "Compliance",
+            "icon": "ListChecks",
+            "path": "/compliance",
+            "children": [
+                {
+                    "label": "Audit & Reporting",
+                    "icon": "FileArchive",
+                    "path": "/compliance/audit-reporting"
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Audit & Reporting",
+            "icon": "FileArchive",
+            "path": "/settings/compliance-audit-reporting"
+        },
+        {
+            "type": "help",
+            "label": "Audit & Reporting Help",
+            "icon": "HelpCircle",
+            "path": "/help/compliance-audit-reporting"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "audit-reporting-summary",
+            "title": "Audit & Reporting",
+            "description": "Shows upcoming audits and open findings.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "audit_reporting_manage",
+            "label": "Audit & Reporting Management",
+            "description": "View and manage audits, findings, and compliance reports."
+        }
+    ],
+    "roles": [
+        {
+            "name": "compliance_auditor",
+            "label": "Compliance Auditor",
+            "description": "Can schedule audits, log findings, and generate compliance reports.",
+            "permissions": {
+                "audit_reporting_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}

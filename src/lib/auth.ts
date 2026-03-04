@@ -10,14 +10,19 @@ export async function signOut() {
 }
 
 export async function getUser() {
-  const session = cookies().get('session')?.value;
+  const cookieStore = await cookies();
+  const session = cookieStore.get('session')?.value;
   if (!session) return null;
 
   const decryptedSession = await decrypt(session);
   if (!decryptedSession) return null;
 
+  const rolesFromSession = decryptedSession.roles ||
+    (decryptedSession.role ? [decryptedSession.role] : ['viewer']);
+
   return {
-      id: decryptedSession.userId,
-      username: decryptedSession.username
+    _id: decryptedSession.userId,
+    username: decryptedSession.username,
+    roles: rolesFromSession as string[]
   };
 }

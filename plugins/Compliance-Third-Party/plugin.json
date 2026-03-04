@@ -1,0 +1,75 @@
+{
+    "id": "compliance-third-party",
+    "version": "1.0.0",
+    "name": "Third-Party Compliance",
+    "description": "Manage vendor risk assessments, supplier audit status, and third-party contract compliance.",
+    "publisher": "ReleaseHub",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Third-Party Compliance",
+            "icon": "BookLock",
+            "path": "/dashboard/plugins/compliance-third-party"
+        },
+        {
+            "type": "main-menu",
+            "label": "Compliance",
+            "icon": "ListChecks",
+            "path": "/compliance",
+            "children": [
+                {
+                    "label": "Third-Party",
+                    "icon": "BookLock",
+                    "path": "/compliance/third-party"
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Third-Party Compliance",
+            "icon": "BookLock",
+            "path": "/settings/compliance-third-party"
+        },
+        {
+            "type": "help",
+            "label": "Third-Party Compliance Help",
+            "icon": "HelpCircle",
+            "path": "/help/compliance-third-party"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "third-party-compliance-summary",
+            "title": "Third-Party Compliance",
+            "description": "Shows vendor count and pending risk assessments.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "third_party_compliance_manage",
+            "label": "Third-Party Compliance Management",
+            "description": "View and manage vendor risks and assessments."
+        }
+    ],
+    "roles": [
+        {
+            "name": "vendor_risk_manager",
+            "label": "Vendor Risk Manager",
+            "description": "Can manage vendor risk assessments and third-party contracts.",
+            "permissions": {
+                "third_party_compliance_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}

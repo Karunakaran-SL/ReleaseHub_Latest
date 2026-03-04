@@ -1,0 +1,72 @@
+{
+    "id": "license-usage",
+    "version": "1.0.0",
+    "name": "License Usage Manager",
+    "description": "Centralized inventory of all software licenses in use across your projects. Track license types, ownership, status, and product associations.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "License Usage Overview",
+            "icon": "Key",
+            "path": "/dashboard/plugins/license-usage"
+        },
+        {
+            "type": "main-menu",
+            "label": "License",
+            "icon": "FileKey2",
+            "path": "/plugins",
+            "children": [
+                {
+                    "label": "License Usage",
+                    "icon": "BarChart",
+                    "path": "/plugins/license-usage"
+                }
+            ]
+        },
+        {
+            "type": "help",
+            "label": "License Management Help",
+            "icon": "HelpCircle",
+            "path": "/help/license-usage"
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "License Usage",
+            "icon": "Key",
+            "path": "/settings/license-usage"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "license-inventory-summary",
+            "title": "License Inventory",
+            "description": "Total software licenses tracked in the system.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "license_usage_manage",
+            "label": "License Usage Management",
+            "description": "View and manage software license inventory."
+        }
+    ],
+    "roles": [
+        {
+            "name": "license_auditor",
+            "label": "License Auditor",
+            "description": "Can view license inventory and compliance data.",
+            "permissions": {
+                "license_usage_manage": [
+                    "view"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}

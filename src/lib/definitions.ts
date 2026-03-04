@@ -10,12 +10,33 @@ export type User = {
   _id: string;
   username: string;
   password?: string;
+  roles?: string[];
+  role?: string; // Legacy field for backwards compatibility during migration
+  email?: string;
+  createdAt?: string;
+  createdBy?: string;
+};
+
+export type RoleRecord = {
+  _id?: string;
+  name: string;
+  label: string;
+  description: string;
+  permissions: Record<string, string[]>; // feature -> Action[]
+  isDefault?: boolean;
+  updatedAt?: string;
 };
 
 export type SessionPayload = {
   userId: string;
   username: string;
+  roles: string[];
+  role?: string; // Legacy fallback
   expiresAt: Date;
+};
+
+export type SystemInitStatus = {
+  initialized: boolean;
 };
 
 export type Product = {
@@ -34,7 +55,7 @@ export type Product = {
     name: string;
   }[];
   compliance_checks: {
-    id:string;
+    id: string;
     name: string;
   }[];
   deployment_type: {
@@ -70,112 +91,112 @@ export type VirtualNode = {
 };
 
 export type Specification = {
-    _id: string;
-    name: string;
-    hw_type?: { id: string; name: string };
-    vendor?: string;
-    image?: string;
-    service_contract_type?: { id: string; name: string };
-    contact_point_email?: string;
-    contact_point_phone?: string;
-    custom_fields?: { key: string; value: string }[];
-    
-    // Virtual Cluster Fields
-    clusterName?: string;
-    nodeCount?: {
-        controlPlane: number;
-        worker: number;
-    };
-    nodes?: VirtualNode[];
+  _id: string;
+  name: string;
+  hw_type?: { id: string; name: string };
+  vendor?: string;
+  image?: string;
+  service_contract_type?: { id: string; name: string };
+  contact_point_email?: string;
+  contact_point_phone?: string;
+  custom_fields?: { key: string; value: string }[];
 
-    // Physical Hardware Fields
-    symmetric?: boolean;
-    total_cpu?: number;
-    memory_gb?: number;
-    storage_gb?: number;
-    bladeCount?: number;
-    blades?: {
-        name: string;
-        cpuType?: string;
-        cpuCores?: number;
-        memory?: number;
-        diskType?: string;
-        diskCapacity?: number;
-        hasGpu?: boolean;
-        gpuType?: string;
-        gpuCores?: number;
-        networkInterfaces?: {
-            name: string;
-            type: string;
-            speed: string;
-        }[];
+  // Virtual Cluster Fields
+  clusterName?: string;
+  nodeCount?: {
+    controlPlane: number;
+    worker: number;
+  };
+  nodes?: VirtualNode[];
+
+  // Physical Hardware Fields
+  symmetric?: boolean;
+  total_cpu?: number;
+  memory_gb?: number;
+  storage_gb?: number;
+  bladeCount?: number;
+  blades?: {
+    name: string;
+    cpuType?: string;
+    cpuCores?: number;
+    memory?: number;
+    diskType?: string;
+    diskCapacity?: number;
+    hasGpu?: boolean;
+    gpuType?: string;
+    gpuCores?: number;
+    networkInterfaces?: {
+      name: string;
+      type: string;
+      speed: string;
     }[];
-    network_cards?: { id: string; name: string }[];
-    plug_power_cords?: { id: string; name: string }[];
-    hypervisor?: { id: string; name: string };
-    cpuArchitecture?: string;
-    virtualizationSupport?: boolean;
-    biosVersion?: string;
-    firmwareVersion?: string;
-    networkTopology?: {
-        managementVLAN?: string;
-        storageVLAN?: string;
-        workloadVLAN?: string;
-    };
-    ipAddressPool?: {
-        management?: string;
-        storage?: string;
-        workload?: string;
-    };
-    iloCredentials?: {
-        username?: string;
-        password?: string;
-    };
-    diskLayout?: {
-        osDisk?: string;
-        dataDisk?: string;
-    };
-    raidConfiguration?: string;
-    timeSync?: string;
-    sshKeys?: string;
+  }[];
+  network_cards?: { id: string; name: string }[];
+  plug_power_cords?: { id: string; name: string }[];
+  hypervisor?: { id: string; name: string };
+  cpuArchitecture?: string;
+  virtualizationSupport?: boolean;
+  biosVersion?: string;
+  firmwareVersion?: string;
+  networkTopology?: {
+    managementVLAN?: string;
+    storageVLAN?: string;
+    workloadVLAN?: string;
+  };
+  ipAddressPool?: {
+    management?: string;
+    storage?: string;
+    workload?: string;
+  };
+  iloCredentials?: {
+    username?: string;
+    password?: string;
+  };
+  diskLayout?: {
+    osDisk?: string;
+    dataDisk?: string;
+  };
+  raidConfiguration?: string;
+  timeSync?: string;
+  sshKeys?: string;
 };
 
 
 export type AuditLog = {
-    _id: string;
-    action: 'CREATE' | 'UPDATE' | 'DELETE';
-    entity: string;
-    entityId: string;
-    user: string;
-    comment: string;
-    timestamp: string;
+  _id: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE';
+  entity: string;
+  entityId: string;
+  user: string;
+  comment: string;
+  timestamp: string;
 };
 
 export type OnboardingFormField = {
-    type: 'Checkbox' | 'RadioBox' | 'TextField' | 'DropDown' | 'Link';
-    name: string;
-    label: string;
-    options?: string[];
-    helpText?: string;
-    proof?: boolean;
-    proofLink?: string;
+  type: 'Checkbox' | 'RadioBox' | 'TextField' | 'DropDown' | 'Link';
+  name: string;
+  label: string;
+  options?: string[];
+  helpText?: string;
+  proof?: boolean;
+  proofLink?: string;
 };
 
 export type OnboardingPhase = {
-    id: string,
-    name: string;
-    ownerName: string;
-    ownerEmail: string;
-    sendEmailOnComplete: boolean;
-    statusOptions: string[];
-    fields: OnboardingFormField[];
+  id: string,
+  name: string;
+  ownerName: string;
+  ownerEmail: string;
+  sendEmailOnComplete: boolean;
+  statusOptions: string[];
+  fields: OnboardingFormField[];
 };
 
 export type OnboardingConfiguration = {
-    _id: string;
-    name: string;
-    version: number;
-    phases: OnboardingPhase[];
+  _id: string;
+  name: string;
+  version: number;
+  phases: OnboardingPhase[];
 };
 
 // CMDB Types
@@ -314,25 +335,25 @@ export type DependencyTree = {
 
 
 export type Baseline = {
-    _id: string;
-    product: {
-        id: string;
-        name: string;
-        version: string;
-    };
-    specifications: { id: string; name: string; version: string; }[];
-    tenants: any[]; // Simplified for now
-    status: 'DRAFT' | 'VALIDATING' | 'VALIDATED' | 'RELEASED' | 'ARCHIVED' | 'REJECTED';
-    validation_phases?: OnboardingPhase[];
-    created_at: string;
-    updated_at: string;
-    created_by: string;
-    artifacts: { name: string; url: string; size: string; }[];
-    package_properties: {
-        location: string;
-        checksum_md5: string;
-        checksum_sha256: string;
-    };
+  _id: string;
+  product: {
+    id: string;
+    name: string;
+    version: string;
+  };
+  specifications: { id: string; name: string; version: string; }[];
+  tenants: any[]; // Simplified for now
+  status: 'DRAFT' | 'VALIDATING' | 'VALIDATED' | 'RELEASED' | 'ARCHIVED' | 'REJECTED';
+  validation_phases?: OnboardingPhase[];
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  artifacts: { name: string; url: string; size: string; }[];
+  package_properties: {
+    location: string;
+    checksum_md5: string;
+    checksum_sha256: string;
+  };
 };
 
 export type DeploymentSummary = {
@@ -343,39 +364,39 @@ export type DeploymentSummary = {
 };
 
 export type Deployment = {
-    _id: string;
-    productId: string;
-    specificationId: string;
-    hypervisorId: string;
-    foundationId?: string; // This will hold the ID of the chosen Platform Foundation
-    foundationComponentIds: string[]; // This will be derived from the foundation
-    security: {
-        encryptionKey?: string;
-        signingCert?: string;
-        pkiDetails?: string;
-        iamToken?: string;
-    };
-    details: {
-        deploymentId: string;
-        customer: string;
-        factory?: string;
-        region?: string;
-        country?: string;
-        availabilityZone?: string;
-        customerKeyPair?: string;
-    };
-    createdBy: string;
-    createdAt: string;
-    status: 'PROVISIONING' | 'ACTIVE' | 'UPGRADING' | 'FAILED' | 'DECOMMISSIONED' | 'UPGRADE_APPROVAL';
-    foundationSummary?: DeploymentSummary;
-    approval_phases?: OnboardingPhase[];
+  _id: string;
+  productId: string;
+  specificationId: string;
+  hypervisorId: string;
+  foundationId?: string; // This will hold the ID of the chosen Platform Foundation
+  foundationComponentIds: string[]; // This will be derived from the foundation
+  security: {
+    encryptionKey?: string;
+    signingCert?: string;
+    pkiDetails?: string;
+    iamToken?: string;
+  };
+  details: {
+    deploymentId: string;
+    customer: string;
+    factory?: string;
+    region?: string;
+    country?: string;
+    availabilityZone?: string;
+    customerKeyPair?: string;
+  };
+  createdBy: string;
+  createdAt: string;
+  status: 'PROVISIONING' | 'ACTIVE' | 'UPGRADING' | 'FAILED' | 'DECOMMISSIONED' | 'UPGRADE_APPROVAL';
+  foundationSummary?: DeploymentSummary;
+  approval_phases?: OnboardingPhase[];
 };
 
 export type UpgradeSummary = {
-    deploymentId: string;
-    status: string;
-    packageLocation: string;
-    targetSpecificationId: string;
+  deploymentId: string;
+  status: string;
+  packageLocation: string;
+  targetSpecificationId: string;
 };
 
 export type UpgradeHistory = {
@@ -427,39 +448,39 @@ export type ProductLicensing = {
 };
 
 export type DevelopmentEnvironment = {
-    _id: string;
-    name: string;
-    productId: string;
-    productName?: string;
-    specificationId: string;
-    specName?: string;
-    baselineId?: string;
-    tenantIds?: string[];
-    createdAt: string;
-    createdBy: string;
-    status: 'PROVISIONING' | 'READY' | 'ERROR' | 'DELETING';
-    estimatedCost?: number;
-    resourceUsage?: {
-        cpu: string;
-        memory: string;
-        storage: string;
-    };
-    dependencySummary?: any[];
+  _id: string;
+  name: string;
+  productId: string;
+  productName?: string;
+  specificationId: string;
+  specName?: string;
+  baselineId?: string;
+  tenantIds?: string[];
+  createdAt: string;
+  createdBy: string;
+  status: 'PROVISIONING' | 'READY' | 'ERROR' | 'DELETING';
+  estimatedCost?: number;
+  resourceUsage?: {
+    cpu: string;
+    memory: string;
+    storage: string;
+  };
+  dependencySummary?: any[];
 }
 
 export type TestEnvironment = DevelopmentEnvironment;
 
 export interface Simulator {
-    _id: string;
-    name: string;
-    dockerImage: string;
-    registryUrl?: string;
-    registryUsername?: string;
-    registryPassword?: string;
-    helmChartUrl?: string;
+  _id: string;
+  name: string;
+  dockerImage: string;
+  registryUrl?: string;
+  registryUsername?: string;
+  registryPassword?: string;
+  helmChartUrl?: string;
 }
 
-export interface Emulator extends Simulator {}
+export interface Emulator extends Simulator { }
 
 export interface SdkApp {
   _id: string;
@@ -478,12 +499,12 @@ export interface SdkApp {
 }
 
 export interface AppCatalogItem {
-    _id: string;
-    category: string;
-    subcategory: string;
-    name: string;
-    logo: string;
-    website: string;
-    description: string;
-    kubernetesConfig?: Record<string, any>;
+  _id: string;
+  category: string;
+  subcategory: string;
+  name: string;
+  logo: string;
+  website: string;
+  description: string;
+  kubernetesConfig?: Record<string, any>;
 }

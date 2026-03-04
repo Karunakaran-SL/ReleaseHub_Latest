@@ -1,38 +1,41 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { decrypt } from '@/lib/session';
-import { cookies } from 'next/headers';
 
-const publicRoutes = ['/login'];
-const protectedRoutes = ['/', '/products', '/api-docs'];
+const publicRoutes = ['/login', '/setup'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const sessionCookie = cookies().get('session')?.value;
+  const sessionCookie = request.cookies.get('session')?.value;
 
   let session;
   try {
     session = await decrypt(sessionCookie);
-  } catch (error) {
-    // Invalid session cookie, treat as no session
+  } catch {
     session = null;
   }
 
-  // Redirect to home if a logged-in user tries to access the login page
+  // /setup is always accessible; also redirect to home if already logged in
+  if (pathname.startsWith('/setup')) {
+    if (session) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Redirect logged-in users away from the login page
   if (pathname.startsWith('/login') && session) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Allow access to public routes for unauthenticated users
+  // Allow unauthenticated access to other public routes
   if (publicRoutes.some(route => pathname.startsWith(route)) && !session) {
     return NextResponse.next();
   }
 
-  // Protect routes
-  if (protectedRoutes.some(route => pathname.startsWith(route))) {
-    if (!session) {
-        return NextResponse.redirect(new URL('/login', request.url));
-    }
+  // All other routes require a valid session
+  if (!session) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();

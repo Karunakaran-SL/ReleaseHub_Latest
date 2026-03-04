@@ -1,0 +1,75 @@
+{
+    "id": "lms-integrations",
+    "version": "1.0.0",
+    "name": "LMS Integrations",
+    "description": "Configure integrations with open-source License Management System tools for automated compliance scanning.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "LMS Integrations Overview",
+            "icon": "Settings2",
+            "path": "/dashboard/plugins/lms-integrations"
+        },
+        {
+            "type": "main-menu",
+            "label": "License",
+            "icon": "FileKey2",
+            "path": "/plugins",
+            "children": [
+                {
+                    "label": "LMS Integrations",
+                    "icon": "Wrench",
+                    "path": "/plugins/lms-integrations"
+                }
+            ]
+        },
+        {
+            "type": "help",
+            "label": "LMS Integrations Help",
+            "icon": "HelpCircle",
+            "path": "/help/lms-integrations"
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "LMS Integrations",
+            "icon": "Settings2",
+            "path": "/settings/lms-integrations"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "lms-integrations-summary",
+            "title": "Configured LMS Tools",
+            "description": "Total active integrations with License Management Systems.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "lms_integration_manage",
+            "label": "LMS Integration Management",
+            "description": "Manage API connections and settings for LMS tools."
+        }
+    ],
+    "roles": [
+        {
+            "name": "lms_admin",
+            "label": "LMS Administrator",
+            "description": "Can manage integrations with external LMS tools.",
+            "permissions": {
+                "lms_integration_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ],
+                "dashboard": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}
