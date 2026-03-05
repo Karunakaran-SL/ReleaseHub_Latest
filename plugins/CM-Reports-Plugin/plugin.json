@@ -1,0 +1,80 @@
+{
+    "id": "cm-reports",
+    "version": "1.0.0",
+    "name": "CM: Visualization & Reporting",
+    "description": "Generate radar charts, heatmaps, and skill distribution reports. Schedule recurring reports and export to CSV or PDF.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-reports",
+            "children": [
+                {
+                    "label": "Reports",
+                    "icon": "PieChart",
+                    "path": "/plugins/cm-reports",
+                    "children": [
+                        {
+                            "label": "Custom Reports",
+                            "icon": "FileBarChart",
+                            "path": "/plugins/cm-reports"
+                        },
+                        {
+                            "label": "Scheduled Reports",
+                            "icon": "CalendarClock",
+                            "path": "/plugins/cm-reports/scheduled"
+                        },
+                        {
+                            "label": "Export Centre",
+                            "icon": "Download",
+                            "path": "/plugins/cm-reports/export"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Reports",
+            "icon": "PieChart",
+            "path": "/settings/cm-reports"
+        }
+    ],
+    "widgets": [],
+    "features": [
+        {
+            "key": "cm_reports_view",
+            "label": "View Reports",
+            "description": "Access generated reports."
+        },
+        {
+            "key": "cm_reports_manage",
+            "label": "Create Reports",
+            "description": "Generate and schedule reports."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_reports_admin",
+            "label": "Reports Administrator",
+            "description": "Manage reports and schedules.",
+            "permissions": {
+                "cm_reports_view": [
+                    "view"
+                ],
+                "cm_reports_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-analytics"
+    ]
+}

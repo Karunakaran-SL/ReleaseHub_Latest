@@ -20,15 +20,6 @@ function getInstallDirs(pluginId: string, navigation: any): { uiDirs: { type: st
                 break;
             case 'main-menu':
                 uiDirs.push({ type: 'main', dir: path.join(process.cwd(), 'src/app/plugins', pluginId) });
-                // Also create sub-dirs for children
-                if (nav.children) {
-                    for (const child of nav.children) {
-                        const childSlug = child.path.split('/').pop();
-                        if (childSlug && childSlug !== pluginId) {
-                            uiDirs.push({ type: `main-child-${childSlug}`, dir: path.join(process.cwd(), 'src/app/plugins', pluginId, childSlug) });
-                        }
-                    }
-                }
                 break;
             case 'help':
                 uiDirs.push({ type: 'help', dir: path.join(process.cwd(), 'src/app/help', pluginId) });
@@ -121,7 +112,7 @@ export async function POST(request: Request) {
             }
 
             // ui/dashboard/page.tsx → dashboard plugin page  
-            if (entryName.endsWith('ui/dashboard/page.tsx')) {
+            else if (entryName.endsWith('ui/dashboard/page.tsx')) {
                 const dashDir = uiDirs.find(d => d.type === 'dashboard');
                 if (dashDir) {
                     fs.writeFileSync(path.join(dashDir.dir, 'page.tsx'), content);
@@ -130,7 +121,7 @@ export async function POST(request: Request) {
             }
 
             // ui/help/page.tsx → help plugin page
-            if (entryName.endsWith('ui/help/page.tsx')) {
+            else if (entryName.endsWith('ui/help/page.tsx')) {
                 const helpDir = uiDirs.find(d => d.type === 'help');
                 if (helpDir) {
                     fs.writeFileSync(path.join(helpDir.dir, 'page.tsx'), content);
@@ -138,14 +129,18 @@ export async function POST(request: Request) {
                 }
             }
 
-            // ui/{child}/page.tsx → main-menu child pages (products, specifications, etc.)
-            const childPageMatch = entryName.match(/ui\/([^/]+)\/page\.tsx$/);
-            if (childPageMatch && childPageMatch[1] !== 'dashboard' && childPageMatch[1] !== 'help') {
-                const childSlug = childPageMatch[1];
-                const childDir = uiDirs.find(d => d.type === `main-child-${childSlug}`);
-                if (childDir) {
-                    fs.writeFileSync(path.join(childDir.dir, 'page.tsx'), content);
-                    extractedFiles++;
+            // ui/{...}/page.tsx → main-menu nested pages (e.g. ui/strategy/3iab/teams/page.tsx)
+            else if (entryName.match(/ui\/(.+)\/page\.tsx$/)) {
+                const match = entryName.match(/ui\/(.+)\/page\.tsx$/);
+                if (match) {
+                    const relativePath = match[1];
+                    const mainDir = uiDirs.find(d => d.type === 'main');
+                    if (mainDir) {
+                        const targetDir = path.join(mainDir.dir, relativePath);
+                        if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+                        fs.writeFileSync(path.join(targetDir, 'page.tsx'), content);
+                        extractedFiles++;
+                    }
                 }
             }
 

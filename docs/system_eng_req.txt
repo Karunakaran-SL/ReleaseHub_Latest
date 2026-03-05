@@ -1,0 +1,152 @@
+# 🛠️ System Engineering Plugins – Dashboards, API, and Workflows
+
+**Main Menu:** System Engineering  
+**Plugins:**  
+1. System Composition Manager  
+2. Product Generation Process (PGP) Manager  
+
+---
+
+## 1️⃣ Plugin: System Composition Manager
+
+### 1.1 Dashboards
+
+**Dashboard Widgets:**
+
+| Widget | Description |
+|--------|------------|
+| Total Systems | Count of all systems defined |
+| Total Products | Count of products across systems |
+| BB/SBB Reusability | Number of reusable building blocks |
+| Functional Group Deliverables | BBs/SBBs per functional group |
+| Dependency Graph | Visual network of BB/SBB relationships |
+| Recent Changes | Last 10 changes (audit log) |
+
+---
+
+### 1.2 Workflows
+
+**System Composition Creation Workflow:**
+
+1. Select “Create System” → Enter metadata  
+2. Add Products under System  
+3. Add Building Blocks (BB) and Sub-Building Blocks (SBB)  
+4. Assign BB/SBBs to Components or Applications  
+5. Add Functions / Methods / Interfaces  
+6. Optional: Link reused BB/SBB across components  
+7. Save → Audit log entry created → Visual graph updated  
+
+**Dependency Visualization Workflow:**
+
+- Identify BB/SBB sharing  
+- Map Functional Group ownership  
+- Auto-generate relationship graph  
+- Highlight reused components in multiple products  
+
+---
+
+### 1.3 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|---------|-------------|
+| GET | /api/system-composition/systems | List all systems |
+| POST | /api/system-composition/systems | Create a new system |
+| PUT | /api/system-composition/systems/{id} | Update system metadata |
+| DELETE | /api/system-composition/systems/{id} | Delete system |
+| GET | /api/system-composition/products/{systemId} | List products under a system |
+| POST | /api/system-composition/building-blocks | Create BB/SBB |
+| GET | /api/system-composition/building-blocks/{id}/graph | Retrieve dependency graph |
+| POST | /api/system-composition/functions | Create Function / Interface |
+| GET | /api/system-composition/audit | List recent changes |
+
+---
+
+## 2️⃣ Plugin: Product Generation Process (PGP) Manager
+
+### 2.1 Dashboards
+
+**Dashboard Widgets:**
+
+| Widget | Description |
+|--------|------------|
+| PBS Tree Overview | Hierarchical view of Parent/Child PBS |
+| Budget Allocation | Planned vs Actual Budget per PBS |
+| Functions Assigned | Functions linked to PBS |
+| KD Status | Pending, In Progress, Closed Key Decisions |
+| Upcoming KD Events | KD events in the next 7 days |
+| Actions Tracker | Pending KD actions and assignments |
+| Product Coverage | PBS coverage per product |
+
+---
+
+### 2.2 Workflows
+
+**PBS Creation Workflow:**
+
+1. Select “Create PBS” → Enter name, budget, requirements  
+2. Assign Functions or Methods for delivery  
+3. Optional: Link PBS to System Composition components if plugin installed  
+4. Save → Audit log entry created  
+5. Dashboard updates with PBS tree and budget status  
+
+**Key Decision (KD) Workflow:**
+
+1. Create KD Template → Define steps, goals, participants  
+2. Plan KD → Schedule event, assign owner/participants  
+3. Conduct KD → Record discussion, add action items  
+4. Close KD → Approve decision, mark outcome, complete actions  
+5. Audit log records Plan/Conduct/Close steps  
+6. Dashboard updates KD status metrics  
+
+**Action Tracking Workflow:**
+
+- Each KD can have multiple actions assigned to participants  
+- Track completion status per action  
+- Link actions to PBS / Functions  
+- Audit log tracks each change  
+
+---
+
+### 2.3 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|---------|-------------|
+| GET | /api/pgp/pbs | List all PBS |
+| POST | /api/pgp/pbs | Create new PBS |
+| PUT | /api/pgp/pbs/{id} | Update PBS metadata |
+| DELETE | /api/pgp/pbs/{id} | Delete PBS |
+| POST | /api/pgp/pbs/{id}/assign-functions | Assign Functions to PBS |
+| GET | /api/pgp/kd | List all Key Decisions |
+| POST | /api/pgp/kd | Create a KD |
+| PUT | /api/pgp/kd/{id}/plan | Plan KD |
+| PUT | /api/pgp/kd/{id}/conduct | Conduct KD |
+| PUT | /api/pgp/kd/{id}/close | Close KD |
+| GET | /api/pgp/dashboard | Fetch PBS/KD dashboard metrics |
+| GET | /api/pgp/audit | List audit logs for PBS/KD |
+
+---
+
+## 3️⃣ Plugin Dependencies
+
+| Plugin | Dependency | Description |
+|--------|-----------|------------|
+| System Composition Manager | None | Standalone plugin |
+| PGP Manager | Optional: System Composition Manager | If installed, allows linking PBS and Functions directly to system components |
+
+**Design Notes:**
+
+- Both plugins can be installed independently  
+- PGP works without System Composition but gains **full traceability** if linked  
+- Each plugin maintains its **own dashboards, audit logs, and API endpoints**  
+- Modular architecture allows future expansion (e.g., Risk Management, Verification & Validation)  
+
+---
+
+This structure allows your AI to **generate two independent plugins** with:
+
+- Full menus  
+- Dashboards  
+- Workflows  
+- MongoDB schemas (from prior spec)  
+- REST APIs  
+

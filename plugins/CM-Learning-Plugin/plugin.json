@@ -1,0 +1,93 @@
+{
+    "id": "cm-learning",
+    "version": "1.0.0",
+    "name": "CM: Learning & Development",
+    "description": "Map courses and training programmes to competencies. Auto-recommend learning based on skill gaps, track completion, and update employee skill levels after finishing.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-learning",
+            "children": [
+                {
+                    "label": "Learning & Development",
+                    "icon": "BookOpen",
+                    "path": "/plugins/cm-learning",
+                    "children": [
+                        {
+                            "label": "Course Library",
+                            "icon": "Library",
+                            "path": "/plugins/cm-learning"
+                        },
+                        {
+                            "label": "My Learning Plan",
+                            "icon": "ClipboardCheck",
+                            "path": "/plugins/cm-learning/my-plan"
+                        },
+                        {
+                            "label": "Assign Training",
+                            "icon": "UserPlus",
+                            "path": "/plugins/cm-learning/assign"
+                        },
+                        {
+                            "label": "Completion Tracker",
+                            "icon": "CheckCircle",
+                            "path": "/plugins/cm-learning/completions"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Learning & Development",
+            "icon": "BookOpen",
+            "path": "/settings/cm-learning"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-my-learning",
+            "title": "My Learning Plan",
+            "description": "Assigned courses and progress.",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_learning_view",
+            "label": "View Courses",
+            "description": "Browse course library."
+        },
+        {
+            "key": "cm_learning_manage",
+            "label": "Manage Training",
+            "description": "Assign and track training."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_learning_admin",
+            "label": "L&D Administrator",
+            "description": "Manage courses and assignments.",
+            "permissions": {
+                "cm_learning_view": [
+                    "view"
+                ],
+                "cm_learning_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-skill-taxonomy",
+        "cm-employee-profiles"
+    ]
+}

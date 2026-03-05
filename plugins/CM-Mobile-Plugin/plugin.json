@@ -1,0 +1,40 @@
+{
+    "id": "cm-mobile",
+    "version": "1.0.0",
+    "name": "CM: Mobile Experience",
+    "description": "Responsive mobile-first UI configuration, push notification settings, offline skill update capability, and progressive web app settings for the Competence Management Suite.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Mobile & Notifications",
+            "icon": "Smartphone",
+            "path": "/settings/cm-mobile"
+        }
+    ],
+    "widgets": [],
+    "features": [
+        {
+            "key": "cm_mobile_config",
+            "label": "Configure Mobile",
+            "description": "Set notification and mobile preferences."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_mobile_admin",
+            "label": "Mobile Config Admin",
+            "description": "Configure mobile and notifications.",
+            "permissions": {
+                "cm_mobile_config": [
+                    "view",
+                    "edit"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-employee-profiles"
+    ]
+}

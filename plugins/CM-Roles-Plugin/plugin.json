@@ -1,0 +1,87 @@
+{
+    "id": "cm-roles",
+    "version": "1.0.0",
+    "name": "CM: Role & Job Framework",
+    "description": "Define job roles with required competency mappings, proficiency weights, and career levels. Used by Gap Analysis, Talent Matching, and Career Pathing plugins.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-roles",
+            "children": [
+                {
+                    "label": "Roles & Jobs",
+                    "icon": "Briefcase",
+                    "path": "/plugins/cm-roles",
+                    "children": [
+                        {
+                            "label": "Role Library",
+                            "icon": "Briefcase",
+                            "path": "/plugins/cm-roles"
+                        },
+                        {
+                            "label": "Role Skill Mapping",
+                            "icon": "Network",
+                            "path": "/plugins/cm-roles/mapping"
+                        },
+                        {
+                            "label": "Compare Roles",
+                            "icon": "GitCompare",
+                            "path": "/plugins/cm-roles/compare"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Role Framework",
+            "icon": "Briefcase",
+            "path": "/settings/cm-roles"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-roles-coverage",
+            "title": "Role Coverage",
+            "description": "Role count and skill mapping completeness.",
+            "size": "small"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_roles_view",
+            "label": "View Roles",
+            "description": "Browse job role definitions."
+        },
+        {
+            "key": "cm_roles_manage",
+            "label": "Manage Roles",
+            "description": "Create and edit role definitions."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_roles_admin",
+            "label": "Role Framework Admin",
+            "description": "Manage job roles and competency mappings.",
+            "permissions": {
+                "cm_roles_view": [
+                    "view"
+                ],
+                "cm_roles_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-skill-taxonomy"
+    ]
+}

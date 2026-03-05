@@ -1,0 +1,80 @@
+{
+    "id": "cm-strategic-planning",
+    "version": "1.0.0",
+    "name": "CM: Strategic Skill Planning",
+    "description": "Define future skill needs, model supply vs demand scenarios, forecast skill shortages, and plan upskilling investment budgets.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-strategic-planning",
+            "children": [
+                {
+                    "label": "Strategic Planning",
+                    "icon": "Target",
+                    "path": "/plugins/cm-strategic-planning",
+                    "children": [
+                        {
+                            "label": "Future Skills",
+                            "icon": "Telescope",
+                            "path": "/plugins/cm-strategic-planning"
+                        },
+                        {
+                            "label": "Scenario Modelling",
+                            "icon": "GitBranch",
+                            "path": "/plugins/cm-strategic-planning/scenarios"
+                        },
+                        {
+                            "label": "Investment Planning",
+                            "icon": "PiggyBank",
+                            "path": "/plugins/cm-strategic-planning/investment"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-skill-plans",
+            "title": "Strategic Skill Plans",
+            "description": "Active upskilling initiatives.",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_planning_view",
+            "label": "View Plans",
+            "description": "View strategic skill plans."
+        },
+        {
+            "key": "cm_planning_manage",
+            "label": "Manage Plans",
+            "description": "Create and edit skill investment plans."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_planning_manager",
+            "label": "Skill Planning Manager",
+            "description": "Manage strategic skill plans.",
+            "permissions": {
+                "cm_planning_view": [
+                    "view"
+                ],
+                "cm_planning_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-analytics"
+    ]
+}

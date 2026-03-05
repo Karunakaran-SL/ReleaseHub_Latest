@@ -1,0 +1,86 @@
+{
+    "id": "cm-performance",
+    "version": "1.0.0",
+    "name": "CM: Performance Integration",
+    "description": "Link skill levels to performance ratings. Capture 360° feedback, run skill-performance correlation analysis, and track improvement over review cycles.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-performance",
+            "children": [
+                {
+                    "label": "Performance",
+                    "icon": "TrendingUp",
+                    "path": "/plugins/cm-performance",
+                    "children": [
+                        {
+                            "label": "Reviews",
+                            "icon": "ClipboardCheck",
+                            "path": "/plugins/cm-performance"
+                        },
+                        {
+                            "label": "360° Feedback",
+                            "icon": "RefreshCcw",
+                            "path": "/plugins/cm-performance/feedback"
+                        },
+                        {
+                            "label": "Skill Correlation",
+                            "icon": "LineChart",
+                            "path": "/plugins/cm-performance/correlation"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Performance",
+            "icon": "TrendingUp",
+            "path": "/settings/cm-performance"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-perf-trend",
+            "title": "Performance Trends",
+            "description": "Skill-performance correlation across teams.",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_perf_view",
+            "label": "View Reviews",
+            "description": "Browse performance reviews."
+        },
+        {
+            "key": "cm_perf_manage",
+            "label": "Manage Reviews",
+            "description": "Create and submit reviews."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_perf_admin",
+            "label": "Performance Admin",
+            "description": "Manage performance reviews.",
+            "permissions": {
+                "cm_perf_view": [
+                    "view"
+                ],
+                "cm_perf_manage": [
+                    "view",
+                    "create",
+                    "edit"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-employee-profiles"
+    ]
+}

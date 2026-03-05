@@ -543,11 +543,35 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <CollapsibleContent>
                           <SidebarMenuSub>
                             {nav.children.map((child: any, idx: number) => (
-                              <SidebarMenuSubItem key={idx}>
-                                <SidebarMenuSubButton href={child.path} isActive={pathname.startsWith(child.path)}>
-                                  <IconMapper name={child.icon} className="mr-2 h-4 w-4" /> {child.label}
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
+                              child.children && child.children.length > 0 ? (
+                                <Collapsible key={idx} asChild defaultOpen={isPluginsPage && pathname.startsWith(child.path)}>
+                                  <SidebarMenuSubItem>
+                                    <CollapsibleTrigger asChild>
+                                      <SidebarMenuSubButton isActive={pathname.startsWith(child.path)} className="cursor-pointer">
+                                        <IconMapper name={child.icon} className="mr-2 h-4 w-4" /> {child.label}
+                                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                                      </SidebarMenuSubButton>
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent>
+                                      <SidebarMenuSub>
+                                        {child.children.map((subChild: any, subIdx: number) => (
+                                          <SidebarMenuSubItem key={subIdx}>
+                                            <SidebarMenuSubButton href={subChild.path} isActive={pathname.startsWith(subChild.path)}>
+                                              <IconMapper name={subChild.icon} className="mr-2 h-4 w-4" /> {subChild.label}
+                                            </SidebarMenuSubButton>
+                                          </SidebarMenuSubItem>
+                                        ))}
+                                      </SidebarMenuSub>
+                                    </CollapsibleContent>
+                                  </SidebarMenuSubItem>
+                                </Collapsible>
+                              ) : (
+                                <SidebarMenuSubItem key={idx}>
+                                  <SidebarMenuSubButton href={child.path} isActive={pathname.startsWith(child.path)}>
+                                    <IconMapper name={child.icon} className="mr-2 h-4 w-4" /> {child.label}
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              )
                             ))}
                           </SidebarMenuSub>
                         </CollapsibleContent>
