@@ -1,0 +1,63 @@
+{
+    "id": "se-pgp-manager",
+    "name": "PGP Manager",
+    "version": "1.0.0",
+    "description": "Manage the Product Generation Process via PBS, Budgets, Key Decisions, and Actions.",
+    "publisher": "Acme Corp",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "PGP Dashboard",
+            "icon": "GitMerge",
+            "path": "/dashboard/plugins/se-pgp-manager"
+        },
+        {
+            "type": "main-menu",
+            "label": "System Engineering",
+            "icon": "Layers",
+            "path": "/plugins",
+            "children": [
+                {
+                    "label": "PGP Manager",
+                    "icon": "GitMerge",
+                    "path": "/plugins/se-pgp-manager"
+                }
+            ]
+        },
+        {
+            "type": "help",
+            "label": "PGP Manager Help",
+            "icon": "HelpCircle",
+            "path": "/help/se-pgp-manager"
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "PGP Manager",
+            "icon": "Settings",
+            "path": "/settings/se-pgp-manager"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "se-pgp-dashboard-overview",
+            "name": "PBS Tree Overview",
+            "description": "Hierarchical view of Parent/Child PBS and budget",
+            "size": "large"
+        }
+    ],
+    "features": [
+        { "key": "pbs_management", "label": "PBS Management", "description": "Manage PBS" }
+    ],
+    "roles": [
+        {
+            "name": "project_manager",
+            "label": "Project Manager",
+            "description": "Manage PBS and KD",
+            "permissions": { "pbs_management": ["view", "edit"] }
+        }
+    ],
+    "dependencies": {
+        "se-system-composition-manager": "optional"
+    }
+}
