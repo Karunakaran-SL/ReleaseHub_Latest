@@ -6,7 +6,10 @@ import type { SessionPayload } from './definitions';
 // IMPORTANT: This secret should be a securely generated random string
 // and stored in an environment variable. For demonstration purposes, it's
 // hardcoded here.
-const secretKey = process.env.SESSION_SECRET || 'a-super-secret-key-that-is-long-enough-for-hs256';
+const secretKey = process.env.SESSION_SECRET;
+if (!secretKey) {
+  throw new Error('Please add your SESSION_SECRET to .env.local');
+}
 const encodedKey = new TextEncoder().encode(secretKey);
 const aDayInSeconds = 24 * 60 * 60;
 
