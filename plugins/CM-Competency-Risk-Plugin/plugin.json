@@ -1,0 +1,79 @@
+{
+    "id": "cm-competency-risk",
+    "version": "1.0.0",
+    "name": "CM: Competency Risk",
+    "description": "Detect critical skill shortages, calculate competency risk scores (probability × coverage loss), visualise risk heatmaps, and manage mitigation plans.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-competency-risk",
+            "children": [
+                {
+                    "label": "Competency Risk",
+                    "icon": "ShieldAlert",
+                    "path": "/plugins/cm-competency-risk",
+                    "children": [
+                        {
+                            "label": "Risk Heatmap",
+                            "icon": "Flame",
+                            "path": "/plugins/cm-competency-risk"
+                        },
+                        {
+                            "label": "Critical Skills",
+                            "icon": "AlertOctagon",
+                            "path": "/plugins/cm-competency-risk/critical"
+                        },
+                        {
+                            "label": "Mitigation Plans",
+                            "icon": "ShieldCheck",
+                            "path": "/plugins/cm-competency-risk/mitigations"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-risk-alerts",
+            "title": "Competency Risk Alerts",
+            "description": "Critical skill shortages requiring attention.",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_risk_view",
+            "label": "View Risks",
+            "description": "View competency risk heatmap."
+        },
+        {
+            "key": "cm_risk_manage",
+            "label": "Manage Mitigations",
+            "description": "Create mitigation plans."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_risk_manager",
+            "label": "Competency Risk Manager",
+            "description": "Manage competency risks.",
+            "permissions": {
+                "cm_risk_view": [
+                    "view"
+                ],
+                "cm_risk_manage": [
+                    "view",
+                    "create",
+                    "edit"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-skill-gap"
+    ]
+}

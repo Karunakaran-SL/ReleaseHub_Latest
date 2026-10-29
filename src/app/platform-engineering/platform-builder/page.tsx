@@ -13,6 +13,7 @@ import Step1Specification from './_components/step1-specification';
 import Step2VmConfig from './_components/step2-vm-config';
 import Step3Kubernetes from './_components/step3-kubernetes';
 import Step4Summary from './_components/step4-summary';
+import Step5Progress from './_components/step5-progress';
 import { VisualBuilder } from './_components/visual-builder';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,9 +51,16 @@ export default function PlatformBuilderPage() {
                 const error = await response.json();
                 throw new Error(error.message || 'Failed to save platform foundation.');
             }
-            toast({ title: 'Success', description: 'Platform Foundation saved successfully.' });
-            router.push('/platform-engineering/platform-foundations');
-            router.refresh();
+
+            // If Managed K8s, move to progress step instead of redirecting
+            if (platformFoundation.specification?.clusterType === 'Managed Kubernetes') {
+                setStep(5);
+                toast({ title: 'Success', description: 'Platform Foundation saved to DB. Provisioning started.' });
+            } else {
+                toast({ title: 'Success', description: 'Platform Foundation saved successfully.' });
+                router.push('/platform-engineering/platform-foundations');
+                router.refresh();
+            }
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error', description: error.message });
         } finally {
@@ -70,6 +78,8 @@ export default function PlatformBuilderPage() {
                 return <Step3Kubernetes data={platformFoundation} onUpdate={updateFoundation} />;
             case 4:
                 return <Step4Summary data={platformFoundation} onUpdate={updateFoundation} />;
+            case 5:
+                return <Step5Progress />;
             default:
                 return null;
         }
@@ -86,13 +96,16 @@ export default function PlatformBuilderPage() {
                     return !platformFoundation.virtual_machines || platformFoundation.virtual_machines.length === 0;
                 }
                 if (isVirtual) return false;
-                return true; // For other physical types, we can't configure VMs yet.
+                return true;
             case 3:
-                return !platformFoundation.kubernetes?.distribution;
+                const isManagedK8s = platformFoundation.specification?.clusterType === 'Managed Kubernetes';
+                return !platformFoundation.kubernetes?.distribution && !isManagedK8s;
             default:
                 return false;
         }
     };
+
+    const isManagedK8s = platformFoundation.specification?.clusterType === 'Managed Kubernetes';
 
     return (
         <DashboardLayout user={user}>
@@ -108,9 +121,9 @@ export default function PlatformBuilderPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
                     <Card className="flex flex-col">
                         <CardHeader>
-                            <CardTitle>Step {step}: {
-                                ["Select Specification", "Configure VMs", "Setup Kubernetes", "Review & Finalize"][step - 1]
-                            }</CardTitle>
+                            <CardTitle>
+                                {step === 5 ? 'Deployment Progress' : `Step ${step}: ${["Select Specification", "Configure VMs", "Setup Kubernetes", "Review & Finalize"][step - 1]}`}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1">
                             {step === 1 && (
@@ -121,23 +134,24 @@ export default function PlatformBuilderPage() {
                             )}
                             {renderStep()}
                         </CardContent>
-                        <CardFooter className="flex justify-between">
-                            <Button variant="outline" onClick={handleBack} disabled={step === 1 || isSubmitting}>
-                                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-                            </Button>
-                            {step < 4 ? (
-                                <Button onClick={handleNext} disabled={isNextDisabled()}>
-                                    Next <ArrowRight className="ml-2 h-4 w-4" />
+                        {step < 5 && (
+                            <CardFooter className="flex justify-between">
+                                <Button variant="outline" onClick={handleBack} disabled={step === 1 || isSubmitting}>
+                                    <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                 </Button>
-                            ) : (
-                                <Button onClick={handleSubmit} disabled={isSubmitting}>
-                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    Save Platform Foundation
-                                </Button>
-                            )}
-                        </CardFooter>
+                                {step < 4 ? (
+                                    <Button onClick={handleNext} disabled={isNextDisabled()}>
+                                        Next <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Button>
+                                ) : (
+                                    <Button onClick={handleSubmit} disabled={isSubmitting}>
+                                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                        {isSubmitting && isManagedK8s ? 'Starting Deployment...' : 'Save & Deploy'}
+                                    </Button>
+                                )}
+                            </CardFooter>
+                        )}
                     </Card>
-
                     <VisualBuilder foundation={platformFoundation} />
                 </div>
             </main>

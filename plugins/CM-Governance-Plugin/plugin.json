@@ -1,0 +1,78 @@
+{
+    "id": "cm-governance",
+    "version": "1.0.0",
+    "name": "CM: Security & Governance",
+    "description": "Role-based access control, field-level permissions, immutable audit trail, and data retention policy management for the Competence Management Suite.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-governance",
+            "children": [
+                {
+                    "label": "Governance",
+                    "icon": "Shield",
+                    "path": "/plugins/cm-governance",
+                    "children": [
+                        {
+                            "label": "Audit Logs",
+                            "icon": "ScrollText",
+                            "path": "/plugins/cm-governance"
+                        },
+                        {
+                            "label": "Roles & Permissions",
+                            "icon": "Lock",
+                            "path": "/plugins/cm-governance/permissions"
+                        },
+                        {
+                            "label": "Data Retention",
+                            "icon": "Database",
+                            "path": "/plugins/cm-governance/retention"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Governance",
+            "icon": "Shield",
+            "path": "/settings/cm-governance"
+        }
+    ],
+    "widgets": [],
+    "features": [
+        {
+            "key": "cm_audit_view",
+            "label": "View Audit Logs",
+            "description": "Access immutable audit trail."
+        },
+        {
+            "key": "cm_governance_manage",
+            "label": "Manage Governance",
+            "description": "Configure permissions and retention."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_governance_admin",
+            "label": "Governance Administrator",
+            "description": "Full governance and audit access.",
+            "permissions": {
+                "cm_audit_view": [
+                    "view"
+                ],
+                "cm_governance_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}

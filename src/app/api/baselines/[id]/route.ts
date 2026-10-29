@@ -6,20 +6,20 @@ import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
 const BaselineUpdateSchema = z.object({
-  status: z.enum(['DRAFT', 'VALIDATING', 'VALIDATED', 'RELEASED', 'ARCHIVED', 'REJECTED']).optional(),
-  updateComment: z.string().min(1, 'Update comment is required.'),
-  validation_phases: z.any().optional(),
+    status: z.enum(['DRAFT', 'VALIDATING', 'VALIDATED', 'RELEASED', 'ARCHIVED', 'REJECTED']).optional(),
+    updateComment: z.string().min(1, 'Update comment is required.'),
+    validation_phases: z.any().optional(),
 });
 
 
 // Get a single baseline by ID
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = params;
-        
+        const { id } = await params;
+
         const client = await clientPromise;
         const db = client.db();
-        const item = await db.collection('baselines').findOne({ _id: id });
+        const item = await db.collection('baselines').findOne({ _id: id as any });
 
         if (!item) {
             return NextResponse.json({ message: 'Baseline not found.' }, { status: 404 });
@@ -34,14 +34,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 
 // Update a baseline
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const user = await getUser();
         if (!user) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = await params;
 
         const body = await req.json();
         const validatedData = BaselineUpdateSchema.safeParse(body);
@@ -49,22 +49,22 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         if (!validatedData.success) {
             return NextResponse.json({ message: 'Invalid data.', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
         }
-        
+
         const client = await clientPromise;
         const db = client.db();
-        
+
         const { updateComment, ...baselineData } = validatedData.data;
 
         const result = await db.collection('baselines').updateOne(
-            { _id: id },
+            { _id: id as any },
             { $set: { ...baselineData, updated_at: new Date().toISOString() } }
         );
 
         if (result.matchedCount === 0) {
             return NextResponse.json({ message: 'Baseline not found.' }, { status: 404 });
         }
-        
-        const baseline = await db.collection('baselines').findOne({ _id: id });
+
+        const baseline = await db.collection('baselines').findOne({ _id: id as any });
         if (!baseline) {
             return NextResponse.json({ message: 'Baseline not found after update.' }, { status: 404 });
         }
@@ -74,7 +74,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
                 { _id: baseline.product.id },
                 { $set: { version: baseline.product.version } }
             );
-             await logAuditEvent({
+            await logAuditEvent({
                 action: 'UPDATE',
                 entity: 'product',
                 entityId: baseline.product.id,
@@ -89,7 +89,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             comment: updateComment,
         });
 
-        const updatedItem = await db.collection('baselines').findOne({ _id: id });
+        const updatedItem = await db.collection('baselines').findOne({ _id: id as any });
         return NextResponse.json(updatedItem, { status: 200 });
 
     } catch (error) {

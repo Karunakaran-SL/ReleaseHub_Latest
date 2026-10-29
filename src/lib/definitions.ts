@@ -102,12 +102,29 @@ export type Specification = {
   custom_fields?: { key: string; value: string }[];
 
   // Virtual Cluster Fields
+  clusterType?: 'Standard' | 'Managed Kubernetes';
   clusterName?: string;
   nodeCount?: {
     controlPlane: number;
     worker: number;
   };
   nodes?: VirtualNode[];
+  managedConfig?: {
+    cpuCores: number;
+    memoryGb: number;
+    diskSizeGb: number;
+    containerEngine: 'containerd' | 'dockerd';
+    kubernetesVersion: string;
+    apiUrl?: string;
+    token?: string;
+    namespaces: string[];
+    workloads: {
+      type: string;
+      name: string;
+      readyReplicas: number;
+      namespace: string;
+    }[];
+  };
 
   // Physical Hardware Fields
   symmetric?: boolean;
@@ -280,6 +297,10 @@ export type CmdbInterface = {
   owner_email: string;
   documentation?: string;
   source: {
+    id: string;
+    name: string;
+  };
+  tenant?: {
     id: string;
     name: string;
   };

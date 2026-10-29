@@ -1,0 +1,79 @@
+{
+    "id": "cm-talent-matching",
+    "version": "1.0.0",
+    "name": "CM: Talent Matching",
+    "description": "Weighted scoring engine that matches employees to roles and projects based on skill profiles. Shows readiness scores, match breakdowns, and ranking.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-talent-matching",
+            "children": [
+                {
+                    "label": "Talent Matching",
+                    "icon": "Zap",
+                    "path": "/plugins/cm-talent-matching",
+                    "children": [
+                        {
+                            "label": "Match by Role",
+                            "icon": "Briefcase",
+                            "path": "/plugins/cm-talent-matching"
+                        },
+                        {
+                            "label": "Match by Project",
+                            "icon": "FolderOpen",
+                            "path": "/plugins/cm-talent-matching/project"
+                        },
+                        {
+                            "label": "Readiness Scores",
+                            "icon": "Gauge",
+                            "path": "/plugins/cm-talent-matching/readiness"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-top-matches",
+            "title": "Top Talent Matches",
+            "description": "Best-matched employees for open roles.",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_match_view",
+            "label": "View Matches",
+            "description": "Browse talent matches."
+        },
+        {
+            "key": "cm_match_run",
+            "label": "Run Matching",
+            "description": "Trigger matching analysis."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_talent_matcher",
+            "label": "Talent Matcher",
+            "description": "Run and review talent matching.",
+            "permissions": {
+                "cm_match_view": [
+                    "view"
+                ],
+                "cm_match_run": [
+                    "view",
+                    "create"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-employee-profiles",
+        "cm-roles"
+    ]
+}

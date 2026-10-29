@@ -1,0 +1,93 @@
+{
+    "id": "cm-ai-intelligence",
+    "version": "1.0.0",
+    "name": "CM: AI Intelligence",
+    "description": "AI-powered competence intelligence — resume skill extraction, future skill demand prediction, skill decay forecasting, gap prioritisation, and personalised development recommendations.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-ai-intelligence",
+            "children": [
+                {
+                    "label": "AI Intelligence",
+                    "icon": "BrainCircuit",
+                    "path": "/plugins/cm-ai-intelligence",
+                    "children": [
+                        {
+                            "label": "Skill Predictions",
+                            "icon": "Sparkles",
+                            "path": "/plugins/cm-ai-intelligence"
+                        },
+                        {
+                            "label": "AI Matching",
+                            "icon": "Zap",
+                            "path": "/plugins/cm-ai-intelligence/matching"
+                        },
+                        {
+                            "label": "Trend Forecast",
+                            "icon": "LineChart",
+                            "path": "/plugins/cm-ai-intelligence/forecast"
+                        },
+                        {
+                            "label": "Smart Recommendations",
+                            "icon": "Lightbulb",
+                            "path": "/plugins/cm-ai-intelligence/recommendations"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: AI Intelligence",
+            "icon": "BrainCircuit",
+            "path": "/settings/cm-ai-intelligence"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-ai-recs",
+            "title": "AI Skill Recommendations",
+            "description": "Personalised skill development suggestions powered by AI.",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_ai_view",
+            "label": "View AI Insights",
+            "description": "Access AI-generated recommendations."
+        },
+        {
+            "key": "cm_ai_manage",
+            "label": "Configure AI",
+            "description": "Manage AI model settings and thresholds."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_ai_admin",
+            "label": "AI Intelligence Admin",
+            "description": "Access and configure AI features.",
+            "permissions": {
+                "cm_ai_view": [
+                    "view"
+                ],
+                "cm_ai_manage": [
+                    "view",
+                    "edit"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-skill-taxonomy",
+        "cm-employee-profiles",
+        "cm-skill-gap",
+        "cm-learning"
+    ]
+}

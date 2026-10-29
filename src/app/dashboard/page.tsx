@@ -327,9 +327,9 @@ export default function DashboardPage() {
     ];
 
     const filteredWidgets = allAvailableWidgets.filter(w =>
-        w.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        w.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        w.source.toLowerCase().includes(searchQuery.toLowerCase())
+        w.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (w.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (w.source || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (

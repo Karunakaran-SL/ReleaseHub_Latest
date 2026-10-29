@@ -6,16 +6,16 @@ import { ObjectId } from 'mongodb';
 const COLLECTION_NAME = 'development_environments';
 
 // Get a single environment by ID
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const user = await getUser();
         if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-        
-        const { id } = params;
+
+        const { id } = await params;
         if (!ObjectId.isValid(id)) {
             return NextResponse.json({ message: 'Invalid ID format' }, { status: 400 });
         }
-        
+
         const client = await clientPromise;
         const db = client.db();
         const item = await db.collection(COLLECTION_NAME).findOne({ _id: new ObjectId(id) });
@@ -33,21 +33,21 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 
 // Update an environment
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const user = await getUser();
         if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         if (!ObjectId.isValid(id)) {
             return NextResponse.json({ message: 'Invalid ID format' }, { status: 400 });
         }
 
         const body = await req.json();
-        
+
         const client = await clientPromise;
         const db = client.db();
-        
+
         // Remove _id from body if it exists to prevent errors
         const { _id, ...updateData } = body;
 
@@ -71,16 +71,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 
 // Delete an environment
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const user = await getUser();
         if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-        const { id } = params;
+        const { id } = await params;
         if (!ObjectId.isValid(id)) {
             return NextResponse.json({ message: 'Invalid ID format' }, { status: 400 });
         }
-        
+
         const body = await req.json();
         const { comment } = body;
         if (!comment) {
@@ -94,7 +94,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Environment not found.' }, { status: 404 });
         }
-        
+
         // In a real app, you would log this to an audit trail
         console.log(`User ${user.username} deleted environment ${id} with comment: "${comment}"`);
 

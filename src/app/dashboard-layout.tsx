@@ -543,11 +543,35 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                         <CollapsibleContent>
                           <SidebarMenuSub>
                             {nav.children.map((child: any, idx: number) => (
-                              <SidebarMenuSubItem key={idx}>
-                                <SidebarMenuSubButton href={child.path} isActive={pathname.startsWith(child.path)}>
-                                  <IconMapper name={child.icon} className="mr-2 h-4 w-4" /> {child.label}
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
+                              child.children && child.children.length > 0 ? (
+                                <Collapsible key={idx} asChild defaultOpen={isPluginsPage && pathname.startsWith(child.path)}>
+                                  <SidebarMenuSubItem>
+                                    <CollapsibleTrigger asChild>
+                                      <SidebarMenuSubButton isActive={pathname.startsWith(child.path)} className="cursor-pointer">
+                                        <IconMapper name={child.icon} className="mr-2 h-4 w-4" /> {child.label}
+                                        <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                                      </SidebarMenuSubButton>
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent>
+                                      <SidebarMenuSub>
+                                        {child.children.map((subChild: any, subIdx: number) => (
+                                          <SidebarMenuSubItem key={subIdx}>
+                                            <SidebarMenuSubButton href={subChild.path} isActive={pathname.startsWith(subChild.path)}>
+                                              <IconMapper name={subChild.icon} className="mr-2 h-4 w-4" /> {subChild.label}
+                                            </SidebarMenuSubButton>
+                                          </SidebarMenuSubItem>
+                                        ))}
+                                      </SidebarMenuSub>
+                                    </CollapsibleContent>
+                                  </SidebarMenuSubItem>
+                                </Collapsible>
+                              ) : (
+                                <SidebarMenuSubItem key={idx}>
+                                  <SidebarMenuSubButton href={child.path} isActive={pathname.startsWith(child.path)}>
+                                    <IconMapper name={child.icon} className="mr-2 h-4 w-4" /> {child.label}
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              )
                             ))}
                           </SidebarMenuSub>
                         </CollapsibleContent>
@@ -555,6 +579,53 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                     </SidebarMenuItem>
                   </Collapsible>
                 ))}
+
+                {canView(user?.roles || user?.role, 'cmdb') && (
+                  <Collapsible asChild defaultOpen={isCmdbPage}>
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                          isActive={isCmdbPage}
+                          tooltip={{ children: 'CMDB' }}
+                          className="data-[state=open]:bg-sidebar-accent"
+                        >
+                          <Database className="mr-2" />
+                          CMDB
+                          <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/tenants" isActive={pathname.startsWith('/cmdb/tenants')}>
+                              <Warehouse className="mr-2" /> Tenants
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/components" isActive={pathname.startsWith('/cmdb/components')}>
+                              <Puzzle className="mr-2" /> Components
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/applications" isActive={pathname.startsWith('/cmdb/applications')}>
+                              <AppWindow className="mr-2" /> Applications
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/interfaces" isActive={pathname.startsWith('/cmdb/interfaces')}>
+                              <Network className="mr-2" /> Interfaces
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/interface-types" isActive={pathname.startsWith('/cmdb/interface-types')}>
+                              <Waypoints className="mr-2" /> Interface Types
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                )}
 
                 {canView(user?.roles || user?.role, 'audits') && (
                   <SidebarMenuItem>

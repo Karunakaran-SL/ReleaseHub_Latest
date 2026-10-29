@@ -4,7 +4,7 @@ import { hasPermission, canView, canCreate, canEdit, canDelete } from '@/lib/rba
 import type { Action, FeatureKey } from '@/lib/permissions';
 
 interface RbacGuardProps {
-    userRole: string | undefined | null;
+    userRole: string[] | string | undefined | null;
     feature: FeatureKey | string;
     action: Action;
     children: React.ReactNode;

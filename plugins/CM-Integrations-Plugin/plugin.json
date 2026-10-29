@@ -1,0 +1,83 @@
+{
+    "id": "cm-integrations",
+    "version": "1.0.0",
+    "name": "CM: Integration & API Hub",
+    "description": "Connect the Competence Management Suite to HRIS (Workday, SAP SuccessFactors), LMS (Cornerstone, Moodle), and DevTools (Jira, GitHub). Manage REST/GraphQL API keys and webhook schedules.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-integrations",
+            "children": [
+                {
+                    "label": "Integrations",
+                    "icon": "PlugZap",
+                    "path": "/plugins/cm-integrations",
+                    "children": [
+                        {
+                            "label": "HRIS Connections",
+                            "icon": "Building2",
+                            "path": "/plugins/cm-integrations"
+                        },
+                        {
+                            "label": "LMS Connections",
+                            "icon": "GraduationCap",
+                            "path": "/plugins/cm-integrations/lms"
+                        },
+                        {
+                            "label": "Dev Tools",
+                            "icon": "Code2",
+                            "path": "/plugins/cm-integrations/devtools"
+                        },
+                        {
+                            "label": "API Keys & Webhooks",
+                            "icon": "Key",
+                            "path": "/plugins/cm-integrations/api-keys"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "CM: Integrations",
+            "icon": "PlugZap",
+            "path": "/settings/cm-integrations"
+        }
+    ],
+    "widgets": [],
+    "features": [
+        {
+            "key": "cm_integrations_view",
+            "label": "View Integrations",
+            "description": "See connected systems."
+        },
+        {
+            "key": "cm_integrations_manage",
+            "label": "Manage Integrations",
+            "description": "Add and configure integrations."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_integrations_admin",
+            "label": "Integrations Administrator",
+            "description": "Manage system integrations.",
+            "permissions": {
+                "cm_integrations_view": [
+                    "view"
+                ],
+                "cm_integrations_manage": [
+                    "view",
+                    "create",
+                    "edit",
+                    "delete"
+                ]
+            }
+        }
+    ],
+    "dependencies": []
+}

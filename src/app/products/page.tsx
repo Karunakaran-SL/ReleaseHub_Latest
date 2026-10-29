@@ -199,7 +199,7 @@ export default function ProductsPage() {
       <main className="flex-1 space-y-8 p-6 md:p-10">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-          <RbacGuard userRole={user?.role} feature="products" action="create">
+          <RbacGuard userRole={user?.roles} feature="products" action="create">
             <Button asChild>
               <Link href="/products/create">CREATE PRODUCT</Link>
             </Button>
@@ -264,12 +264,12 @@ export default function ProductsPage() {
                           <Button variant="outline" size="sm" asChild>
                             <Link href={`/products/${product._id}/view`}>VIEW</Link>
                           </Button>
-                          <RbacGuard userRole={user?.role} feature="products" action="edit">
+                          <RbacGuard userRole={user?.roles} feature="products" action="edit">
                             <Button variant="outline" size="sm" asChild>
                               <Link href={`/products/${product._id}/edit`}>UPDATE</Link>
                             </Button>
                           </RbacGuard>
-                          <RbacGuard userRole={user?.role} feature="products" action="delete">
+                          <RbacGuard userRole={user?.roles} feature="products" action="delete">
                             <DeleteProductDialog product={product} onProductDeleted={fetchProducts} />
                           </RbacGuard>
                         </div>

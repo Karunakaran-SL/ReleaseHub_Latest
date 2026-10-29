@@ -1,8 +1,8 @@
-
 'use client';
 import { useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CheckCircle, Package } from "lucide-react";
+import { CheckCircle, Package, FileCode } from "lucide-react";
+import { DeploymentManifests } from "./deployment-manifests";
 
 interface Step4Props {
     data: any;
@@ -64,11 +64,20 @@ export default function Step4Summary({ data, onUpdate }: Step4Props) {
                 <ul className="list-disc pl-5 mt-2 text-sm text-muted-foreground">
                     <li>Hardware Spec: <strong>{data.specification?.name || 'N/A'}</strong></li>
                     {data.hypervisor && <li>Hypervisor: <strong>{data.hypervisor.name}</strong></li>}
-                    <li>VMs: <strong>{data.virtual_machines?.length || 0} nodes</strong> ({data.kubernetes?.controlPlaneNodes?.length || 0} control, {data.kubernetes?.workerNodes?.length || 0} worker)</li>
-                    <li>Kubernetes: <strong>{data.kubernetes?.distribution || 'N/A'}</strong></li>
+                    {data.specification?.clusterType === 'Managed Kubernetes' ? (
+                        <li>Nodes: <strong>Managed via API</strong> (Synced from {data.specification.name})</li>
+                    ) : (
+                        <li>VMs: <strong>{data.virtual_machines?.length || 0} nodes</strong> ({data.kubernetes?.controlPlaneNodes?.length || 0} control, {data.kubernetes?.workerNodes?.length || 0} worker)</li>
+                    )}
+                    <li>Kubernetes: <strong>{data.specification?.clusterType === 'Managed Kubernetes' ? 'Managed Sync' : (data.kubernetes?.distribution || 'N/A')}</strong></li>
                     <li>CNI: <strong>{data.kubernetes?.cniPlugin || 'N/A'}</strong></li>
                 </ul>
             </div>
+
+            {data.specification?.clusterType === 'Managed Kubernetes' && (
+                <DeploymentManifests />
+            )}
+
             <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">For air-gapped environments, you will need to pre-download required container images and binaries.</p>
                 <p className="text-sm font-mono bg-background p-2 rounded">Local Registry: to be configured</p>

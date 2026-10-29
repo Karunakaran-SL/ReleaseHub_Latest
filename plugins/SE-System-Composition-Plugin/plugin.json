@@ -1,0 +1,67 @@
+{
+    "id": "se-system-composition-manager",
+    "name": "System Composition Manager",
+    "version": "1.0.0",
+    "description": "Define and manage system structures, products, and technical building blocks.",
+    "publisher": "Acme Corp",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Composition Overview",
+            "icon": "Box",
+            "path": "/dashboard/plugins/se-system-composition-manager"
+        },
+        {
+            "type": "main-menu",
+            "label": "System Engineering",
+            "icon": "Layers",
+            "path": "/plugins",
+            "children": [
+                {
+                    "label": "System Composition",
+                    "icon": "Box",
+                    "path": "/plugins/se-system-composition-manager"
+                }
+            ]
+        },
+        {
+            "type": "help",
+            "label": "System Composition Help",
+            "icon": "HelpCircle",
+            "path": "/help/se-system-composition-manager"
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "System Composition",
+            "icon": "Settings2",
+            "path": "/settings/se-system-composition-manager"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "se-comp-total-systems",
+            "name": "Total Systems Overview",
+            "description": "Count of all systems and products",
+            "size": "small"
+        },
+        {
+            "id": "se-comp-dependency-graph",
+            "name": "Dependency Graph",
+            "description": "Visual network of BB/SBB relationships",
+            "size": "large"
+        }
+    ],
+    "features": [
+        { "key": "system_management", "label": "System Management", "description": "Manage systems" }
+    ],
+    "roles": [
+        {
+            "name": "system_engineer",
+            "label": "System Engineer",
+            "description": "Manage systems",
+            "permissions": { "system_management": ["view", "edit"] }
+        }
+    ],
+    "dependencies": {}
+}

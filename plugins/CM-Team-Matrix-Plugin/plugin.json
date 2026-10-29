@@ -1,0 +1,69 @@
+{
+    "id": "cm-team-matrix",
+    "version": "1.0.0",
+    "name": "CM: Team Competency Matrix",
+    "description": "Display team skill matrices as interactive grids. Calculate team readiness scores and export matrices for reporting.",
+    "publisher": "ReleaseHub Internal",
+    "navigation": [
+        {
+            "type": "main-menu",
+            "label": "Competence Management",
+            "icon": "GraduationCap",
+            "path": "/plugins/cm-team-matrix",
+            "children": [
+                {
+                    "label": "Team Matrix",
+                    "icon": "Grid3x3",
+                    "path": "/plugins/cm-team-matrix",
+                    "children": [
+                        {
+                            "label": "Matrix View",
+                            "icon": "Grid3x3",
+                            "path": "/plugins/cm-team-matrix"
+                        },
+                        {
+                            "label": "Team Comparison",
+                            "icon": "GitCompare",
+                            "path": "/plugins/cm-team-matrix/compare"
+                        },
+                        {
+                            "label": "Export",
+                            "icon": "Download",
+                            "path": "/plugins/cm-team-matrix/export"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "widgets": [
+        {
+            "id": "cm-team-readiness",
+            "title": "Team Readiness",
+            "description": "Team skill matrix and readiness score.",
+            "size": "large"
+        }
+    ],
+    "features": [
+        {
+            "key": "cm_matrix_view",
+            "label": "View Team Matrix",
+            "description": "View skill matrix for teams."
+        }
+    ],
+    "roles": [
+        {
+            "name": "cm_matrix_viewer",
+            "label": "Matrix Viewer",
+            "description": "View team competency matrices.",
+            "permissions": {
+                "cm_matrix_view": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": [
+        "cm-employee-profiles"
+    ]
+}
