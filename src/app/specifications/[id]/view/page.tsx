@@ -8,13 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { Server, Monitor } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/app/dashboard-layout';
 import type { User, Specification } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { 
+import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
@@ -37,7 +40,7 @@ export default function ViewSpecificationPage() {
     const router = useRouter();
     const params = useParams();
     const { id } = params;
-    
+
     const [deleteComment, setDeleteComment] = useState('');
     const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
 
@@ -45,6 +48,10 @@ export default function ViewSpecificationPage() {
         if (!specification) return null;
         return specification;
     }, [specification]);
+
+    const isVirtualHardware = (spec: Specification) => {
+        return spec.hw_type?.name === 'Virtual';
+    };
 
     useEffect(() => {
         getUser().then(setUser);
@@ -105,7 +112,7 @@ export default function ViewSpecificationPage() {
 
     if (loading) {
         return (
-             <DashboardLayout user={user}>
+            <DashboardLayout user={user}>
                 <div className="flex justify-center items-center h-full">
                     <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
@@ -114,19 +121,19 @@ export default function ViewSpecificationPage() {
     }
 
     if (!specification || !specObject) {
-         return (
-             <DashboardLayout user={user}>
+        return (
+            <DashboardLayout user={user}>
                 <div className="flex justify-center items-center h-full">
                     <p>Specification not found or data is corrupt.</p>
                 </div>
             </DashboardLayout>
         )
     }
-    
+
     const isDeleteButtonDisabled = deleteConfirmationText !== 'delete' || !deleteComment || isDeleting;
     const networkCardsDisplay = specObject.network_cards?.map((c: any) => c.name).join(', ') || 'N/A';
     const plugPowerCordsDisplay = specObject.plug_power_cords?.map((p: any) => p.name).join(', ') || 'N/A';
-    
+
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10 space-y-6">
@@ -136,7 +143,7 @@ export default function ViewSpecificationPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                             <div className="space-y-4">
+                            <div className="space-y-4">
                                 <h3 className="font-semibold text-lg">Details</h3>
                                 <div><Label>HW Name</Label><Input value={specObject.name || ''} disabled /></div>
                                 <div><Label>HW Type</Label><Input value={specObject.hw_type?.name || ''} disabled /></div>
@@ -166,24 +173,80 @@ export default function ViewSpecificationPage() {
                                 <div><Label>OS Disk Layout</Label><Input value={specObject.diskLayout?.osDisk || 'N/A'} disabled /></div>
                                 <div><Label>Data Disk Layout</Label><Input value={specObject.diskLayout?.dataDisk || 'N/A'} disabled /></div>
                             </div>
-                            {(specObject.custom_fields?.length > 0) && (
+                            {(specObject.custom_fields && specObject.custom_fields.length > 0) && (
                                 <div className="md:col-span-3 space-y-2">
-                                <h3 className="font-semibold text-lg">Custom Fields</h3>
-                                <div className="space-y-2">
-                                    {specObject.custom_fields.map((field: any, index: number) => (
-                                        <div key={index} className="flex items-center gap-2">
-                                            <Input value={field.key} disabled className="font-semibold" />
-                                            <Input value={field.value} disabled />
-                                        </div>
-                                    ))}
+                                    <h3 className="font-semibold text-lg">Custom Fields</h3>
+                                    <div className="space-y-2">
+                                        {specObject.custom_fields.map((field: any, index: number) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <Input value={field.key} disabled className="font-semibold" />
+                                                <Input value={field.value} disabled />
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+                            {isVirtualHardware(specObject) && (
+                                <div className="space-y-4 col-span-1 md:col-span-2">
+                                    <h4 className="font-semibold text-lg border-b pb-2">Virtual Cluster Configuration</h4>
+                                    {specObject.clusterType === 'Rancher Desktop' ? (
+                                        <div className="p-4 border rounded-md space-y-4">
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                <div className="flex flex-col"><span className="text-gray-500 font-medium">Cluster Name</span><span className="font-semibold">{specObject.clusterName || 'Default Rancher Cluster'}</span></div>
+                                                <div className="flex flex-col"><span className="text-gray-500 font-medium">Cluster Type</span><span className="font-semibold"><Badge variant="outline">Rancher Desktop</Badge></span></div>
+                                                <div className="flex flex-col"><span className="text-gray-500 font-medium">Container Engine</span><span className="font-semibold">{specObject.rancherConfig?.containerEngine}</span></div>
+                                                <div className="flex flex-col"><span className="text-gray-500 font-medium">Kubernetes Version</span><span className="font-semibold">{specObject.rancherConfig?.kubernetesVersion}</span></div>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-4 p-4 bg-muted/30 rounded">
+                                                <div className="flex flex-col"><span className="text-gray-500 font-medium text-sm">Total Cores</span><span className="font-semibold text-lg">{specObject.rancherConfig?.cpuCores} vCPU</span></div>
+                                                <div className="flex flex-col"><span className="text-gray-500 font-medium text-sm">Total Memory</span><span className="font-semibold text-lg">{specObject.rancherConfig?.memoryGb} GB</span></div>
+                                                <div className="flex flex-col"><span className="text-gray-500 font-medium text-sm">Main Disk</span><span className="font-semibold text-lg">{specObject.rancherConfig?.diskSizeGb} GB</span></div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4 p-4 border rounded-md">
+                                            <div className="grid grid-cols-3 gap-4 mb-4">
+                                                <div><p className="text-sm font-medium text-muted-foreground">Cluster Name</p><p className="font-semibold">{specObject.clusterName || '-'}</p></div>
+                                                <div><p className="text-sm font-medium text-muted-foreground">Control Plane Nodes</p><p className="font-semibold">{specObject.nodeCount?.controlPlane || 0}</p></div>
+                                                <div><p className="text-sm font-medium text-muted-foreground">Worker Nodes</p><p className="font-semibold">{specObject.nodeCount?.worker || 0}</p></div>
+                                            </div>
+                                            {specObject.nodes && specObject.nodes.length > 0 && (
+                                                <div className="pt-4 border-t">
+                                                    <h5 className="font-medium text-sm text-muted-foreground mb-4">Node Configurations</h5>
+                                                    {specObject.nodes.map((node: any, index: number) => (
+                                                        <Accordion type="single" collapsible key={index}>
+                                                            <AccordionItem value={`node-${index}`}>
+                                                                <AccordionTrigger>
+                                                                    <div className="flex items-center gap-2">
+                                                                        {node.role === 'Control Plane' ? <Monitor className="h-5 w-5 text-blue-500" /> : <Server className="h-5 w-5 text-green-600" />}
+                                                                        <span>{node.vmName || `${node.role} ${index + 1}`}</span>
+                                                                    </div>
+                                                                </AccordionTrigger>
+                                                                <AccordionContent className="p-4 space-y-4">
+                                                                    <div className="grid grid-cols-3 gap-2">
+                                                                        <div><p className="text-sm font-medium text-muted-foreground">CPU Cores</p><p className="font-medium">{node.cpuCores}</p></div>
+                                                                        <div><p className="text-sm font-medium text-muted-foreground">Memory</p><p className="font-medium">{node.memory} GB</p></div>
+                                                                        <div><p className="text-sm font-medium text-muted-foreground">Disk</p><p className="font-medium">{node.diskSize} GB</p></div>
+                                                                    </div>
+                                                                    <div><p className="text-sm font-medium text-muted-foreground">OS Type</p><p className="font-medium">{node.osType}</p></div>
+                                                                    <div><p className="text-sm font-medium text-muted-foreground">Network Interface</p><p className="font-medium">{node.networkInterface} ({node.connectivity})</p></div>
+                                                                    <div><p className="text-sm font-medium text-muted-foreground">DNS Settings</p><p className="font-medium">{node.dns}</p></div>
+                                                                    <div><p className="text-sm font-medium text-muted-foreground">SSH Access</p><p className="font-medium">{node.ssh?.username}</p><p className="text-xs text-muted-foreground truncate">{node.ssh?.sshKey}</p></div>
+                                                                </AccordionContent>
+                                                            </AccordionItem>
+                                                        </Accordion>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">
                         <Button variant="outline" asChild>
-                           <Link href={`/specifications/${id}/edit`}>UPDATE</Link>
+                            <Link href={`/specifications/${id}/edit`}>UPDATE</Link>
                         </Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -202,7 +265,7 @@ export default function ViewSpecificationPage() {
                                         <Label htmlFor="delete-comment">Reason for Deletion *</Label>
                                         <Textarea id="delete-comment" value={deleteComment} onChange={(e) => setDeleteComment(e.target.value)} />
                                     </div>
-                                     <div className="space-y-2">
+                                    <div className="space-y-2">
                                         <Label htmlFor="delete-confirmation">Type "delete" to confirm *</Label>
                                         <Input id="delete-confirmation" value={deleteConfirmationText} onChange={(e) => setDeleteConfirmationText(e.target.value)} />
                                     </div>
@@ -218,13 +281,13 @@ export default function ViewSpecificationPage() {
                         </AlertDialog>
                     </CardFooter>
                 </Card>
-                 <Card className="mt-6">
+                <Card className="mt-6">
                     <CardHeader><CardTitle>Visualization & Raw JSON</CardTitle></CardHeader>
                     <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div className="h-[30rem]"><DiagramDisplay specJson={JSON.stringify(specObject, null, 2)} /></div>
                         <div>
-                           <Label htmlFor="json-output">Specification JSON</Label>
-                           <Textarea id="json-output" value={JSON.stringify(specObject, null, 2)} readOnly rows={24} className="font-mono text-xs"/>
+                            <Label htmlFor="json-output">Specification JSON</Label>
+                            <Textarea id="json-output" value={JSON.stringify(specObject, null, 2)} readOnly rows={24} className="font-mono text-xs" />
                         </div>
                     </CardContent>
                 </Card>

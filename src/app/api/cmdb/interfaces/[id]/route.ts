@@ -6,49 +6,50 @@ import { getUser } from '@/lib/auth';
 import { logAuditEvent } from '@/lib/audit';
 
 const SecuritySchema = z.object({
-  internal: z.object({
-    secure: z.boolean(),
-    authentication: z.boolean(),
-  }),
-  external: z.object({
-    secure: z.boolean(),
-    authentication: z.boolean(),
-  }),
+    internal: z.object({
+        secure: z.boolean(),
+        authentication: z.boolean(),
+    }),
+    external: z.object({
+        secure: z.boolean(),
+        authentication: z.boolean(),
+    }),
 });
 
 const InterfaceUpdateSchema = z.object({
-  name: z.string().min(1, 'Name is required').optional(),
-  type: z.object({ id: z.string(), name: z.string() }).optional(),
-  version: z.string().min(1).optional(),
-  description: z.string().optional().nullable(),
-  owner_name: z.string().min(1).optional(),
-  owner_email: z.string().email().optional(),
-  documentation: z.string().url().optional().nullable(),
-  source: z.object({ id: z.string(), name: z.string() }).optional(),
-  security: SecuritySchema.optional(),
-  additional_docs: z.array(z.object({
-    id: z.string(),
-    key: z.string(),
-    name: z.string(),
-    url: z.string().url(),
-  })).optional().nullable(),
-  custom_fields: z.array(z.object({
-      key: z.string(),
-      value: z.string()
-  })).optional().nullable(),
-  updateComment: z.string().min(1, 'Update comment is required.'),
+    name: z.string().min(1, 'Name is required').optional(),
+    type: z.object({ id: z.string(), name: z.string() }).optional(),
+    version: z.string().min(1).optional(),
+    description: z.string().optional().nullable(),
+    owner_name: z.string().min(1).optional(),
+    owner_email: z.string().email().optional(),
+    documentation: z.string().url().optional().nullable(),
+    source: z.object({ id: z.string(), name: z.string() }).optional(),
+    security: SecuritySchema.optional(),
+    tenant: z.object({ id: z.string(), name: z.string() }).optional().nullable(),
+    additional_docs: z.array(z.object({
+        id: z.string(),
+        key: z.string(),
+        name: z.string(),
+        url: z.string().url(),
+    })).optional().nullable(),
+    custom_fields: z.array(z.object({
+        key: z.string(),
+        value: z.string()
+    })).optional().nullable(),
+    updateComment: z.string().min(1, 'Update comment is required.'),
 });
 
 const COLLECTION_NAME = 'cmdb_interfaces';
 
 // Get a single interface by ID
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = params;
-        
+        const { id } = await params;
+
         const client = await clientPromise;
         const db = client.db();
-        const item = await db.collection(COLLECTION_NAME).findOne({ _id: id });
+        const item = await db.collection(COLLECTION_NAME).findOne({ _id: id as any });
 
         if (!item) {
             return NextResponse.json({ message: 'Interface not found.' }, { status: 404 });
@@ -63,14 +64,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 
 // Update an interface
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const user = await getUser();
         if (!user) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = await params;
 
         const body = await req.json();
         const validatedData = InterfaceUpdateSchema.safeParse(body);
@@ -78,14 +79,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         if (!validatedData.success) {
             return NextResponse.json({ message: 'Invalid data.', errors: validatedData.error.flatten().fieldErrors }, { status: 400 });
         }
-        
+
         const client = await clientPromise;
         const db = client.db();
-        
+
         const { updateComment, ...interfaceData } = validatedData.data;
 
         const result = await db.collection(COLLECTION_NAME).updateOne(
-            { _id: id },
+            { _id: id as any },
             { $set: { ...interfaceData, updated_at: new Date().toISOString() } }
         );
 
@@ -100,7 +101,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             comment: updateComment,
         });
 
-        const updatedItem = await db.collection(COLLECTION_NAME).findOne({ _id: id });
+        const updatedItem = await db.collection(COLLECTION_NAME).findOne({ _id: id as any });
         return NextResponse.json(updatedItem, { status: 200 });
 
     } catch (error) {
@@ -111,14 +112,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 
 // Delete an interface
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const user = await getUser();
         if (!user) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = await params;
 
         const { comment } = await req.json();
         if (!comment) {
@@ -127,12 +128,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
         const client = await clientPromise;
         const db = client.db();
-        const result = await db.collection(COLLECTION_NAME).deleteOne({ _id: id });
+        const result = await db.collection(COLLECTION_NAME).deleteOne({ _id: id as any });
 
         if (result.deletedCount === 0) {
             return NextResponse.json({ message: 'Interface not found.' }, { status: 404 });
         }
-        
+
         await logAuditEvent({
             action: 'DELETE',
             entity: 'interface',

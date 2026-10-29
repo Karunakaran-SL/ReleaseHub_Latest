@@ -1,0 +1,105 @@
+{
+    "id": "sdk-capability-marketplace",
+    "name": "Capability Marketplace",
+    "version": "1.0.0",
+    "description": "Publish, manage, and distribute reusable development capabilities like DBs, Messaging, and SDKs.",
+    "publisher": "Platform Team",
+    "navigation": [
+        {
+            "type": "dashboard-submenu",
+            "label": "Marketplace Overview",
+            "icon": "ShoppingCart",
+            "path": "/dashboard/plugins/sdk-capability-marketplace"
+        },
+        {
+            "type": "main-menu",
+            "label": "Platform Engineering",
+            "icon": "Box",
+            "path": "/plugins",
+            "children": [
+                {
+                    "label": "SDK",
+                    "icon": "Code2",
+                    "path": "/plugins",
+                    "children": [
+                        {
+                            "label": "Capability Marketplace",
+                            "icon": "ShoppingCart",
+                            "path": "/plugins/sdk-capability-marketplace"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "help",
+            "label": "Capability Marketplace Help",
+            "icon": "HelpCircle",
+            "path": "/help/sdk-capability-marketplace"
+        },
+        {
+            "type": "submenu",
+            "parent": "Settings",
+            "label": "Capability Marketplace",
+            "icon": "Settings2",
+            "path": "/settings/sdk-capability-marketplace"
+        }
+    ],
+    "widgets": [
+        {
+            "id": "sdk-cap-top-used",
+            "name": "Top Used Capabilities",
+            "description": "List of the most adopted capabilities across SDK generations",
+            "size": "small"
+        },
+        {
+            "id": "sdk-cap-lang-adoption",
+            "name": "Language Adoption",
+            "description": "Programming languages usage chart",
+            "size": "medium"
+        }
+    ],
+    "features": [
+        {
+            "key": "marketplace_admin",
+            "label": "Marketplace Administration",
+            "description": "Publish and govern capabilities"
+        }
+    ],
+    "roles": [
+        {
+            "name": "platform_admin",
+            "label": "Platform Admin",
+            "description": "Full access to publish, deprecate, and approve capabilities.",
+            "permissions": {
+                "marketplace_admin": [
+                    "view",
+                    "edit",
+                    "delete"
+                ]
+            }
+        },
+        {
+            "name": "capability_maintainer",
+            "label": "Capability Maintainer",
+            "description": "Can publish and edit owned capabilities.",
+            "permissions": {
+                "marketplace_admin": [
+                    "view",
+                    "edit"
+                ]
+            }
+        },
+        {
+            "name": "developer",
+            "label": "Developer",
+            "description": "Can view and consume capabilities in the SDK generator.",
+            "permissions": {
+                "marketplace_admin": [
+                    "view"
+                ]
+            }
+        }
+    ],
+    "dependencies": {}
+}

@@ -580,6 +580,53 @@ export default function DashboardLayout({ children, user }: { children: React.Re
                   </Collapsible>
                 ))}
 
+                {canView(user?.roles || user?.role, 'cmdb') && (
+                  <Collapsible asChild defaultOpen={isCmdbPage}>
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                          isActive={isCmdbPage}
+                          tooltip={{ children: 'CMDB' }}
+                          className="data-[state=open]:bg-sidebar-accent"
+                        >
+                          <Database className="mr-2" />
+                          CMDB
+                          <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/tenants" isActive={pathname.startsWith('/cmdb/tenants')}>
+                              <Warehouse className="mr-2" /> Tenants
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/components" isActive={pathname.startsWith('/cmdb/components')}>
+                              <Puzzle className="mr-2" /> Components
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/applications" isActive={pathname.startsWith('/cmdb/applications')}>
+                              <AppWindow className="mr-2" /> Applications
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/interfaces" isActive={pathname.startsWith('/cmdb/interfaces')}>
+                              <Network className="mr-2" /> Interfaces
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton href="/cmdb/interface-types" isActive={pathname.startsWith('/cmdb/interface-types')}>
+                              <Waypoints className="mr-2" /> Interface Types
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                )}
+
                 {canView(user?.roles || user?.role, 'audits') && (
                   <SidebarMenuItem>
                     <SidebarMenuButton

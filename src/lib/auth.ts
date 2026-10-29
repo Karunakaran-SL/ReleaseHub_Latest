@@ -23,6 +23,7 @@ export async function getUser() {
   return {
     _id: decryptedSession.userId,
     username: decryptedSession.username,
-    roles: rolesFromSession as string[]
+    roles: rolesFromSession as string[],
+    role: rolesFromSession[0] as string // Backward compatibility
   };
 }
