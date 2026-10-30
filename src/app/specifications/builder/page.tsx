@@ -7,7 +7,7 @@ import type { User, Specification, VirtualNode } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Package, Copy, Check, FileJson, Server, Monitor } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Package, Copy, Check, FileJson, Server, Monitor, Download, Upload } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,8 @@ import { DiagramDisplay } from '../_components/diagram-display';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ExportModal } from '@/components/specifications/ExportModal';
+import { ImportWizard } from '@/components/specifications/ImportWizard';
 
 interface Option {
     _id: string;
@@ -77,6 +79,8 @@ export default function SpecificationBuilderPage() {
     const [jsonSpec, setJsonSpec] = useState('');
     const [isSyncingRancher, setIsSyncingRancher] = useState(false);
     const [showSyncForm, setShowSyncForm] = useState(false);
+    const [isExportOpen, setIsExportOpen] = useState(false);
+    const [isImportOpen, setIsImportOpen] = useState(false);
 
     const [options, setOptions] = useState({
         hwTypes: [] as Option[],
@@ -744,7 +748,35 @@ export default function SpecificationBuilderPage() {
                     <CardHeader><CardTitle>Upload Specification</CardTitle></CardHeader>
                     <CardContent>
                         <p className="text-sm text-muted-foreground mb-2">Or, upload an existing specification in the same JSON format.</p>
-                        <Input type="file" />
+                        <Input
+                            type="file"
+                            accept=".json,application/json"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const reader = new FileReader();
+                                reader.onload = (ev) => {
+                                    try {
+                                        const text = String(ev.target?.result || '').replace(/^\uFEFF/, '');
+                                        const parsed = JSON.parse(text);
+                                        const formatted = JSON.stringify(parsed, null, 2);
+                                        setJsonSpec(formatted);
+                                        setFormData((prev) => ({ ...prev, ...parsed }));
+                                        toast({
+                                            title: 'JSON Specification Loaded',
+                                            description: `Loaded "${parsed.name || file.name}" into editor.`,
+                                        });
+                                    } catch {
+                                        toast({
+                                            variant: 'destructive',
+                                            title: 'Invalid JSON File',
+                                            description: 'Could not parse the uploaded JSON file.',
+                                        });
+                                    }
+                                };
+                                reader.readAsText(file);
+                            }}
+                        />
                     </CardContent>
                 </Card>
             </div>
@@ -778,11 +810,23 @@ export default function SpecificationBuilderPage() {
     return (
         <DashboardLayout user={user}>
             <main className="flex-1 p-6 md:p-10">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold">Specification Builder</h1>
-                    <p className="text-muted-foreground">
-                        Create a detailed hardware specification using the form below.
-                    </p>
+                <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold">Specification Studio</h1>
+                        <p className="text-muted-foreground">
+                            Create a detailed hardware or virtual specification using the studio builder below.
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" onClick={() => setIsExportOpen(true)}>
+                            <Download className="mr-2 h-4 w-4" />
+                            Export
+                        </Button>
+                        <Button variant="outline" onClick={() => setIsImportOpen(true)}>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Import Specification
+                        </Button>
+                    </div>
                 </div>
 
                 <Card className="w-full">
@@ -806,6 +850,22 @@ export default function SpecificationBuilderPage() {
                         )}
                     </CardFooter>
                 </Card>
+
+                <ExportModal
+                    isOpen={isExportOpen}
+                    onClose={() => setIsExportOpen(false)}
+                    specification={formData}
+                />
+
+                <ImportWizard
+                    isOpen={isImportOpen}
+                    onClose={() => setIsImportOpen(false)}
+                    onImported={(importedSpec) => {
+                        setFormData((prev) => ({ ...prev, ...importedSpec }));
+                        setJsonSpec(JSON.stringify(importedSpec, null, 2));
+                        router.push('/specifications');
+                    }}
+                />
             </main>
         </DashboardLayout>
     );

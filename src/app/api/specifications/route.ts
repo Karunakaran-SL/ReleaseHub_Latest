@@ -47,9 +47,9 @@ const SpecificationSchema = z.object({
     name: z.string().min(1, 'Name is required'),
     hw_type: OptionSchema,
     vendor: z.string().optional(),
-    image: z.string().url().optional().nullable(),
+    image: z.union([z.string().url(), z.literal('')]).optional().nullable(),
     service_contract_type: OptionSchema,
-    contact_point_email: z.string().email().optional().nullable(),
+    contact_point_email: z.union([z.string().email(), z.literal('')]).optional().nullable(),
     contact_point_phone: z.string().optional().nullable(),
     custom_fields: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
 
@@ -113,7 +113,7 @@ const SpecificationSchema = z.object({
     raidConfiguration: z.string().optional(),
     timeSync: z.string().optional(),
     sshKeys: z.string().optional(),
-});
+}).passthrough();
 
 
 // List all specifications

@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://releasehub.internal/schemas/specification.v1.json",
+  "title": "ReleaseHub Specification Schema v1.2",
+  "version": "1.2.0",
+  "type": "object",
+  "required": ["specId", "name", "version", "target", "steps"],
+  "properties": {
+    "specId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for the specification"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable name of the specification"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Semantic version string (e.g. '1.0.0')"
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Deployment or hardware target (e.g. 'kubernetes', 'docker', 'blade', 'rack', 'virtual')"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": ["string", "object"]
+      },
+      "description": "Ordered list of provisioning or pipeline steps"
+    },
+    "vendor": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "hw_type": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}
+

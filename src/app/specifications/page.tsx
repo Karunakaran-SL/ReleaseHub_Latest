@@ -31,7 +31,10 @@ import {
   ChevronRight,
   Trash2,
   Loader2,
-  Info
+  Info,
+  Download,
+  Upload,
+  Copy
 } from 'lucide-react';
 import {
   Select,
@@ -51,54 +54,57 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ExportModal } from '@/components/specifications/ExportModal';
+import { ImportWizard } from '@/components/specifications/ImportWizard';
+import { DuplicateModal } from '@/components/specifications/DuplicateModal';
 
 
-function DeleteSpecificationDialog({ specification, onSpecificationDeleted }: { specification: Specification, onSpecificationDeleted: () => void}) {
+function DeleteSpecificationDialog({ specification, onSpecificationDeleted }: { specification: Specification, onSpecificationDeleted: () => void }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteComment, setDeleteComment] = useState('');
   const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
   const { toast } = useToast();
 
-  const handleDelete = async () => {    
+  const handleDelete = async () => {
     if (deleteConfirmationText !== 'delete' || !deleteComment) {
-        toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'Please type "delete" and provide a comment to confirm deletion.'
-        });
-        return;
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please type "delete" and provide a comment to confirm deletion.'
+      });
+      return;
     }
-    
+
     setIsDeleting(true);
     try {
-        const response = await fetch(`/api/specifications/${specification._id}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ comment: deleteComment }),
-        });
+      const response = await fetch(`/api/specifications/${specification._id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment: deleteComment }),
+      });
 
-        if (response.ok) {
-            toast({
-                title: "Success",
-                description: "Specification deleted successfully.",
-            });
-            onSpecificationDeleted();
-        } else {
-            const errorData = await response.json();
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: errorData.message || "Failed to delete specification.",
-            });
-        }
-    } catch (error) {
+      if (response.ok) {
         toast({
-            variant: "destructive",
-            title: "Error",
-            description: "An unexpected error occurred.",
+          title: "Success",
+          description: "Specification deleted successfully.",
         });
+        onSpecificationDeleted();
+      } else {
+        const errorData = await response.json();
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: errorData.message || "Failed to delete specification.",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred.",
+      });
     } finally {
-        setIsDeleting(false);
+      setIsDeleting(false);
     }
   };
 
@@ -106,51 +112,51 @@ function DeleteSpecificationDialog({ specification, onSpecificationDeleted }: { 
 
 
   return (
-    <AlertDialog onOpenChange={(open) => { if (!open) { setDeleteComment(''); setDeleteConfirmationText(''); }}}>
-        <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon">
-                <Trash2 className="h-4 w-4" />
-            </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-            <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the specification.
-                Please type <strong>delete</strong> to confirm.
-            </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor={`delete-comment-${specification._id}`}>Reason for Deletion *</Label>
-                    <Textarea 
-                        id={`delete-comment-${specification._id}`}
-                        placeholder="Provide a comment for auditing purposes."
-                        value={deleteComment}
-                        onChange={(e) => setDeleteComment(e.target.value)}
-                    />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor={`delete-confirmation-${specification._id}`}>Type "delete" to confirm *</Label>
-                    <Input 
-                        id={`delete-confirmation-${specification._id}`}
-                        value={deleteConfirmationText}
-                        onChange={(e) => setDeleteConfirmationText(e.target.value)}
-                    />
-                </div>
-            </div>
-            <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-                onClick={handleDelete}
-                disabled={isDeleteButtonDisabled}
-                className="bg-destructive hover:bg-destructive/90"
-            >
-                 {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Continue
-            </AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
+    <AlertDialog onOpenChange={(open) => { if (!open) { setDeleteComment(''); setDeleteConfirmationText(''); } }}>
+      <AlertDialogTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the specification.
+            Please type <strong>delete</strong> to confirm.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor={`delete-comment-${specification._id}`}>Reason for Deletion *</Label>
+            <Textarea
+              id={`delete-comment-${specification._id}`}
+              placeholder="Provide a comment for auditing purposes."
+              value={deleteComment}
+              onChange={(e) => setDeleteComment(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`delete-confirmation-${specification._id}`}>Type "delete" to confirm *</Label>
+            <Input
+              id={`delete-confirmation-${specification._id}`}
+              value={deleteConfirmationText}
+              onChange={(e) => setDeleteConfirmationText(e.target.value)}
+            />
+          </div>
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={isDeleteButtonDisabled}
+            className="bg-destructive hover:bg-destructive/90"
+          >
+            {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Continue
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
     </AlertDialog>
   )
 }
@@ -160,6 +166,10 @@ export default function SpecificationsPage() {
   const [specifications, setSpecifications] = useState<Specification[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [exportSpec, setExportSpec] = useState<Record<string, any> | null>(null);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [duplicateSpec, setDuplicateSpec] = useState<Record<string, any> | null>(null);
   const { toast } = useToast();
 
   async function fetchSpecifications() {
@@ -172,18 +182,18 @@ export default function SpecificationsPage() {
       } else {
         console.error('Failed to fetch specifications');
         toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to fetch specifications.",
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch specifications.",
         });
       }
     } catch (error) {
       console.error('Error fetching specifications:', error);
-       toast({
-            variant: "destructive",
-            title: "Error",
-            description: "An error occurred while fetching specifications.",
-        });
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An error occurred while fetching specifications.",
+      });
     } finally {
       setLoading(false);
     }
@@ -197,25 +207,35 @@ export default function SpecificationsPage() {
   return (
     <DashboardLayout user={user}>
       <main className="flex-1 space-y-8 p-6 md:p-10">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-3xl font-bold tracking-tight">Specifications</h1>
-          <Button asChild>
-            <Link href="/specifications/builder">CREATE SPECIFICATION</Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={() => { setExportSpec(specifications[0] || null); setIsExportOpen(true); }}>
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button variant="outline" onClick={() => setIsImportOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              Import Specification
+            </Button>
+            <Button asChild>
+              <Link href="/specifications/builder">SPECIFICATION STUDIO</Link>
+            </Button>
+          </div>
         </div>
 
         <Accordion type="single" collapsible defaultValue="item-1" className="mb-8">
-            <AccordionItem value="item-1">
-                <AccordionTrigger className="text-lg font-semibold">
-                    <div className="flex items-center gap-2">
-                        <Info className="h-5 w-5" />
-                        Introduction
-                    </div>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                    This page lists all hardware and virtual specifications, which serve as blueprints for your deployments. Specifications define the exact configuration of a server, blade, or virtual cluster. You can create new specifications using the builder, or view and manage existing ones from this table.
-                </AccordionContent>
-            </AccordionItem>
+          <AccordionItem value="item-1">
+            <AccordionTrigger className="text-lg font-semibold">
+              <div className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                Introduction
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="text-muted-foreground">
+              This page lists all hardware and virtual specifications, which serve as blueprints for your deployments. Specifications define the exact configuration of a server, blade, or virtual cluster. You can create new specifications using the builder, or view and manage existing ones from this table.
+            </AccordionContent>
+          </AccordionItem>
         </Accordion>
 
         <Card>
@@ -239,18 +259,18 @@ export default function SpecificationsPage() {
                   specifications.map((spec) => (
                     <TableRow key={spec._id}>
                       <TableCell>
-                        <Image 
-                            src={spec.image || `https://picsum.photos/seed/${spec._id}/40/40`} 
-                            alt={spec.name} 
-                            width={40} 
-                            height={40} 
-                            className="rounded-full"
-                            unoptimized
+                        <Image
+                          src={spec.image || `https://picsum.photos/seed/${spec._id}/40/40`}
+                          alt={spec.name}
+                          width={40}
+                          height={40}
+                          className="rounded-full"
+                          unoptimized
                         />
                       </TableCell>
                       <TableCell className="font-medium">
                         <Link href={`/specifications/${spec._id}/view`} className="hover:underline">
-                            {spec.name}
+                          {spec.name}
                         </Link>
                       </TableCell>
                       <TableCell>{spec.hw_type?.name || 'N/A'}</TableCell>
@@ -258,10 +278,18 @@ export default function SpecificationsPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" asChild>
-                             <Link href={`/specifications/${spec._id}/view`}>VIEW</Link>
+                            <Link href={`/specifications/${spec._id}/view`}>VIEW</Link>
                           </Button>
                           <Button variant="outline" size="sm" asChild>
-                             <Link href={`/specifications/${spec._id}/edit`}>UPDATE</Link>
+                            <Link href={`/specifications/${spec._id}/edit`}>UPDATE</Link>
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => { setExportSpec(spec); setIsExportOpen(true); }}>
+                            <Download className="mr-1 h-3.5 w-3.5" />
+                            Export
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => setDuplicateSpec(spec)}>
+                            <Copy className="mr-1 h-3.5 w-3.5" />
+                            Duplicate
                           </Button>
                           <DeleteSpecificationDialog specification={spec} onSpecificationDeleted={fetchSpecifications} />
                         </div>
@@ -301,6 +329,25 @@ export default function SpecificationsPage() {
             </div>
           </CardFooter>
         </Card>
+
+        <ExportModal
+          isOpen={isExportOpen}
+          onClose={() => setIsExportOpen(false)}
+          specification={exportSpec}
+        />
+
+        <ImportWizard
+          isOpen={isImportOpen}
+          onClose={() => setIsImportOpen(false)}
+          onImported={() => fetchSpecifications()}
+        />
+
+        <DuplicateModal
+          isOpen={Boolean(duplicateSpec)}
+          onClose={() => setDuplicateSpec(null)}
+          sourceSpecification={duplicateSpec}
+          onDuplicated={() => fetchSpecifications()}
+        />
       </main>
     </DashboardLayout>
   );
