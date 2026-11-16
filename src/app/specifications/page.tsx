@@ -34,7 +34,10 @@ import {
   Info,
   Download,
   Upload,
-  Copy
+  Copy,
+  Plus,
+  Store,
+  ShieldCheck
 } from 'lucide-react';
 import {
   Select,
@@ -49,7 +52,9 @@ import { getUser } from '@/lib/auth';
 import DashboardLayout from '../dashboard-layout';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -57,6 +62,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ExportModal } from '@/components/specifications/ExportModal';
 import { ImportWizard } from '@/components/specifications/ImportWizard';
 import { DuplicateModal } from '@/components/specifications/DuplicateModal';
+import { IngestionSourceModal, type IngestionStream } from '@/components/specifications/IngestionSourceModal';
+import { MarketplaceCatalogModal } from '@/components/specifications/MarketplaceCatalogModal';
 
 
 function DeleteSpecificationDialog({ specification, onSpecificationDeleted }: { specification: Specification, onSpecificationDeleted: () => void }) {
@@ -169,8 +176,21 @@ export default function SpecificationsPage() {
   const [exportSpec, setExportSpec] = useState<Record<string, any> | null>(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isIngestionOpen, setIsIngestionOpen] = useState(false);
+  const [isMarketplaceOpen, setIsMarketplaceOpen] = useState(false);
   const [duplicateSpec, setDuplicateSpec] = useState<Record<string, any> | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
+
+  const handleSelectIngestionSource = (source: IngestionStream) => {
+    if (source === 'MARKETPLACE') {
+      setIsMarketplaceOpen(true);
+    } else if (source === 'FILE_IMPORT') {
+      setIsImportOpen(true);
+    } else if (source === 'STUDIO_CUSTOM') {
+      router.push('/specifications/builder');
+    }
+  };
 
   async function fetchSpecifications() {
     setLoading(true);
@@ -210,6 +230,10 @@ export default function SpecificationsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-3xl font-bold tracking-tight">Specifications</h1>
           <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" onClick={() => setIsMarketplaceOpen(true)}>
+              <Store className="mr-2 h-4 w-4" />
+              Browse Marketplace
+            </Button>
             <Button variant="outline" onClick={() => { setExportSpec(specifications[0] || null); setIsExportOpen(true); }}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -217,6 +241,10 @@ export default function SpecificationsPage() {
             <Button variant="outline" onClick={() => setIsImportOpen(true)}>
               <Upload className="mr-2 h-4 w-4" />
               Import Specification
+            </Button>
+            <Button variant="secondary" onClick={() => setIsIngestionOpen(true)}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              + Add Specification
             </Button>
             <Button asChild>
               <Link href="/specifications/builder">SPECIFICATION STUDIO</Link>
@@ -269,9 +297,26 @@ export default function SpecificationsPage() {
                         />
                       </TableCell>
                       <TableCell className="font-medium">
-                        <Link href={`/specifications/${spec._id}/view`} className="hover:underline">
-                          {spec.name}
-                        </Link>
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-2">
+                            <Link href={`/specifications/${spec._id}/view`} className="hover:underline">
+                              {spec.name}
+                            </Link>
+                            {(spec as any).sourceType && (
+                              <Badge variant="outline" className="text-[10px]">
+                                {(spec as any).sourceType}
+                              </Badge>
+                            )}
+                          </div>
+                          {(spec as any).vendorMeta?.publisherName && (
+                            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                              {(spec as any).vendorMeta.publisherName}
+                              {(spec as any).vendorMeta.verified && (
+                                <ShieldCheck className="h-3 w-3 text-blue-500" />
+                              )}
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>{spec.hw_type?.name || 'N/A'}</TableCell>
                       <TableCell>{spec.vendor || 'N/A'}</TableCell>
@@ -329,6 +374,18 @@ export default function SpecificationsPage() {
             </div>
           </CardFooter>
         </Card>
+
+        <IngestionSourceModal
+          isOpen={isIngestionOpen}
+          onClose={() => setIsIngestionOpen(false)}
+          onSelectSource={handleSelectIngestionSource}
+        />
+
+        <MarketplaceCatalogModal
+          isOpen={isMarketplaceOpen}
+          onClose={() => setIsMarketplaceOpen(false)}
+          onImported={() => fetchSpecifications()}
+        />
 
         <ExportModal
           isOpen={isExportOpen}

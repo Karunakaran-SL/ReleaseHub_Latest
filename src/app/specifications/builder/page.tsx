@@ -7,7 +7,7 @@ import type { User, Specification, VirtualNode } from '@/lib/definitions';
 import { getUser } from '@/lib/auth';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Package, Copy, Check, FileJson, Server, Monitor, Download, Upload } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Package, Copy, Check, FileJson, Server, Monitor, Download, Upload, Plus, Store } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ExportModal } from '@/components/specifications/ExportModal';
 import { ImportWizard } from '@/components/specifications/ImportWizard';
+import { IngestionSourceModal, type IngestionStream } from '@/components/specifications/IngestionSourceModal';
+import { MarketplaceCatalogModal } from '@/components/specifications/MarketplaceCatalogModal';
+import { SpecTypeSelector } from '@/components/specifications/SpecTypeSelector';
+import { HardwareSpecForm } from '@/components/specifications/forms/HardwareSpecForm';
+import { CloudSpecForm } from '@/components/specifications/forms/CloudSpecForm';
+import { K8sSpecForm } from '@/components/specifications/forms/K8sSpecForm';
+import type { SpecificationType } from '@/models/Specification';
 
 interface Option {
     _id: string;
@@ -81,6 +88,48 @@ export default function SpecificationBuilderPage() {
     const [showSyncForm, setShowSyncForm] = useState(false);
     const [isExportOpen, setIsExportOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
+    const [isIngestionOpen, setIsIngestionOpen] = useState(false);
+    const [isMarketplaceOpen, setIsMarketplaceOpen] = useState(false);
+    const [selectedSpecType, setSelectedSpecType] = useState<SpecificationType>('HW');
+
+    const handleSaveTypedSpec = async (payload: Record<string, any>) => {
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/specifications/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    rawContent: JSON.stringify({
+                        ...payload,
+                        sourceType: 'STUDIO_CUSTOM',
+                    }),
+                    format: 'json',
+                    sourceType: 'STUDIO_CUSTOM',
+                }),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Failed to save specification.');
+            }
+            toast({ title: 'Success', description: `"${payload.name}" (${payload.specType}) saved successfully.` });
+            router.push('/specifications');
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: error.message });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleSelectIngestionSource = (source: IngestionStream) => {
+        if (source === 'MARKETPLACE') {
+            setIsMarketplaceOpen(true);
+        } else if (source === 'FILE_IMPORT') {
+            setIsImportOpen(true);
+        } else if (source === 'STUDIO_CUSTOM') {
+            setStep(1);
+            setFormData({ ...initialFormState, name: 'New Custom Specification' });
+        }
+    };
 
     const [options, setOptions] = useState({
         hwTypes: [] as Option[],
@@ -817,7 +866,15 @@ export default function SpecificationBuilderPage() {
                             Create a detailed hardware or virtual specification using the studio builder below.
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Button variant="default" onClick={() => setIsIngestionOpen(true)}>
+                            <Plus className="mr-1.5 h-4 w-4" />
+                            + Add Specification
+                        </Button>
+                        <Button variant="secondary" onClick={() => setIsMarketplaceOpen(true)}>
+                            <Store className="mr-1.5 h-4 w-4" />
+                            Browse Marketplace
+                        </Button>
                         <Button variant="outline" onClick={() => setIsExportOpen(true)}>
                             <Download className="mr-2 h-4 w-4" />
                             Export
@@ -829,27 +886,80 @@ export default function SpecificationBuilderPage() {
                     </div>
                 </div>
 
-                <Card className="w-full">
-                    <CardHeader>
-                        <CardTitle>
-                            {step === 1 && 'Step 1: Define Specification Details'}
-                            {step === 2 && 'Step 2: Review and Finalize'}
-                        </CardTitle>
+                <Card className="w-full mb-6">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-lg">Specification Type</CardTitle>
+                        <CardDescription>
+                            Select Hardware (On-Prem), Cloud Infrastructure, or Managed Kubernetes blueprint mode.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {renderStepContent()}
+                        <SpecTypeSelector
+                            selectedType={selectedSpecType}
+                            onSelectType={setSelectedSpecType}
+                        />
                     </CardContent>
-                    <CardFooter className="flex justify-between">
-                        <Button variant="outline" onClick={handleBack} disabled={isSubmitting || step === 1}>
-                            <ArrowLeft className="mr-2 h-4 w-4" /> Back
-                        </Button>
-                        {step < 2 && (
-                            <Button onClick={handleNext} disabled={!formData.name}>
-                                Next <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        )}
-                    </CardFooter>
                 </Card>
+
+                {selectedSpecType === 'CLOUD' ? (
+                    <Card className="w-full">
+                        <CardHeader>
+                            <CardTitle>Cloud Infrastructure Specification</CardTitle>
+                            <CardDescription>Configure Public, Private, or Hybrid Cloud provider and region details.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <CloudSpecForm onSubmit={handleSaveTypedSpec} isSubmitting={isSubmitting} />
+                        </CardContent>
+                    </Card>
+                ) : selectedSpecType === 'MANAGED_K8S' ? (
+                    <Card className="w-full">
+                        <CardHeader>
+                            <CardTitle>Managed Kubernetes Specification</CardTitle>
+                            <CardDescription>Configure Kubernetes distribution (EKS, GKE, AKS, OpenShift, Rancher, Talos), cluster scope, and version.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <K8sSpecForm onSubmit={handleSaveTypedSpec} isSubmitting={isSubmitting} />
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Card className="w-full">
+                        <CardHeader>
+                            <CardTitle>
+                                {step === 1 && 'Step 1: Define Hardware Specification Details'}
+                                {step === 2 && 'Step 2: Review and Finalize'}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {renderStepContent()}
+                        </CardContent>
+                        <CardFooter className="flex justify-between">
+                            <Button variant="outline" onClick={handleBack} disabled={isSubmitting || step === 1}>
+                                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                            </Button>
+                            {step < 2 && (
+                                <Button onClick={handleNext} disabled={!formData.name}>
+                                    Next <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                            )}
+                        </CardFooter>
+                    </Card>
+                )}
+
+                <IngestionSourceModal
+                    isOpen={isIngestionOpen}
+                    onClose={() => setIsIngestionOpen(false)}
+                    onSelectSource={handleSelectIngestionSource}
+                />
+
+                <MarketplaceCatalogModal
+                    isOpen={isMarketplaceOpen}
+                    onClose={() => setIsMarketplaceOpen(false)}
+                    onImported={(importedSpec) => {
+                        setFormData((prev) => ({ ...prev, ...importedSpec }));
+                        setJsonSpec(JSON.stringify(importedSpec, null, 2));
+                        router.push('/specifications');
+                    }}
+                />
 
                 <ExportModal
                     isOpen={isExportOpen}

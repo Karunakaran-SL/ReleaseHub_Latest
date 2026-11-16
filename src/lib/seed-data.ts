@@ -1,6 +1,7 @@
 
 import clientPromise from '@/lib/mongodb';
 import { generateAndStoreAllProductTrees } from '@/lib/dependency-graph';
+import { seedSpecificationOptions } from '@/db/seed';
 import type { Product, CmdbTenant, CmdbComponent, CmdbApplication, CmdbInterfaceType, CmdbInterface, OnboardingConfiguration, OnboardingPhase, License, ProductLicensing, Specification, Deployment, Simulator, Emulator, DevelopmentEnvironment, TestEnvironment, SdkApp, Baseline } from './definitions';
 
 
@@ -2881,7 +2882,7 @@ const initialBaselineConfig: Omit<OnboardingConfiguration, '_id'> = {
 };
 
 const initialSpecVendors = [{ name: 'Dell EMC' }, { name: 'HPE' }, { name: 'Cisco' }, { name: 'Lenovo' }, { name: 'CNCF' }, { name: 'OpenID' }, { name: 'Apache' }, { name: 'Facebook' }, { name: 'Google' }, { name: 'OASIS' }];
-const initialSpecHwTypes = [{ name: 'Rack' }, { name: 'Blade' }, { name: 'Virtual' }];
+const initialSpecHwTypes = [{ name: 'Rack' }, { name: 'Blade' }, { name: 'Virtual' }, { name: 'Standalone Server' }, { name: 'Edge Node' }];
 const initialSpecNetworkCards = [
     { "name": "Ethernet_1G_RJ45", "type": "Ethernet", "classification": { "speed": "1Gbps", "connector": "RJ-45" } },
     { "name": "Ethernet_10G_RJ45", "type": "Ethernet", "classification": { "speed": "10Gbps", "connector": "RJ-45" } },
@@ -3021,6 +3022,7 @@ export async function seedDatabase() {
         }
     }
     
+    await seedSpecificationOptions();
     await generateAndStoreAllProductTrees();
 
     return { seededCount, skippedCount };

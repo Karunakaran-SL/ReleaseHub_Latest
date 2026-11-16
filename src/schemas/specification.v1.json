@@ -34,6 +34,22 @@
       },
       "description": "Ordered list of provisioning or pipeline steps"
     },
+    "sourceType": {
+      "type": "string",
+      "enum": ["MARKETPLACE", "FILE_IMPORT", "STUDIO_CUSTOM"]
+    },
+    "vendorMeta": {
+      "type": "object",
+      "properties": {
+        "publisherName": { "type": "string" },
+        "vendorType": { "type": "string" },
+        "verified": { "type": "boolean" },
+        "marketplaceSpecId": { "type": "string" }
+      }
+    },
+    "specDefinition": {
+      "type": "object"
+    },
     "vendor": {
       "type": "string"
     },
@@ -53,4 +69,3 @@
   },
   "additionalProperties": true
 }
-

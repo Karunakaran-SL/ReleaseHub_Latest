@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { validateSpecification } from '@/lib/spec-validator';
+import { Specification, type SpecificationSourceType } from '@/models/Specification';
 import { logAuditEvent } from '@/lib/audit';
 
 export async function POST(req: NextRequest) {
@@ -12,65 +13,73 @@ export async function POST(req: NextRequest) {
 
     if (typeof body.rawContent === 'string') {
       rawContent = body.rawContent;
-        const trimmed = rawContent.trim().replace(/^\uFEFF/, '');
-        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-          format = 'json';
-        } else if (body.format === 'yaml' || body.format === 'json') {
-          format = body.format;
-        } else {
-          format = 'yaml';
-        }
-      } else if (typeof body.content === 'string') {
-        rawContent = body.content;
-        const trimmed = rawContent.trim().replace(/^\uFEFF/, '');
-        format = trimmed.startsWith('{') || trimmed.startsWith('[') ? 'json' : 'yaml';
-      } else if (body.spec && typeof body.spec === 'object') {
-        rawContent = JSON.stringify(body.spec);
+      const trimmed = rawContent.trim().replace(/^\uFEFF/, '');
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
         format = 'json';
+      } else if (body.format === 'yaml' || body.format === 'json') {
+        format = body.format;
       } else {
-        rawContent = JSON.stringify(body);
-        format = 'json';
+        format = 'yaml';
       }
+    } else if (typeof body.content === 'string') {
+      rawContent = body.content;
+      const trimmed = rawContent.trim().replace(/^\uFEFF/, '');
+      format = trimmed.startsWith('{') || trimmed.startsWith('[') ? 'json' : 'yaml';
+    } else if (body.spec && typeof body.spec === 'object') {
+      rawContent = JSON.stringify(body.spec);
+      format = 'json';
+    } else {
+      rawContent = JSON.stringify(body);
+      format = 'json';
+    }
 
-      const validation = validateSpecification(rawContent, format);
-      if (!validation.isValid || !validation.data) {
-        return NextResponse.json(
-          {
-            message: 'Specification failed schema validation.',
-            isValid: false,
-            errors: validation.errors,
-          },
-          { status: 400 }
-        );
-      }
+    const validation = validateSpecification(rawContent, format);
+    if (!validation.isValid || !validation.data) {
+      return NextResponse.json(
+        {
+          message: 'Specification failed schema validation.',
+          isValid: false,
+          errors: validation.errors,
+        },
+        { status: 400 }
+      );
+    }
 
-      const data = validation.data;
-      const { _id: rawId, ...restData } = data;
-      const docId = String(
-        data.specId ||
-        rawId ||
+    const data = validation.data;
+    const requestedSourceType: SpecificationSourceType =
+      body.sourceType ||
+      data.sourceType ||
+      (body.vendorMeta || data.vendorMeta ? 'MARKETPLACE' : 'FILE_IMPORT');
+
+    const vendorMeta = body.vendorMeta || data.vendorMeta;
+    const targetLabel = String(data.target || data.hw_type?.name || 'Virtual');
+    const docId = String(
+      data.specId ||
+        data._id ||
         String(data.name || 'spec').replace(/[^a-zA-Z0-9-_]/g, '') ||
         `spec-${Date.now()}`
-      );
-      const targetLabel = String(data.target || data.hw_type?.name || 'Virtual');
+    );
 
-        const fieldsToSet: Record<string, any> = {
-          ...restData,
-          specId: docId,
-          name: data.name,
-          version: String(data.version || '1.0.0'),
-                target: data.target || targetLabel.toLowerCase(),
-                  steps: Array.isArray(data.steps) ? data.steps : ['build', 'deploy'],
-                    vendor: data.vendor || 'Custom Studio',
-                      hw_type: data.hw_type || {
-                        id: targetLabel,
-                        name: targetLabel.charAt(0).toUpperCase() + targetLabel.slice(1),
-                      },
-                          image: data.image || `https://picsum.photos/seed/${encodeURIComponent(docId)}/400/400`,
-                            updatedAt: new Date().toISOString(),
-    };
+    const specModel = new Specification({
+      ...data,
+      _id: docId,
+      specId: docId,
+      name: data.name,
+      version: String(data.version || '1.0.0'),
+      sourceType: requestedSourceType,
+      ...(vendorMeta ? { vendorMeta } : {}),
+      target: data.target || targetLabel.toLowerCase(),
+      steps: Array.isArray(data.steps) ? data.steps : ['build', 'deploy'],
+      vendor: data.vendor || vendorMeta?.publisherName || 'Custom Studio',
+      hw_type: data.hw_type || {
+        id: targetLabel,
+        name: targetLabel.charAt(0).toUpperCase() + targetLabel.slice(1),
+      },
+      image: data.image || `https://picsum.photos/seed/${encodeURIComponent(docId)}/400/400`,
+    });
 
-    const savedSpec = { _id: docId, ...fieldsToSet };
+    const savedSpec = specModel.toDocument();
+    const { _id, ...fieldsToSet } = savedSpec;
 
     try {
       const client = await clientPromise;
@@ -78,7 +87,7 @@ export async function POST(req: NextRequest) {
       const collection = db.collection('specifications');
 
       await collection.updateOne(
-        { _id: docId as any },
+        { _id: _id as any },
         { $set: fieldsToSet },
         { upsert: true }
       );
@@ -86,9 +95,9 @@ export async function POST(req: NextRequest) {
       await logAuditEvent({
         action: 'CREATE',
         entity: 'specification',
-        entityId: docId,
-        comment: `Specification "${savedSpec.name}" (${docId}) imported via Specification Studio.`,
-      }).catch(() => { });
+        entityId: _id,
+        comment: `Specification "${savedSpec.name}" (${_id}) imported via ${savedSpec.sourceType}.`,
+      }).catch(() => {});
     } catch (dbErr) {
       console.error('Database write error during import:', dbErr);
       return NextResponse.json(

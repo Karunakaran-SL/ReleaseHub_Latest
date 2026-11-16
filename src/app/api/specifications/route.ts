@@ -152,6 +152,7 @@ export async function POST(req: NextRequest) {
         const collection = db.collection('specifications');
 
         const newItem = {
+            sourceType: 'STUDIO_CUSTOM',
             ...validatedData.data,
             _id: validatedData.data.name.replace(/[^a-zA-Z0-9]/g, ''),
         };

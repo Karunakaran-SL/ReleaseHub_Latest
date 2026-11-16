@@ -1,5 +1,7 @@
 # Firebase Studio
 
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
 This is a NextJS starter in Firebase Studio.
 
 To get started, take a look at src/app/page.tsx.

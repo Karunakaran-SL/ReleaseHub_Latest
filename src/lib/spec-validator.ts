@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 import Ajv, { ErrorObject } from 'ajv';
 import * as yaml from 'js-yaml';
 import specificationSchema from '@/schemas/specification.v1.json';
@@ -16,7 +17,77 @@ export interface ValidationResult {
 }
 
 const ajv = new Ajv({ allErrors: true, strict: false });
-const validateSchema = ajv.compile(specificationSchema);
+const validateBaseSchema = ajv.compile(specificationSchema);
+
+const hwTypeSchema = {
+  type: 'object',
+  required: ['specId', 'name', 'specType', 'hwDetails'],
+  properties: {
+    specId: { type: 'string', minLength: 1 },
+    name: { type: 'string', minLength: 1 },
+    version: { type: 'string', minLength: 1 },
+    specType: { type: 'string', const: 'HW' },
+    hwDetails: {
+      type: 'object',
+      required: ['formFactor', 'architecture', 'airgapSupport'],
+      properties: {
+        formFactor: { type: 'string', minLength: 1 },
+        architecture: { type: 'string', minLength: 1 },
+        airgapSupport: { type: 'boolean' },
+      },
+      additionalProperties: true,
+    },
+  },
+  additionalProperties: true,
+};
+
+const cloudTypeSchema = {
+  type: 'object',
+  required: ['specId', 'name', 'specType', 'cloudDetails'],
+  properties: {
+    specId: { type: 'string', minLength: 1 },
+    name: { type: 'string', minLength: 1 },
+    version: { type: 'string', minLength: 1 },
+    specType: { type: 'string', const: 'CLOUD' },
+    cloudDetails: {
+      type: 'object',
+      required: ['provider', 'cloudType', 'region'],
+      properties: {
+        provider: { type: 'string', minLength: 1 },
+        cloudType: { type: 'string', minLength: 1 },
+        region: { type: 'string', minLength: 1 },
+      },
+      additionalProperties: true,
+    },
+  },
+  additionalProperties: true,
+};
+
+const managedK8sTypeSchema = {
+  type: 'object',
+  required: ['specId', 'name', 'specType', 'k8sDetails'],
+  properties: {
+    specId: { type: 'string', minLength: 1 },
+    name: { type: 'string', minLength: 1 },
+    version: { type: 'string', minLength: 1 },
+    specType: { type: 'string', const: 'MANAGED_K8S' },
+    k8sDetails: {
+      type: 'object',
+      required: ['k8sDistro', 'clusterScope', 'k8sVersion'],
+      properties: {
+        k8sDistro: { type: 'string', minLength: 1 },
+        clusterScope: { type: 'string', minLength: 1 },
+        k8sVersion: { type: 'string', minLength: 1 },
+      },
+      additionalProperties: true,
+    },
+  },
+  additionalProperties: true,
+};
+
+const validateHwSchema = ajv.compile(hwTypeSchema);
+const validateCloudSchema = ajv.compile(cloudTypeSchema);
+const validateK8sSchema = ajv.compile(managedK8sTypeSchema);
 
 const FIELD_SUGGESTIONS: Record<string, Record<string, string>> = {
   '/specId': {
@@ -44,10 +115,41 @@ const FIELD_SUGGESTIONS: Record<string, Record<string, string>> = {
     type: "Change 'steps' to an array of strings or step objects, e.g. ['build', 'deploy']",
     minItems: "Include at least one step in the 'steps' array (e.g., ['provision', 'deploy'])",
   },
+  '/hwDetails/formFactor': {
+    required: "Specify 'hwDetails.formFactor' (e.g., 'Rack', 'Blade', 'Standalone Server', or 'Edge')",
+    type: "Change 'hwDetails.formFactor' to a valid string (e.g., 'Rack' or 'Blade')",
+  },
+  '/hwDetails/architecture': {
+    required: "Specify 'hwDetails.architecture' (e.g., 'x86_64' or 'ARM64')",
+    type: "Change 'hwDetails.architecture' to a string like 'x86_64'",
+  },
+  '/hwDetails/airgapSupport': {
+    required: "Specify 'hwDetails.airgapSupport' as a boolean (true or false)",
+    type: "Change 'hwDetails.airgapSupport' to a boolean value (true or false)",
+  },
+  '/cloudDetails/provider': {
+    required: "Specify 'cloudDetails.provider' (e.g., 'AWS', 'Azure', 'GCP', 'OpenStack', 'VMware')",
+  },
+  '/cloudDetails/cloudType': {
+    required: "Specify 'cloudDetails.cloudType' (e.g., 'PUBLIC', 'PRIVATE', or 'HYBRID')",
+  },
+  '/cloudDetails/region': {
+    required: "Specify 'cloudDetails.region' (e.g., 'us-east-1' or 'eu-central-1')",
+  },
+  '/k8sDetails/k8sDistro': {
+    required: "Specify 'k8sDetails.k8sDistro' (e.g., 'EKS', 'GKE', 'AKS', 'OpenShift', 'Rancher', 'Talos')",
+  },
+  '/k8sDetails/clusterScope': {
+    required: "Specify 'k8sDetails.clusterScope' (e.g., 'CLOUD_MANAGED', 'ON_PREM', 'EDGE')",
+  },
+  '/k8sDetails/k8sVersion': {
+    required: "Specify 'k8sDetails.k8sVersion' as a string (e.g., '1.30')",
+  },
 };
 
 function findLineNumberForField(rawContent: string, fieldPath: string): number | undefined {
-  const cleanField = fieldPath.replace(/^\//, '').split('/')[0];
+  const parts = fieldPath.replace(/^\//, '').split('/');
+  const cleanField = parts[parts.length - 1];
   if (!cleanField) return undefined;
   const lines = rawContent.split('\n');
   const regex = new RegExp(`^\\s*["']?${cleanField}["']?\\s*:`);
@@ -72,7 +174,7 @@ function mapAjvErrorToRemediation(err: ErrorObject, rawContent: string): Validat
   if (!suggestion) {
     if (err.keyword === 'required' && err.params && 'missingProperty' in err.params) {
       const prop = String(err.params.missingProperty);
-      suggestion = `Add missing required property '${prop}' to the specification.`;
+      suggestion = `Add missing required property '${prop}' at '${path}'.`;
     } else if (err.keyword === 'type') {
       const expectedType = (err.params as any)?.type || 'valid type';
       suggestion = `Change value at '${path}' to type '${expectedType}'.`;
@@ -136,7 +238,6 @@ export function validateSpecification(
 
   let parsed: any;
   try {
-    // Strip UTF-8 BOM if present in uploaded files
     const cleanContent = rawContent.replace(/^\uFEFF/, '');
     if (format === 'json') {
       parsed = JSON.parse(cleanContent);
@@ -185,30 +286,87 @@ export function validateSpecification(
     };
   }
 
-  // If this is a ReleaseHub Hardware/Virtual Specification JSON (from Builder/DB),
-  // enrich missing studio metadata fields automatically so JSON imports work out-of-the-box.
-  const candidate = isHardwareOrVirtualSpecObject(parsed)
-    ? {
+  // Tri-Modal Specification Type Validation (HW, CLOUD, MANAGED_K8S)
+  if (parsed.specType === 'HW' || parsed.specType === 'CLOUD' || parsed.specType === 'MANAGED_K8S') {
+    const typeValidator =
+      parsed.specType === 'HW'
+        ? validateHwSchema
+        : parsed.specType === 'CLOUD'
+        ? validateCloudSchema
+        : validateK8sSchema;
+
+    const validType = typeValidator(parsed);
+    if (!validType) {
+      const errors = (typeValidator.errors || []).map((err) =>
+        mapAjvErrorToRemediation(err, rawContent)
+      );
+      return {
+        isValid: false,
+        errors,
+      };
+    }
+
+    const enriched = {
       ...parsed,
-      specId:
-        parsed.specId ||
-        parsed._id ||
-        String(parsed.name).replace(/[^a-zA-Z0-9-_]/g, '') ||
-        `spec-${Date.now()}`,
-      version: parsed.version !== undefined ? parsed.version : '1.0.0',
+      version: parsed.version !== undefined ? String(parsed.version) : '1.0.0',
       target:
         parsed.target ||
-        parsed.hw_type?.name?.toLowerCase() ||
-        parsed.clusterType?.toLowerCase() ||
-        'hardware',
+        parsed.specDefinition?.target ||
+        parsed.k8sDetails?.k8sDistro?.toLowerCase() ||
+        parsed.cloudDetails?.provider?.toLowerCase() ||
+        parsed.hwDetails?.formFactor?.toLowerCase() ||
+        parsed.specType.toLowerCase(),
       steps:
         Array.isArray(parsed.steps) && parsed.steps.length > 0
           ? parsed.steps
-          : ['validate-hardware', 'provision-nodes', 'configure-network', 'verify-readiness'],
-    }
+          : Array.isArray(parsed.specDefinition?.steps) && parsed.specDefinition.steps.length > 0
+          ? parsed.specDefinition.steps
+          : ['provision', 'deploy'],
+    };
+
+    return {
+      isValid: true,
+      data: enriched,
+      errors: [],
+    };
+  }
+
+  const hasSpecDef =
+    parsed.specDefinition &&
+    typeof parsed.specDefinition === 'object' &&
+    (parsed.specDefinition.target || parsed.specDefinition.steps);
+
+  const candidate = isHardwareOrVirtualSpecObject(parsed)
+    ? {
+        ...parsed,
+        specId:
+          parsed.specId ||
+          parsed._id ||
+          String(parsed.name).replace(/[^a-zA-Z0-9-_]/g, '') ||
+          `spec-${Date.now()}`,
+        version: parsed.version !== undefined ? parsed.version : '1.0.0',
+        target:
+          parsed.target ||
+          parsed.specDefinition?.target ||
+          parsed.hw_type?.name?.toLowerCase() ||
+          parsed.clusterType?.toLowerCase() ||
+          'hardware',
+        steps:
+          Array.isArray(parsed.steps) && parsed.steps.length > 0
+            ? parsed.steps
+            : Array.isArray(parsed.specDefinition?.steps) && parsed.specDefinition.steps.length > 0
+            ? parsed.specDefinition.steps
+            : ['validate-hardware', 'provision-nodes', 'configure-network', 'verify-readiness'],
+      }
+    : hasSpecDef
+    ? {
+        ...parsed,
+        target: parsed.target || parsed.specDefinition.target,
+        steps: parsed.steps || parsed.specDefinition.steps,
+      }
     : parsed;
 
-  const valid = validateSchema(candidate);
+  const valid = validateBaseSchema(candidate);
   if (valid) {
     return {
       isValid: true,
@@ -217,7 +375,7 @@ export function validateSpecification(
     };
   }
 
-  const errors = (validateSchema.errors || []).map((err) =>
+  const errors = (validateBaseSchema.errors || []).map((err) =>
     mapAjvErrorToRemediation(err, rawContent)
   );
 
@@ -238,6 +396,7 @@ export function toStudioSpecObject(spec: Record<string, any>): Record<string, an
     version: String(spec?.version || '1.0.0'),
     target:
       spec?.target ||
+      spec?.specDefinition?.target ||
       spec?.hw_type?.name?.toLowerCase() ||
       spec?.clusterType?.toLowerCase() ||
       'kubernetes',
